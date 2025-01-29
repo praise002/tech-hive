@@ -2,10 +2,9 @@ import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 
-
 function AppLayout() {
   return (
-    <div>
+    <div className="font-inter">
       <Navbar />
       <main>
         <Outlet /> {/* This is where child routes will be rendered */}

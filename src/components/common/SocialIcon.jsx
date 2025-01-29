@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 
 export const SocialIcon = ({ href, icon: Icon }) => (
-  <li className="border-purple-700 border rounded-full p-2 bg-customGray flex items-center justify-center hover:bg-lime-500 hover:border-lime-500 transition-colors">
+  <li>
     <a href={href}>
-      <Icon className="text-white" />
+      <Icon className="h-6 text-gray-100 hover:text-gray-300 transition-colors" />
     </a>
   </li>
 );

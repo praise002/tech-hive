@@ -12,7 +12,7 @@ import CategoryList from './features/category/CategoryList';
 import Contact from './pages/Contact';
 import EditorDashboard from './pages/EditorDashboard';
 import Home from './pages/Home';
-import Login from './pages/Login';
+import Login from './features/auth/Login';
 import PageNotFound from './pages/PageNotFound';
 import ProfileDetail from './features/profile/ProfileDetail';
 import Register from './features/auth/Register';
