@@ -1,9 +1,12 @@
 import PropTypes from 'prop-types';
+import Text from './Text';
 
 function ErrorFallbacks({ error, resetErrorBoundary }) {
   return (
     <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-      <h2 className="font-bold">Something went wrong!</h2>
+      <Text variant="h2" size="2xl" color="text-red-700">
+        Something went wrong!
+      </Text>
       <p className="mb-4">{error.message}</p>
       <button
         onClick={resetErrorBoundary}

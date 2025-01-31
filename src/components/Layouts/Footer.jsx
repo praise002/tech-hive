@@ -3,78 +3,69 @@ import { FaSquareFacebook, FaXTwitter } from 'react-icons/fa6';
 import { FaInstagram, FaLinkedin } from 'react-icons/fa';
 import { SocialIcon } from '../common/SocialIcon';
 
+// use max-width or w-full
 function Footer() {
   const currentYear = new Date().getFullYear();
+
+  const footerLinks = [
+    { to: '/', name: 'Home' },
+    { to: 'categories', name: 'Categories' },
+    { to: 'about', name: 'About Us' },
+    { to: 'contact', name: 'Contact Us' },
+  ];
+
+  const otherLinks = [
+    { href: '#legal', name: 'Legal' },
+    { href: '#privacy', name: 'Privacy Policy' },
+    { href: '#termsofservice', name: 'Terms of Service' },
+  ];
+
+  const socialIcon = {
+    x: 'http://',
+    fb: 'http://',
+    ln: 'http://',
+    ig: 'http://',
+  };
+
   return (
     <footer className="text-gray-100 bg-red-800">
-      <div className="container mx-auto py-12 px-4">
+      <div className="max-w-7xl mx-auto py-12 px-4 lg:px-8">
         <div className="grid md:grid-cols-4 gap-6 text-center md:text-left">
           <div className="uppercase  text-xl font-bold">
             <span className="text-[#d67917]">Tec</span>Hive.
           </div>
           <ul className="flex flex-col space-y-4 text-sm">
-            <li>
-              <Link to="/" className="hover:text-gray-300 transition-colors">
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/categories"
-                className="hover:text-gray-300 transition-colors"
-              >
-                Categories
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/about"
-                className="hover:text-gray-300 transition-colors"
-              >
-                About Us
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/contact"
-                className="hover:text-gray-300 transition-colors"
-              >
-                Contact Us
-              </Link>
-            </li>
+            {footerLinks.map((link) => (
+              <li key={link.to}>
+                <Link
+                  to={link.to}
+                  className="hover:text-gray-300 transition-colors"
+                >
+                  {link.name}
+                </Link>
+              </li>
+            ))}
           </ul>
           <ul className="flex flex-col space-y-4 text-sm">
-            <li>
-              <a
-                href="#legal"
-                className="hover:text-gray-300 transition-colors"
-              >
-                Legal
-              </a>
-            </li>
-            <li>
-              <a
-                href="#privacy"
-                className="hover:text-gray-300 transition-colors"
-              >
-                Privacy Policy
-              </a>
-            </li>
-            <li>
-              <a
-                href="#terms"
-                className="hover:text-gray-300 transition-colors"
-              >
-                Terms of Service
-              </a>
-            </li>
+            {otherLinks.map((link) => (
+              <li key={link.href}>
+                <a
+                  href={link.href}
+                  className="hover:text-gray-300 transition-colors"
+                >
+                  {link.name}
+                </a>
+              </li>
+            ))}
           </ul>
 
           <ul className="flex justify-center md:items-start space-x-4 mt-4 md:mt-0">
-            <SocialIcon href="http://" icon={FaXTwitter} />
-            <SocialIcon href="http://" icon={FaSquareFacebook} />
-            <SocialIcon href="http://" icon={FaLinkedin} />
-            <SocialIcon href="http://" icon={FaInstagram} />
+            {socialIcon.x && <SocialIcon href="http://" icon={FaXTwitter} />}
+            {socialIcon.fb && (
+              <SocialIcon href="http://" icon={FaSquareFacebook} />
+            )}
+            {socialIcon.ln && <SocialIcon href="http://" icon={FaLinkedin} />}
+            {socialIcon.ig && <SocialIcon href="http://" icon={FaInstagram} />}
           </ul>
         </div>
         <div className="mt-10 text-center text-xs">
