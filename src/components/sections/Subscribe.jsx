@@ -1,5 +1,4 @@
 import Form from '../common/Form';
-import Image from '../common/Image';
 import Text from '../common/Text';
 
 function Subscribe() {
@@ -24,7 +23,7 @@ function Subscribe() {
   };
 
   return (
-    <div className='px-0 sm:px-6 lg:px-8'>
+    <div className="px-0 sm:px-6 lg:px-8">
       <div className="px-6 flex sm:flex-row flex-col sm:rounded-lg bg-[#ffebe4] m-6 items-center justify-center py-8 gap-4 max-w-7xl mx-auto">
         <div className="flex-1 order-2 sm:order-none">
           <Text variant="h2" size="2xl" className="mb-4">

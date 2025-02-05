@@ -1,6 +1,6 @@
 import Text from '../../components/common/Text';
 
-function ProfileDetail() {
+function ProfileDetailEmpty() {
   return (
     <div className="mt-20">
       <div className="bg-[#FFEBE4] "></div>
@@ -37,35 +37,13 @@ function ProfileDetail() {
         </div>
         <div>
           <div>
-            <Text
-              variant="h3"
-              size="lg"
-              bold={false}
-              className="font-semibold text-gray-900 mb-2"
-            >
-              Recent Comments
-            </Text>
-            <div>
-              <Text
-                variant="h3"
-                size="lg"
-                bold={false}
-                className="font-semibold text-gray-900 mb-2"
-              >
-                Africa Fintech Summit 2024
-              </Text>
-              <p className="text-[#889392] text-sm">Africa Fintech Summit</p>
-            </div>
-            <div className="flex">
-              <p className="font-bold">Thanks for the info</p>
-              <p className="text-[#889392] text-sm">27th January, 2025</p>
-            </div>
+            <img src="/src/assets/icons/amico.png" alt="" />
           </div>
-          <div></div>
+          <div>No comments or saved articles yet!</div>
         </div>
       </div>
     </div>
   );
 }
 
-export default ProfileDetail;
+export default ProfileDetailEmpty;

@@ -22,6 +22,7 @@ import TechJobDetail from './features/jobs/TechJobDetail';
 import TechJobsList from './features/jobs/TechJobsList';
 import TechToolDetail from './features/tools/TechToolDetail';
 import TechToolList from './features/tools/TechToolList';
+import ProfileDetailEmpty from './features/profile/ProfileDetailEmpty';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -55,7 +56,8 @@ function App() {
             <Route path="about" element={<About />} />
             <Route path="contact" element={<Contact />} />
             <Route path="dashboard" element={<EditorDashboard />} />
-            <Route path="profile" element={<ProfileDetail />} />
+            {/* <Route path="profile" element={<ProfileDetail />} /> */}
+            <Route path="profile" element={<ProfileDetailEmpty />} />
             <Route path="account" element={<AccountDetail />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
