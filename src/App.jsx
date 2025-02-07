@@ -56,8 +56,8 @@ function App() {
             <Route path="about" element={<About />} />
             <Route path="contact" element={<Contact />} />
             <Route path="dashboard" element={<EditorDashboard />} />
-            {/* <Route path="profile" element={<ProfileDetail />} /> */}
-            <Route path="profile" element={<ProfileDetailEmpty />} />
+            <Route path="profile" element={<ProfileDetail />} />
+            {/* <Route path="profile" element={<ProfileDetailEmpty />} /> */}
             <Route path="account" element={<AccountDetail />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
