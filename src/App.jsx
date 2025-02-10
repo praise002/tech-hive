@@ -22,7 +22,9 @@ import TechJobDetail from './features/jobs/TechJobDetail';
 import TechJobsList from './features/jobs/TechJobsList';
 import TechToolDetail from './features/tools/TechToolDetail';
 import TechToolList from './features/tools/TechToolList';
-import ProfileDetailEmpty from './features/profile/ProfileDetailEmpty';
+// import ProfileDetailEmpty from './features/profile/ProfileDetailEmpty';
+import ResourceList from './features/resource/ResourceList';
+import ResourceDetail from './features/resource/ResourceDetail';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,6 +50,12 @@ function App() {
             <Route path="events/:eventSlug" element={<TechEventDetail />} />
             <Route path="tools" element={<TechToolList />} />
             <Route path="tools/:toolSlug" element={<TechToolDetail />} />
+            <Route path="resources" element={<ResourceList />} />
+            <Route
+              path="resources/:resourceSlug"
+              element={<ResourceDetail />}
+            />
+
             <Route path="categories">
               <Route index element={<CategoryList />} />
               <Route path=":categorySlug" element={<CategoryDetail />} />
