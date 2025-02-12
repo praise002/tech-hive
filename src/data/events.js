@@ -131,3 +131,31 @@ export const displayedEvents = [
     lastPosted: '2 hours',
   },
 ];
+
+export const homePageEvents = [
+  {
+    title: 'Africa FinTech Summit 2025',
+    organizer: 'Africa FinTech Summit',
+    date: '24-25 November, 2025',
+    location: 'Cape Town, South Africa',
+    type: 'In Person',
+    lastPosted: '1 hour',
+  },
+  {
+    title: 'DevFest Lagos 2025',
+    organizer: 'Google Developer Groups.',
+    date: '24-26 October, 2025',
+    location: 'Lagos, Nigeria',
+    type: 'In Person',
+    lastPosted: '3 hours',
+  },
+  {
+    title: 'Hackathon Lagos 2025',
+    organizer: 'Startup Nigeria.',
+    date: '5 - 10 June, 2025',
+    location: 'Lagos, Nigeria',
+    type: 'In Person',
+    lastPosted: '1 day',
+  },
+  
+];

@@ -1,25 +1,27 @@
-// import SocialLinks from '../components/common/SocialLinks';
-// import CategoryBar from '../components/sections/CategoryBar';
+import Rectangle from '../components/common/Rectangle';
 import HeroSection from '../components/sections/HeroSection';
-// import ResourceSpotlight from '../components/sections/ResourceSpotlight';
 import Subscribe from '../components/sections/Subscribe';
-import TechDashboard from '../components/sections/TechDashboard';
-// import TechTool from '../components/sections/TechTool';
-
-// import TrendingArticles from '../components/sections/TrendingArticles';
+import Articles from '../features/category/components/Articles';
+import ResourceSpotlight from '../features/category/components/ResourceSpotlight';
+import TechEvents from '../features/category/components/TechEvents';
+import TechJobs from '../features/category/components/TechJobs';
+import TechTool from '../features/category/components/TechTool';
+import TrendingArticles from '../features/category/components/TrendingArticles';
+// import TechDashboard from '../components/sections/TechDashboard';
 
 function Home() {
   return (
     <>
-      {/* <CategoryBar /> */}
       <HeroSection />
-      {/* <TrendingArticles /> */}
-      {/* <TechTool /> */}
-      {/* <ResourceSpotlight /> */}
-      {/* <SocialLinks /> */}
-      <TechDashboard />
+      {/* <TechDashboard /> */}
+      <TrendingArticles />
+      <Articles />
+      <TechJobs />
+      <TechEvents />
+      <TechTool />
+      <ResourceSpotlight />
+      <Rectangle />
       <Subscribe />
-      <div className="m-5"></div>
     </>
   );
 }

@@ -204,3 +204,51 @@ export const displayedResources = [
     timePosted: '2 days ago',
   },
 ];
+
+export const homepageResources = [
+  {
+    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceName: 'FreeCodeCamp',
+    resourceType: 'Coding Community',
+    resourceDescription:
+      'A comprehensive programming curriculum with hands-on projects and certifications in web development, algorithms, and data structures.',
+
+    resourceCategories: [
+      { name: 'WebDevelopment', color: 'text-purple-600' },
+      { name: 'DataStructures', color: 'text-orange-500' },
+      { name: 'Algorithms', color: 'text-pink-600' },
+      { name: 'BeginnerFriendly', color: 'lime-400' },
+    ],
+    timePosted: '1 day ago',
+  },
+  {
+    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceName: 'Coursera',
+    resourceType: 'Online Learning Platform',
+    resourceDescription:
+      'University-backed courses and specializations in technology, computer science, machine learning, cloud computing, and UX design.',
+
+    resourceCategories: [
+      { name: 'MachineLearning', color: 'text-purple-600' },
+      { name: 'CloudComputing', color: 'text-orange-500' },
+      { name: 'UXDesign', color: 'text-pink-600' },
+      { name: 'Python', color: 'lime-400' },
+    ],
+    timePosted: '1 day ago',
+  },
+  {
+    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceName: 'Khan Academy',
+    resourceType: 'Educational Website',
+    resourceDescription:
+      'Free courses on a wide range of subjects, including math, science, programming, and more, suitable for all levels of learners.',
+
+    resourceCategories: [
+      { name: 'Mathematics', color: 'text-purple-600' },
+      { name: 'Science', color: 'text-orange-500' },
+      { name: 'Programming', color: 'text-pink-600' },
+      { name: 'BeginnerFriendly', color: 'lime-400' }, // lime-400
+    ],
+    timePosted: '2 days ago',
+  },
+];
