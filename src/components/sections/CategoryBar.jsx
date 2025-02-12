@@ -23,7 +23,7 @@ function CategoryBar() {
           </li>
         ))}
       </ul>
-      <div className="text-[#889392]">
+      <div className="text-[#889392] hover:text-[#a32816] transition-colors">
         <Link to="categories">See All Categories</Link>
       </div>
     </div>

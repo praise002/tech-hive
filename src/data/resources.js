@@ -1,41 +1,6 @@
-import Button from './Button';
-import Description from './Description';
-import Image from './Image';
-import Tags from './Tags';
-import Text from './Text';
-
-function Resource() {
-  return (
-    <div className="relative overflow-hidden rounded-lg shadow-lg">
-      <Image
-        alt="GitHub Learning Lab"
-        src="/src/assets/resources/github-learning-lab.png"
-      />
-
-      <div className="p-5 border-l border-r border-b border-[#C1C8C7] rounded-bl-lg rounded-br-lg overflow-hidden">
-        <Text variant="h4" size="xl" bold={false} className="font-semibold">
-          GitHub Learning Lab
-        </Text>
-        <div className="text-xs text-[#889392]">Educational Platform</div>
-
-        <Description>
-          Interactive coding courses and project-based learning to improve your
-          skills in software development and version control.
-        </Description>
-
-        <Tags />
-        <Button variant="outline">View details</Button>
-        <div className="mt-2 text-xs text-[#889392]">Posted 1 day ago</div>
-      </div>
-    </div>
-  );
-}
-
-export default Resource;
-
-const resources = [
+export const resources = [
   {
-    resourceImage: '',
+    resourceImage: '/src/assets/resources/github-learning-lab.png',
     resourceName: 'GitHub Learning Lab',
     resourceType: 'Educational Platform',
     resourceDescription:
@@ -174,5 +139,68 @@ const resources = [
       'BeginnerFriendly',
     ],
     timePosted: '8 days ago',
+  },
+];
+
+export const displayedResources = [
+  {
+    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceName: 'GitHub Learning Lab',
+    resourceType: 'Educational Platform',
+    resourceDescription:
+      'Interactive coding courses and project-based learning to improve your skills in software development and version control.',
+
+    resourceCategories: [
+      { name: 'SoftwareDevelopment', color: 'text-purple-600' },
+      { name: 'VersionControl', color: 'text-orange-500' },
+      { name: 'OpenSource', color: 'text-pink-600' },
+      { name: 'BeginnerFriendly', color: 'lime-400' },
+    ],
+    timePosted: '1 day ago',
+  },
+  {
+    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceName: 'FreeCodeCamp',
+    resourceType: 'Coding Community',
+    resourceDescription:
+      'A comprehensive programming curriculum with hands-on projects and certifications in web development, algorithms, and data structures.',
+
+    resourceCategories: [
+      { name: 'WebDevelopment', color: 'text-purple-600' },
+      { name: 'DataStructures', color: 'text-orange-500' },
+      { name: 'Algorithms', color: 'text-pink-600' },
+      { name: 'BeginnerFriendly', color: 'lime-400' },
+    ],
+    timePosted: '1 day ago',
+  },
+  {
+    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceName: 'Coursera',
+    resourceType: 'Online Learning Platform',
+    resourceDescription:
+      'University-backed courses and specializations in technology, computer science, machine learning, cloud computing, and UX design.',
+
+    resourceCategories: [
+      { name: 'MachineLearning', color: 'text-purple-600' },
+      { name: 'CloudComputing', color: 'text-orange-500' },
+      { name: 'UXDesign', color: 'text-pink-600' },
+      { name: 'Python', color: 'lime-400' },
+    ],
+    timePosted: '1 day ago',
+  },
+  {
+    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceName: 'Khan Academy',
+    resourceType: 'Educational Website',
+    resourceDescription:
+      'Free courses on a wide range of subjects, including math, science, programming, and more, suitable for all levels of learners.',
+
+    resourceCategories: [
+      { name: 'Mathematics', color: 'text-purple-600' },
+      { name: 'Science', color: 'text-orange-500' },
+      { name: 'Programming', color: 'text-pink-600' },
+      { name: 'BeginnerFriendly', color: 'lime-400' }, // lime-400
+    ],
+    timePosted: '2 days ago',
   },
 ];

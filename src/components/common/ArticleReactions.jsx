@@ -1,4 +1,6 @@
-function ArticleReactions() {
+import PropTypes from 'prop-types';
+
+function ArticleReactions({ reactions, reactionsCount, posted, readTime }) {
   return (
     <div className="flex flex-col">
       {/* Reactions and Bookmark Section */}
@@ -6,27 +8,27 @@ function ArticleReactions() {
         {/* Reactions */}
         <div className="flex items-center space-x-2">
           <div className="flex space-x-1 text-lg">
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full shadow-md">
-              ❤️
-            </span>
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full shadow-md -ml-2">
-              😍
-            </span>
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full shadow-md -ml-2">
-              👍
-            </span>
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full shadow-md -ml-2">
-              🔥
-            </span>
+            {reactions.map((reaction, index) => (
+              <span
+                key={index}
+                className={`inline-flex items-center justify-center w-6 h-6 rounded-full shadow-md ${
+                  index !== 0 ? '-ml-2' : ''
+                }`}
+              >
+                {reaction}
+              </span>
+            ))}
           </div>
-          <div className="text-sm text-[#262A2A] font-medium">95 reactions</div>
+          <div className="whitespace-nowrap text-sm text-[#262A2A] font-medium">
+            {reactionsCount} reactions
+          </div>
         </div>
 
         {/* Bookmark */}
         <div className="flex items-center space-x-2">
           {/* Read Time */}
-          <div className="text-sm text-[#262A2A]  font-medium">
-            5 min read
+          <div className="whitespace-nowrap text-sm text-[#262A2A]  font-medium">
+            {readTime} read
           </div>
           <img
             src="/src/assets/icons/bookmark-light.png"
@@ -37,9 +39,16 @@ function ArticleReactions() {
       </div>
 
       {/* Posted Time */}
-      <div className="text-xs text-[#889392]">Posted 1 hour ago</div>
+      <div className="text-xs text-[#889392]">Posted {posted}</div>
     </div>
   );
 }
+
+ArticleReactions.propTypes = {
+  reactions: PropTypes.arrayOf(PropTypes.string).isRequired,
+  reactionsCount: PropTypes.number.isRequired,
+  posted: PropTypes.string.isRequired,
+  readTime: PropTypes.string.isRequired,
+};
 
 export default ArticleReactions;

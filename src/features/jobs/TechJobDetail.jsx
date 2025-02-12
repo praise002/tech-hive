@@ -128,7 +128,7 @@ function TechJobDetail() {
         </div>
 
         {/* Mobile social link */}
-        <div className="block md:hidden px-10">
+        <div className="block md:hidden text-center">
           <SocialLinks visible={false} />
         </div>
       </div>

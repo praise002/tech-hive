@@ -1,11 +1,20 @@
 import Text from './Text';
+import PropTypes from 'prop-types';
 
-function ArticleTitle() {
+function ArticleTitle({ children }) {
   return (
-    <Text variant="h4" bold={false} className="font-semibold sm:text-xl" size="lg">
-      The Future of UI/UX: Trends to Watch in 2024
+    <Text
+      variant="h4"
+      bold={false}
+      className="font-semibold sm:text-xl"
+      size="lg"
+    >
+      {children}
     </Text>
   );
 }
+ArticleTitle.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 export default ArticleTitle;

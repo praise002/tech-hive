@@ -1,98 +1,40 @@
-import Button from '../common/Button';
+// import Button from '../common/Button';
+import { Link } from 'react-router-dom';
+import { displayedTechTools } from '../../data/tools';
 import Text from '../common/Text';
-import Tool from '../common/Tool';
+import ToolCard from '../common/ToolCard.jsx';
 
 function TechTool() {
   return (
-    <div>
-      <div className="my-4">
-        <Text
-          variant="h3"
-          size="xl"
-          bold={false}
-          className="font-semibold sm:2xl"
-        >
-          Featured Tech Tool
-        </Text>
-        <div className="w-[20px]">
-          <hr className="border-b-2 border-[#a32816]" />
+    <div className="mt-20 lg:mt-4 max-w-7xl mx-auto px-4 lg:px-8 mb-4">
+      <div className="flex justify-between items-center">
+        <div className="my-4">
+          <Text variant="h3" size="xl" className="sm:2xl">
+            Featured Tech Tool
+          </Text>
+          <div className="w-[20px]">
+            <hr className="border-b-2 border-[#a32816]" />
+          </div>
+        </div>
+        <div>
+          <Link
+            to="tools"
+            className="cursor-pointer text-[#889392] hover:text-[#a32816] transition-colors"
+          >
+            See all
+          </Link>
         </div>
       </div>
-      <Tool />
-      <Button>Explore More Tools &rarr;</Button>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 h-full">
+        {/* <div className="flex flex-col gap-y-2"> */}
+        {displayedTechTools.map((tool, index) => (
+          <ToolCard key={index} tool={tool} />
+        ))}
+      </div>
+
+      {/* <Button>Explore More Tools &rarr;</Button> */}
     </div>
   );
 }
 
 export default TechTool;
-
-const tools = [
-  {
-    toolImage: '',
-    toolName: 'Figma',
-    toolDescription:
-      'A cloud-based design tool for creating, prototyping, and collaborating on user interfaces.',
-    toolCategories: ['Design', 'UI/UX', 'Collaboration'],
-    callToAction: 'Try Figma for Free',
-  },
-  {
-    toolImage: '',
-    toolName: 'Notion',
-    toolDescription:
-      'An all-in-one workspace for notes, tasks, databases, and collaboration.',
-    toolCategories: ['Productivity', 'Organization', 'Teamwork'],
-    callToAction: 'Get Started with Notion',
-  },
-  {
-    toolImage: '',
-    toolName: 'TensorFlow',
-    toolDescription:
-      'An open-source platform for building and deploying machine learning models at scale.',
-    toolCategories: [
-      'Machine Learning',
-      'Artificial Intelligence',
-      'Data Science',
-    ],
-    callToAction: 'Explore TensorFlow',
-  },
-  {
-    toolImage: '',
-    toolName: 'GitHub',
-    toolDescription:
-      'A web-based platform for version control, code hosting, and collaboration in software development.',
-    toolCategories: ['Development', 'Version Control', 'Collaboration'],
-    callToAction: 'Sign Up for GitHub',
-  },
-  {
-    toolImage: '',
-    toolName: 'Canva',
-    toolDescription:
-      'A graphic design platform that allows users to create visual content easily and professionally.',
-    toolCategories: ['Design', 'Graphics', 'Marketing'],
-    callToAction: 'Start Designing with Canva',
-  },
-  {
-    toolImage: '',
-    toolName: 'Slack',
-    toolDescription:
-      'A communication and collaboration platform designed for teams and businesses.',
-    toolCategories: ['Communication', 'Teamwork', 'Productivity'],
-    callToAction: 'Try Slack for Free',
-  },
-  {
-    toolImage: '',
-    toolName: 'Jira',
-    toolDescription:
-      'A project management tool used for agile software development, issue tracking, and team collaboration.',
-    toolCategories: ['Project Management', 'Agile', 'Software Development'],
-    callToAction: 'Start Using Jira',
-  },
-  {
-    toolImage: '',
-    toolName: 'Docker',
-    toolDescription:
-      'A platform for developing, shipping, and running applications using containerization technology.',
-    toolCategories: ['DevOps', 'Containerization', 'Automation'],
-    callToAction: 'Learn More About Docker',
-  },
-];

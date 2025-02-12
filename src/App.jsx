@@ -59,6 +59,8 @@ function App() {
             <Route path="categories">
               <Route index element={<CategoryList />} />
               <Route path=":categorySlug" element={<CategoryDetail />} />
+              {/* <Route path=":categorySlug/articles" element={<ArticleList />} />
+              <Route path=":categorySlug/articles/:articleSlug" element={<ArticleDetail />} /> */}
             </Route>
 
             <Route path="about" element={<About />} />

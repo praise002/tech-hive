@@ -3,18 +3,18 @@ import PropTypes from 'prop-types';
 
 function SocialLinks({ visible }) {
   return (
-    <div className="inline-flex flex-row md:flex-col p-2 space-x-4 md:space-y-4 items-center justify-center cursor-pointer">
+    <div className="inline-flex flex-row md:flex-col p-2 gap-x-4 md:gap-y-4 items-center justify-center cursor-pointer">
       {/* Quick AI Section */}
       {visible && (
         <>
           <Text variant="h5" size="xs" bold={false} className="font-semibold">
             Quick AI
           </Text>
-          <div>
+          <div className="w-6 h-6">
             <img
               src="/src/assets/icons/AI article summary.png"
               alt="AI Article Summary"
-              className="w-8 h-8" 
+              className="w-full h-full" 
             />
           </div>
         </>
@@ -26,39 +26,39 @@ function SocialLinks({ visible }) {
       </Text>
 
       {/* Social Media Icons */}
-      <div>
+      <div className="w-6 h-6" >
         <img
           src="/src/assets/icons/prime_twitter.png"
           alt="Twitter"
-          className="w-6 h-6" 
+          className="w-full h-full" 
         />
       </div>
-      <div>
+      <div className="w-6 h-6" >
         <img
           src="/src/assets/icons/uil_facebook.png"
           alt="Facebook"
-          className="w-6 h-6" 
+          className="w-full h-full" 
         />
       </div>
-      <div>
+      <div className="w-6 h-6" >
         <img
           src="/src/assets/icons/mdi_linkedin.png"
           alt="LinkedIn"
-          className="w-6 h-6" 
+          className="w-full h-full" 
         />
       </div>
-      <div>
+      <div className="w-6 h-6" >
         <img
           src="/src/assets/icons/mdi_instagram.png"
           alt="Instagram"
-          className="w-6 h-6" 
+          className="w-full h-full" 
         />
       </div>
-      <div className='mr-4'>
+      <div className='w-6 h-6'>
         <img
           src="/src/assets/icons/fluent_share-ios-24-filled.png"
           alt="Share Icon"
-          className="w-6 h-6" 
+          className="w-full h-full" 
         />
       </div>
     </div>

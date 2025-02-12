@@ -1,25 +1,25 @@
-function Tags() {
+import PropTypes from 'prop-types';
+
+function Tags({ tags }) {
   return (
-    <div className="flex gap-2 flex-wrap my-2">
-      {/* Tag 1 */}
-      <div className="inline-flex items-center text-sm">
-        <span className="text-[#960299]">#</span>
-        <span>UIUXDesign</span>
-      </div>
-
-      {/* Tag 2 */}
-      <div className="inline-flex items-center text-sm">
-        <span className="text-[#F58F29]">#</span>
-        <span>UserExperience</span>
-      </div>
-
-      {/* Tag 3 */}
-      <div className="inline-flex items-center text-sm">
-        <span className="text-[#DF24A7]">#</span>
-        <span>InterfaceDesign</span>
-      </div>
+    <div className="flex gap-2 flex-wrap my-2 text-xs md:text-sm">
+      {tags.map((tag, index) => (
+        <div key={index} className="inline-flex items-center">
+          <span className={tag.color}>#</span>
+          <span>{tag.name}</span>
+        </div>
+      ))}
     </div>
   );
 }
+
+Tags.propTypes = {
+  tags: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      color: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+};
 
 export default Tags;
