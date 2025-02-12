@@ -1,19 +1,17 @@
 import Rectangle from '../components/common/Rectangle';
 import HeroSection from '../components/sections/HeroSection';
 import Subscribe from '../components/sections/Subscribe';
-import Articles from '../features/category/components/Articles';
-import ResourceSpotlight from '../features/category/components/ResourceSpotlight';
-import TechEvents from '../features/category/components/TechEvents';
-import TechJobs from '../features/category/components/TechJobs';
-import TechTool from '../features/category/components/TechTool';
-import TrendingArticles from '../features/category/components/TrendingArticles';
-// import TechDashboard from '../components/sections/TechDashboard';
+import Articles from '../components/sections/Articles';
+import ResourceSpotlight from '../components/sections/ResourceSpotlight';
+import TechEvents from '../components/sections/TechEvents';
+import TechJobs from '../components/sections/TechJobs';
+import TechTool from '../components/sections/TechTool';
+import TrendingArticles from '../components/sections/TrendingArticles';
 
 function Home() {
   return (
     <>
       <HeroSection />
-      {/* <TechDashboard /> */}
       <TrendingArticles />
       <Articles />
       <TechJobs />

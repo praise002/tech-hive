@@ -1,8 +1,8 @@
 // import Button from '../common/Button';
 import { Link } from 'react-router-dom';
-import { displayedTechJobs } from '../../../data/jobs';
-import JobPostingCard from '../../../components/common/JobPostingCard';
-import Text from '../../../components/common/Text';
+import { displayedTechJobs } from '../../data/jobs';
+import JobPostingCard from '../common/JobPostingCard';
+import Text from '../common/Text';
 
 function TechJobs() {
   return (
