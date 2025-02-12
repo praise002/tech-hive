@@ -122,24 +122,3 @@ export const displayedTechJobs = [
     lastPosted: '4 days',
   },
 ];
-
-export const homePageTechJobs = [
-  {
-    title: 'Data Analyst',
-    company: 'Insight Analytics Co.',
-    tags: ['🏢 Hybrid', '🐍 Python', '🤖 Machine Learning', '⏰ Part-time'],
-    lastPosted: '3 hours',
-  },
-  {
-    title: 'Mobile App Developer',
-    company: 'AppNest Studios',
-    tags: ['🌍 Remote', '📱 Flutter', '🟪 Kotlin', '🕒 Full-time'],
-    lastPosted: '1 day',
-  },
-  {
-    title: 'Technical Writer',
-    company: 'DocuCraft',
-    tags: ['🌍 Remote', '📝 Documentation', '✍️ Markdown', '⏰ Part-time'],
-    lastPosted: '4 days',
-  },
-];
