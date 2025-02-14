@@ -20,7 +20,7 @@ function Form({ inputs, onSubmit, children, onClick, className }) {
     <form onSubmit={handleSubmit(submitForm)}>
       {/* Dynamically render inputs based on the 'inputs' prop */}
       {inputs.map((input, index) => (
-        <div key={index} className="mb-4">
+        <div key={index} className="relative mb-4">
           {/* Render the input field */}
           <input
             {...register(input.name, input.rules)} // Apply validation rules
@@ -29,6 +29,12 @@ function Form({ inputs, onSubmit, children, onClick, className }) {
             type={input.type || 'text'}
             className="block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
           />
+
+          {input.icon && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              {input.icon}
+            </div>
+          )}
 
           {/* Render error messages if validation fails */}
           {errors[input.name] && (
@@ -58,8 +64,8 @@ Form.propTypes = {
     })
   ).isRequired, // The inputs array is required
   onSubmit: PropTypes.func,
-  children: PropTypes.node.isRequired, 
-  onClick: PropTypes.func, 
+  children: PropTypes.node.isRequired,
+  onClick: PropTypes.func,
   className: PropTypes.string,
 };
 
