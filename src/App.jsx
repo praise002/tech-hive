@@ -16,8 +16,9 @@ import Login from './features/auth/Login';
 import PageNotFound from './pages/PageNotFound';
 import ProfileDetail from './features/profile/ProfileDetail';
 import Register from './features/auth/Register';
-import TechEventDetail from './features/events/TechEventDetail';
 import TechEventList from './features/events/TechEventList';
+import TechEventDetail from './features/events/TechEventDetail';
+
 import TechJobDetail from './features/jobs/TechJobDetail';
 import TechJobsList from './features/jobs/TechJobsList';
 import TechToolDetail from './features/tools/TechToolDetail';
@@ -25,6 +26,9 @@ import TechToolList from './features/tools/TechToolList';
 // import ProfileDetailEmpty from './features/profile/ProfileDetailEmpty';
 import ResourceList from './features/resource/ResourceList';
 import ResourceDetail from './features/resource/ResourceDetail';
+import ChangePassword from './features/auth/ChangePassword';
+import ResetPassword from './features/auth/ResetPassword';
+import ResetPasswordSuccess from './features/auth/ResetPaswordSuccess';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -71,6 +75,12 @@ function App() {
             <Route path="account" element={<AccountDetail />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
+            <Route path="change-password" element={<ChangePassword />} />
+            <Route path="reset-password" element={<ResetPassword />} />
+            <Route
+              path="reset-password-success"
+              element={<ResetPasswordSuccess />}
+            />
           </Route>
 
           {/* Catch-all route for 404 errors */}

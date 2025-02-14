@@ -1,6 +1,22 @@
 import ArticleCard from '../../components/common/ArticleCard';
 import Text from '../../components/common/Text';
 
+const article = {
+  image: '/src/assets/articles/the-future-ui-ux.jpg',
+  title: 'The Power of Data: How Analytics is Driving Business Decisions',
+  description:
+    'Learn how data analytics is transforming industries and helping businesses make smarter, data-driven decisions...',
+  tags: [
+    { name: 'Data Analytics', color: 'text-purple-600' }, // Replaced [#960299]
+    { name: 'Business', color: 'text-orange-500' }, // Replaced [#F58F29]
+    { name: 'Technology', color: 'text-pink-600' }, // Replaced [#DF24A7]
+  ],
+  reactions: ['❤️', '😍', '👍', '🔥'],
+  reactionsCount: 105,
+  posted: '1 week ago',
+  readTime: '7 min',
+};
+
 function ProfileDetail() {
   return (
     <div className="mt-15">
@@ -28,7 +44,7 @@ function ProfileDetail() {
               variant="h3"
               size="lg"
               bold={false}
-              className="font-semibold text-gray-900 mb-1"
+              className="font-semibold mb-1 text-gray-900"
             >
               Elizabeth Stone
             </Text>
@@ -37,7 +53,7 @@ function ProfileDetail() {
         </div>
       </div>
 
-      <div className="mt-30 md:mt-50 flex-col items-center md:items-start md:flex-row flex gap-4 mb-8 px-20">
+      <div className="text-gray-900 mt-30 md:mt-50 flex-col items-center md:items-start md:flex-row flex gap-4 mb-8 px-20">
         <div className="p-3 md:w-fit md:h-fit border border-[#C1C8C7] rounded-lg">
           <div className="flex gap-2 items-center mb-2">
             <div className="w-4 h-4">
@@ -72,16 +88,16 @@ function ProfileDetail() {
               variant="h3"
               size="lg"
               bold={false}
-              className="font-semibold text-gray-900 mb-2"
+              className="font-semibold mb-2"
             >
               Recent Comments
             </Text>
             <div>
               <Text
                 variant="h3"
-                size="md"
+                size="base"
                 bold={false}
-                className="font-semibold text-gray-900 mb-2"
+                className="font-semibold mb-2"
               >
                 Africa Fintech Summit 2024
               </Text>
@@ -100,11 +116,11 @@ function ProfileDetail() {
               variant="h3"
               size="lg"
               bold={false}
-              className="font-semibold text-gray-900 mb-1 md:text-2xl"
+              className="font-semibold mb-1 md:text-2xl"
             >
               Saved Articles
             </Text>
-            <ArticleCard />
+            <ArticleCard article={article} />
           </div>
         </div>
       </div>

@@ -46,6 +46,14 @@ function Navbar() {
           <SearchInput iconSize="text-xl" />
         </div>
 
+        <div className="hidden lg:block">
+          <img
+            className="w-10 h-10 rounded-full object-cover"
+            src="/src/assets/icons/Avatars.png"
+            alt="Profile Picture"
+          />
+        </div>
+
         {/* Mobile Menu Toggle */}
         <button onClick={toggleMenu} className="lg:hidden p-2">
           {isMenuOpen ? (
@@ -104,6 +112,18 @@ function Navbar() {
             </NavLink>
           </li>
         ))}
+
+        {/* Profile Picture */}
+        <li className="flex items-center">
+          <img
+            className="w-7 h-7 rounded-full object-cover"
+            src="/src/assets/icons/Avatars.png"
+            alt="Profile Picture"
+          />
+          <span className="ml-2 font-medium text-gray-800">
+            Elizabeth Stone
+          </span>
+        </li>
       </ul>
     </nav>
   );

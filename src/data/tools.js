@@ -4,7 +4,11 @@ export const tools = [
     toolName: 'Figma',
     toolDescription:
       'A cloud-based design tool for creating, prototyping, and collaborating on user interfaces.',
-    toolCategories: ['Design', 'UI/UX', 'Collaboration'],
+    toolCategories: [
+      { name: 'UI/UX', color: 'text-purple-600' },
+      { name: 'Design', color: 'text-orange-500' },
+      { name: 'Collaboration', color: 'text-pink-600' },
+    ],
     callToAction: 'Try Figma for Free',
   },
   {
@@ -12,7 +16,11 @@ export const tools = [
     toolName: 'Notion',
     toolDescription:
       'An all-in-one workspace for notes, tasks, databases, and collaboration.',
-    toolCategories: ['Productivity', 'Organization', 'Teamwork'],
+    toolCategories: [
+      { name: 'Productivity', color: 'text-purple-600' },
+      { name: 'Organization', color: 'text-orange-500' },
+      { name: 'Teamwork', color: 'text-pink-600' },
+    ],
     callToAction: 'Get Started with Notion',
   },
   {
@@ -21,9 +29,9 @@ export const tools = [
     toolDescription:
       'An open-source platform for building and deploying machine learning models at scale.',
     toolCategories: [
-      'Machine Learning',
-      'Artificial Intelligence',
-      'Data Science',
+      { name: 'Machine Learning', color: 'text-purple-600' },
+      { name: 'Artificial Intelligence', color: 'text-orange-500' },
+      { name: 'Data Science', color: 'text-pink-600' },
     ],
     callToAction: 'Explore TensorFlow',
   },
@@ -32,7 +40,11 @@ export const tools = [
     toolName: 'GitHub',
     toolDescription:
       'A web-based platform for version control, code hosting, and collaboration in software development.',
-    toolCategories: ['Development', 'Version Control', 'Collaboration'],
+    toolCategories: [
+      { name: 'Development', color: 'text-purple-600' },
+      { name: 'Version Control', color: 'text-orange-500' },
+      { name: 'Collaboration', color: 'text-pink-600' },
+    ],
     callToAction: 'Sign Up for GitHub',
   },
   {
@@ -40,7 +52,12 @@ export const tools = [
     toolName: 'Canva',
     toolDescription:
       'A graphic design platform that allows users to create visual content easily and professionally.',
-    toolCategories: ['Design', 'Graphics', 'Marketing'],
+
+    toolCategories: [
+      { name: 'Design', color: 'text-purple-600' },
+      { name: 'Graphics', color: 'text-orange-500' },
+      { name: 'Marketing', color: 'text-pink-600' },
+    ],
     callToAction: 'Start Designing with Canva',
   },
   {
@@ -48,7 +65,12 @@ export const tools = [
     toolName: 'Slack',
     toolDescription:
       'A communication and collaboration platform designed for teams and businesses.',
-    toolCategories: ['Communication', 'Teamwork', 'Productivity'],
+
+    toolCategories: [
+      { name: 'Communication', color: 'text-purple-600' },
+      { name: 'Teamwork', color: 'text-orange-500' },
+      { name: 'Productivity', color: 'text-pink-600' },
+    ],
     callToAction: 'Try Slack for Free',
   },
   {
@@ -56,7 +78,12 @@ export const tools = [
     toolName: 'Jira',
     toolDescription:
       'A project management tool used for agile software development, issue tracking, and team collaboration.',
-    toolCategories: ['Project Management', 'Agile', 'Software Development'],
+
+    toolCategories: [
+      { name: 'Project Management', color: 'text-purple-600' },
+      { name: 'Agile', color: 'text-orange-500' },
+      { name: 'Software Development', color: 'text-pink-600' },
+    ],
     callToAction: 'Start Using Jira',
   },
   {
@@ -64,7 +91,12 @@ export const tools = [
     toolName: 'Docker',
     toolDescription:
       'A platform for developing, shipping, and running applications using containerization technology.',
-    toolCategories: ['DevOps', 'Containerization', 'Automation'],
+
+    toolCategories: [
+      { name: 'DevOps', color: 'text-purple-600' },
+      { name: 'Containerization', color: 'text-orange-500' },
+      { name: 'Automation', color: 'text-pink-600' },
+    ],
     callToAction: 'Learn More About Docker',
   },
 ];
