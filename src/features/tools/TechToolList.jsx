@@ -15,8 +15,8 @@ function TechToolList() {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4 h-full">
-        {tools.map((tool, index) => (
-          <ToolCard key={index} tool={tool} />
+        {tools.map((tool) => (
+          <ToolCard key={tool.id} tool={tool} />
         ))}
       </div>
 

@@ -1,5 +1,6 @@
 export const events = [
   {
+    id: '1111',
     title: 'Africa FinTech Summit 2025',
     organizer: 'Africa FinTech Summit',
     date: '24-25 November, 2025',
@@ -8,6 +9,7 @@ export const events = [
     lastPosted: '1 hour',
   },
   {
+    id: '2222',
     title: 'DevFest Lagos 2025',
     organizer: 'Google Developer Groups.',
     date: '24-26 October, 2025',
@@ -16,6 +18,7 @@ export const events = [
     lastPosted: '3 hours',
   },
   {
+    id: '3333',
     title: 'Hackathon Lagos 2025',
     organizer: 'Startup Nigeria.',
     date: '5 - 10 June, 2025',
@@ -24,6 +27,7 @@ export const events = [
     lastPosted: '1 day',
   },
   {
+    id: '4444',
     title: 'AI & Machine Learning Conference 2025',
     organizer: 'ALX Africa.',
     date: '15-17 September, 2025',
@@ -32,6 +36,7 @@ export const events = [
     lastPosted: '2 hours',
   },
   {
+    id: '5555',
     title: 'Blockchain Africa Conference 2025',
     organizer: 'ALX Africa.',
     date: '10-12 March, 2025',
@@ -40,6 +45,7 @@ export const events = [
     lastPosted: '5 hours',
   },
   {
+    id: '6666',
     title: 'Tech Startup Expo 2025',
     organizer: 'Tech Startup Expo',
     date: '8-10 August, 2025',
@@ -48,6 +54,7 @@ export const events = [
     lastPosted: '6 hours',
   },
   {
+    id: '7777',
     title: 'Women in Tech Summit 2025',
     organizer: 'Women in Tech',
     date: '12-14 July, 2025',
@@ -56,6 +63,7 @@ export const events = [
     lastPosted: '1 day',
   },
   {
+    id: '8888',
     title: 'Cloud Computing Workshop 2025',
     organizer: 'Google Cloud.',
     date: '20-22 May, 2025',
@@ -64,6 +72,7 @@ export const events = [
     lastPosted: '4 hours',
   },
   {
+    id: '9999',
     title: 'Cybersecurity Forum 2025',
     organizer: 'Cybersecurity.',
     date: '30 November - 2 December, 2025',
@@ -72,6 +81,7 @@ export const events = [
     lastPosted: '2 days',
   },
   {
+    id: '1100',
     title: 'Data Science Africa 2025',
     organizer: 'Data Science Africa.',
     date: '18-20 October, 2025',
@@ -80,6 +90,7 @@ export const events = [
     lastPosted: '3 days',
   },
   {
+    id: '1200',
     title: 'AgriTech Innovation Summit 2025',
     organizer: 'AgriTech Innovation',
     date: '5-7 September, 2025',
@@ -88,6 +99,7 @@ export const events = [
     lastPosted: '1 day',
   },
   {
+    id: '1300',
     title: 'Mobile App Development Bootcamp 2025',
     organizer: 'ALX Africa',
     date: '14-16 June, 2025',
@@ -99,6 +111,7 @@ export const events = [
 
 export const displayedEvents = [
   {
+    id: '1400',
     title: 'Africa FinTech Summit 2025',
     organizer: 'Africa FinTech Summit',
     date: '24-25 November, 2025',
@@ -107,6 +120,7 @@ export const displayedEvents = [
     lastPosted: '1 hour',
   },
   {
+    id: '1500',
     title: 'DevFest Lagos 2025',
     organizer: 'Google Developer Groups.',
     date: '24-26 October, 2025',
@@ -115,6 +129,7 @@ export const displayedEvents = [
     lastPosted: '3 hours',
   },
   {
+    id: '1600',
     title: 'Hackathon Lagos 2025',
     organizer: 'Startup Nigeria.',
     date: '5 - 10 June, 2025',
@@ -123,6 +138,7 @@ export const displayedEvents = [
     lastPosted: '1 day',
   },
   {
+    id: '1700',
     title: 'AI & Machine Learning Conference 2025',
     organizer: 'ALX Africa.',
     date: '15-17 September, 2025',

@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 
 import Text from '../../components/common/Text';
+import Button from '../../components/common/Button';
+
 
 const allCategories = [
   {
@@ -109,19 +111,10 @@ function CategoriesList() {
       {/* Static Pagination */}
       <div className="max-w-7xl mx-auto mt-8 flex items-center justify-center">
         <div className="flex items-center space-x-2">
-          <button
-            className="py-2 px-4 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-700"
-            disabled
-          >
-            Previous
-          </button>
+          <Button variant="primary">Previous</Button>
+
           <span className="text-gray-600">Page 1 of 5</span>
-          <button
-            className="py-2 px-4 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-700"
-            disabled
-          >
-            Next
-          </button>
+          <Button variant="primary">Next</Button>
         </div>
       </div>
     </div>
@@ -129,4 +122,4 @@ function CategoriesList() {
 }
 
 export default CategoriesList;
-// ADD SORTING, PAGINATION, SEARCH BAR STICKY
+// ADD SORTING, PAGINATION

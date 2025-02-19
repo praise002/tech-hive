@@ -1,5 +1,6 @@
 export const tools = [
   {
+    id: '4001',
     toolImage: '/src/assets/tech-tool/figma.png',
     toolName: 'Figma',
     toolDescription:
@@ -12,6 +13,7 @@ export const tools = [
     callToAction: 'Try Figma for Free',
   },
   {
+    id: '4002',
     toolImage: '/src/assets/tech-tool/figma.png',
     toolName: 'Notion',
     toolDescription:
@@ -24,6 +26,7 @@ export const tools = [
     callToAction: 'Get Started with Notion',
   },
   {
+    id: '4003',
     toolImage: '/src/assets/tech-tool/figma.png',
     toolName: 'TensorFlow',
     toolDescription:
@@ -36,6 +39,7 @@ export const tools = [
     callToAction: 'Explore TensorFlow',
   },
   {
+    id: '4004',
     toolImage: '/src/assets/tech-tool/figma.png',
     toolName: 'GitHub',
     toolDescription:
@@ -48,6 +52,7 @@ export const tools = [
     callToAction: 'Sign Up for GitHub',
   },
   {
+    id: '4005',
     toolImage: '/src/assets/tech-tool/figma.png',
     toolName: 'Canva',
     toolDescription:
@@ -61,6 +66,7 @@ export const tools = [
     callToAction: 'Start Designing with Canva',
   },
   {
+    id: '4006',
     toolImage: '/src/assets/tech-tool/figma.png',
     toolName: 'Slack',
     toolDescription:
@@ -74,6 +80,7 @@ export const tools = [
     callToAction: 'Try Slack for Free',
   },
   {
+    id: '4007',
     toolImage: '/src/assets/tech-tool/figma.png',
     toolName: 'Jira',
     toolDescription:
@@ -87,6 +94,7 @@ export const tools = [
     callToAction: 'Start Using Jira',
   },
   {
+    id: '4008',
     toolImage: '/src/assets/tech-tool/figma.png',
     toolName: 'Docker',
     toolDescription:
@@ -103,6 +111,7 @@ export const tools = [
 
 export const displayedTechTools = [
   {
+    id: '4009',
     toolImage: '/src/assets/tech-tool/figma.png',
     toolName: 'Figma',
     toolDescription:
@@ -116,6 +125,7 @@ export const displayedTechTools = [
     callToAction: 'Try Figma for Free',
   },
   {
+    id: '4010',
     toolImage: '/src/assets/tech-tool/figma.png',
     toolName: 'Notion',
     toolDescription:
@@ -129,6 +139,7 @@ export const displayedTechTools = [
     callToAction: 'Get Started with Notion',
   },
   {
+    id: '4011',
     toolImage: '/src/assets/tech-tool/figma.png',
     toolName: 'TensorFlow',
     toolDescription:
@@ -142,6 +153,7 @@ export const displayedTechTools = [
     callToAction: 'Explore TensorFlow',
   },
   {
+    id: '4012',
     toolImage: '/src/assets/tech-tool/figma.png',
     toolName: 'GitHub',
     toolDescription:

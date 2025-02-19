@@ -1,5 +1,6 @@
 export const articles = [
   {
+    id: '1001',
     image: '/src/assets/articles/the-future-ui-ux.jpg',
     title: 'The Future of UI/UX: Trends to Watch in 2024',
     description:
@@ -15,6 +16,7 @@ export const articles = [
     readTime: '3 min',
   },
   {
+    id: '1002',
     image: '/src/assets/articles/the-future-ui-ux.jpg',
     title: 'Top 5 Programming Languages to Learn in 2024',
     description:
@@ -30,6 +32,7 @@ export const articles = [
     readTime: '5 min',
   },
   {
+    id: '1003',
     image: '/src/assets/articles/the-future-ui-ux.jpg',
     title: 'How AI is Transforming Healthcare in 2024',
     description:
@@ -45,6 +48,7 @@ export const articles = [
     readTime: '7 min',
   },
   {
+    id: '1004',
     image: '/src/assets/articles/the-future-ui-ux.jpg',
     title: 'The Rise of Remote Work: Tools and Tips for Success',
     description:
@@ -60,6 +64,7 @@ export const articles = [
     readTime: '6 min',
   },
   {
+    id: '1005',
     image: '/src/assets/articles/the-future-ui-ux.jpg',
     title: 'Blockchain Beyond Cryptocurrency: Real-World Applications',
     description:
@@ -75,6 +80,7 @@ export const articles = [
     readTime: '8 min',
   },
   {
+    id: '1006',
     image: '/src/assets/articles/the-future-ui-ux.jpg',
     title: 'The Ethics of AI: Balancing Innovation and Responsibility',
     description:
@@ -90,6 +96,7 @@ export const articles = [
     readTime: '9 min',
   },
   {
+    id: '1007',
     image: '/src/assets/articles/the-future-ui-ux.jpg',
     title: 'Cybersecurity in 2024: Threats and Best Practices',
     description:
@@ -105,6 +112,7 @@ export const articles = [
     readTime: '10 min',
   },
   {
+    id: '1008',
     image: '/src/assets/articles/the-future-ui-ux.jpg',
     title: 'The Future of E-Commerce: Trends to Watch',
     description:
@@ -120,6 +128,7 @@ export const articles = [
     readTime: '6 min',
   },
   {
+    id: '1009',
     image: '/src/assets/articles/the-future-ui-ux.jpg',
     title: 'The Power of Data: How Analytics is Driving Business Decisions',
     description:
@@ -135,6 +144,7 @@ export const articles = [
     readTime: '7 min',
   },
   {
+    id: '1100',
     image: '/src/assets/articles/the-future-ui-ux.jpg',
     title: "The Evolution of Cloud Computing: What's Next?",
     description:
@@ -153,6 +163,7 @@ export const articles = [
 
 export const trendingArticles = [
   {
+    id: '1101',
     image: '/src/assets/articles/the-future-ui-ux.jpg',
     title: 'The Power of Data: How Analytics is Driving Business Decisions',
     description:
@@ -168,6 +179,7 @@ export const trendingArticles = [
     readTime: '7 min',
   },
   {
+    id: '1102',
     image: '/src/assets/articles/the-future-ui-ux.jpg',
     title: 'The Future of E-Commerce: Trends to Watch',
     description:
@@ -183,6 +195,7 @@ export const trendingArticles = [
     readTime: '6 min',
   },
   {
+    id: '1103',
     image: '/src/assets/articles/the-future-ui-ux.jpg',
     title: 'How AI is Transforming Healthcare in 2024',
     description:
@@ -198,6 +211,7 @@ export const trendingArticles = [
     readTime: '7 min',
   },
   {
+    id: '1104',
     image: '/src/assets/articles/the-future-ui-ux.jpg',
     title: 'Cybersecurity in 2024: Threats and Best Practices',
     description:
@@ -216,6 +230,7 @@ export const trendingArticles = [
 
 export const displayedArticles = [
   {
+    id: '1105',
     image: '/src/assets/articles/the-future-ui-ux.jpg',
     title: 'The Future of UI/UX: Trends to Watch in 2024',
     description:
@@ -231,6 +246,7 @@ export const displayedArticles = [
     readTime: '3 min',
   },
   {
+    id: '1106',
     image: '/src/assets/articles/the-future-ui-ux.jpg',
     title: 'Top 5 Programming Languages to Learn in 2024',
     description:
@@ -246,6 +262,7 @@ export const displayedArticles = [
     readTime: '5 min',
   },
   {
+    id: '1107',
     image: '/src/assets/articles/the-future-ui-ux.jpg',
     title: 'How AI is Transforming Healthcare in 2024',
     description:
@@ -261,6 +278,7 @@ export const displayedArticles = [
     readTime: '7 min',
   },
   {
+    id: '1108',
     image: '/src/assets/articles/the-future-ui-ux.jpg',
     title: 'Cybersecurity in 2024: Threats and Best Practices',
     description:

@@ -28,7 +28,7 @@ function Articles() {
         <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4 h-full">
           {/* <div className="flex flex-col gap-y-2"> */}
           {displayedArticles.map((article) => (
-            <ArticleCard key={article.title} article={article} />
+            <ArticleCard key={article.id} article={article} />
           ))}
         </div>
       </div>

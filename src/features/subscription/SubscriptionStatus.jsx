@@ -49,8 +49,8 @@ function SubscriptionStatus() {
             </Text>
             <p className="text-gray-700 mb-6">Select a plan:</p>
             <div className="space-y-4">
-              <Button variant="outline">Premium Plan ($9.99/month)</Button>
-              <Button variant="outline">Basic Plan ($4.99/month)</Button>
+              <Button variant="outline">Premium Plan ($1.99/month)</Button>
+              <Button variant="outline">Basic Plan (Free)</Button>
               <Button
                 variant="primary"
                 onClick={closeRenewModal}

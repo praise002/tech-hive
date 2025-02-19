@@ -26,8 +26,8 @@ function ResourceSpotlight() {
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 h-full">
-        {displayedResources.map((resource, index) => (
-          <ResourceCard key={index} resource={resource} />
+        {displayedResources.map((resource) => (
+          <ResourceCard key={resource.id} resource={resource} />
         ))}
       </div>
 

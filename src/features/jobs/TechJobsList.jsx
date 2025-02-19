@@ -15,8 +15,8 @@ function TechJobsList() {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4 h-full">
-        {techJobs.map((job, index) => (
-          <JobPostingCard key={index} job={job} />
+        {techJobs.map((job) => (
+          <JobPostingCard key={job.id} job={job} />
         ))}
       </div>
 

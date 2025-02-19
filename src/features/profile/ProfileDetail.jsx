@@ -30,13 +30,6 @@ function ProfileDetail() {
                 alt=""
               />
             </div>
-            <div className="absolute top-1/3 right-10 md:right-1 md:top-1/2 bg-[#FFEBE4] rounded-full p-1 md:p-2">
-              <img
-                className="w-5 h-5 md:w-7 md:h-7"
-                src="/src/assets/icons/mynaui_edit.png"
-                alt=""
-              />
-            </div>
           </div>
 
           <div className="flex flex-col justify-center items-center">

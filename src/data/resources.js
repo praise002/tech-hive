@@ -1,5 +1,6 @@
 export const resources = [
   {
+    id: '3001',
     resourceImage: '/src/assets/resources/github-learning-lab.png',
     resourceName: 'GitHub Learning Lab',
     resourceType: 'Educational Platform',
@@ -14,6 +15,7 @@ export const resources = [
     timePosted: '1 day ago',
   },
   {
+    id: '3002',
     resourceImage: '/src/assets/resources/github-learning-lab.png',
     resourceName: 'FreeCodeCamp',
     resourceType: 'Coding Community',
@@ -28,6 +30,7 @@ export const resources = [
     timePosted: '1 day ago',
   },
   {
+    id: '3003',
     resourceImage: '/src/assets/resources/github-learning-lab.png',
     resourceName: 'Coursera',
     resourceType: 'Online Learning Platform',
@@ -42,6 +45,7 @@ export const resources = [
     timePosted: '1 day ago',
   },
   {
+    id: '3004',
     resourceImage: '/src/assets/resources/github-learning-lab.png',
     resourceName: 'Khan Academy',
     resourceType: 'Educational Website',
@@ -56,6 +60,7 @@ export const resources = [
     timePosted: '2 days ago',
   },
   {
+    id: '3005',
     resourceImage: '/src/assets/resources/github-learning-lab.png',
     resourceName: 'Udemy',
     resourceType: 'E-Learning Marketplace',
@@ -71,6 +76,7 @@ export const resources = [
     timePosted: '3 days ago',
   },
   {
+    id: '3006',
     resourceImage: '/src/assets/resources/github-learning-lab.png',
     resourceName: 'edX',
     resourceType: 'Online Education Platform',
@@ -86,6 +92,7 @@ export const resources = [
     timePosted: '4 days ago',
   },
   {
+    id: '3007',
     resourceImage: '/src/assets/resources/github-learning-lab.png',
     resourceName: 'LeetCode',
     resourceType: 'Algorithm Practice Platform',
@@ -101,6 +108,7 @@ export const resources = [
     timePosted: '5 days ago',
   },
   {
+    id: '3008',
     resourceImage: '/src/assets/resources/github-learning-lab.png',
     resourceName: 'MDN Web Docs',
     resourceType: 'Web Development Documentation',
@@ -116,6 +124,7 @@ export const resources = [
     timePosted: '6 days ago',
   },
   {
+    id: '3009',
     resourceImage: '/src/assets/resources/github-learning-lab.png',
     resourceName: 'Stack Overflow',
     resourceType: 'Q&A Community',
@@ -131,6 +140,7 @@ export const resources = [
     timePosted: '7 days ago',
   },
   {
+    id: '3010',
     resourceImage: '/src/assets/resources/github-learning-lab.png',
     resourceName: 'The Odin Project',
     resourceType: 'Open-Source Curriculum',
@@ -149,6 +159,7 @@ export const resources = [
 
 export const displayedResources = [
   {
+    id: '3011',
     resourceImage: '/src/assets/resources/github-learning-lab.png',
     resourceName: 'GitHub Learning Lab',
     resourceType: 'Educational Platform',
@@ -164,6 +175,7 @@ export const displayedResources = [
     timePosted: '1 day ago',
   },
   {
+    id: '3012',
     resourceImage: '/src/assets/resources/github-learning-lab.png',
     resourceName: 'FreeCodeCamp',
     resourceType: 'Coding Community',
@@ -179,6 +191,7 @@ export const displayedResources = [
     timePosted: '1 day ago',
   },
   {
+    id: '3013',
     resourceImage: '/src/assets/resources/github-learning-lab.png',
     resourceName: 'Coursera',
     resourceType: 'Online Learning Platform',
@@ -194,6 +207,7 @@ export const displayedResources = [
     timePosted: '1 day ago',
   },
   {
+    id: '3014',
     resourceImage: '/src/assets/resources/github-learning-lab.png',
     resourceName: 'Khan Academy',
     resourceType: 'Educational Website',

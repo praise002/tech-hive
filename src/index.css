@@ -3,6 +3,7 @@
 
 @theme {
   --font-inter: 'Inter', serif;
+  --color-gray: #C1C8C7;
 }
 
 .active {

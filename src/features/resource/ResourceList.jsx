@@ -7,7 +7,7 @@ function ResourceList() {
   return (
     <div className="mt-20 lg:mt-20 max-w-7xl mx-auto px-4 lg:px-8 mb-4">
       <div className="my-4">
-        <Text variant="h3" size="xl" className="sm:2xl">
+        <Text variant="h3" size="2xl" className="sm:xl">
           All Resources
         </Text>
         <div className="w-[20px]">
@@ -15,8 +15,8 @@ function ResourceList() {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4 h-full">
-        {resources.map((resource, index) => (
-          <ResourceCard key={index} resource={resource} />
+        {resources.map((resource) => (
+          <ResourceCard key={resource.id} resource={resource} />
         ))}
       </div>
 

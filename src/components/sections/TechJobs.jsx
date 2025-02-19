@@ -28,8 +28,8 @@ function TechJobs() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 h-full">
         {/* <div className="flex flex-col gap-y-2"> */}
-        {displayedTechJobs.map((job, index) => (
-          <JobPostingCard key={index} job={job} />
+        {displayedTechJobs.map((job) => (
+          <JobPostingCard key={job.id} job={job} />
         ))}
       </div>
       {/* <Button>Explore More Jobs &rarr;</Button> */}

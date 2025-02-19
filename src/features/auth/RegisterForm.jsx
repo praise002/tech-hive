@@ -3,6 +3,7 @@ import Form from '../../components/common/Form';
 import { IoIosEye } from 'react-icons/io';
 import { FcGoogle } from 'react-icons/fc';
 import { FaApple } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 function RegisterForm() {
   const inputs = [
@@ -62,9 +63,13 @@ function RegisterForm() {
           Tec<span className="text-red-700">Hive.</span>
         </div>
         <div className="flex items-center gap-2 my-4">
-          <p className="text-[#889392]">Register</p>
+          <div className="text-[#889392]">
+            <Link to="register">Register</Link>
+          </div>
           <div className="h-4 w-[1px] bg-[#A32816]"></div>
-          <p className="text-[#262A2A]">Login</p>
+          <div className="text-[#262A2A]">
+            <Link to="register">Login</Link>
+          </div>
         </div>
 
         <Form inputs={inputs} onSubmit={handleFormSubmit} className="w-full">

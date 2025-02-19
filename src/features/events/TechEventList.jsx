@@ -15,8 +15,8 @@ function TechEventList() {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4 h-full">
-        {events.map((event, index) => (
-          <EventCard key={index} event={event} />
+        {events.map((event) => (
+          <EventCard key={event.id} event={event} />
         ))}
       </div>
 

@@ -27,8 +27,8 @@ function TechEvents() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 h-full">
         {/* <div className="flex flex-col gap-y-2"> */}
-        {displayedEvents.map((event, index) => (
-          <EventCard key={index} event={event} />
+        {displayedEvents.map((event) => (
+          <EventCard key={event.id} event={event} />
         ))}
       </div>
       {/* <Button>Explore More Jobs &rarr;</Button> */}
