@@ -7,7 +7,7 @@ import Subscribe from '../../components/sections/Subscribe';
 function TechEventDetail() {
   return (
     <>
-    <CategoryBar />
+      <CategoryBar />
       <div className="flex flex-col md:flex-row gap-8 px-4 md:px-10 py-8">
         {/* Left Column: Social Links */}
         <div className="hidden md:block px-10 mt-70">
@@ -15,7 +15,7 @@ function TechEventDetail() {
         </div>
 
         {/* Right Column: Content */}
-        <div className="p-2 w-full md:w-3/4 mt-20 md:mt-10 border border-[#C1C8C7]">
+        <div className="p-2 w-full md:w-3/4 mt-20 md:mt-10 border border-gray">
           <div>
             <Text
               variant="h3"
@@ -25,9 +25,11 @@ function TechEventDetail() {
             >
               Africa Fintech Summit 2024
             </Text>
-            <div className="text-[#889392] text-sm">Africa Fintech Summit</div>
+            <div className="text-color-text-secondary text-sm">
+              Africa Fintech Summit
+            </div>
           </div>
-          <div className="space-y-8 text-[#262A2A]">
+          <div className="space-y-8 text-color-text-primary">
             {/* Description */}
             <div>
               <Text
@@ -119,7 +121,7 @@ function TechEventDetail() {
               </div>
             </div>
           </div>
-          <div className="text-[#889392] text-sm my-4">
+          <div className="text-color-text-secondary text-sm my-4">
             Posted 1 hour ago
           </div>
         </div>

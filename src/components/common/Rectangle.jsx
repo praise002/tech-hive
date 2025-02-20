@@ -1,6 +1,6 @@
 function Rectangle() {
   return (
-    <div className="bg-gradient-to-r from-[#FDB87F]/50 to-[#ffd7c9] w-full h-6"></div>
+    <div className="bg-gradient-to-r from-orange/50 to-peach w-full h-6"></div>
   );
 }
 

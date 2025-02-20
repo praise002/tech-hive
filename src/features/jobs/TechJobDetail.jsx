@@ -7,7 +7,7 @@ import Subscribe from '../../components/sections/Subscribe';
 function TechJobDetail() {
   return (
     <>
-    <CategoryBar />
+      <CategoryBar />
       <div className="flex flex-col md:flex-row gap-8 px-4 md:px-10 py-8">
         {/* Left Column: Social Links */}
         <div className="hidden md:block px-10 mt-70">
@@ -15,7 +15,7 @@ function TechJobDetail() {
         </div>
 
         {/* Right Column: Content */}
-        <div className="p-2 w-full md:w-3/4 mt-20 md:mt-10 border border-[#C1C8C7]">
+        <div className="p-2 w-full md:w-3/4 mt-20 md:mt-10 border border-gray">
           <div>
             <Text
               variant="h3"
@@ -25,26 +25,28 @@ function TechJobDetail() {
             >
               Frontend Developer
             </Text>
-            <div className="text-[#889392] text-sm">TechGiant Inc</div>
+            <div className="text-color-text-secondary text-sm">
+              TechGiant Inc
+            </div>
           </div>
 
           {/* Tags Section */}
           <div className="flex gap-2 flex-wrap my-4">
-            <span className="inline-flex items-center px-2 py-1 bg-[#FFEDDD] text-xs font-medium text-gray-700 rounded-sm">
+            <span className="inline-flex items-center px-2 py-1 bg-cream text-xs font-medium text-gray-700 rounded-sm">
               🌍 Remote
             </span>
-            <span className="inline-flex items-center px-2 py-1 bg-[#FFEDDD] text-xs font-medium text-gray-700 rounded-sm">
+            <span className="inline-flex items-center px-2 py-1 bg-cream text-xs font-medium text-gray-700 rounded-sm">
               ⚛️ React
             </span>
-            <span className="inline-flex items-center px-2 py-1 bg-[#FFEDDD] text-xs font-medium text-gray-700 rounded-sm">
+            <span className="inline-flex items-center px-2 py-1 bg-cream text-xs font-medium text-gray-700 rounded-sm">
               🟨 JavaScript
             </span>
-            <span className="inline-flex items-center px-2 py-1 bg-[#FFEDDD] text-xs font-medium text-gray-700 rounded-sm">
+            <span className="inline-flex items-center px-2 py-1 bg-cream text-xs font-medium text-gray-700 rounded-sm">
               ⏳ Full-time
             </span>
           </div>
 
-          <div className="space-y-8 text-[#262A2A]">
+          <div className="space-y-8 text-color-text-primary">
             {/* Description */}
             <div>
               <Text
@@ -124,7 +126,9 @@ function TechJobDetail() {
               </div>
             </div>
           </div>
-          <div className="text-[#889392] text-sm my-4">Posted 1 hour ago</div>
+          <div className="text-color-text-secondary text-sm my-4">
+            Posted 1 hour ago
+          </div>
         </div>
 
         {/* Mobile social link */}

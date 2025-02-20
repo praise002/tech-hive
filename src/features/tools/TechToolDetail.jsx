@@ -8,7 +8,7 @@ import Subscribe from '../../components/sections/Subscribe';
 function TechToolDetail() {
   return (
     <>
-    <CategoryBar />
+      <CategoryBar />
       <div className="flex flex-col md:flex-row gap-8 px-4 md:px-10 py-8">
         {/* Left Column: Social Links */}
         <div className="hidden md:block px-10 mt-70">
@@ -16,13 +16,13 @@ function TechToolDetail() {
         </div>
 
         {/* Right Column: Content */}
-        <div className="w-full md:w-3/4 mt-20 md:mt-10 border border-[#C1C8C7] rounded-tl-lg rounded-tr-lg overflow-hidden">
+        <div className="w-full md:w-3/4 mt-20 md:mt-10 border border-gray rounded-tl-lg rounded-tr-lg overflow-hidden">
           <Image
             alt="Figma"
             src="/src/assets/tech-tool/figma.png"
             className="w-full h-auto shadow-md"
           />
-          <div className="space-y-8 px-2 text-[#262A2A]">
+          <div className="space-y-8 px-2 text-color-text-primary">
             <Text
               variant="h3"
               size="xl"
@@ -109,7 +109,7 @@ function TechToolDetail() {
               </div>
             </div>
           </div>
-          <div className="px-2 text-[#889392] text-sm my-4">
+          <div className="px-2 text-color-text-secondary text-sm my-4">
             Posted 1 hour ago
           </div>
         </div>

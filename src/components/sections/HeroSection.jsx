@@ -3,7 +3,7 @@ import Text from '../common/Text';
 
 function HeroSection() {
   return (
-    <div className="relative mt-12 bg-gradient-to-r from-[#fd8878]/50 to-[#ffd7c9] py-10 px-7 sm:py-20 sm:px-14 overflow-hidden">
+    <div className="relative mt-12 bg-gradient-to-r from-coral/50 to-peach py-10 px-7 sm:py-20 sm:px-14 overflow-hidden">
       {/* ✅ SVG Background */}
       <img
         src="/src/assets/hero-section.svg"

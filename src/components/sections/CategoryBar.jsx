@@ -15,15 +15,15 @@ const popularCategories = [
 
 function CategoryBar() {
   return (
-    <div className="lg:flex hidden bg-[#FFD7C9] items-center justify-between overflow-x-auto mt-15 px-8 py-4">
-      <ul className='flex items-center space-x-2 overflow-x-auto '>
+    <div className="lg:flex hidden bg-peach items-center justify-between overflow-x-auto mt-15 px-8 py-4">
+      <ul className="flex items-center space-x-2 overflow-x-auto ">
         {popularCategories.map((category) => (
           <li key={category.id}>
             <NavLink to={category.link}>{category.name}</NavLink>
           </li>
         ))}
       </ul>
-      <div className="text-[#889392] hover:text-[#a32816] transition-colors">
+      <div className="text-secondary hover:text-red transition-colors">
         <Link to="categories">See All Categories</Link>
       </div>
     </div>

@@ -4,7 +4,7 @@ import Text from './Text';
 
 function EventCard({ event }) {
   return (
-    <div className="p-6 rounded-lg border border-[#C1C8C7] shadow-lg h-full flex flex-col">
+    <div className="p-6 rounded-lg border border-gray shadow-lg h-full flex flex-col">
       <div className="flex-grow space-y-2">
         {/* Event Title */}
         <Text
@@ -16,8 +16,10 @@ function EventCard({ event }) {
           {event.title}
         </Text>
 
-        <div className="text-[#889392] text-sm">{event.organizer}</div>
-        <div className="text-sm text-[#262a2a] space-y-2">
+        <div className="text-color-text-secondary text-sm">
+          {event.organizer}
+        </div>
+        <div className="text-sm text-color-text-primary space-y-2">
           {/* Date */}
           <div className="flex gap-2 items-center">
             <div className="w-5 h-5 md:w-7 md:h-7">
@@ -64,7 +66,7 @@ function EventCard({ event }) {
 
         {/* Posted Time */}
 
-        <div className="text-[#889392] text-xs">
+        <div className="text-color-text-secondary text-xs">
           Posted {event.lastPosted} ago
         </div>
       </div>

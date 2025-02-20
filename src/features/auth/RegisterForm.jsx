@@ -20,7 +20,7 @@ function RegisterForm() {
     {
       name: 'email',
       placeholder: 'Email',
-      icon: <IoIosEye className="text-[#262A2A] cursor-pointer" />,
+      icon: <IoIosEye className="text-color-text-primary cursor-pointer" />,
       // TODO; LATER TOGGLE IT WITH STATE BY CHANGING THE EYE
       type: 'email',
       rules: {
@@ -58,16 +58,16 @@ function RegisterForm() {
         />
       </div>
 
-      <div className="bg-[#FFEBE4] md:flex-1 p-6">
+      <div className="bg-light md:flex-1 p-6">
         <div className="uppercase text-gray-900 text-xl font-bold">
           Tec<span className="text-red-700">Hive.</span>
         </div>
         <div className="flex items-center gap-2 my-4">
-          <div className="text-[#889392]">
+          <div className="text-color-text-secondary">
             <Link to="register">Register</Link>
           </div>
-          <div className="h-4 w-[1px] bg-[#A32816]"></div>
-          <div className="text-[#262A2A]">
+          <div className="h-4 w-[1px] bg-red"></div>
+          <div className="text-color-text-primary">
             <Link to="register">Login</Link>
           </div>
         </div>
@@ -78,11 +78,11 @@ function RegisterForm() {
 
         <div className="my-4 flex items-center gap-2">
           <div className="flex-1">
-            <hr className="border-b-1 border-[#262A2A]" />
+            <hr className="border-b-1 border-color-text-primary" />
           </div>
-          <div className="uppercase text-[#262A2A]">or</div>
+          <div className="uppercase text-color-text-primary">or</div>
           <div className="flex-1">
-            <hr className="border-b-1 border-[#262A2A]" />
+            <hr className="border-b-1 border-color-text-primary" />
           </div>
         </div>
 
@@ -106,10 +106,10 @@ function RegisterForm() {
           </Button>
         </div>
 
-        <p className="text-[#262A2A] text-xs">
+        <p className="text-color-text-primary text-xs">
           By signing up, you are agreeing to our{' '}
-          <span className="text-[#A32816]">privacy policy</span> and{' '}
-          <span className="text-[#A32816]">terms of use.</span>
+          <span className="text-red">privacy policy</span> and{' '}
+          <span className="text-red">terms of use.</span>
         </p>
       </div>
     </div>

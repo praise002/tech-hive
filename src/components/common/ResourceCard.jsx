@@ -14,13 +14,15 @@ function ResourceCard({ resource }) {
         className="flex-shrink-0"
       />
 
-      <div className="flex flex-col justify-between flex-grow p-5 border-l border-r border-b border-[#C1C8C7] rounded-bl-lg rounded-br-lg overflow-hidden">
+      <div className="flex flex-col justify-between flex-grow p-5 border-l border-r border-b border-gray rounded-bl-lg rounded-br-lg overflow-hidden">
         <div className="space-y-2">
           <div>
             <Text variant="h4" size="xl" bold={false} className="font-semibold">
               {resource.resourceName}
             </Text>
-            <p className="text-xs text-[#889392]">{resource.resourceType}</p>
+            <p className="text-xs text-color-text-secondary">
+              {resource.resourceType}
+            </p>
           </div>
 
           <Description>{resource.resourceDescription}</Description>
@@ -30,7 +32,7 @@ function ResourceCard({ resource }) {
 
         <div className="space-y-2">
           <Button variant="outline">View details</Button>
-          <div className="text-xs text-[#889392]">
+          <div className="text-xs text-color-text-secondary">
             Posted {resource.timePosted}
           </div>
         </div>
@@ -52,7 +54,6 @@ ResourceCard.propTypes = {
       })
     ).isRequired,
     timePosted: PropTypes.string.isRequired,
-    
   }).isRequired,
 };
 

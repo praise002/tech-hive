@@ -11,7 +11,7 @@ function TechJobsList() {
           All Jobs
         </Text>
         <div className="w-[20px]">
-          <hr className="border-b-2 border-[#a32816]" />
+          <hr className="border-b-2 border-red" />
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4 h-full">

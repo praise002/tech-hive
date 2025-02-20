@@ -102,7 +102,7 @@ function ResetPassword() {
         <Text variant="h2" size="2xl" className="mb-1">
           Reset your Password
         </Text>
-        <p className="text-[#889392] text-sm mb-4">
+        <p className="text-color-text-secondary text-sm mb-4">
           Check your email for a verification code and enter it below.
         </p>
         <Form
@@ -113,7 +113,7 @@ function ResetPassword() {
         >
           Verify OTP
         </Form>
-        <p className="text-[#889392] text-sm mt-2">
+        <p className="text-color-text-secondary text-sm mt-2">
           To receive a new otp <a href="#">Click Here!</a>
         </p>
       </div>
@@ -126,7 +126,7 @@ function ResetPassword() {
         <Text variant="h2" size="2xl" className="mb-1">
           Reset your Password
         </Text>
-        <p className="text-[#889392] text-sm mb-4">
+        <p className="text-color-text-secondary text-sm mb-4">
           Please enter your new password twice:
         </p>
         <Form

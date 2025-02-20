@@ -56,7 +56,7 @@ function AccountDetail() {
   return (
     <div className="mt-15">
       {/* ✅ Profile Header */}
-      <div className="bg-[#FFEBE4] w-full h-40 relative">
+      <div className="bg-light w-full h-40 relative">
         <div className="absolute transform -translate-x-1/2 top-30 md:top-1/2 left-1/2 flex flex-col items-center">
           <div>
             <div className="relative">
@@ -67,7 +67,7 @@ function AccountDetail() {
               />
 
               {/* Wrapper for the edit functionality */}
-              <div className="absolute top-12 right-0 md:top-25 bg-[#FFEBE4] rounded-full p-1 md:p-2">
+              <div className="absolute top-12 right-0 md:top-25 bg-light rounded-full p-1 md:p-2">
                 {/* Hidden file input for profile picture upload */}
                 <input
                   type="file"
@@ -105,7 +105,7 @@ function AccountDetail() {
                 {profile.name}
               </Text>
             )}
-            <p className="text-[#889392] text-sm my-1">
+            <p className="text-color-text-secondary text-sm my-1">
               Joined 27th January 2025
             </p>
             {!isEditing && (
@@ -138,7 +138,7 @@ function AccountDetail() {
           Account Settings
         </Text>
         <div className="space-y-4">
-          <div className="border border-[#C1C8C7] rounded-lg p-4">
+          <div className="border border-gray rounded-lg p-4">
             <p className="font-semibold mb-1">Change Password</p>
             <Button
               variant="outline"
@@ -155,7 +155,7 @@ function AccountDetail() {
 
       {/* ✅ Recent Comments & Saved Articles */}
       <div className="text-gray-900 flex-col items-center md:items-start md:flex-row flex gap-4 mb-8 px-20">
-        <div className="p-3 md:w-fit md:h-fit border border-[#C1C8C7] rounded-lg">
+        <div className="p-3 md:w-fit md:h-fit border border-gray rounded-lg">
           <div className="flex gap-2 items-center mb-2">
             <div className="w-4 h-4">
               <img
@@ -184,7 +184,7 @@ function AccountDetail() {
           </div>
         </div>
         <div className="flex-1 flex flex-col gap-4">
-          <div className="p-4 border border-[#C1C8C7] rounded-lg">
+          <div className="p-4 border border-gray rounded-lg">
             <Text
               variant="h3"
               size="lg"
@@ -202,17 +202,17 @@ function AccountDetail() {
               >
                 Africa Fintech Summit 2024
               </Text>
-              <p className="text-[#889392] text-sm mb-1">
+              <p className="text-color-text-secondary text-sm mb-1">
                 Africa Fintech Summit
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs md:text-sm">
               <p className="font-bold">Thanks for the info</p>
-              <p className="text-[#889392]">27th January, 2025</p>
+              <p className="text-color-text-secondary">27th January, 2025</p>
             </div>
           </div>
 
-          <div className="p-4 border border-[#C1C8C7] rounded-lg">
+          <div className="p-4 border border-gray rounded-lg">
             <Text
               variant="h3"
               size="lg"

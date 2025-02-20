@@ -7,9 +7,9 @@ const article = {
   description:
     'Learn how data analytics is transforming industries and helping businesses make smarter, data-driven decisions...',
   tags: [
-    { name: 'Data Analytics', color: 'text-purple-600' }, // Replaced [#960299]
-    { name: 'Business', color: 'text-orange-500' }, // Replaced [#F58F29]
-    { name: 'Technology', color: 'text-pink-600' }, // Replaced [#DF24A7]
+    { name: 'Data Analytics', color: 'text-purple-600' },
+    { name: 'Business', color: 'text-orange-500' },
+    { name: 'Technology', color: 'text-pink-600' },
   ],
   reactions: ['❤️', '😍', '👍', '🔥'],
   reactionsCount: 105,
@@ -20,7 +20,7 @@ const article = {
 function ProfileDetail() {
   return (
     <div className="mt-15">
-      <div className="bg-[#FFEBE4] w-full h-40 relative">
+      <div className="bg-light w-full h-40 relative">
         <div className="absolute transform -translate-x-1/2 top-30 md:top-1/2 left-1/2 flex flex-col items-center">
           <div>
             <div className="relative">
@@ -41,13 +41,15 @@ function ProfileDetail() {
             >
               Elizabeth Stone
             </Text>
-            <p className="text-[#889392] text-sm">Joined 27th January 2025</p>
+            <p className="text-color-text-secondary text-sm">
+              Joined 27th January 2025
+            </p>
           </div>
         </div>
       </div>
 
       <div className="text-gray-900 mt-30 md:mt-50 flex-col items-center md:items-start md:flex-row flex gap-4 mb-8 px-20">
-        <div className="p-3 md:w-fit md:h-fit border border-[#C1C8C7] rounded-lg">
+        <div className="p-3 md:w-fit md:h-fit border border-gray rounded-lg">
           <div className="flex gap-2 items-center mb-2">
             <div className="w-4 h-4">
               <img
@@ -76,7 +78,7 @@ function ProfileDetail() {
           </div>
         </div>
         <div className="flex-1 flex flex-col gap-4">
-          <div className="p-4 border border-[#C1C8C7] rounded-lg">
+          <div className="p-4 border border-gray rounded-lg">
             <Text
               variant="h3"
               size="lg"
@@ -94,17 +96,17 @@ function ProfileDetail() {
               >
                 Africa Fintech Summit 2024
               </Text>
-              <p className="text-[#889392] text-sm mb-1">
+              <p className="text-color-text-secondary text-sm mb-1">
                 Africa Fintech Summit
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs md:text-sm">
               <p className="font-bold">Thanks for the info</p>
-              <p className="text-[#889392]">27th January, 2025</p>
+              <p className="text-color-text-secondary">27th January, 2025</p>
             </div>
           </div>
 
-          <div className="p-4 border border-[#C1C8C7] rounded-lg">
+          <div className="p-4 border border-gray rounded-lg">
             <Text
               variant="h3"
               size="lg"

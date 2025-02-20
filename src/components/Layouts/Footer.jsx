@@ -32,7 +32,7 @@ function Footer() {
       <div className="max-w-7xl mx-auto py-12 px-4 lg:px-8">
         <div className="grid md:grid-cols-4 gap-6 text-center md:text-left">
           <div className="uppercase  text-xl font-bold">
-            <span className="text-[#d67917]">Tec</span>Hive.
+            <span className="text-orange-dark">Tec</span>Hive.
           </div>
           <ul className="flex flex-col space-y-4 text-sm">
             {footerLinks.map((link) => (

@@ -13,13 +13,13 @@ function ResourceSpotlight() {
             Resource Spotlight
           </Text>
           <div className="w-[20px]">
-            <hr className="border-b-2 border-[#a32816]" />
+            <hr className="border-b-2 border-red" />
           </div>
         </div>
         <div>
           <Link
             to="resources"
-            className="cursor-pointer text-[#889392] hover:text-[#a32816] transition-colors"
+            className="cursor-pointer text-color-text-secondary hover:text-red transition-colors"
           >
             See all
           </Link>

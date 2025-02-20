@@ -13,18 +13,18 @@ function ToolCard({ tool }) {
         className="flex-shrink-0"
       />
 
-      <div className="flex flex-col justify-between flex-grow p-5 border-l border-r border-b border-[#C1C8C7] rounded-bl-lg rounded-br-lg overflow-hidden">
+      <div className="flex flex-col justify-between flex-grow p-5 border-l border-r border-b border-gray rounded-bl-lg rounded-br-lg overflow-hidden">
         <div className="space-y-2">
           <Text variant="h4" size="xl" bold={false} className="font-semibold">
             {tool.toolName}
           </Text>
-          <div className="text-sm md:text-base text-[#262a2a]">
+          <div className="text-sm md:text-base text-color-text-primary">
             {tool.toolDescription}
           </div>
           <Tags tags={tool.toolCategories} />
         </div>
 
-        <div className='mt-2'>
+        <div className="mt-2">
           <Button className="text-xs w-auto" variant="outline">
             {tool.callToAction}
           </Button>

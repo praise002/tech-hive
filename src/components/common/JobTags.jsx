@@ -6,7 +6,7 @@ function JobTags({ tags }) {
       {tags.map((tag, index) => (
         <span
           key={index}
-          className="inline-flex items-center px-2 py-1 bg-[#FFEDDD] text-xs font-medium text-gray-700 rounded-sm"
+          className="inline-flex items-center px-2 py-1 bg-cream text-xs font-medium text-gray-700 rounded-sm"
         >
           {tag}
         </span>

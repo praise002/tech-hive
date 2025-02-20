@@ -18,14 +18,17 @@ function SubscriptionStatus() {
       <Text variant="h3" size="lg" bold={false} className="font-semibold mb-2">
         Subscription Status
       </Text>
-      <div className="border border-[#C1C8C7] rounded-lg p-4">
+      <div className="border border-gray rounded-lg p-4">
         <p className="font-semibold">Current Plan</p>
-        <p className="text-[#889392] text-sm mb-1">
+        <p className="text-color-text-secondary text-sm mb-1">
           Premium Plan (Expires on 27th January 2026)
         </p>
         <Button type="submit" variant="gradient" onClick={openRenewModal}>
           Renew Subscription
         </Button>
+        {/* <Button type="submit" variant="gradient" onClick={openRenewModal}>
+          Subscribe to Premium
+        </Button> */}
       </div>
 
       {/* Modal Overlay */}

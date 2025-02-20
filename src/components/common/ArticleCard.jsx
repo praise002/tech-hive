@@ -15,7 +15,7 @@ function ArticleCard({ article }) {
           src={article.image}
           className="flex-shrink-0"
         />
-        <div className="flex flex-col justify-between flex-grow p-5 border border-l border-r border-b border-[#C1C8C7] rounded-bl-lg rounded-br-lg overflow-hidden">
+        <div className="flex flex-col justify-between flex-grow p-5 border border-l border-r border-b border-gray rounded-bl-lg rounded-br-lg overflow-hidden">
           <div className="space-y-2">
             <ArticleTitle>{article.title}</ArticleTitle>
             <Description>{article.description}</Description>
@@ -36,7 +36,7 @@ function ArticleCard({ article }) {
       </div>
       {/* <div className="relative overflow-hidden rounded-lg shadow-lg flex">
         <Image alt="Article" src="/src/assets/articles/the-future-ui-ux.jpg" />
-        <div className="p-5 border-t border-r border-b border-[#C1C8C7] rounded-br-lg rounded-tr-lg overflow-hidden">
+        <div className="p-5 border-t border-r border-b border-gray rounded-br-lg rounded-tr-lg overflow-hidden">
           <ArticleTitle>{article.title}</ArticleTitle>
           <Description>{article.description}</Description>
           <Tags tags={article.tags} />

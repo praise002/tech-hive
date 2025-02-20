@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 
 function JobPostingCard({ job }) {
   return (
-    <div className="p-6 rounded-lg border border-[#C1C8C7] shadow-lg h-full flex flex-col">
+    <div className="p-6 rounded-lg border border-gray shadow-lg h-full flex flex-col">
       <div className="flex-grow space-y-2">
         {/* Job Title */}
         <Text
@@ -18,7 +18,7 @@ function JobPostingCard({ job }) {
         </Text>
 
         {/* Company Name */}
-        <div className="text-[#889392] text-sm">{job.company}</div>
+        <div className="text-color-text-secondary text-sm">{job.company}</div>
 
         {/* Tags Section */}
         <JobTags tags={job.tags} />
@@ -32,7 +32,7 @@ function JobPostingCard({ job }) {
 
         {/* Posted Time */}
 
-        <div className="text-[#889392] text-xs">
+        <div className="text-color-text-secondary text-xs">
           Posted {job.lastPosted} ago
         </div>
       </div>

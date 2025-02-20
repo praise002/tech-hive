@@ -3,7 +3,17 @@
 
 @theme {
   --font-inter: 'Inter', serif;
-  --color-gray: #C1C8C7;
+  --color-gray: #c1c8c7;
+  --color-primary: #262a2a;
+  --color-secondary: #889392;
+  --color-primary-light: #ee6649;
+  --color-cream: #ffeddd;
+  --color-orange: #fdb87f;
+  --color-peach: #ffd7c9;
+  --color-orange-dark: #d67917;
+  --color-red: #a32816;
+  --color-coral: #fd8878;
+  --color-light: #ffebe4;
 }
 
 .active {

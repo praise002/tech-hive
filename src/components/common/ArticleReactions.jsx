@@ -19,7 +19,7 @@ function ArticleReactions({ reactions, reactionsCount, posted, readTime }) {
               </span>
             ))}
           </div>
-          <div className="whitespace-nowrap text-sm text-[#262A2A] font-medium">
+          <div className="whitespace-nowrap text-sm text-color-text-primary font-medium">
             {reactionsCount} reactions
           </div>
         </div>
@@ -27,7 +27,7 @@ function ArticleReactions({ reactions, reactionsCount, posted, readTime }) {
         {/* Bookmark */}
         <div className="flex items-center space-x-2">
           {/* Read Time */}
-          <div className="whitespace-nowrap text-sm text-[#262A2A]  font-medium">
+          <div className="whitespace-nowrap text-sm text-color-text-primary  font-medium">
             {readTime} read
           </div>
           <img
@@ -39,7 +39,7 @@ function ArticleReactions({ reactions, reactionsCount, posted, readTime }) {
       </div>
 
       {/* Posted Time */}
-      <div className="text-xs text-[#889392]">Posted {posted}</div>
+      <div className="text-xs text-color-text-secondary">Posted {posted}</div>
     </div>
   );
 }

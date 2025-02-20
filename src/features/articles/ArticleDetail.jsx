@@ -8,9 +8,9 @@ import Subscribe from '../../components/sections/Subscribe';
 
 function ArticleDetail() {
   const tags = [
-    { name: 'UIUXDesign', color: 'text-purple-600' }, // Replaced [#960299]
-    { name: 'UserExperience', color: 'text-orange-500' }, // Replaced [#F58F29]
-    { name: 'InterfaceDesign', color: 'text-pink-600' }, // Replaced [#DF24A7]
+    { name: 'UIUXDesign', color: 'text-purple-600' },
+    { name: 'UserExperience', color: 'text-orange-500' },
+    { name: 'InterfaceDesign', color: 'text-pink-600' },
   ];
 
   return (
@@ -23,14 +23,16 @@ function ArticleDetail() {
         </div>
 
         {/* Right Column: Content */}
-        <div className="w-full md:w-3/4 mt-20 md:mt-10 border border-[#C1C8C7] rounded-tl-lg rounded-tr-lg overflow-hidden">
+        <div className="w-full md:w-3/4 mt-20 md:mt-10 border border-gray rounded-tl-lg rounded-tr-lg overflow-hidden">
           <Image
             alt="Article Image"
             src="/src/assets/articles/the-future-ui-ux.jpg"
             className="w-full h-auto shadow-md"
           />
-          <div className="px-4 py-6 border border-[#889392] text-[#262A2A]">
-            <div className="my-4 text-xs text-[#889392]">Posted 1 hour ago</div>
+          <div className="px-4 py-6 border border-color-text-secondary text-color-text-primary">
+            <div className="my-4 text-xs text-color-text-secondary">
+              Posted 1 hour ago
+            </div>
             <Text
               variant="h3"
               size="xl"
@@ -113,7 +115,7 @@ function ArticleDetail() {
                   <div className="flex-1">
                     <textarea
                       placeholder="Add to discussion"
-                      className="resize-none  w-full px-4 py-2 border border-[#889392] rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
+                      className="resize-none  w-full px-4 py-2 border border-color-text-secondary rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
                     ></textarea>
                   </div>
                 </div>
