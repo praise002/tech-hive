@@ -6,7 +6,7 @@ function ArticleTitle({ children }) {
     <Text
       variant="h4"
       bold={false}
-      className="font-semibold sm:text-xl"
+      className="font-semibold sm:text-xl dark:text-custom-white"
       size="lg"
     >
       {children}

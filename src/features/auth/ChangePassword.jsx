@@ -44,8 +44,8 @@ function ChangePassword() {
   };
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 my-20">
-      <Text variant="h2" size="2xl" className="mb-4">
+    <div className="px-4 sm:px-6 lg:px-8 py-20">
+      <Text variant="h2" size="2xl" className="mb-4 dark:text-custom-white">
         Change Password
       </Text>
       <Form inputs={inputs} onSubmit={handleFormSubmit} className="w-full">

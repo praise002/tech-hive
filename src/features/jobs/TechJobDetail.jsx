@@ -21,13 +21,11 @@ function TechJobDetail() {
               variant="h3"
               size="xl"
               bold={false}
-              className="font-semibold mb-2"
+              className="font-semibold mb-2 dark:text-custom-white"
             >
               Frontend Developer
             </Text>
-            <div className="text-color-text-secondary text-sm">
-              TechGiant Inc
-            </div>
+            <div className="text-secondary text-sm">TechGiant Inc</div>
           </div>
 
           {/* Tags Section */}
@@ -46,14 +44,14 @@ function TechJobDetail() {
             </span>
           </div>
 
-          <div className="space-y-8 text-color-text-primary">
+          <div className="space-y-8 text-primary dark:text-custom-white">
             {/* Description */}
             <div>
               <Text
                 variant="h5"
                 size="lg"
                 bold={false}
-                className="font-semibold mb-2"
+                className="font-semibold mb-2 dark:text-custom-white"
               >
                 Job Description
               </Text>
@@ -71,7 +69,7 @@ function TechJobDetail() {
                 variant="h5"
                 size="lg"
                 bold={false}
-                className="font-semibold mb-2"
+                className="font-semibold mb-2 dark:text-custom-white"
               >
                 Requirements
               </Text>
@@ -91,7 +89,7 @@ function TechJobDetail() {
                 variant="h5"
                 size="lg"
                 bold={false}
-                className="font-semibold mb-2"
+                className="font-semibold mb-2 dark:text-custom-white"
               >
                 Responsibilities
               </Text>
@@ -110,12 +108,12 @@ function TechJobDetail() {
                 variant="h5"
                 size="lg"
                 bold={false}
-                className="font-semibold mb-2"
+                className="font-semibold mb-2 dark:text-custom-white"
               >
                 How to Apply
               </Text>
               <div className="flex gap-2 items-center text-base md:text-lg">
-                <img src="/src/assets/icons/solar_link-bold.png" alt="" />
+                <img src="/src/assets/icons/solar_link-bold.png" className="dark:invert" alt="" />
                 <a
                   href="https://www.techgiant.inc/positions"
                   target="_blank"
@@ -126,9 +124,7 @@ function TechJobDetail() {
               </div>
             </div>
           </div>
-          <div className="text-color-text-secondary text-sm my-4">
-            Posted 1 hour ago
-          </div>
+          <div className="text-secondary text-sm my-4">Posted 1 hour ago</div>
         </div>
 
         {/* Mobile social link */}

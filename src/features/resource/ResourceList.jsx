@@ -5,9 +5,9 @@ import { resources } from '../../data/resources';
 
 function ResourceList() {
   return (
-    <div className="mt-20 lg:mt-20 max-w-7xl mx-auto px-4 lg:px-8 mb-4">
+    <div className="pt-20 lg:pt-20 max-w-7xl mx-auto px-4 lg:px-8 mb-4">
       <div className="my-4">
-        <Text variant="h3" size="2xl" className="sm:xl">
+        <Text variant="h3" size="2xl" className="sm:xl dark:text-custom-white">
           All Resources
         </Text>
         <div className="w-[20px]">

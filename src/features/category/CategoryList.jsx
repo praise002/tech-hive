@@ -61,18 +61,18 @@ function CategoriesList() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 mt-10 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-100 dark:bg-dark mt-10 py-8 px-4 sm:px-6 lg:px-8">
       {/* Sticky Search Bar */}
       <div className="">
         {/* Page Title */}
         <div className="flex items-center justify-between">
-          <Text variant="h1" size="xl" className="lg:text-2xl">
+          <Text variant="h1" size="xl" className="lg:text-2xl dark:text-custom-white">
             All Categories
           </Text>
 
           {/* Sorting Dropdown (Static) */}
           <form>
-            <select className="py-2 px-4 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700">
+            <select className="dark:text-custom-white dark:bg-dark py-2 px-4 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700">
               {options.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.name}
@@ -85,7 +85,7 @@ function CategoriesList() {
         <input
           type="text"
           placeholder="Search categories..."
-          className="w-full py-2 px-4 mt-4 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700"
+          className="dark:text-custom-white w-full py-2 px-4 mt-4 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700"
         />
       </div>
 

@@ -6,7 +6,7 @@ function Tags({ tags }) {
       {tags.map((tag, index) => (
         <div key={index} className="inline-flex items-center">
           <span className={tag.color}>#</span>
-          <span>{tag.name}</span>
+          <span className="dark:text-custom-white">{tag.name}</span>
         </div>
       ))}
     </div>

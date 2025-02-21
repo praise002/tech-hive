@@ -5,6 +5,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import './index.css';
 import App from './App.jsx';
 import ErrorFallbacks from './components/common/ErrorFallbacks.jsx';
+import ThemeProvider from './context/ThemeProvider.jsx';
 
 // function BuggyComponent() {
 //   // Simulate a runtime error
@@ -18,7 +19,10 @@ createRoot(document.getElementById('root')).render(
       FallbackComponent={ErrorFallbacks}
       onReset={() => window.location.replace('/')}
     >
-      <App />
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+
       {/* <BuggyComponent /> */}
     </ErrorBoundary>
   </StrictMode>

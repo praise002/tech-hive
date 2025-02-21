@@ -17,12 +17,10 @@ function ResourceCard({ resource }) {
       <div className="flex flex-col justify-between flex-grow p-5 border-l border-r border-b border-gray rounded-bl-lg rounded-br-lg overflow-hidden">
         <div className="space-y-2">
           <div>
-            <Text variant="h4" size="xl" bold={false} className="font-semibold">
+            <Text variant="h4" size="xl" bold={false} className="font-semibold dark:text-custom-white">
               {resource.resourceName}
             </Text>
-            <p className="text-xs text-color-text-secondary">
-              {resource.resourceType}
-            </p>
+            <p className="text-xs text-secondary">{resource.resourceType}</p>
           </div>
 
           <Description>{resource.resourceDescription}</Description>
@@ -32,7 +30,7 @@ function ResourceCard({ resource }) {
 
         <div className="space-y-2">
           <Button variant="outline">View details</Button>
-          <div className="text-xs text-color-text-secondary">
+          <div className="text-xs text-secondary">
             Posted {resource.timePosted}
           </div>
         </div>

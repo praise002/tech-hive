@@ -14,7 +14,7 @@ function About() {
         </div>
 
         {/* Right Column: Content */}
-        <div className="w-full md:w-3/4 space-y-8 mt-20 md:mt-30 rounded-tl-lg rounded-tr-lg overflow-hidden">
+        <div className="dark:text-custom-white w-full md:w-3/4 space-y-8 mt-20 md:mt-30 rounded-tl-lg rounded-tr-lg overflow-hidden">
           {/* Image */}
 
           <Image

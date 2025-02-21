@@ -21,17 +21,15 @@ function TechEventDetail() {
               variant="h3"
               size="xl"
               bold={false}
-              className="font-semibold mb-2"
+              className="font-semibold mb-2 dark:text-custom-white "
             >
               Africa Fintech Summit 2024
             </Text>
-            <div className="text-color-text-secondary text-sm">
-              Africa Fintech Summit
-            </div>
+            <div className="text-secondary text-sm">Africa Fintech Summit</div>
           </div>
-          <div className="space-y-8 text-color-text-primary">
+          <div className="space-y-8 text-primary">
             {/* Description */}
-            <div>
+            <div className="dark:invert">
               <Text
                 variant="h5"
                 size="lg"
@@ -48,7 +46,7 @@ function TechEventDetail() {
             </div>
 
             {/* Dates */}
-            <div>
+            <div className="dark:invert">
               <Text
                 variant="h5"
                 size="lg"
@@ -63,7 +61,7 @@ function TechEventDetail() {
             </div>
 
             {/* Location */}
-            <div>
+            <div className="dark:invert">
               <Text
                 variant="h5"
                 size="lg"
@@ -78,7 +76,7 @@ function TechEventDetail() {
             </div>
 
             {/* Agenda */}
-            <div>
+            <div className="dark:invert">
               <Text
                 variant="h5"
                 size="lg"
@@ -100,7 +98,7 @@ function TechEventDetail() {
             </div>
 
             {/* Tickets */}
-            <div>
+            <div className="dark:invert">
               <Text
                 variant="h5"
                 size="lg"
@@ -121,9 +119,7 @@ function TechEventDetail() {
               </div>
             </div>
           </div>
-          <div className="text-color-text-secondary text-sm my-4">
-            Posted 1 hour ago
-          </div>
+          <div className="text-secondary text-sm my-4">Posted 1 hour ago</div>
         </div>
 
         {/* Mobile social link */}

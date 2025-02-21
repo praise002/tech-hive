@@ -11,22 +11,20 @@ function EventCard({ event }) {
           variant="h4"
           size="xl"
           bold={false}
-          className="font-semibold text-gray-900"
+          className="font-semibold text-gray-900 dark:text-custom-white"
         >
           {event.title}
         </Text>
 
-        <div className="text-color-text-secondary text-sm">
-          {event.organizer}
-        </div>
-        <div className="text-sm text-color-text-primary space-y-2">
+        <div className="text-secondary text-sm">{event.organizer}</div>
+        <div className="text-sm text-primary dark:text-custom-white space-y-2">
           {/* Date */}
           <div className="flex gap-2 items-center">
             <div className="w-5 h-5 md:w-7 md:h-7">
               <img
                 src="/src/assets/icons/ic_outline-date-range.png"
                 alt=""
-                className="w-full h-full"
+                className="w-full h-full dark:invert"
               />
             </div>
             <p>{event.date}</p>
@@ -38,7 +36,7 @@ function EventCard({ event }) {
               <img
                 src="/src/assets/icons/mynaui_location.png"
                 alt=""
-                className="w-full h-full"
+                className="w-full h-full dark:invert"
               />
             </div>
             <p>{event.location}</p>
@@ -50,7 +48,7 @@ function EventCard({ event }) {
               <img
                 src="/src/assets/icons/mingcute_map-pin-line.png"
                 alt=""
-                className="w-full h-full"
+                className="w-full h-full dark:invert"
               />
             </div>
             <p>{event.type}</p>
@@ -66,7 +64,7 @@ function EventCard({ event }) {
 
         {/* Posted Time */}
 
-        <div className="text-color-text-secondary text-xs">
+        <div className="text-secondary text-xs">
           Posted {event.lastPosted} ago
         </div>
       </div>

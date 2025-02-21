@@ -15,12 +15,12 @@ function SubscriptionStatus() {
 
   return (
     <div className="mb-5 text-gray-900 px-20">
-      <Text variant="h3" size="lg" bold={false} className="font-semibold mb-2">
+      <Text variant="h3" size="lg" bold={false} className="dark:text-custom-white font-semibold mb-2">
         Subscription Status
       </Text>
-      <div className="border border-gray rounded-lg p-4">
+      <div className="border border-gray rounded-lg p-4 dark:text-custom-white">
         <p className="font-semibold">Current Plan</p>
-        <p className="text-color-text-secondary text-sm mb-1">
+        <p className="text-secondary text-sm mb-1">
           Premium Plan (Expires on 27th January 2026)
         </p>
         <Button type="submit" variant="gradient" onClick={openRenewModal}>

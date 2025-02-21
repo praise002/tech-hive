@@ -27,23 +27,21 @@ function ProfileDetailEmpty() {
               variant="h3"
               size="lg"
               bold={false}
-              className="font-semibold text-gray-900 mb-1"
+              className="font-semibold text-gray-900 dark:text-custom-white mb-1"
             >
               Elizabeth Stone
             </Text>
-            <p className="text-color-text-secondary text-sm">
-              Joined 27th January 2025
-            </p>
+            <p className="text-secondary text-sm">Joined 27th January 2025</p>
           </div>
         </div>
       </div>
 
-      <div className="mt-30 md:mt-50 flex-col items-center md:items-start md:flex-row flex gap-4 mb-8 px-20">
+      <div className="dark:text-custom-white mt-30 md:mt-50 flex-col items-center md:items-start md:flex-row flex gap-4 mb-8 px-20">
         <div className="p-3 md:w-fit md:h-fit border border-gray rounded-lg">
           <div className="flex gap-2 items-center mb-2">
             <div className="w-4 h-4">
               <img
-                className="w-full h-full"
+                className="w-full h-full dark:invert"
                 src="/src/assets/icons/Chat.png"
                 alt=""
               />
@@ -57,7 +55,7 @@ function ProfileDetailEmpty() {
           <div className="flex gap-2 items-center">
             <div className="w-4 h-4">
               <img
-                className="w-full h-full"
+                className="w-full h-full dark:invert"
                 src="/src/assets/icons/bookmark-light.png"
                 alt=""
               />
@@ -70,7 +68,7 @@ function ProfileDetailEmpty() {
         <div className="flex-1 p-4 border flex justify-center items-center border-gray rounded-lg">
           <div className="md:w-xs w-60">
             <img
-              className="w-full h-full"
+              className="w-full h-full dark:invert"
               src="/src/assets/icons/amico.png"
               alt=""
             />

@@ -12,13 +12,13 @@ function JobPostingCard({ job }) {
           variant="h4"
           size="xl"
           bold={false}
-          className="font-semibold text-gray-900"
+          className="font-semibold text-gray-900 dark:text-custom-white"
         >
           {job.title}
         </Text>
 
         {/* Company Name */}
-        <div className="text-color-text-secondary text-sm">{job.company}</div>
+        <div className="text-secondary text-sm">{job.company}</div>
 
         {/* Tags Section */}
         <JobTags tags={job.tags} />
@@ -32,7 +32,7 @@ function JobPostingCard({ job }) {
 
         {/* Posted Time */}
 
-        <div className="text-color-text-secondary text-xs">
+        <div className="text-secondary text-xs">
           Posted {job.lastPosted} ago
         </div>
       </div>

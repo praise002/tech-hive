@@ -10,9 +10,9 @@ function ContactForm() {
   } = useForm();
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 my-20">
-      <form className="space-y-4" onSubmit={handleSubmit((data) => console.log(data))}>
-        <Text variant="h2" size="2xl" className="sm:xl">
+    <div className="px-4 sm:px-6 lg:px-8 py-20">
+      <form className="space-y-4 dark:text-custom-white" onSubmit={handleSubmit((data) => console.log(data))}>
+        <Text variant="h2" size="2xl" className="sm:xl dark:text-custom-white">
           Contact Form
         </Text>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

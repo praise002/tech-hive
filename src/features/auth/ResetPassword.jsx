@@ -102,7 +102,7 @@ function ResetPassword() {
         <Text variant="h2" size="2xl" className="mb-1">
           Reset your Password
         </Text>
-        <p className="text-color-text-secondary text-sm mb-4">
+        <p className="text-secondary text-sm mb-4">
           Check your email for a verification code and enter it below.
         </p>
         <Form
@@ -113,7 +113,7 @@ function ResetPassword() {
         >
           Verify OTP
         </Form>
-        <p className="text-color-text-secondary text-sm mt-2">
+        <p className="text-secondary text-sm mt-2">
           To receive a new otp <a href="#">Click Here!</a>
         </p>
       </div>
@@ -122,11 +122,11 @@ function ResetPassword() {
 
   if (step === 3) {
     return (
-      <div className="px-4 sm:px-6 lg:px-8 my-20">
-        <Text variant="h2" size="2xl" className="mb-1">
+      <div className="px-4 sm:px-6 lg:px-8 py-20">
+        <Text variant="h2" size="2xl" className="mb-1 dark:text-custom-white">
           Reset your Password
         </Text>
-        <p className="text-color-text-secondary text-sm mb-4">
+        <p className="text-secondary text-sm mb-4">
           Please enter your new password twice:
         </p>
         <Form

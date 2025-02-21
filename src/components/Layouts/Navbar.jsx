@@ -1,11 +1,16 @@
-import { useState } from 'react';
+import { MdOutlineLightMode, MdOutlineDarkMode } from 'react-icons/md';
+import { useContext, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import SearchInput from '../common/SearchInput';
+import { ThemeContext } from '../../context/ThemeContext';
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
+
+  // Use the ThemeContext
+  const { theme, toggleTheme } = useContext(ThemeContext);
 
   const navLinks = [
     { to: '/', name: 'Home' },
@@ -17,15 +22,15 @@ function Navbar() {
   ];
 
   return (
-    <nav className="fixed left-0 right-0 top-0 z-50 bg-white shadow-md">
+    <nav className="fixed left-0 right-0 top-0 z-50 bg-white shadow-md dark:bg-dark">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center py-3">
         {/* Logo & Nav Links */}
 
         <div className="flex items-center gap-6">
-          <div className="uppercase text-gray-900 text-xl font-bold">
+          <div className="uppercase text-gray-900 dark:text-custom-white text-xl font-bold">
             Tec<span className="text-red-700">Hive.</span>
           </div>
-          <ul className="hidden lg:flex items-center gap-6 text-gray-900 font-medium">
+          <ul className="hidden lg:flex items-center gap-6 text-gray-900 dark:text-custom-white font-medium">
             {navLinks.map((nav) => (
               <li key={nav.to}>
                 <NavLink to={nav.to} className="hover:text-red-700">
@@ -38,11 +43,15 @@ function Navbar() {
 
         {/* Search & Icons */}
         <div className="hidden lg:flex items-center gap-4 text-sm">
-          <img
-            className="w-6 h-6 text-gray-900"
-            src="/src/assets/icons/Vector.png"
-            alt="Search Icon"
-          />
+          {/* Theme Toggle Button */}
+          <button onClick={toggleTheme}>
+            {theme === 'light' ? (
+              <MdOutlineDarkMode className="w-6 h-6 text-gray-900 dark:text-white" />
+            ) : (
+              <MdOutlineLightMode className="w-6 h-6 text-gray-900 dark:text-white" />
+            )}
+          </button>
+
           <SearchInput iconSize="text-xl" />
         </div>
 
@@ -58,7 +67,7 @@ function Navbar() {
         <button onClick={toggleMenu} className="lg:hidden p-2">
           {isMenuOpen ? (
             <svg
-              className="w-6 h-6 text-gray-800"
+              className="w-6 h-6 text-gray-800 dark:text-custom-white"
               fill="none"
               stroke="currentColor"
             >
@@ -71,7 +80,7 @@ function Navbar() {
             </svg>
           ) : (
             <svg
-              className="w-6 h-6 text-gray-800"
+              className="w-6 h-6 text-gray-800 dark:text-custom-white"
               fill="none"
               stroke="currentColor"
             >
@@ -95,18 +104,22 @@ function Navbar() {
         {/* Search & Icons */}
 
         <li className="flex flex-col items-center gap-4 text-xs">
-          <img
-            className="w-6 h-6 text-gray-900"
-            src="/src/assets/icons/Vector.png"
-            alt="Search Icon"
-          />
+          {/* Theme Toggle Button */}
+          <button onClick={toggleTheme}>
+            {theme === 'light' ? (
+              <MdOutlineDarkMode className="w-6 h-6 text-gray-900 dark:text-white" />
+            ) : (
+              <MdOutlineLightMode className="w-6 h-6 text-gray-900 dark:text-white" />
+            )}
+          </button>
+
           <SearchInput inputWidth="w-40" iconSize="text-xl" />
         </li>
         {navLinks.map((nav) => (
           <li key={nav.to}>
             <NavLink
               to={nav.to}
-              className="block text-gray-800 hover:text-red-700"
+              className="block text-gray-800 dark:text-custom-white hover:text-red-700"
             >
               {nav.name}
             </NavLink>
@@ -120,7 +133,7 @@ function Navbar() {
             src="/src/assets/icons/Avatars.png"
             alt="Profile Picture"
           />
-          <span className="ml-2 font-medium text-gray-800">
+          <span className="ml-2 font-medium text-gray-800 dark:text-custom-white">
             Elizabeth Stone
           </span>
         </li>

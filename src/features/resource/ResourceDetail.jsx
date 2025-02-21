@@ -22,12 +22,12 @@ function ResourceDetail() {
             src="/src/assets/resources/github-learning-lab.png"
             className="w-full h-auto shadow-md"
           />
-          <div className="space-y-8 px-2 text-color-text-primary">
+          <div className="space-y-8 px-2 text-primary">
             <Text
               variant="h3"
               size="xl"
               bold={false}
-              className="font-semibold mt-4"
+              className="font-semibold mt-4 dark:text-custom-white"
             >
               Github Learning Lab
             </Text>
@@ -38,11 +38,11 @@ function ResourceDetail() {
                 variant="h5"
                 size="lg"
                 bold={false}
-                className="font-semibold mb-2"
+                className="font-semibold mb-2 dark:text-custom-white"
               >
                 Software Description
               </Text>
-              <p className="text-base md:text-lg leading-relaxed">
+              <p className="text-base md:text-lg leading-relaxed dark:text-custom-white">
                 GitHub Learning Lab is an educational platform offering
                 interactive, project-based courses to improve your skills in
                 software development, version control, and open-source
@@ -56,11 +56,11 @@ function ResourceDetail() {
                 variant="h5"
                 size="lg"
                 bold={false}
-                className="font-semibold mb-2"
+                className="font-semibold mb-2 dark:text-custom-white"
               >
                 Popular Courses
               </Text>
-              <ul className="list-disc pl-6 space-y-2 text-base md:text-lg leading-relaxed">
+              <ul className="dark:text-custom-white list-disc pl-6 space-y-2 text-base md:text-lg leading-relaxed">
                 <li>Introduction to Git and GitHub.</li>
                 <li>Building RESTful APIs.</li>
                 <li>Works on any platform with an internet connection.</li>
@@ -74,11 +74,11 @@ function ResourceDetail() {
                 variant="h5"
                 size="lg"
                 bold={false}
-                className="font-semibold mb-2"
+                className="font-semibold mb-2 dark:text-custom-white"
               >
                 Why Learn Here?
               </Text>
-              <ul className="list-disc pl-6 space-y-2 text-base md:text-lg leading-relaxed">
+              <ul className="dark:text-custom-white list-disc pl-6 space-y-2 text-base md:text-lg leading-relaxed">
                 <li>Hands-on exercises with real-world applications.</li>
                 <li>
                   Earn certificates of completion to showcase your skills.
@@ -93,12 +93,12 @@ function ResourceDetail() {
                 variant="h5"
                 size="lg"
                 bold={false}
-                className="font-semibold mb-2"
+                className="font-semibold mb-2 dark:text-custom-white"
               >
                 How to Access
               </Text>
-              <div className="flex gap-2 items-center text-base md:text-lg">
-                <img src="/src/assets/icons/solar_link-bold.png" alt="" />
+              <div className="flex gap-2 items-center text-base md:text-lg dark:text-custom-white">
+                <img className="dark:invert" src="/src/assets/icons/solar_link-bold.png" alt="" />
                 <a
                   href="https://www.github.com"
                   target="_blank"
@@ -109,7 +109,7 @@ function ResourceDetail() {
               </div>
             </div>
           </div>
-          <div className="px-2 text-color-text-secondary text-sm my-4">
+          <div className="px-2 text-secondary text-sm my-4">
             Posted 1 hour ago
           </div>
         </div>

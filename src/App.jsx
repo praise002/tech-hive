@@ -29,6 +29,7 @@ import ResourceDetail from './features/resource/ResourceDetail';
 import ChangePassword from './features/auth/ChangePassword';
 import ResetPassword from './features/auth/ResetPassword';
 import ResetPasswordSuccess from './features/auth/ResetPaswordSuccess';
+// import ProfileDetailEmpty from './features/profile/ProfileDetailEmpty';
 
 const queryClient = new QueryClient({
   defaultOptions: {

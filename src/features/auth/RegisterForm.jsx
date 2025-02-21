@@ -20,7 +20,7 @@ function RegisterForm() {
     {
       name: 'email',
       placeholder: 'Email',
-      icon: <IoIosEye className="text-color-text-primary cursor-pointer" />,
+      icon: <IoIosEye className="text-primary cursor-pointer" />,
       // TODO; LATER TOGGLE IT WITH STATE BY CHANGING THE EYE
       type: 'email',
       rules: {
@@ -49,7 +49,7 @@ function RegisterForm() {
     alert('Form Submitted successfully!');
   };
   return (
-    <div className="px-4 sm:px-6 lg:px-8 my-20 flex flex-col md:flex-row">
+    <div className="px-4 sm:px-6 lg:px-8 py-20 flex flex-col md:flex-row">
       <div className="md:flex-1">
         <img
           src="/src/assets/abstract-network-com-bg.jpg"
@@ -63,11 +63,11 @@ function RegisterForm() {
           Tec<span className="text-red-700">Hive.</span>
         </div>
         <div className="flex items-center gap-2 my-4">
-          <div className="text-color-text-secondary">
+          <div className="text-secondary">
             <Link to="register">Register</Link>
           </div>
           <div className="h-4 w-[1px] bg-red"></div>
-          <div className="text-color-text-primary">
+          <div className="text-primary">
             <Link to="register">Login</Link>
           </div>
         </div>
@@ -80,7 +80,7 @@ function RegisterForm() {
           <div className="flex-1">
             <hr className="border-b-1 border-color-text-primary" />
           </div>
-          <div className="uppercase text-color-text-primary">or</div>
+          <div className="uppercase text-primary">or</div>
           <div className="flex-1">
             <hr className="border-b-1 border-color-text-primary" />
           </div>
@@ -106,7 +106,7 @@ function RegisterForm() {
           </Button>
         </div>
 
-        <p className="text-color-text-primary text-xs">
+        <p className="text-primary text-xs">
           By signing up, you are agreeing to our{' '}
           <span className="text-red">privacy policy</span> and{' '}
           <span className="text-red">terms of use.</span>

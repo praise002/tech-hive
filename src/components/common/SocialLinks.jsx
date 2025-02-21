@@ -3,11 +3,11 @@ import PropTypes from 'prop-types';
 
 function SocialLinks({ visible }) {
   return (
-    <div className="inline-flex flex-row md:flex-col p-2 gap-x-4 md:gap-y-4 items-center justify-center cursor-pointer">
+    <div className="dark:invert inline-flex flex-row md:flex-col p-2 gap-x-4 md:gap-y-4 items-center justify-center cursor-pointer">
       {/* Quick AI Section */}
       {visible && (
         <>
-          <Text variant="h5" size="xs" bold={false} className="font-semibold">
+          <Text variant="h5" size="xs" bold={false} className="font-semibold dark:text-custom-white">
             Quick AI
           </Text>
           <div className="w-6 h-6">

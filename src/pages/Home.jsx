@@ -10,7 +10,7 @@ import TrendingArticles from '../components/sections/TrendingArticles';
 
 function Home() {
   return (
-    <>
+    <div>
       <HeroSection />
       <TrendingArticles />
       <Articles />
@@ -20,7 +20,7 @@ function Home() {
       <ResourceSpotlight />
       <Rectangle />
       <Subscribe />
-    </>
+    </div>
   );
 }
 

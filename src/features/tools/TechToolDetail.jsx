@@ -22,7 +22,7 @@ function TechToolDetail() {
             src="/src/assets/tech-tool/figma.png"
             className="w-full h-auto shadow-md"
           />
-          <div className="space-y-8 px-2 text-color-text-primary">
+          <div className="space-y-8 px-2 text-primary dark:invert">
             <Text
               variant="h3"
               size="xl"
@@ -109,7 +109,7 @@ function TechToolDetail() {
               </div>
             </div>
           </div>
-          <div className="px-2 text-color-text-secondary text-sm my-4">
+          <div className="px-2 text-secondary text-sm my-4">
             Posted 1 hour ago
           </div>
         </div>

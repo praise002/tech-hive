@@ -37,23 +37,21 @@ function ProfileDetail() {
               variant="h3"
               size="lg"
               bold={false}
-              className="font-semibold mb-1 text-gray-900"
+              className="font-semibold mb-1 text-gray-900 dark:text-custom-white"
             >
               Elizabeth Stone
             </Text>
-            <p className="text-color-text-secondary text-sm">
-              Joined 27th January 2025
-            </p>
+            <p className="text-secondary text-sm">Joined 27th January 2025</p>
           </div>
         </div>
       </div>
 
-      <div className="text-gray-900 mt-30 md:mt-50 flex-col items-center md:items-start md:flex-row flex gap-4 mb-8 px-20">
+      <div className="text-gray-900 dark:text-custom-white mt-30 md:mt-50 flex-col items-center md:items-start md:flex-row flex gap-4 mb-8 px-20">
         <div className="p-3 md:w-fit md:h-fit border border-gray rounded-lg">
           <div className="flex gap-2 items-center mb-2">
             <div className="w-4 h-4">
               <img
-                className="w-full h-full"
+                className="w-full h-full dark:invert"
                 src="/src/assets/icons/Chat.png"
                 alt=""
               />
@@ -67,7 +65,7 @@ function ProfileDetail() {
           <div className="flex gap-2 items-center">
             <div className="w-4 h-4">
               <img
-                className="w-full h-full"
+                className="w-full h-full dark:invert"
                 src="/src/assets/icons/bookmark-light.png"
                 alt=""
               />
@@ -83,7 +81,7 @@ function ProfileDetail() {
               variant="h3"
               size="lg"
               bold={false}
-              className="font-semibold mb-2"
+              className="font-semibold mb-2 dark:text-custom-white"
             >
               Recent Comments
             </Text>
@@ -92,17 +90,17 @@ function ProfileDetail() {
                 variant="h3"
                 size="base"
                 bold={false}
-                className="font-semibold mb-2"
+                className="font-semibold mb-2 dark:text-custom-white"
               >
                 Africa Fintech Summit 2024
               </Text>
-              <p className="text-color-text-secondary text-sm mb-1">
+              <p className="text-secondary text-sm mb-1">
                 Africa Fintech Summit
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs md:text-sm">
               <p className="font-bold">Thanks for the info</p>
-              <p className="text-color-text-secondary">27th January, 2025</p>
+              <p className="text-secondary">27th January, 2025</p>
             </div>
           </div>
 
@@ -111,7 +109,7 @@ function ProfileDetail() {
               variant="h3"
               size="lg"
               bold={false}
-              className="font-semibold mb-1 md:text-2xl"
+              className="font-semibold mb-1 md:text-2xl dark:text-custom-white"
             >
               Saved Articles
             </Text>

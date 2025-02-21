@@ -15,10 +15,10 @@ function ToolCard({ tool }) {
 
       <div className="flex flex-col justify-between flex-grow p-5 border-l border-r border-b border-gray rounded-bl-lg rounded-br-lg overflow-hidden">
         <div className="space-y-2">
-          <Text variant="h4" size="xl" bold={false} className="font-semibold">
+          <Text variant="h4" size="xl" bold={false} className="font-semibold dark:text-custom-white">
             {tool.toolName}
           </Text>
-          <div className="text-sm md:text-base text-color-text-primary">
+          <div className="text-sm md:text-base text-primary dark:text-custom-white">
             {tool.toolDescription}
           </div>
           <Tags tags={tool.toolCategories} />

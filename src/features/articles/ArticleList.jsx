@@ -5,9 +5,9 @@ import { articles } from '../../data/articles';
 
 function ArticleList() {
   return (
-    <div className="mt-20 lg:mt-20 max-w-7xl mx-auto px-4 lg:px-8 mb-4">
+    <div className="pt-20 lg:pt-20 max-w-7xl mx-auto px-4 lg:px-8 mb-4">
       <div className="my-4">
-        <Text variant="h3" size="xl" className="sm:2xl">
+        <Text variant="h3" size="xl" className="sm:2xl dark:text-custom-white">
           All Articles
         </Text>
         <div className="w-[20px]">

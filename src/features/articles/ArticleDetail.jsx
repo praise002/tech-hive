@@ -29,19 +29,17 @@ function ArticleDetail() {
             src="/src/assets/articles/the-future-ui-ux.jpg"
             className="w-full h-auto shadow-md"
           />
-          <div className="px-4 py-6 border border-color-text-secondary text-color-text-primary">
-            <div className="my-4 text-xs text-color-text-secondary">
-              Posted 1 hour ago
-            </div>
+          <div className="px-4 py-6 border border-color-text-secondary text-primary">
+            <div className="my-4 text-xs text-secondary">Posted 1 hour ago</div>
             <Text
               variant="h3"
               size="xl"
               bold={false}
-              className="font-semibold mb-2"
+              className="font-semibold mb-2 dark:text-custom-white"
             >
               The Future of UI/UX: Trends to Watch in 2024
             </Text>
-            <p className="text-base md:text-lg leading-relaxed">
+            <p className="text-base md:text-lg leading-relaxed dark:text-custom-white">
               From AI-powered interfaces to immersive experiences, here are the
               key trends shaping UI/UX design and how designers can stay ahead
               designers must anticipate and adapt to these emerging trends. The
@@ -78,15 +76,15 @@ function ArticleDetail() {
             <div className="flex justify-between my-4">
               <div className="w-6 h-6">
                 <img
-                  className="w-full h-full"
+                  className="w-full h-full dark:invert"
                   src="/src/assets/icons/reaction-light.png"
                   alt=""
                 />
               </div>
               <div className="w-6 h-6">
                 <img
-                  className="w-full h-full"
-                  src="/src/assets/icons/Vector.png"
+                  className="w-full h-full dark:invert"
+                  src="/src/assets/icons/bookmark-light.png"
                   alt=""
                 />
               </div>
@@ -97,17 +95,17 @@ function ArticleDetail() {
                 variant="h4"
                 size="lg"
                 bold={false}
-                className="font-semibold"
+                className="font-semibold dark:text-custom-white"
               >
                 Comments (1)
               </Text>
               {/* Chat */}
-              <div>
+              <div className="dark:text-custom-white">
                 {/* New Chat */}
                 <div className="flex gap-4 my-4">
                   <div className="w-6 h-6 rounded-full border p-1">
                     <img
-                      className="w-full h-full"
+                      className="w-full h-full dark:invert"
                       src="/src/assets/icons/iconamoon_profile-light.png"
                       alt=""
                     />
