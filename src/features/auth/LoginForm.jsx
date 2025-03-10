@@ -10,8 +10,6 @@ function LoginForm() {
     {
       name: 'email',
       placeholder: 'Email',
-      icon: <IoIosEye className="text-primary cursor-pointer" />,
-      // TODO; LATER TOGGLE IT WITH STATE BY CHANGING THE EYE
       type: 'email',
       rules: {
         required: 'Email is required',
@@ -25,6 +23,8 @@ function LoginForm() {
       name: 'password',
       type: 'password',
       placeholder: 'Password',
+      icon: <IoIosEye className="text-primary cursor-pointer" />,
+      // TODO; LATER TOGGLE IT WITH STATE BY CHANGING THE EYE
       rules: {
         required: 'Password is required',
         minLength: {
@@ -54,11 +54,11 @@ function LoginForm() {
         </div>
         <div className="flex items-center gap-2 my-4">
           <div className="text-secondary">
-            <Link to="register">Register</Link>
+            <Link to="/register">Register</Link>
           </div>
           <div className="h-4 w-[1px] bg-red"></div>
           <div className="text-primary">
-            <Link to="register">Login</Link>
+            <Link to="/login">Login</Link>
           </div>
         </div>
 

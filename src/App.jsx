@@ -46,7 +46,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route element={<AppLayout />}>
-            <Route path="/" element={<Home />} />
+            {/* <Route path="/" element={<Home />} /> */}
+            <Route index element={<Home />} />
             <Route path="articles" element={<ArticleList />} />
             <Route path="articles/:articleSlug" element={<ArticleDetail />} />
             <Route path="jobs" element={<TechJobsList />} />

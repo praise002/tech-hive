@@ -9,9 +9,9 @@ function Footer() {
 
   const footerLinks = [
     { to: '/', name: 'Home' },
-    { to: 'categories', name: 'Categories' },
-    { to: 'about', name: 'About Us' },
-    { to: 'contact', name: 'Contact Us' },
+    { to: '/categories', name: 'Categories' },
+    { to: '/about', name: 'About Us' },
+    { to: '/contact', name: 'Contact Us' },
   ];
 
   const otherLinks = [

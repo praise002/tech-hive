@@ -5,6 +5,7 @@ import Tags from './Tags';
 import ArticleTitle from './ArticleTitle';
 import Button from './Button';
 import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 
 function ArticleCard({ article }) {
   return (
@@ -15,7 +16,7 @@ function ArticleCard({ article }) {
           src={article.image}
           className="flex-shrink-0"
         />
-        <div className="flex flex-col justify-between flex-grow p-5 border border-l border-r border-b border-gray rounded-bl-lg rounded-br-lg overflow-hidden">
+        <div className="flex flex-col justify-between flex-grow p-5 border border-l border-r border-b border-gray dark:border-gray-700 rounded-bl-lg rounded-br-lg overflow-hidden">
           <div className="space-y-2">
             <ArticleTitle>{article.title}</ArticleTitle>
             <Description>{article.description}</Description>
@@ -23,7 +24,7 @@ function ArticleCard({ article }) {
           </div>
           <div className="space-y-2">
             <Button className="w-auto" variant="outline">
-              View details
+              <Link to="/articles/a">View details</Link>
             </Button>
             <ArticleReactions
               reactions={article.reactions}

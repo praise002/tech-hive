@@ -8,37 +8,37 @@ const allCategories = [
   {
     id: 1,
     name: 'AI & Machine Learning',
-    link: 'categories/ai-machine-learning',
+    link: '/categories/ai-machine-learning',
     description: 'Explore articles and resources on AI and machine learning.',
   },
   {
     id: 2,
     name: 'Blockchain',
-    link: 'categories/blockchain',
+    link: '/categories/blockchain',
     description: 'Learn about blockchain technology and its applications.',
   },
   {
     id: 3,
     name: 'Cloud Computing',
-    link: 'categories/cloud-computing',
+    link: '/categories/cloud-computing',
     description: 'Dive into cloud computing trends and tools.',
   },
   {
     id: 4,
     name: 'Cybersecurity',
-    link: 'categories/cybersecurity',
+    link: '/categories/cybersecurity',
     description: 'Stay updated on cybersecurity best practices.',
   },
   {
     id: 5,
     name: 'Data Science',
-    link: 'categories/data-science',
+    link: '/categories/data-science',
     description: 'Discover data science techniques and tools.',
   },
   {
     id: 6,
     name: 'Web Development',
-    link: 'categories/web-development',
+    link: '/categories/web-development',
     description: 'Enhance your web development skills with our resources.',
   },
   // Add more categories as needed
@@ -61,7 +61,7 @@ function CategoriesList() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-dark mt-10 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen sm:min-h-0 bg-gray-100 dark:bg-dark mt-10 py-8 px-4 sm:px-6 lg:px-8">
       {/* Sticky Search Bar */}
       <div className="">
         {/* Page Title */}

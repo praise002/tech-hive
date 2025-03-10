@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import Bookmark from './Bookmark';
 
 function ArticleReactions({ reactions, reactionsCount, posted, readTime }) {
   return (
@@ -30,11 +31,8 @@ function ArticleReactions({ reactions, reactionsCount, posted, readTime }) {
           <div className="whitespace-nowrap text-sm text-primary dark:text-custom-white font-medium">
             {readTime} read
           </div>
-          <img
-            src="/src/assets/icons/bookmark-light.png"
-            alt="Bookmark"
-            className="w-5 h-5 cursor-pointer dark:invert"
-          />
+
+          <Bookmark className="w-5 h-5" />
         </div>
       </div>
 

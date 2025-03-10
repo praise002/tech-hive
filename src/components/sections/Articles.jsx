@@ -17,7 +17,7 @@ function Articles() {
         </div>
         <div>
           <Link
-            to="articles"
+            to="/articles"
             className="cursor-pointer text-secondary hover:text-red transition-colors"
           >
             See all

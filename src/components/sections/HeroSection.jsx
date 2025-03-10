@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+import { Link as ScrollLink } from 'react-scroll';
 import Button from '../common/Button';
 import Text from '../common/Text';
 
@@ -17,28 +19,22 @@ function HeroSection() {
       </Text>
 
       <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
-        <Button
-          type="submit"
-          variant="outline"
-          onClick={() => alert('Logged in!')}
-        >
-          Login
+        <Button variant="outline">
+          <Link to="/login">Login</Link>
         </Button>
 
-        <Button type="submit" onClick={() => alert('Registered!')}>
-          Register
+        <Button>
+          <Link to="/register">Register</Link>
         </Button>
       </div>
 
       <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
         <p className="italic text-gray-800">Never miss an update!</p>
 
-        <Button
-          type="submit"
-          variant="gradient"
-          onClick={() => alert('Subscribed to newsletter!')}
-        >
-          Subscribe to newsletter
+        <Button variant="gradient">
+          <ScrollLink to="subscribe" smooth={true} duration={500}>
+            Subscribe to newsletter
+          </ScrollLink>
         </Button>
       </div>
     </div>

@@ -25,7 +25,7 @@ function About() {
 
           {/* Welcome Section */}
           <div>
-            <Text variant="h2" size="2xl" className="font-bold mb-4">
+            <Text variant="h2" size="2xl" className="font-bold mb-4 dark:text-custom-white">
               Welcome to Tech Hive
             </Text>
             <p className="text-base md:text-lg leading-relaxed">
@@ -43,7 +43,7 @@ function About() {
               variant="h3"
               size="xl"
               bold={false}
-              className="font-semibold mb-2"
+              className="font-semibold mb-2 dark:text-custom-white"
             >
               Our Mission
             </Text>
@@ -60,7 +60,7 @@ function About() {
               variant="h3"
               size="xl"
               bold={false}
-              className="font-semibold mb-2"
+              className="font-semibold mb-2 dark:text-custom-white"
             >
               What We Offer
             </Text>
@@ -94,7 +94,7 @@ function About() {
               variant="h3"
               size="xl"
               bold={false}
-              className="font-semibold mb-2"
+              className="font-semibold mb-2 dark:text-custom-white"
             >
               Why Tech Hive?
             </Text>
@@ -112,13 +112,13 @@ function About() {
               variant="h3"
               size="xl"
               bold={false}
-              className="font-semibold mb-2"
+              className="font-semibold mb-2 dark:text-custom-white"
             >
               Join the Buzz
             </Text>
             <p className="text-base md:text-lg leading-relaxed">
               Stay updated with the latest in tech by following us on our
-              journey. Let’s shape the future of technology together!
+              journey. Let&apos;s shape the future of technology together!
             </p>
           </div>
         </div>

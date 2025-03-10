@@ -18,7 +18,7 @@ function ResourceSpotlight() {
         </div>
         <div>
           <Link
-            to="resources"
+            to="/resources"
             className="cursor-pointer text-secondary hover:text-red transition-colors"
           >
             See all

@@ -24,7 +24,7 @@ function CategoryBar() {
         ))}
       </ul>
       <div className="text-secondary hover:text-red transition-colors">
-        <Link to="categories">See All Categories</Link>
+        <Link to="/categories">See All Categories</Link>
       </div>
     </div>
   );

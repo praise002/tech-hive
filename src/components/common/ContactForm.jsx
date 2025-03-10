@@ -79,7 +79,7 @@ function ContactForm() {
           )}
         </div>
 
-        <Button variant="primary">Send Message</Button>
+        <Button type="submit" variant="primary">Send Message</Button>
       </form>
     </div>
   );

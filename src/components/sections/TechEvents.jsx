@@ -17,7 +17,7 @@ function TechEvents() {
         </div>
         <div>
           <Link
-            to="events"
+            to="/events"
             className="cursor-pointer text-secondary hover:text-red transition-colors"
           >
             See all

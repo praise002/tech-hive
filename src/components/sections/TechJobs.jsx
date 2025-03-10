@@ -18,7 +18,7 @@ function TechJobs() {
         </div>
         <div>
           <Link
-            to="jobs"
+            to="/jobs"
             className="cursor-pointer text-secondary hover:text-red transition-colors"
           >
             See all

@@ -18,7 +18,7 @@ function TechTool() {
         </div>
         <div>
           <Link
-            to="tools"
+            to="/tools"
             className="cursor-pointer text-secondary hover:text-red transition-colors"
           >
             See all

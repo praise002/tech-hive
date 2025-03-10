@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 
 function JobPostingCard({ job }) {
   return (
-    <div className="p-6 rounded-lg border border-gray shadow-lg h-full flex flex-col">
+    <div className="p-6 rounded-lg border border-gray dark:border-gray-700 shadow-lg h-full flex flex-col">
       <div className="flex-grow space-y-2">
         {/* Job Title */}
         <Text
