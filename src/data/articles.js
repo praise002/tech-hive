@@ -5,11 +5,7 @@ export const articles = [
     title: 'The Future of UI/UX: Trends to Watch in 2024',
     description:
       'From AI-powered interfaces to immersive experiences, here are the key trends shaping UI/UX design and how designers can stay ahead...',
-    tags: [
-      { name: 'UIUXDesign', color: 'text-purple-600' }, // Replaced [#960299]
-      { name: 'UserExperience', color: 'text-orange-500' }, // Replaced [#F58F29]
-      { name: 'InterfaceDesign', color: 'text-pink-600' }, // Replaced [#DF24A7]
-    ],
+    tags: ['UIUXDesign', 'UserExperience', 'InterfaceDesign'],
     reactions: ['❤️', '😍', '👍', '🔥'],
     reactionsCount: 100,
     posted: '1 day ago',
@@ -21,11 +17,7 @@ export const articles = [
     title: 'Top 5 Programming Languages to Learn in 2024',
     description:
       "Discover which coding languages are leading the tech revolution this year, and why they're essential for your career growth...",
-    tags: [
-      { name: 'Programming', color: 'text-purple-600' }, // Replaced [#960299]
-      { name: 'Web Development', color: 'text-orange-500' }, // Replaced [#F58F29]
-      { name: 'Open Source', color: 'text-pink-600' }, // Replaced [#DF24A7]
-    ],
+    tags: ['Programming', 'Web Development', 'Open Source'],
     reactions: ['❤️', '😍', '👍', '🔥'],
     reactionsCount: 85,
     posted: '1 day ago',
@@ -37,11 +29,7 @@ export const articles = [
     title: 'How AI is Transforming Healthcare in 2024',
     description:
       'Explore the groundbreaking ways artificial intelligence is revolutionizing healthcare, from diagnostics to personalized medicine...',
-    tags: [
-      { name: 'AI', color: 'text-purple-600' }, // Replaced [#960299]
-      { name: 'Healthcare', color: 'text-orange-500' }, // Replaced [#F58F29]
-      { name: 'Innovation', color: 'text-pink-600' }, // Replaced [#DF24A7]
-    ],
+    tags: ['AI', 'Healthcare', 'Innovation'],
     reactions: ['❤️', '😍', '👍', '🔥'],
     reactionsCount: 120,
     posted: '2 days ago',
@@ -53,12 +41,8 @@ export const articles = [
     title: 'The Rise of Remote Work: Tools and Tips for Success',
     description:
       'Remote work is here to stay. Learn about the best tools and strategies to thrive in a distributed work environment...',
-    tags: [
-      { name: 'Remote Work', color: 'text-purple-600' }, // Replaced [#960299]
-      { name: 'Productivity', color: 'text-orange-500' }, // Replaced [#F58F29]
-      { name: 'Collaboration', color: 'text-pink-600' }, // Replaced [#DF24A7]
-    ],
-    reactions: ['❤️', '😍', '👍', '🔥'],
+    tags: ['Remote Work', 'Productivity', 'Collaboration'],
+    reactions: ['❤️', '😍', '😄', '🔥'],
     reactionsCount: 95,
     posted: '3 days ago',
     readTime: '6 min',
@@ -69,12 +53,8 @@ export const articles = [
     title: 'Blockchain Beyond Cryptocurrency: Real-World Applications',
     description:
       'Discover how blockchain technology is being used in industries like supply chain, healthcare, and finance...',
-    tags: [
-      { name: 'Blockchain', color: 'text-purple-600' }, // Replaced [#960299]
-      { name: 'Technology', color: 'text-orange-500' }, // Replaced [#F58F29]
-      { name: 'Innovation', color: 'text-pink-600' }, // Replaced [#DF24A7]
-    ],
-    reactions: ['❤️', '😍', '👍', '🔥'],
+    tags: ['Blockchain', 'Technology', 'Innovation'],
+    reactions: ['❤️', '😍', '🤔', '🔥'],
     reactionsCount: 75,
     posted: '4 days ago',
     readTime: '8 min',
@@ -85,12 +65,8 @@ export const articles = [
     title: 'The Ethics of AI: Balancing Innovation and Responsibility',
     description:
       'As AI becomes more powerful, ethical considerations are more important than ever. Learn about the challenges and solutions...',
-    tags: [
-      { name: 'AI Ethics', color: 'text-purple-600' }, // Replaced [#960299]
-      { name: 'Technology', color: 'text-orange-500' }, // Replaced [#F58F29]
-      { name: 'Responsibility', color: 'text-pink-600' }, // Replaced [#DF24A7]
-    ],
-    reactions: ['❤️', '😍', '👍', '🔥'],
+    tags: ['AI Ethics', 'Technology', 'Responsibility'],
+    reactions: ['❤️', '😍', '🤔', '🔥'],
     reactionsCount: 110,
     posted: '5 days ago',
     readTime: '9 min',
@@ -101,12 +77,8 @@ export const articles = [
     title: 'Cybersecurity in 2024: Threats and Best Practices',
     description:
       'Stay ahead of cyber threats with the latest trends and best practices in cybersecurity for individuals and businesses...',
-    tags: [
-      { name: 'Cybersecurity', color: 'text-purple-600' }, // Replaced [#960299]
-      { name: 'Technology', color: 'text-orange-500' }, // Replaced [#F58F29]
-      { name: 'Best Practices', color: 'text-pink-600' }, // Replaced [#DF24A7]
-    ],
-    reactions: ['❤️', '😍', '👍', '🔥'],
+    tags: ['Cybersecurity', 'Technology', 'Best Practices'],
+    reactions: ['❤️', '😍', '🤔', '🔥'],
     reactionsCount: 90,
     posted: '6 days ago',
     readTime: '10 min',
@@ -117,12 +89,8 @@ export const articles = [
     title: 'The Future of E-Commerce: Trends to Watch',
     description:
       'From AI-driven personalization to sustainable practices, explore the trends shaping the future of online shopping...',
-    tags: [
-      { name: 'E-Commerce', color: 'text-purple-600' }, // Replaced [#960299]
-      { name: 'Technology', color: 'text-orange-500' }, // Replaced [#F58F29]
-      { name: 'Trendsy', color: 'text-pink-600' }, // Replaced [#DF24A7]
-    ],
-    reactions: ['❤️', '😍', '👍', '🔥'],
+    tags: ['E-Commerce', 'Technology', 'Trendsy'],
+    reactions: ['❤️', '😍', '😡', '🔥'],
     reactionsCount: 80,
     posted: '1 week ago',
     readTime: '6 min',
@@ -133,12 +101,8 @@ export const articles = [
     title: 'The Power of Data: How Analytics is Driving Business Decisions',
     description:
       'Learn how data analytics is transforming industries and helping businesses make smarter, data-driven decisions...',
-    tags: [
-      { name: 'Data Analytics', color: 'text-purple-600' }, // Replaced [#960299]
-      { name: 'Business', color: 'text-orange-500' }, // Replaced [#F58F29]
-      { name: 'Technology', color: 'text-pink-600' }, // Replaced [#DF24A7]
-    ],
-    reactions: ['❤️', '😍', '👍', '🔥'],
+    tags: ['Data Analytics', 'Business', 'Technology'],
+    reactions: ['❤️', '😍', '😡', '🔥'],
     reactionsCount: 105,
     posted: '1 week ago',
     readTime: '7 min',
@@ -149,12 +113,8 @@ export const articles = [
     title: "The Evolution of Cloud Computing: What's Next?",
     description:
       'From hybrid clouds to serverless architectures, explore the future of cloud computing and its impact on businesses...',
-    tags: [
-      { name: 'Cloud Computing', color: 'text-purple-600' }, // Replaced [#960299]
-      { name: 'Technology', color: 'text-orange-500' }, // Replaced [#F58F29]
-      { name: 'Innovation', color: 'text-pink-600' }, // Replaced [#DF24A7]
-    ],
-    reactions: ['❤️', '😍', '👍', '🔥'],
+    tags: ['Cloud Computing', 'Technology', 'Innovation'],
+    reactions: ['❤️', '😍', '😄', '🔥'],
     reactionsCount: 70,
     posted: '2 weeks ago',
     readTime: '8 min',
@@ -168,12 +128,8 @@ export const trendingArticles = [
     title: 'The Power of Data: How Analytics is Driving Business Decisions',
     description:
       'Learn how data analytics is transforming industries and helping businesses make smarter, data-driven decisions...',
-    tags: [
-      { name: 'Data Analytics', color: 'text-purple-600' }, // Replaced [#960299]
-      { name: 'Business', color: 'text-orange-500' }, // Replaced [#F58F29]
-      { name: 'Technology', color: 'text-pink-600' }, // Replaced [#DF24A7]
-    ],
-    reactions: ['❤️', '😍', '👍', '🔥'],
+    tags: ['Data Analytics', 'Business', 'Technology'],
+    reactions: ['❤️', '😍', '😄', '🔥'],
     reactionsCount: 105,
     posted: '1 week ago',
     readTime: '7 min',
@@ -184,12 +140,8 @@ export const trendingArticles = [
     title: 'The Future of E-Commerce: Trends to Watch',
     description:
       'From AI-driven personalization to sustainable practices, explore the trends shaping the future of online shopping...',
-    tags: [
-      { name: 'E-Commerce', color: 'text-purple-600' }, // Replaced [#960299]
-      { name: 'Technology', color: 'text-orange-500' }, // Replaced [#F58F29]
-      { name: 'Trendsy', color: 'text-pink-600' }, // Replaced [#DF24A7]
-    ],
-    reactions: ['❤️', '😍', '👍', '🔥'],
+    tags: ['E-Commerce', 'Technology', 'Trendsy'],
+    reactions: ['❤️', '😍', '😄', '🔥'],
     reactionsCount: 80,
     posted: '1 week ago',
     readTime: '6 min',
@@ -200,12 +152,8 @@ export const trendingArticles = [
     title: 'How AI is Transforming Healthcare in 2024',
     description:
       'Explore the groundbreaking ways artificial intelligence is revolutionizing healthcare, from diagnostics to personalized medicine...',
-    tags: [
-      { name: 'AI', color: 'text-purple-600' }, // Replaced [#960299]
-      { name: 'Healthcare', color: 'text-orange-500' }, // Replaced [#F58F29]
-      { name: 'Innovation', color: 'text-pink-600' }, // Replaced [#DF24A7]
-    ],
-    reactions: ['❤️', '😍', '👍', '🔥'],
+    tags: ['AI', 'Healthcare', 'Innovation'],
+    reactions: ['❤️', '😍', '🤔', '🔥'],
     reactionsCount: 120,
     posted: '2 days ago',
     readTime: '7 min',
@@ -216,12 +164,8 @@ export const trendingArticles = [
     title: 'Cybersecurity in 2024: Threats and Best Practices',
     description:
       'Stay ahead of cyber threats with the latest trends and best practices in cybersecurity for individuals and businesses...',
-    tags: [
-      { name: 'Cybersecurity', color: 'text-purple-600' }, // Replaced [#960299]
-      { name: 'Technology', color: 'text-orange-500' }, // Replaced [#F58F29]
-      { name: 'Best Practices', color: 'text-pink-600' }, // Replaced [#DF24A7]
-    ],
-    reactions: ['❤️', '😍', '👍', '🔥'],
+    tags: ['Cybersecurity', 'Technology', 'Best Practices'],
+    reactions: ['❤️', '😍', '🤔', '🔥'],
     reactionsCount: 90,
     posted: '6 days ago',
     readTime: '10 min',
@@ -235,12 +179,8 @@ export const displayedArticles = [
     title: 'The Future of UI/UX: Trends to Watch in 2024',
     description:
       'From AI-powered interfaces to immersive experiences, here are the key trends shaping UI/UX design and how designers can stay ahead...',
-    tags: [
-      { name: 'UIUXDesign', color: 'text-purple-600' }, // Replaced [#960299]
-      { name: 'UserExperience', color: 'text-orange-500' }, // Replaced [#F58F29]
-      { name: 'InterfaceDesign', color: 'text-pink-600' }, // Replaced [#DF24A7]
-    ],
-    reactions: ['❤️', '😍', '👍', '🔥'],
+    tags: ['UIUXDesign', 'UserExperience', 'InterfaceDesign'],
+    reactions: ['❤️', '😍', '🤔', '🔥'],
     reactionsCount: 100,
     posted: '1 day ago',
     readTime: '3 min',
@@ -251,12 +191,8 @@ export const displayedArticles = [
     title: 'Top 5 Programming Languages to Learn in 2024',
     description:
       "Discover which coding languages are leading the tech revolution this year, and why they're essential for your career growth...",
-    tags: [
-      { name: 'Programming', color: 'text-purple-600' }, // Replaced [#960299]
-      { name: 'Web Development', color: 'text-orange-500' }, // Replaced [#F58F29]
-      { name: 'Open Source', color: 'text-pink-600' }, // Replaced [#DF24A7]
-    ],
-    reactions: ['❤️', '😍', '👍', '🔥'],
+    tags: ['Programming', 'Web Development', 'Open Source'],
+    reactions: ['❤️', '😍', '🤔', '🔥'],
     reactionsCount: 85,
     posted: '1 day ago',
     readTime: '5 min',
@@ -267,12 +203,8 @@ export const displayedArticles = [
     title: 'How AI is Transforming Healthcare in 2024',
     description:
       'Explore the groundbreaking ways artificial intelligence is revolutionizing healthcare, from diagnostics to personalized medicine...',
-    tags: [
-      { name: 'AI', color: 'text-purple-600' }, // Replaced [#960299]
-      { name: 'Healthcare', color: 'text-orange-500' }, // Replaced [#F58F29]
-      { name: 'Innovation', color: 'text-pink-600' }, // Replaced [#DF24A7]
-    ],
-    reactions: ['❤️', '😍', '👍', '🔥'],
+    tags: ['AI', 'Healthcare', 'Innovation'],
+    reactions: ['❤️', '😍', '😄', '🔥'],
     reactionsCount: 120,
     posted: '2 days ago',
     readTime: '7 min',
@@ -283,14 +215,56 @@ export const displayedArticles = [
     title: 'Cybersecurity in 2024: Threats and Best Practices',
     description:
       'Stay ahead of cyber threats with the latest trends and best practices in cybersecurity for individuals and businesses...',
-    tags: [
-      { name: 'Cybersecurity', color: 'text-purple-600' }, // Replaced [#960299]
-      { name: 'Technology', color: 'text-orange-500' }, // Replaced [#F58F29]
-      { name: 'Best Practices', color: 'text-pink-600' }, // Replaced [#DF24A7]
-    ],
-    reactions: ['❤️', '😍', '👍', '🔥'],
+    tags: ['Cybersecurity', 'Technology', 'Best Practices'],
+    reactions: ['❤️', '😍', '😄', '🔥'],
     reactionsCount: 90,
     posted: '6 days ago',
     readTime: '10 min',
   },
 ];
+
+function hashTagName(tagName) {
+  return tagName
+    .toLowerCase()
+    .split('')
+    .reduce((sum, char) => sum + char.charCodeAt(0), 0);
+}
+
+console.log('Technology'.toLowerCase().split(''));
+console.log(hashTagName('technology'));
+console.log(hashTagName('innovation'));
+
+const tagColors = [
+  'text-purple-600', // Purple
+  'text-orange-500', // Orange
+  'text-pink-600', // Pink
+  'text-blue-500', // Blue
+  'text-green-500', // Green
+  'text-red-500', // Red
+];
+
+function getTagColor(tagName) {
+  const hash = hashTagName(tagName);
+  return tagColors[hash % tagColors.length];
+}
+
+console.log(getTagColor('Technology'));
+console.log(getTagColor('technology'));
+console.log(getTagColor('Cybersecurity'));
+console.log(getTagColor('cybersecurity'));
+console.log(getTagColor('AI'));
+console.log(getTagColor('Ai'));
+console.log(getTagColor('ai'));
+console.log(getTagColor('UIUXDesign'));
+console.log(getTagColor('UserExperience'));
+console.log(getTagColor('InterfaceDesign'));
+console.log(getTagColor('E-Commerce'));
+
+const tags = ['Cybersecurity', 'Technology', 'Best Practices'];
+
+const result = tags.map((tag) => tag);
+console.log(result);
+
+tags.map((tag) => {
+  console.log(tag);
+});

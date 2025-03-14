@@ -17,7 +17,12 @@ function ResourceCard({ resource }) {
       <div className="flex flex-col justify-between flex-grow p-5 border-l border-r border-b border-gray dark:border-gray-700 rounded-bl-lg rounded-br-lg overflow-hidden">
         <div className="space-y-2">
           <div>
-            <Text variant="h4" size="xl" bold={false} className="font-semibold dark:text-custom-white">
+            <Text
+              variant="h4"
+              size="xl"
+              bold={false}
+              className="font-semibold dark:text-custom-white"
+            >
               {resource.resourceName}
             </Text>
             <p className="text-xs text-secondary">{resource.resourceType}</p>
@@ -45,12 +50,7 @@ ResourceCard.propTypes = {
     resourceImage: PropTypes.string.isRequired,
     resourceType: PropTypes.string.isRequired,
     resourceDescription: PropTypes.string.isRequired,
-    resourceCategories: PropTypes.arrayOf(
-      PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        color: PropTypes.string.isRequired,
-      })
-    ).isRequired,
+    resourceCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
     timePosted: PropTypes.string.isRequired,
   }).isRequired,
 };

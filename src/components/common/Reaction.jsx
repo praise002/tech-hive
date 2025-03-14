@@ -1,41 +1,69 @@
 import { useState } from 'react';
-import { MdOutlineAddReaction } from 'react-icons/md';
+import { MdOutlineAddReaction, MdAddReaction } from 'react-icons/md';
 
-const reactions = [
-  { id: 'Like', emoji: '👍', numReactions: 3 }, // backend updates numReactions
+const initialReactions = [
   { id: 'Love', emoji: '❤️', numReactions: 5 },
   { id: 'Laugh', emoji: '😄', numReactions: 9 },
   { id: 'Think', emoji: '🤔', numReactions: 13 },
   { id: 'Angry', emoji: '😡', numReactions: 1 },
+  { id: 'Fire', emoji: '🔥', numReactions: 10 },
+  { id: 'Heart Eyes', emoji: '😍', numReactions: 4 },
 ];
 
 function Reaction() {
-  const [selectedReaction, setSelectedReaction] = useState(null);
-  const [showReactions, setShowReactions] = useState(false); // Show reactions on hover
-  const [hoveredId, setHoveredId] = useState(null); // Stores the ID of the reaction currently being hovered
+  const [reactions, setReactions] = useState(initialReactions); // Keeps track of all the reactions and their counts
+  const [selectedReactions, setSelectedReactions] = useState([]); // Remembers which reactions YOU have selected
+  const [showReactions, setShowReactions] = useState(false); // Shows or hides the list of emojis
+  const [hoveredId, setHoveredId] = useState(null); // Remembers which emoji you're hovering over with your mouse
 
   function toggleReaction(reactionId) {
-    setSelectedReaction((currentReaction) =>
-      currentReaction === reactionId ? null : reactionId
+    setSelectedReactions((prevSelected) => {
+      // Check if reaction is already selected
+      const isSelected = prevSelected.includes(reactionId);
+
+      return isSelected
+        ? // Remove the reaction if already selected
+          prevSelected.filter((id) => id !== reactionId)
+        : // Add the reaction if not selected
+          [...prevSelected, reactionId];
+    });
+
+    setReactions((prevReactions) =>
+      prevReactions.map((reaction) =>
+        reaction.id === reactionId
+          ? {
+              ...reaction,
+              numReactions: selectedReactions.includes(reactionId)
+                ? reaction.numReactions - 1
+                : reaction.numReactions + 1,
+            }
+          : reaction
+      )
     );
+
     setShowReactions(false); // Hide reaction picker after selection
   }
 
-  // Get the selected reaction emoji
-  const selectedEmoji = reactions.find((r) => r.id === selectedReaction)?.emoji;
+  const totalReactions = reactions.reduce(
+    (sum, reaction) => sum + reaction.numReactions,
+    0
+  );
 
   return (
     <div className="relative">
-      <button
-        className="hover:opacity-80 transition cursor-pointer"
-        onClick={() => setShowReactions((show) => !show)}
-      >
-        {selectedEmoji ? (
-          <span className='text-xl sm:text-2xl'>{selectedEmoji}</span>
-        ) : (
-          <MdOutlineAddReaction className="w-6 h-6 dark:text-custom-white" />
-        )}
-      </button>
+      <div className="inline-flex flex-col gap-1">
+        <button
+          className="hover:opacity-80 transition cursor-pointer"
+          onClick={() => setShowReactions((show) => !show)}
+        >
+          {selectedReactions.length > 0 ? (
+            <MdAddReaction className="w-6 h-6 dark:text-custom-white" />
+          ) : (
+            <MdOutlineAddReaction className="w-6 h-6 dark:text-custom-white" />
+          )}
+        </button>
+        <span className="dark:text-custom-white">{totalReactions}</span>
+      </div>
 
       {showReactions && (
         <div className="px-1 flex absolute -top-7 left-8 mt-2 bg-white dark:bg-dark border border-gray dark:border-0 rounded-2xl shadow-lg p-2 z-10">
@@ -48,7 +76,7 @@ function Reaction() {
               onClick={() => toggleReaction(reaction.id)}
             >
               <button className="cursor-pointer hover:scale-125 transition-transform">
-                <span>{reaction.emoji}</span>
+                <span className="w-6 h-6">{reaction.emoji}</span>
                 <span className="text-xs"> {reaction.numReactions}</span>
               </button>
 
@@ -61,17 +89,6 @@ function Reaction() {
           ))}
         </div>
       )}
-
-      {/* Display Selected Reactions */}
-      {/* <div className="flex gap-2 mt-2">
-        {reactions.map((reaction) => {
-          return (
-            <span key={reaction.id} className="text-xl">
-              {reaction.emoji}
-            </span>
-          );
-        })}
-      </div> */}
     </div>
   );
 }

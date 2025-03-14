@@ -59,12 +59,7 @@ ArticleCard.propTypes = {
     image: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
-    tags: PropTypes.arrayOf(
-      PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        color: PropTypes.string.isRequired,
-      })
-    ).isRequired,
+    tags: PropTypes.arrayOf(PropTypes.string).isRequired,
     reactions: PropTypes.arrayOf(PropTypes.string).isRequired,
     reactionsCount: PropTypes.number.isRequired,
     posted: PropTypes.string.isRequired,

@@ -10,11 +10,7 @@ import DiscussionThread from '../../components/common/DiscussionThread';
 import Reaction from '../../components/common/Reaction';
 
 function ArticleDetail() {
-  const tags = [
-    { name: 'UIUXDesign', color: 'text-purple-600' },
-    { name: 'UserExperience', color: 'text-orange-500' },
-    { name: 'InterfaceDesign', color: 'text-pink-600' },
-  ];
+  const tags = ['UIUXDesign', 'UserExperience', 'InterfaceDesign'];
 
   return (
     <>
