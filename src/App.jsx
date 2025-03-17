@@ -29,6 +29,7 @@ import ResourceDetail from './features/resource/ResourceDetail';
 import ChangePassword from './features/auth/ChangePassword';
 import ResetPassword from './features/auth/ResetPassword';
 import ResetPasswordSuccess from './features/auth/ResetPaswordSuccess';
+import { Toaster } from 'react-hot-toast';
 // import ProfileDetailEmpty from './features/profile/ProfileDetailEmpty';
 
 const queryClient = new QueryClient({
@@ -89,6 +90,19 @@ function App() {
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </BrowserRouter>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          // className: '!bg-custom-white !dark:bg-dark !dark:text-white',
+          style: {
+            padding: '16px 24px',
+            fontSize: '16px',
+            maxWidth: '500px',
+            // backgroundColor: '#262a2a',
+            // color: '#FCFCFC',
+          },
+        }}
+      />
     </QueryClientProvider>
   );
 }

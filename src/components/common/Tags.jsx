@@ -28,7 +28,7 @@ function getTagColor(tagName) {
 
 function Tags({ tags }) {
   return (
-    <div className="flex gap-2 flex-wrap my-2 text-xs md:text-sm">
+    <div className="flex gap-2 flex-wrap my-2 text-xs md:text-sm cursor-pointer">
       {tags.map((tag) => {
         const color = getTagColor(tag);
         return (
@@ -38,7 +38,7 @@ function Tags({ tags }) {
           >
             <span className={`text-${color}`}>#</span>
             <button type="button" className="dark:text-custom-white">
-              <Link to={`/${tag}`}>{tag}</Link>
+              <Link to={`/articles?tag=${encodeURIComponent(tag)}`}>{tag}</Link>
             </button>
           </div>
         );

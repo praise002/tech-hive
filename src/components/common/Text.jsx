@@ -68,3 +68,17 @@ Text.propTypes = {
 };
 
 export default Text;
+
+// const [isHovered, setIsHovered] = useState(false);
+
+// return (
+//   <div
+//     onMouseEnter={() => setIsHovered(true)}
+//     onMouseLeave={() => setIsHovered(false)}
+//   >
+//     <div>{icon.icon}</div>
+//     <div className={isHovered ? "opacity-100" : "opacity-0"}>
+//       Tooltip Text
+//     </div>
+//   </div>
+// );

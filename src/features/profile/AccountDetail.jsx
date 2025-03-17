@@ -9,11 +9,7 @@ const article = {
   title: 'The Power of Data: How Analytics is Driving Business Decisions',
   description:
     'Learn how data analytics is transforming industries and helping businesses make smarter, data-driven decisions...',
-  tags: [
-    { name: 'Data Analytics', color: 'text-purple-600' },
-    { name: 'Business', color: 'text-orange-500' },
-    { name: 'Technology', color: 'text-pink-600' },
-  ],
+  tags: ['Data Analytics', 'Business', 'Technology'],
   reactions: ['❤️', '😍', '👍', '🔥'],
   reactionsCount: 105,
   posted: '1 week ago',
