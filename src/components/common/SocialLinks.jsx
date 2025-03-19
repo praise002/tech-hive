@@ -1,13 +1,23 @@
 import { MdOutlineSummarize } from 'react-icons/md';
 import { RiShare2Line } from 'react-icons/ri';
 import { FaXTwitter, FaSquareFacebook, FaLinkedin } from 'react-icons/fa6';
+import {
+  FaWhatsapp,
+  FaTelegram,
+  FaEnvelope,
+  FaReddit,
+  FaLink,
+} from 'react-icons/fa';
 import PropTypes from 'prop-types';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
+// close if outside is being clicked
+
+
+
 function SocialLinks({ visible, title, url, content = '' }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
   const message = encodeURIComponent(`${title} ${url}`);
   const icons = [
     {
@@ -33,6 +43,29 @@ function SocialLinks({ visible, title, url, content = '' }) {
         <RiShare2Line key="share" className="w-6 h-6" aria-label="Share Icon" />
       ),
       onClick: handleGeneralShare,
+    },
+  ];
+
+  const socialIcons = [
+    {
+      id: 'WhatsApp',
+      icon: <FaWhatsapp className="w-6 h-6" aria-label="WhatsApp icon" />,
+      onClick: handleWhatsAppShare,
+    },
+    {
+      id: 'Telegram',
+      icon: <FaTelegram className="w-6 h-6" aria-label="Telegram icon" />,
+      onClick: handleTelegramShare,
+    },
+    {
+      id: 'Email',
+      icon: <FaEnvelope className="w-6 h-6" aria-label="Email icon" />,
+      onClick: handleEmailShare,
+    },
+    {
+      id: 'Reddit',
+      icon: <FaReddit className="w-6 h-6" aria-label="Reddit icon" />,
+      onClick: handleRedditShare,
     },
   ];
 
@@ -79,7 +112,7 @@ function SocialLinks({ visible, title, url, content = '' }) {
     );
   }
 
-  function handleGmailShare() {
+  function handleEmailShare() {
     const subject = `Check out this article on ${title}`;
     const body = `${content.slice(0, 20)}.\n\nRead more: ${url}`;
     window.open(
@@ -94,16 +127,17 @@ function SocialLinks({ visible, title, url, content = '' }) {
     navigator.clipboard
       .writeText(url)
       .then(() => {
-        setIsCopied(true);
-        toast.success('Link copied to clipboard!')
-        setTimeout(() => setIsCopied(false), 1500);
+        toast.success('Link copied to clipboard!');
       })
       .catch(() => toast.error('Failed to copy the link.'));
   }
 
-  function handleGeneralShare() {}
+  function handleGeneralShare() {
+    setIsOpen((open) => !open);
+  }
+
   return (
-    <div className="dark:text-custom-white inline-flex flex-row md:flex-col p-2 gap-x-4 md:gap-y-4 items-center justify-center cursor-pointer">
+    <div className="relative dark:text-custom-white inline-flex flex-row md:flex-col p-2 gap-x-4 md:gap-y-4 items-center justify-center cursor-pointer">
       {/* Quick AI Section */}
 
       {visible && (
@@ -119,21 +153,6 @@ function SocialLinks({ visible, title, url, content = '' }) {
           </div>
         </>
       )}
-      <button className="cursor-pointer" onClick={handleTelegramShare}>
-        Telegram
-      </button>
-      <button className="cursor-pointer" onClick={handleRedditShare}>
-        Reddit
-      </button>
-      <button className="cursor-pointer" onClick={handleWhatsAppShare}>
-        WhatsApp
-      </button>
-      <button className="cursor-pointer" onClick={handleGmailShare}>
-        Email
-      </button>
-      <button className="cursor-pointer" onClick={handleCopyLink}>
-        Copy
-      </button>
 
       {/* Social Media Icons */}
       {icons.map((icon) => (
@@ -144,6 +163,30 @@ function SocialLinks({ visible, title, url, content = '' }) {
           </div>
         </button>
       ))}
+
+      {isOpen && (
+        <div className="absolute lg:left-12 lg:-bottom-55 space-y-2 flex flex-col justify-center shadow-2xl rounded-md p-2 border bg-white dark:bg-black border-primary dark:border-secondary">
+          {socialIcons.map((icon) => (
+            <button
+              key={icon.id}
+              className="flex items-center gap-4 p-2 hover:bg-red hover:text-custom-white transition-colors"
+              onClick={icon.onClick}
+            >
+              <div>{icon.icon}</div>
+              <div className="text-nowrap ">Share to {icon.id}</div>
+            </button>
+          ))}
+          <button
+            onClick={handleCopyLink}
+            className="flex items-center gap-4 p-2 hover:bg-red hover:text-custom-white transition-colors"
+          >
+            <div>
+              <FaLink className="w-6 h-6" />
+            </div>
+            <div className="text-nowrap ">Copy link</div>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -151,6 +194,7 @@ function SocialLinks({ visible, title, url, content = '' }) {
 SocialLinks.propTypes = {
   visible: PropTypes.bool.isRequired,
   text: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
   content: PropTypes.string.isRequired,
   url: PropTypes.string.isRequired,
 };

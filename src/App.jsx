@@ -92,15 +92,16 @@ function App() {
       </BrowserRouter>
       <Toaster
         position="top-right"
+        
         toastOptions={{
-          // className: '!bg-custom-white !dark:bg-dark !dark:text-white',
+          className: 'dark:!bg-dark dark:!text-white',
           style: {
             padding: '16px 24px',
             fontSize: '16px',
             maxWidth: '500px',
-            // backgroundColor: '#262a2a',
-            // color: '#FCFCFC',
           },
+
+          
         }}
       />
     </QueryClientProvider>
