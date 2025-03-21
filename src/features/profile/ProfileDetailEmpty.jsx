@@ -1,6 +1,42 @@
+import { RiDraftFill } from 'react-icons/ri';
+import { MdArticle, MdLibraryBooks } from 'react-icons/md';
+import { BiMessageRounded } from 'react-icons/bi';
+
+import Bookmark from '../../components/common/Bookmark';
 import Text from '../../components/common/Text';
+import { useState } from 'react';
 
 function ProfileDetailEmpty() {
+  const [isActiveTab, setIsActiveTab] = useState('saved');
+
+  const profileTabs = [
+    {
+      id: 'saved',
+      label: 'Saved',
+      icon: <Bookmark className="w-5 h-5" />,
+    },
+    {
+      id: 'comments',
+      label: 'Comments',
+      icon: <BiMessageRounded className="w-5 h-5" />,
+    },
+    {
+      id: 'drafts',
+      label: 'Drafts',
+      icon: <RiDraftFill className="w-5 h-5" />,
+    },
+    {
+      id: 'submitted',
+      label: 'Submitted Articles',
+      icon: <MdArticle className="w-5 h-5" />,
+    },
+    {
+      id: 'published',
+      label: 'Published Articles',
+      icon: <MdLibraryBooks className="w-5 h-5" />,
+    },
+  ];
+
   return (
     <div className="mt-15">
       <div className="bg-light w-full h-40 relative">
@@ -36,44 +72,31 @@ function ProfileDetailEmpty() {
         </div>
       </div>
 
-      <div className="dark:text-custom-white mt-30 md:mt-50 flex-col items-center md:items-start md:flex-row flex gap-4 mb-8 px-20">
-        <div className="p-3 md:w-fit md:h-fit border border-gray rounded-lg">
-          <div className="flex gap-2 items-center mb-2">
-            <div className="w-4 h-4">
-              <img
-                className="w-full h-full dark:invert"
-                src="/src/assets/icons/Chat.png"
-                alt=""
-              />
-            </div>
-            <div>
-              <p className="font-semibold text-xs sm:text-sm md:text-lg">
-                0 Comments{' '}
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2 items-center">
-            <div className="w-4 h-4">
-              <img
-                className="w-full h-full dark:invert"
-                src="/src/assets/icons/bookmark-light.png"
-                alt=""
-              />
-            </div>
-            <p className="font-semibold text-xs sm:text-sm md:text-lg">
-              0 Saved{' '}
-            </p>
-          </div>
+      <div className="flex flex-col gap-4 items-center mt-30 md:mt-50">
+        <div className="flex bg-light gap-2 p-2 rounded-md">
+          {profileTabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setIsActiveTab(tab.id)}
+              className={`flex p-2 items-center gap-1 rounded-md cursor-pointer ${
+                isActiveTab === tab.id && 'bg-red text-custom-white'
+              }`}
+            >
+              <span>{tab.icon}</span>
+              <span>{tab.label}</span>
+            </button>
+          ))}
         </div>
-        <div className="flex-1 p-4 border flex justify-center items-center border-gray rounded-lg">
-          <div className="md:w-xs w-60">
+
+        <div className="flex-1 py-8 flex justify-center items-center ">
+          <div className="md:w-xs w-60 dark:text-custom-white">
             <img
-              className="w-full h-full dark:invert"
+              className="w-full h-full"
               src="/src/assets/icons/amico.png"
-              alt=""
+              alt="An empty profile"
             />
-            <div className="text-xs md:text-sm text-center">
-              No comments or saved articles yet!
+            <div className="text-xs md:text-sm text-center mt-4">
+              No saved articles yet!
             </div>
           </div>
         </div>

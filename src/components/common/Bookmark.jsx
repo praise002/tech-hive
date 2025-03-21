@@ -7,21 +7,21 @@ function Bookmark( { className= '' }) {
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   return (
-    <>
+    <span>
       {isBookmarked ? (
         <FaBookmark
-          className={`cursor-pointer dark:invert ${className}`}
+          className={`cursor-pointer ${className}`}
           aria-label="Add bookmark"
           onClick={() => setIsBookmarked(false)}
         />
       ) : (
         <FaRegBookmark
-          className={`cursor-pointer dark:invert ${className}`}
+          className={`cursor-pointer ${className}`}
           aria-label="Remove bookmark"
           onClick={() => setIsBookmarked(true)}
         />
       )}
-    </>
+    </span>
   );
 }
 

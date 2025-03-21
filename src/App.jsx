@@ -30,6 +30,7 @@ import ChangePassword from './features/auth/ChangePassword';
 import ResetPassword from './features/auth/ResetPassword';
 import ResetPasswordSuccess from './features/auth/ResetPaswordSuccess';
 import { Toaster } from 'react-hot-toast';
+import ProfileDetailEmpty from './features/profile/ProfileDetailEmpty';
 // import ProfileDetailEmpty from './features/profile/ProfileDetailEmpty';
 
 const queryClient = new QueryClient({
@@ -73,8 +74,8 @@ function App() {
             <Route path="about" element={<About />} />
             <Route path="contact" element={<Contact />} />
             <Route path="dashboard" element={<EditorDashboard />} />
-            <Route path="profile" element={<ProfileDetail />} />
-            {/* <Route path="profile" element={<ProfileDetailEmpty />} /> */}
+            {/* <Route path="profile" element={<ProfileDetail />} /> */}
+            <Route path="profile" element={<ProfileDetailEmpty />} />
             <Route path="account" element={<AccountDetail />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />

@@ -32,7 +32,7 @@ function ArticleReactions({ reactions, reactionsCount, posted, readTime }) {
             {readTime} read
           </div>
 
-          <Bookmark className="w-5 h-5" />
+          <Bookmark className="w-5 h-5 dark:invert" />
         </div>
       </div>
 

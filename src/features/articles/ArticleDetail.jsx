@@ -45,7 +45,7 @@ function ArticleDetail() {
                 staying informed about these trends and adapting their skills
                 accordingly, designers can ensure they remain at the forefront of
                 the ever-evolving UI/UX landscape.`,
-    url: 'https://dev.to/praise002/hacktoberfest-2024-my-contributor-experience-4mf1'            ,
+    url: 'https://dev.to/praise002/hacktoberfest-2024-my-contributor-experience-4mf1',
     author: {
       name: 'Bob Janet',
       image: '/src/assets/icons/profile.jpg',
@@ -59,19 +59,25 @@ function ArticleDetail() {
       <div className="flex flex-col md:flex-row gap-8 px-4 md:px-10 py-8">
         {/* Left Column: Social Links */}
         <div className="hidden md:block px-10 mt-70">
-          <SocialLinks visible={true} title={article.title} url={article.url} content={article.content} />
+          <SocialLinks
+            visible={true}
+            title={article.title}
+            url={article.url}
+            content={article.content}
+          />
         </div>
 
         {/* Right Column: Content */}
         <div className="w-full md:w-3/4 mt-20 md:mt-10 border border-gray rounded-tl-lg rounded-tr-lg overflow-hidden">
-
           <Image
             alt="Article Image"
             src={article.image}
             className="w-full h-auto shadow-md"
           />
           <div className="px-4 py-6 border border-secondary text-primary">
-            <div className="my-4 text-xs text-secondary">Posted {article.timePosted} ago</div>
+            <div className="my-4 text-xs text-secondary">
+              Posted {article.timePosted} ago
+            </div>
             <Text
               variant="h3"
               size="xl"
@@ -109,7 +115,7 @@ function ArticleDetail() {
             <div className="flex justify-between my-4">
               <Reaction />
               <div>
-                <Bookmark className="w-6 h-6" />
+                <Bookmark className="w-6 h-6 dark:invert" />
               </div>
             </div>
             <DiscussionThread />
@@ -118,7 +124,12 @@ function ArticleDetail() {
 
         {/* Mobile social link */}
         <div className="block md:hidden">
-          <SocialLinks visible={true} />
+          <SocialLinks
+            visible={true}
+            title={article.title}
+            url={article.url}
+            content={article.content}
+          />
         </div>
       </div>
       <Rectangle />

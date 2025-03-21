@@ -9,120 +9,133 @@ import {
   FaLink,
 } from 'react-icons/fa';
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 // close if outside is being clicked
 
+// Helper function to generate share URLs
+function getShareUrl(platform, url, title, content) {
+  const message = encodeURIComponent(`${title} ${url}`);
+  const shareMessage = `Check out this article on ${title}`;
+  const body = `${content.slice(0, 20)}.\n\nRead more: ${url}`;
 
+  switch (platform) {
+    case 'twitter':
+      return `https://twitter.com/intent/tweet?text=${message}`;
+    case 'facebook':
+      return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+        url
+      )}`;
+    case 'linkedin':
+      return `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+        url
+      )}`;
+    case 'whatsapp':
+      return `https://wa.me/?text=${message}`;
+    case 'telegram':
+      return `https://t.me/share/url?url=${encodeURIComponent(
+        url
+      )}&text=${encodeURIComponent(shareMessage)}`;
+    case 'reddit':
+      return `https://www.reddit.com/submit?url=${encodeURIComponent(
+        url
+      )}&title=${encodeURIComponent(title)}`;
+    case 'email':
+      return `mailto:?subject=${encodeURIComponent(
+        shareMessage
+      )}&body=${encodeURIComponent(body)}`;
+    default:
+      return '#';
+  }
+}
 
 function SocialLinks({ visible, title, url, content = '' }) {
   const [isOpen, setIsOpen] = useState(false);
-  const message = encodeURIComponent(`${title} ${url}`);
-  const icons = [
+  // const summary =
+  //   'This article explores the future of UI/UX design, focusing on trends like AI-powered interfaces, immersive experiences, and personalized user interactions. Designers must adapt to these emerging technologies to stay ahead.';
+
+  // Function to handle clicks outside the dropdown
+  useEffect(() => {
+    function handleClickOutside(event) {
+      const dropdown = document.getElementById('social-links-dropdown');
+
+      if (dropdown && !dropdown.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
+  function handleToggleShare() {
+    setIsOpen((prev) => !prev);
+  }
+
+  const primaryIcons = [
     {
       id: 'Twitter',
       icon: <FaXTwitter className="w-6 h-6" aria-label="Twitter icon" />,
-      onClick: handleTwitterShare,
+      platform: 'twitter',
     },
     {
       id: 'Facebook',
       icon: <FaSquareFacebook className="w-6 h-6" aria-label="Facebook icon" />,
-      onClick: handleFacebookShare,
+      platform: 'facebook',
     },
     {
       id: 'Linkedin',
       icon: (
         <FaLinkedin key="" className="w-6 h-6" aria-label="LinkedIn icon" />
       ),
-      onClick: handleLinkedInShare,
+      platform: 'linkedin',
     },
     {
       id: 'Share',
       icon: (
         <RiShare2Line key="share" className="w-6 h-6" aria-label="Share Icon" />
       ),
-      onClick: handleGeneralShare,
+      onClick: handleToggleShare,
     },
   ];
 
-  const socialIcons = [
+  const secondaryIcons = [
     {
       id: 'WhatsApp',
       icon: <FaWhatsapp className="w-6 h-6" aria-label="WhatsApp icon" />,
-      onClick: handleWhatsAppShare,
+      platform: 'whatsapp',
     },
     {
       id: 'Telegram',
       icon: <FaTelegram className="w-6 h-6" aria-label="Telegram icon" />,
-      onClick: handleTelegramShare,
+      platform: 'telegram',
     },
     {
       id: 'Email',
       icon: <FaEnvelope className="w-6 h-6" aria-label="Email icon" />,
-      onClick: handleEmailShare,
+      platform: 'email',
     },
     {
       id: 'Reddit',
       icon: <FaReddit className="w-6 h-6" aria-label="Reddit icon" />,
-      onClick: handleRedditShare,
+      platform: 'reddit',
     },
   ];
 
-  function handleTwitterShare() {
-    window.open(`https://twitter.com/intent/tweet?text=${message}`, '_blank');
+  // Generic share handler
+  function handleShare(platform) {
+    const shareUrl = getShareUrl(platform, url, title, content);
+    window.open(shareUrl, '_blank');
+    setIsOpen(false); // Close the dropdown after sharing
   }
 
-  function handleFacebookShare() {
-    window.open(
-      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
-      '_blank'
-    );
-  }
-
-  function handleLinkedInShare() {
-    window.open(
-      `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-        url
-      )}`,
-      '_blank'
-    );
-  }
-
-  function handleWhatsAppShare() {
-    window.open(`https://wa.me/?text=${message}`, '_blank');
-  }
-
-  function handleTelegramShare() {
-    const shareMessage = `Check out this article on ${title}`;
-    window.open(
-      `https://t.me/share/url?url=${encodeURIComponent(
-        url
-      )}&text=${encodeURIComponent(shareMessage)}`,
-      '_blank'
-    );
-  }
-
-  function handleRedditShare() {
-    window.open(
-      `https://www.reddit.com/submit?url=${encodeURIComponent(
-        url
-      )}&title=${encodeURIComponent(title)}`,
-      '_blank'
-    );
-  }
-
-  function handleEmailShare() {
-    const subject = `Check out this article on ${title}`;
-    const body = `${content.slice(0, 20)}.\n\nRead more: ${url}`;
-    window.open(
-      `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
-        body
-      )}`,
-      '_blank'
-    );
-  } // TODO: Yet to test
-
+  // Copy link handler
   function handleCopyLink() {
     navigator.clipboard
       .writeText(url)
@@ -132,45 +145,59 @@ function SocialLinks({ visible, title, url, content = '' }) {
       .catch(() => toast.error('Failed to copy the link.'));
   }
 
-  function handleGeneralShare() {
-    setIsOpen((open) => !open);
+  function ToolTip({ children, text }) {
+    return (
+      <div className="relative group">
+        {children}
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-0 left-8  px-2 py-1 bg-black text-custom-white text-xs rounded whitespace-nowrap">
+          {text}
+        </div>
+      </div>
+    );
   }
+
+  ToolTip.propTypes = {
+    children: PropTypes.node.isRequired,
+    text: PropTypes.string.isRequired,
+  };
 
   return (
     <div className="relative dark:text-custom-white inline-flex flex-row md:flex-col p-2 gap-x-4 md:gap-y-4 items-center justify-center cursor-pointer">
       {/* Quick AI Section */}
 
       {visible && (
-        <>
-          <div className="relative group">
-            <MdOutlineSummarize
-              className="w-6 h-6"
-              aria-label="AI Article Summary icon"
-            />
-            <div className="opacity-0 group-hover:opacity-100 absolute -top-0 left-8  px-2 py-1 bg-black text-custom-white text-xs rounded whitespace-nowrap">
-              AI Summarize
-            </div>
-          </div>
-        </>
+        <ToolTip text="AI Summarize">
+          <MdOutlineSummarize
+            className="w-6 h-6"
+            aria-label="AI Article Summary icon"
+          />
+        </ToolTip>
       )}
 
-      {/* Social Media Icons */}
-      {icons.map((icon) => (
-        <button className="relative group" key={icon.id} onClick={icon.onClick}>
-          {icon.icon}
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-0 left-8  px-2 py-1 bg-black text-custom-white text-xs rounded whitespace-nowrap">
-            {icon.id}
-          </div>
-        </button>
+      {/* Primary Social Media Icons */}
+      {primaryIcons.map((icon) => (
+        <ToolTip key={icon.id} text={icon.id}>
+          <button
+            onClick={() => {
+              icon.onClick ? icon.onClick() : handleShare(icon.platform);
+            }}
+          >
+            {icon.icon}
+          </button>
+        </ToolTip>
       ))}
 
+      {/* Secondary Social Icons (Dropdown) */}
       {isOpen && (
-        <div className="absolute lg:left-12 lg:-bottom-55 space-y-2 flex flex-col justify-center shadow-2xl rounded-md p-2 border bg-white dark:bg-black border-primary dark:border-secondary">
-          {socialIcons.map((icon) => (
+        <div
+          id="social-links-dropdown"
+          className="absolute -bottom-62 left-1/2 sm:-bottom-55 sm:left-50 md:left-12 md:-bottom-55 space-y-2 flex flex-col justify-center shadow-2xl rounded-md p-2 border bg-white dark:bg-black border-primary dark:border-secondary"
+        >
+          {secondaryIcons.map((icon) => (
             <button
               key={icon.id}
               className="flex items-center gap-4 p-2 hover:bg-red hover:text-custom-white transition-colors"
-              onClick={icon.onClick}
+              onClick={() => handleShare(icon.platform)}
             >
               <div>{icon.icon}</div>
               <div className="text-nowrap ">Share to {icon.id}</div>
@@ -193,9 +220,9 @@ function SocialLinks({ visible, title, url, content = '' }) {
 
 SocialLinks.propTypes = {
   visible: PropTypes.bool.isRequired,
-  text: PropTypes.string.isRequired,
+
   title: PropTypes.string.isRequired,
-  content: PropTypes.string.isRequired,
+  content: PropTypes.string,
   url: PropTypes.string.isRequired,
 };
 

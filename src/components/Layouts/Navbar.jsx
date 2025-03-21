@@ -31,10 +31,10 @@ function Navbar() {
             Tec<span className="text-red-700">Hive.</span>
           </div>
           <ul className="hidden lg:flex items-center gap-6 text-gray-900 dark:text-custom-white font-medium">
-            {navLinks.map((nav) => (
-              <li key={nav.to}>
-                <NavLink to={nav.to} className="hover:text-red-700">
-                  {nav.name}
+            {navLinks.map(({ to, name }) => (
+              <li key={to}>
+                <NavLink to={to} className="hover:text-red-700">
+                  {name}
                 </NavLink>
               </li>
             ))}
@@ -44,7 +44,7 @@ function Navbar() {
         {/* Search & Icons */}
         <div className="hidden lg:flex items-center gap-4 text-sm">
           {/* Theme Toggle Button */}
-          <button onClick={toggleTheme}>
+          <button aria-label='Toggle theme' onClick={toggleTheme}>
             {theme === 'light' ? (
               <MdOutlineDarkMode className="w-6 h-6 text-gray-900 dark:text-white" />
             ) : (
@@ -64,7 +64,7 @@ function Navbar() {
         </div>
 
         {/* Mobile Menu Toggle */}
-        <button onClick={toggleMenu} className="lg:hidden p-2">
+        <button aria-label='Toggle menu' onClick={toggleMenu} className="lg:hidden p-2">
           {isMenuOpen ? (
             <svg
               className="w-6 h-6 text-gray-800 dark:text-custom-white"
@@ -105,7 +105,7 @@ function Navbar() {
 
         <li className="flex flex-col items-center gap-4 text-xs">
           {/* Theme Toggle Button */}
-          <button onClick={toggleTheme}>
+          <button  aria-label='Toggle theme' onClick={toggleTheme}>
             {theme === 'light' ? (
               <MdOutlineDarkMode className="w-6 h-6 text-gray-900 dark:text-white" />
             ) : (
