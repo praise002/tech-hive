@@ -1,8 +1,8 @@
 import { RiDraftFill } from 'react-icons/ri';
 import { MdArticle, MdLibraryBooks } from 'react-icons/md';
 import { BiMessageRounded } from 'react-icons/bi';
+import { FaRegBookmark } from 'react-icons/fa6';
 
-import Bookmark from '../../components/common/Bookmark';
 import Text from '../../components/common/Text';
 import { useState } from 'react';
 
@@ -13,7 +13,7 @@ function ProfileDetailEmpty() {
     {
       id: 'saved',
       label: 'Saved',
-      icon: <Bookmark className="w-5 h-5" />,
+      icon: <FaRegBookmark className="w-5 h-5" />,
     },
     {
       id: 'comments',
@@ -78,17 +78,23 @@ function ProfileDetailEmpty() {
             <button
               key={tab.id}
               onClick={() => setIsActiveTab(tab.id)}
-              className={`flex p-2 items-center gap-1 rounded-md cursor-pointer ${
+              className={`flex p-2 items-center gap-2 rounded-md text-xs sm:text-base cursor-pointer ${
                 isActiveTab === tab.id && 'bg-red text-custom-white'
               }`}
             >
-              <span>{tab.icon}</span>
-              <span>{tab.label}</span>
+              <span className="flex-shrink-0">{tab.icon}</span>
+              <span
+                className={`${
+                  isActiveTab == tab.id ? 'inline' : 'hidden md:inline'
+                }`}
+              >
+                {tab.label}
+              </span>
             </button>
           ))}
         </div>
 
-        <div className="flex-1 py-8 flex justify-center items-center ">
+        <div className="flex-1 py-8 flex justify-center items-center">
           <div className="md:w-xs w-60 dark:text-custom-white">
             <img
               className="w-full h-full"
