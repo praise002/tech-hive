@@ -1,5 +1,10 @@
+import { RiDraftFill } from 'react-icons/ri';
+import { MdArticle, MdLibraryBooks } from 'react-icons/md';
+import { BiMessageRounded } from 'react-icons/bi';
+import { FaRegBookmark } from 'react-icons/fa6';
 import ArticleCard from '../../components/common/ArticleCard';
 import Text from '../../components/common/Text';
+import { useState } from 'react';
 
 const article = {
   image: '/src/assets/articles/the-future-ui-ux.jpg',
@@ -14,6 +19,35 @@ const article = {
 };
 
 function ProfileDetail() {
+  const [isActiveTab, setIsActiveTab] = useState('saved');
+
+  const profileTabs = [
+    {
+      id: 'saved',
+      label: 'Saved',
+      icon: <FaRegBookmark className="w-5 h-5" />,
+    },
+    {
+      id: 'comments',
+      label: 'Comments',
+      icon: <BiMessageRounded className="w-5 h-5" />,
+    },
+    {
+      id: 'drafts',
+      label: 'Drafts',
+      icon: <RiDraftFill className="w-5 h-5" />,
+    },
+    {
+      id: 'submitted',
+      label: 'Submitted Articles',
+      icon: <MdArticle className="w-5 h-5" />,
+    },
+    {
+      id: 'published',
+      label: 'Published Articles',
+      icon: <MdLibraryBooks className="w-5 h-5" />,
+    },
+  ];
   return (
     <div className="mt-15">
       <div className="bg-light w-full h-40 relative">
@@ -38,6 +72,52 @@ function ProfileDetail() {
               Elizabeth Stone
             </Text>
             <p className="text-secondary text-sm">Joined 27th January 2025</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-4 items-center mt-30 md:mt-50">
+          <div className="flex bg-light gap-2 p-2 rounded-md">
+            {profileTabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setIsActiveTab(tab.id)}
+                className={`flex p-2 items-center gap-2 rounded-md text-xs sm:text-base cursor-pointer ${
+                  isActiveTab === tab.id && 'bg-red text-custom-white'
+                }`}
+              >
+                <span className="flex-shrink-0">{tab.icon}</span>
+                <span
+                  className={`${
+                    isActiveTab == tab.id ? 'inline' : 'hidden md:inline'
+                  }`}
+                >
+                  {tab.label}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="py-8 flex justify-center">
+            <div className="dark:text-custom-white">
+              <div className="p-4 border border-gray rounded-lg">
+                <Text
+                  variant="h3"
+                  size="lg"
+                  bold={false}
+                  className="font-semibold mb-1 md:text-2xl dark:text-custom-white"
+                >
+                  Saved Articles
+                </Text>
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+                  <ArticleCard article={article} />
+                  <ArticleCard article={article} />
+                  <ArticleCard article={article} />
+                  <ArticleCard article={article} />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
