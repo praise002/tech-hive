@@ -26,26 +26,31 @@ function ProfileDetail() {
       id: 'saved',
       label: 'Saved',
       icon: <FaRegBookmark className="w-5 h-5" />,
+      articles: [1001, 1002, 1004],  // find the article in articles use find() or filter()
     },
     {
       id: 'comments',
       label: 'Comments',
       icon: <BiMessageRounded className="w-5 h-5" />,
+      comments: [6, 10, 15],
     },
     {
       id: 'drafts',
       label: 'Drafts',
       icon: <RiDraftFill className="w-5 h-5" />,
+      drafts: [4, 6, 8],
     },
     {
       id: 'submitted',
       label: 'Submitted Articles',
       icon: <MdArticle className="w-5 h-5" />,
+      submitted: [10, 16, 2],
     },
     {
       id: 'published',
       label: 'Published Articles',
       icon: <MdLibraryBooks className="w-5 h-5" />,
+      published: [1005, 1006],
     },
   ];
   return (
