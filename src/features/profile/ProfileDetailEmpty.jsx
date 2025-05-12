@@ -112,3 +112,7 @@ function ProfileDetailEmpty() {
 }
 
 export default ProfileDetailEmpty;
+
+
+
+

@@ -26,7 +26,7 @@ function ProfileDetail() {
       id: 'saved',
       label: 'Saved',
       icon: <FaRegBookmark className="w-5 h-5" />,
-      articles: [1001, 1002, 1004],  // find the article in articles use find() or filter()
+      articles: [1001, 1002, 1004], // find the article in articles use find() or filter()
     },
     {
       id: 'comments',
@@ -54,7 +54,299 @@ function ProfileDetail() {
     },
   ];
 
-  // comment
+  function SavedContent() {
+    return (
+      <>
+        {/* <div className="md:w-xs w-60 dark:text-custom-white">
+          <img
+            className="w-full h-full"
+            src="/src/assets/icons/amico.png"
+            alt="An empty profile"
+          />
+          <div className="text-xs md:text-sm text-center mt-4">
+            No saved articles yet!
+          </div>
+        </div> */}
+        <Text
+          variant="h3"
+          size="lg"
+          bold={false}
+          className="font-semibold mb-1 md:text-2xl dark:text-custom-white"
+        >
+          Saved Articles
+        </Text>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+          <ArticleCard article={article} />
+          <ArticleCard article={article} />
+          <ArticleCard article={article} />
+          <ArticleCard article={article} />
+        </div>
+      </>
+    );
+  }
+
+  function CommentsContent() {
+    return (
+      // <p className="font-bold text-sm">No recent comments available.</p>
+      <>
+        <Text
+          variant="h3"
+          size="lg"
+          bold={false}
+          className="font-semibold mb-2 dark:text-custom-white"
+        >
+          Recent Comments
+        </Text>
+        <div>
+          <Text
+            variant="h3"
+            size="base"
+            bold={false}
+            className="font-semibold mb-2 dark:text-custom-white"
+          >
+            Africa Fintech Summit 2024
+          </Text>
+          <p className="text-secondary text-sm mb-1">Africa Fintech Summit</p>
+        </div>
+        <div className="flex items-center gap-2 text-xs md:text-sm">
+          <p className="font-bold">Thanks for the info</p>
+          <p className="text-secondary">27th January, 2025</p>
+        </div>
+      </>
+    );
+  }
+
+  function DraftsContent() {
+    return (
+      <>
+        {/* <div className="md:w-xs w-60 dark:text-custom-white">
+          <img
+            className="w-full h-full"
+            src="/src/assets/icons/amico.png"
+            alt="An empty profile"
+          />
+          <div className="text-xs md:text-sm text-center mt-4">
+            No drafts available.
+          </div>
+        </div> */}
+        <Text
+          variant="h3"
+          size="lg"
+          bold={false}
+          className="font-semibold mb-4 dark:text-custom-white"
+        >
+          My Drafts
+        </Text>
+
+        <div className="space-y-4">
+          <div className="border border-gray-200 rounded-lg p-4 hover:border-red transition-colors">
+            <div className="flex justify-between items-start mb-2">
+              <Text
+                variant="h3"
+                size="base"
+                bold={false}
+                className="font-semibold dark:text-custom-white"
+              >
+                Getting Started with React Hooks
+              </Text>
+              <span className="text-nowrap text-xs px-2 py-1 bg-light rounded-full text-secondary">
+                In Progress
+              </span>
+            </div>
+
+            <p className="text-secondary text-sm mb-3 line-clamp-2">
+              React Hooks are a powerful feature that allows you to use state
+              and other React features without writing a class component...
+            </p>
+
+            <div className="flex items-center gap-4">
+              <div className="flex-1 h-2 bg-gray-200 rounded-full">
+                <div
+                  className="h-full bg-red rounded-full"
+                  style={{ width: '75%' }}
+                />
+              </div>
+              <span className="text-xs text-secondary">75% complete</span>
+            </div>
+
+            <div className="flex items-center justify-between mt-3 text-xs text-secondary">
+              <span>Last edited: May 10, 2025</span>
+              <button className="text-red hover:text-red-600 font-medium">
+                Continue Editing
+              </button>
+            </div>
+          </div>
+
+          <div className="border border-gray-200 rounded-lg p-4 hover:border-red transition-colors">
+            <div className="flex justify-between items-start mb-2">
+              <Text
+                variant="h3"
+                size="base"
+                bold={false}
+                className="font-semibold dark:text-custom-white"
+              >
+                Understanding TypeScript Generics
+              </Text>
+              <span className="text-nowrap text-xs px-2 py-1 bg-light rounded-full text-secondary">
+                Just Started
+              </span>
+            </div>
+
+            <p className="text-secondary text-sm mb-3 line-clamp-2">
+              TypeScript generics provide a way to make components work with any
+              data type while maintaining type safety...
+            </p>
+
+            <div className="flex items-center gap-4">
+              <div className="flex-1 h-2 bg-gray-200 rounded-full">
+                <div
+                  className="h-full bg-red rounded-full"
+                  style={{ width: '30%' }}
+                />
+              </div>
+              <span className="text-xs text-secondary">30% complete</span>
+            </div>
+
+            <div className="flex items-center justify-between mt-3 text-xs text-secondary">
+              <span>Last edited: May 8, 2025</span>
+              <button className="text-red hover:text-red-600 font-medium">
+                Continue Editing
+              </button>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  function SubmittedContent() {
+    return (
+      <>
+        {/* <p className="font-bold text-sm">No articles submitted.</p> */}
+        <Text
+          variant="h3"
+          size="lg"
+          bold={false}
+          className="font-semibold mb-4 dark:text-custom-white"
+        >
+          Submitted Articles
+        </Text>
+
+        <div className="space-y-4">
+          <div className="border border-gray-200 rounded-lg p-4 hover:border-red transition-colors">
+            <div className="flex justify-between mb-2">
+              <Text
+                variant="h3"
+                size="base"
+                bold={false}
+                className="font-semibold dark:text-custom-white"
+              >
+                Building Scalable APIs with Node.js
+              </Text>
+              <span className="text-nowrap flex items-center text-xs px-2 py-1 bg-light rounded-full text-secondary">
+                Under Review
+              </span>
+            </div>
+
+            <p className="text-secondary text-sm mb-3 line-clamp-2">
+              Learn best practices for building robust and scalable REST APIs
+              using Node.js, Express, and MongoDB...
+            </p>
+
+            <div className="flex  justify-between mt-3 text-xs text-secondary">
+              <span>Submitted: May 11, 2025</span>
+              <div className="flex gap-3">
+                <span>Expected review: 2-3 days</span>
+                <button className="text-red hover:text-red-600 font-medium">
+                  View Details
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="border border-gray-200 rounded-lg p-4 hover:border-red transition-colors">
+            <div className="flex justify-between mb-2">
+              <Text
+                variant="h3"
+                size="base"
+                bold={false}
+                className="font-semibold dark:text-custom-white"
+              >
+                Introduction to Web Accessibility
+              </Text>
+              <span className="text-nowrap flex items-center text-xs px-2 py-1 bg-light rounded-full text-secondary">
+                Pending Review
+              </span>
+            </div>
+
+            <p className="text-secondary text-sm mb-3 line-clamp-2">
+              Discover how to make your websites accessible to everyone by
+              implementing WCAG guidelines and best practices...
+            </p>
+
+            <div className="flex justify-between mt-3 text-xs text-secondary">
+              <span>Submitted: May 9, 2025</span>
+              <div className="flex gap-3">
+                <span>In review queue</span>
+                <button className="text-red hover:text-red-600 font-medium">
+                  View Details
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  function PublishedContent() {
+    return (
+      <>
+        {/* <div className="md:w-xs w-60 dark:text-custom-white">
+          <img
+            className="w-full h-full"
+            src="/src/assets/icons/amico.png"
+            alt="An empty profile"
+          />
+          <div className="text-xs md:text-sm text-center mt-4">
+            No published articles!
+          </div>
+        </div> */}
+        <Text
+          variant="h3"
+          size="lg"
+          bold={false}
+          className="font-semibold mb-1 md:text-2xl dark:text-custom-white"
+        >
+          Published Articles
+        </Text>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+          <ArticleCard article={article} />
+          <ArticleCard article={article} />
+          <ArticleCard article={article} />
+          <ArticleCard article={article} />
+        </div>
+      </>
+    );
+  }
+
+  function getContent() {
+    switch (isActiveTab) {
+      case 'saved':
+        return <SavedContent />;
+      case 'comments':
+        return <CommentsContent />;
+      case 'drafts':
+        return <DraftsContent />;
+      case 'submitted':
+        return <SubmittedContent />;
+      case 'published':
+        return <PublishedContent />;
+      default:
+        return null;
+    }
+  }
+
   return (
     <div className="mt-15">
       <div className="bg-light w-full h-40 relative">
@@ -109,94 +401,9 @@ function ProfileDetail() {
           <div className="py-8 flex justify-center">
             <div className="dark:text-custom-white">
               <div className="p-4 border border-gray rounded-lg">
-                <Text
-                  variant="h3"
-                  size="lg"
-                  bold={false}
-                  className="font-semibold mb-1 md:text-2xl dark:text-custom-white"
-                >
-                  Saved Articles
-                </Text>
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
-                  <ArticleCard article={article} />
-                  <ArticleCard article={article} />
-                  <ArticleCard article={article} />
-                  <ArticleCard article={article} />
-                </div>
+                {getContent()}
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="text-gray-900 dark:text-custom-white mt-30 md:mt-50 flex-col items-center md:items-start md:flex-row flex gap-4 mb-8 px-20">
-        <div className="p-3 md:w-fit md:h-fit border border-gray rounded-lg">
-          <div className="flex gap-2 items-center mb-2">
-            <div className="w-4 h-4">
-              <img
-                className="w-full h-full dark:invert"
-                src="/src/assets/icons/Chat.png"
-                alt=""
-              />
-            </div>
-            <div>
-              <p className="font-semibold text-xs sm:text-sm md:text-lg">
-                0 Comments{' '}
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2 items-center">
-            <div className="w-4 h-4">
-              <img
-                className="w-full h-full dark:invert"
-                src="/src/assets/icons/bookmark-light.png"
-                alt=""
-              />
-            </div>
-            <p className="font-semibold text-xs sm:text-sm md:text-lg">
-              0 Saved{' '}
-            </p>
-          </div>
-        </div>
-        <div className="flex-1 flex flex-col gap-4">
-          <div className="p-4 border border-gray rounded-lg">
-            <Text
-              variant="h3"
-              size="lg"
-              bold={false}
-              className="font-semibold mb-2 dark:text-custom-white"
-            >
-              Recent Comments
-            </Text>
-            <div>
-              <Text
-                variant="h3"
-                size="base"
-                bold={false}
-                className="font-semibold mb-2 dark:text-custom-white"
-              >
-                Africa Fintech Summit 2024
-              </Text>
-              <p className="text-secondary text-sm mb-1">
-                Africa Fintech Summit
-              </p>
-            </div>
-            <div className="flex items-center gap-2 text-xs md:text-sm">
-              <p className="font-bold">Thanks for the info</p>
-              <p className="text-secondary">27th January, 2025</p>
-            </div>
-          </div>
-
-          <div className="p-4 border border-gray rounded-lg">
-            <Text
-              variant="h3"
-              size="lg"
-              bold={false}
-              className="font-semibold mb-1 md:text-2xl dark:text-custom-white"
-            >
-              Saved Articles
-            </Text>
-            <ArticleCard article={article} />
           </div>
         </div>
       </div>
