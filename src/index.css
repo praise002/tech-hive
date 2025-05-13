@@ -17,6 +17,8 @@
   --color-red: #a32816;
   --color-coral: #fd8878;
   --color-light: #ffebe4;
+  --color-neutral: #EFF1F1;
+  --color-fill: #C0C0C0;
 }
 
 .active {

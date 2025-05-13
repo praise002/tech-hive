@@ -30,6 +30,7 @@ import ChangePassword from './features/auth/ChangePassword';
 import ResetPassword from './features/auth/ResetPassword';
 import ResetPasswordSuccess from './features/auth/ResetPaswordSuccess';
 import { Toaster } from 'react-hot-toast';
+import Test from './features/profile/Test';
 // import ProfileDetailEmpty from './features/profile/ProfileDetailEmpty';
 
 const queryClient = new QueryClient({
@@ -84,7 +85,12 @@ function App() {
               path="reset-password-success"
               element={<ResetPasswordSuccess />}
             />
+            <Route
+              path="test"
+              element={<Test />}
+            />
           </Route>
+          
 
           {/* Catch-all route for 404 errors */}
           <Route path="*" element={<PageNotFound />} />
