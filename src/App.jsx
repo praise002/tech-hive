@@ -10,7 +10,7 @@ import ArticleList from './features/articles/ArticleList';
 import CategoryDetail from './features/category/CategoryDetail';
 import CategoryList from './features/category/CategoryList';
 import Contact from './pages/Contact';
-import EditorDashboard from './pages/EditorDashboard';
+import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
 import Login from './features/auth/Login';
 import PageNotFound from './pages/PageNotFound';
@@ -31,6 +31,8 @@ import ResetPassword from './features/auth/ResetPassword';
 import ResetPasswordSuccess from './features/auth/ResetPaswordSuccess';
 import { Toaster } from 'react-hot-toast';
 import Test from './features/profile/Test';
+import RichTextEditor from './features/articles/RichTextEditor';
+import AdminDashboard from './features/admin/AdminDashboard';
 // import ProfileDetailEmpty from './features/profile/ProfileDetailEmpty';
 
 const queryClient = new QueryClient({
@@ -73,7 +75,8 @@ function App() {
 
             <Route path="about" element={<About />} />
             <Route path="contact" element={<Contact />} />
-            <Route path="dashboard" element={<EditorDashboard />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="new" element={<RichTextEditor />} />
             <Route path="profile" element={<ProfileDetail />} />
             {/* <Route path="profile" element={<ProfileDetailEmpty />} /> */}
             <Route path="account" element={<AccountDetail />} />
@@ -88,6 +91,10 @@ function App() {
             <Route
               path="test"
               element={<Test />}
+            />
+            <Route
+              path="admin"
+              element={<AdminDashboard />}
             />
           </Route>
           

@@ -53,7 +53,7 @@ function Test() {
         <p className="bg-fill rounded-full w-1 h-1"></p>
       </div>
 
-      <div className="bg-white  w-70 mx-auto mb-4 p-4">
+      <div className="bg-white rounded-sm w-70 mx-auto mb-4 p-4">
         <Text variant="h1" size="lg" className="mb-2">
           Change User Role
         </Text>
@@ -67,7 +67,7 @@ function Test() {
         </div>
       </div>
 
-      <div className="bg-white  w-70 mx-auto mb-4 p-4">
+      <div className="bg-white rounded-sm w-70 mx-auto mb-4 p-4">
         <Text variant="h1" size="lg" className="mb-2">
           Change User Status
         </Text>
@@ -80,7 +80,7 @@ function Test() {
         </div>
       </div>
 
-      <div className="bg-white flex flex-col gap-2 w-70 mx-auto mb-4 p-4">
+      <div className="bg-white rounded-sm flex flex-col gap-2 w-70 mx-auto mb-4 p-4">
         <Button className="bg-red !text-custom-white" variant="outline">
           Edit
         </Button>
@@ -88,6 +88,9 @@ function Test() {
         <Button variant="outline">Suspend</Button>
         <Button variant="outline">Delete</Button>
       </div>
+
+      {/* For creating post */}
+      <Button variant="outline">Create Post</Button>
     </>
   );
 }
