@@ -9,7 +9,7 @@ function SearchInput({ inputWidth, iconSize }) {
 
       {/* Input Field */}
       <input
-        className={`${inputWidth} dark:text-custom-white border border-gray-500 dark:border-custom-white rounded-md pl-10 pr-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-600 dark:focus-visible:ring-white dark:focus-visible:text-white focus-visible:border-gray-600 dark:focus-visible:border-white`}
+        className={`${inputWidth} appearance-none dark:text-custom-white border border-gray-500 dark:border-custom-white rounded-md pl-10 pr-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-600 dark:focus-visible:ring-white dark:focus-visible:text-white focus-visible:border-gray-600 dark:focus-visible:border-white`}
         type="search"
         placeholder="Search articles..."
       />

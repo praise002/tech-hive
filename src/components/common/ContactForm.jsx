@@ -22,7 +22,7 @@ function ContactForm() {
               id="firstName"
               placeholder="First Name"
               {...register('firstName', { required: 'First name is required' })}
-              className="block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
+              className="appearance-none block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
             />
             {errors.firstName && (
               <p className="text-red-500 text-sm mt-1">
@@ -35,7 +35,7 @@ function ContactForm() {
               id="lastName"
               placeholder="Last Name"
               {...register('lastName', { required: 'Last name is required' })}
-              className="block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
+              className="appearance-none block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
             />
             {errors.lastName && (
               <p className="text-red-500 text-sm mt-1">
@@ -57,7 +57,7 @@ function ContactForm() {
                 message: 'Invalid email address',
               },
             })}
-            className="block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
+            className="appearance-none block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
           />
           {errors.email && (
             <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>

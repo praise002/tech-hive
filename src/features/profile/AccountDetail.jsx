@@ -68,7 +68,7 @@ function AccountDetail() {
                 <input
                   type="file"
                   accept="image/*"
-                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                  className="appearance-none absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                   onChange={handleProfilePicChange}
                 />
                 {/* Edit icon that stays fixed */}
@@ -85,7 +85,7 @@ function AccountDetail() {
             {isEditing ? (
               <input
                 type="text"
-                className="dark:text-custom-white mt-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
+                className="appearance-none dark:text-custom-white mt-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
                 value={profile.name}
                 onChange={(e) =>
                   setProfile({ ...profile, name: e.target.value })
@@ -112,7 +112,7 @@ function AccountDetail() {
             {isEditing && (
               <div className="flex space-x-2 mt-2">
                 <Button variant="gradient" onClick={handleSaveClick}>
-                  Save
+                Save
                 </Button>
                 <Button variant="outline" onClick={handleCancelClick}>
                   Cancel

@@ -85,7 +85,7 @@ function CategoriesList() {
         <input
           type="text"
           placeholder="Search categories..."
-          className="dark:text-custom-white w-full py-2 px-4 mt-4 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700"
+          className="appearance-none dark:text-custom-white w-full py-2 px-4 mt-4 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700"
         />
       </div>
 

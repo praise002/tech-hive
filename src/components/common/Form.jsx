@@ -27,7 +27,7 @@ function Form({ inputs, onSubmit, children, onClick, className }) {
             id={input.id || input.name}
             placeholder={input.placeholder || ''}
             type={input.type || 'text'}
-            className="block w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-800 focus-visible:border-gray-800"
+            className="appearance-none block w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-800 focus-visible:border-gray-800"
           />
 
           {input.icon && (

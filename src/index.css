@@ -19,6 +19,8 @@
   --color-light: #ffebe4;
   --color-neutral: #EFF1F1;
   --color-fill: #C0C0C0;
+  --color-custom-green: #2EA316;
+  --color-mint: #EFFDEE;
 }
 
 .active {
