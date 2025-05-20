@@ -161,96 +161,7 @@
       </div>
 
       {/* Analytics */}
-      <div>
-        <div>
-          <div>
-            <div>
-              <div>
-                <span>Time on page</span>
-                <span>3.2 min</span>
-                <p>
-                  <GoArrowUpRight />
-                  <span>+1.01% this week</span>
-                </p>
-              </div>
-              <div>
-                <span>Bounce rate</span>
-                <span>42%</span>
-                <p>
-                  <GoArrowUpRight />
-                  <span>+0.12% this week</span>
-                </p>
-              </div>
-              <div>
-                <span>Load speed</span>
-                <span>1.0 min</span>
-                <p>
-                  <GoArrowDownRight />
-                  <span>-1.01% this week</span>
-                </p>
-              </div>
-            </div>
-            <div>
-              <div>
-                <h3>Top Hashtag Performance</h3>
-                <p>...</p>
-              </div>
-              <div>
-                <h3>Crypto</h3>
-                <p>1.5k Engagements</p>
-              </div>
-            </div>
-          </div>
-          <div>
-            <div>
-              <h3>Device types</h3>
-              <form>
-                <select className="dark:text-custom-white dark:bg-dark py-2 px-4 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700">
-                  <option value="">Weekly</option>
-                  <option value="monthly">Monthly</option>
-                </select>
-              </form>
-            </div>
-            <div>The graph</div>
-            <div>
-              <span>Mobile</span>
-              <span>Tablet</span>
-              <span>Desktop</span>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div>
-            <h3>Device types</h3>
-            <form>
-              <select className="dark:text-custom-white dark:bg-dark py-2 px-4 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700">
-                <option value="">Weekly</option>
-                <option value="monthly">Monthly</option>
-              </select>
-            </form>
-            <p>The graph</p>
-            <div>
-              <span>Registered Users</span>
-              <span>Visitors</span>
-              <span>Total Active Users</span>
-            </div>
-          </div>
-          <div>
-            <h3>Top Performing Post</h3>
-            <form>
-              <select className="dark:text-custom-white dark:bg-dark py-2 px-4 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700">
-                <option value="">Weekly</option>
-                <option value="monthly">Monthly</option>
-              </select>
-            </form>
-            <p>The graph</p>
-            <div>
-              <span>Views</span>
-              <span>Shares</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      
 
       {/* Settings */}
       <div>
@@ -297,3 +208,5 @@
           <Button>Save Changes</Button>
         </form>
       </div>
+
+      
