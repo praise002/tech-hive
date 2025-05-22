@@ -33,6 +33,7 @@ import { Toaster } from 'react-hot-toast';
 import Test from './features/profile/Test';
 import RichTextEditor from './features/articles/RichTextEditor';
 import AdminDashboard from './features/admin/AdminDashboard';
+import ArticleEditor from './features/articles/ArticleEditor';
 // import ProfileDetailEmpty from './features/profile/ProfileDetailEmpty';
 
 const queryClient = new QueryClient({
@@ -76,7 +77,7 @@ function App() {
             <Route path="about" element={<About />} />
             <Route path="contact" element={<Contact />} />
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="new" element={<RichTextEditor />} />
+            <Route path="new" element={<ArticleEditor />} />
             <Route path="profile" element={<ProfileDetail />} />
             {/* <Route path="profile" element={<ProfileDetailEmpty />} /> */}
             <Route path="account" element={<AccountDetail />} />

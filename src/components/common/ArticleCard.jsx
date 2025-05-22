@@ -7,7 +7,12 @@ import Button from './Button';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
-function ArticleCard({ article }) {
+function ArticleCard({
+  article,
+  isOpen,
+  onMenuClick,
+  showAdminActions = false,
+}) {
   return (
     <>
       <div className="relative overflow-hidden rounded-lg shadow-lg h-full flex flex-col">
@@ -16,6 +21,35 @@ function ArticleCard({ article }) {
           src={article.image}
           className="flex-shrink-0"
         />
+        {showAdminActions && (
+          <>
+            <div className="absolute top-2 right-4">
+              <button
+                type="button"
+                onClick={() => onMenuClick(article.id)}
+                className="flex flex-col items-center justify-center gap-1 m-auto bg-red rounded-sm p-2"
+              >
+                <p className="bg-fill rounded-full w-1 h-1"></p>
+                <p className="bg-fill rounded-full w-1 h-1"></p>
+                <p className="bg-fill rounded-full w-1 h-1"></p>
+              </button>
+            </div>
+            {isOpen && (
+              <div className="absolute top-15 right-2">
+                <div className="relative bg-custom-white text-gray-800 gap-2 py-3 px-5 w-25 flex flex-col items-start rounded-md">
+                  <button>Edit</button>
+                  <button>Archive</button>
+                  <button>Delete</button>
+                  <div
+                    className="absolute -top-3 right-3 w-4 h-4 bg-white"
+                    style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}
+                  ></div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
         <div className="flex flex-col justify-between flex-grow p-5 border border-l border-r border-b border-gray dark:border-gray-700 rounded-bl-lg rounded-br-lg overflow-hidden">
           <div className="space-y-2">
             <ArticleTitle>{article.title}</ArticleTitle>
@@ -56,6 +90,7 @@ function ArticleCard({ article }) {
 
 ArticleCard.propTypes = {
   article: PropTypes.shape({
+    id: PropTypes.string.isRequired,
     image: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
@@ -65,6 +100,9 @@ ArticleCard.propTypes = {
     posted: PropTypes.string.isRequired,
     readTime: PropTypes.string.isRequired,
   }).isRequired,
+  showAdminActions: PropTypes.bool,
+  isOpen: PropTypes.bool.isRequired,
+  onMenuClick: PropTypes.func.isRequired,
 };
 
 export default ArticleCard;

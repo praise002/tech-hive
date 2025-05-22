@@ -5,7 +5,7 @@
 @theme {
   --font-inter: 'Inter', serif;
   --color-dark: #1e1e1e;
-  --color-custom-white: #FCFCFC;
+  --color-custom-white: #fcfcfc;
   --color-gray: #c1c8c7;
   --color-primary: #262a2a;
   --color-secondary: #889392;
@@ -17,13 +17,13 @@
   --color-red: #a32816;
   --color-coral: #fd8878;
   --color-light: #ffebe4;
-  --color-neutral: #EFF1F1;
-  --color-fill: #C0C0C0;
-  --color-custom-green: #2EA316;
-  --color-mint: #EFFDEE;
+  --color-neutral: #eff1f1;
+  --color-fill: #c0c0c0;
+  --color-custom-green: #2ea316;
+  --color-mint: #effdee;
   --color-lime-green: #34c759;
-  --color-honey: #F58F29;
-  --color-cyan-light: #2EEEEE;
+  --color-honey: #f58f29;
+  --color-cyan-light: #2eeeee;
 }
 
 .active {

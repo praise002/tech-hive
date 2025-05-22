@@ -92,8 +92,59 @@ function Test() {
 
       {/* For creating post */}
       <Button variant="outline">Create Post</Button>
+
+      <img src="/src/assets/images/Chart 1.png" alt="" />
+      <div className="flex gap-4">
+        {data.map(({ name, colorClass }) => (
+          <div key={name} className="flex items-center gap-2">
+            <p className={`rounded-full w-2 h-2 bg-${colorClass}`}></p>
+            <p>{name}</p>
+          </div>
+        ))}
+      </div>
+
+      <img src="/src/assets/images/chart-2.png" alt="" />
+      <div className="flex gap-4">
+        <div className="flex items-center gap-2">
+          <p className="rounded-full w-2 h-2 bg-red"></p>
+          <p>Registered Users</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <p className="rounded-full w-2 h-2 bg-honey"></p>
+          <p>Visitors</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <p className="rounded-full w-2 h-2 bg-custom-green"></p>
+          <p>Total Active Users</p>
+        </div>
+      </div>
+
+      <div>
+        <img src="/src/assets/images/chart-3.png" alt="" />
+      </div>
+
+      <div className="flex gap-4 justify-center">
+        <div className="flex items-center gap-2">
+          <p className="rounded-full w-2 h-2 bg-red"></p>
+          <p>Views</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <p className="rounded-full w-2 h-2 bg-honey"></p>
+          <p>Shares</p>
+        </div>
+      </div>
     </>
   );
 }
 
+const data = [
+  { name: 'Mobile', value: 400, color: '#a32816', colorClass: 'red' },
+  { name: 'Tablet', value: 300, color: '#F58F29', colorClass: 'honey' },
+  {
+    name: 'Desktop',
+    value: 200,
+    color: '#2EA316',
+    colorClass: 'custom-green',
+  },
+];
 export default Test;

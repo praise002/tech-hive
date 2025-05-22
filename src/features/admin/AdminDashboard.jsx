@@ -1,9 +1,26 @@
+import PropTypes from 'prop-types';
 import { IoPeople } from 'react-icons/io5';
 import { IoFilterOutline } from 'react-icons/io5';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from 'react-icons/md';
 import { GoPlus, GoArrowDownRight, GoArrowUpRight } from 'react-icons/go';
 import { BsToggleOn, BsToggleOff } from 'react-icons/bs';
 
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+  // Tooltip as RechartsTooltip,
+} from 'recharts';
 import Text from '../../components/common/Text';
 import {
   MdArticle,
@@ -51,6 +68,49 @@ function AdminDashboard() {
       icon: <MdSettings className="w-5 h-5" />,
     },
   ];
+
+  function TableCell({ children, className }) {
+    return (
+      <td className={`px-6 whitespace-nowrap lg:table-cell block ${className}`}>
+        {children}
+      </td>
+    );
+  }
+
+  TableCell.propTypes = {
+    children: PropTypes.node.isRequired, // Content inside the button (text, icons, etc.)
+    className: PropTypes.string,
+  };
+
+  function RoleSpan({ role }) {
+    return (
+      <span className="lg:px-5 px-2 py-3 rounded-md bg-cream text-orange-dark">
+        {role}
+      </span>
+    );
+  }
+
+  RoleSpan.propTypes = {
+    role: PropTypes.string,
+  };
+
+  function StatusSpan({ status }) {
+    return (
+      <span
+        className={`lg:px-5 px-2 py-3 rounded-md ${
+          status === 'Active' || status === 'Published'
+            ? 'bg-mint text-custom-green'
+            : 'bg-cream text-red'
+        }`}
+      >
+        {status}
+      </span>
+    );
+  }
+
+  StatusSpan.propTypes = {
+    status: PropTypes.string,
+  };
 
   function ManageUsers() {
     const users = [
@@ -174,29 +234,17 @@ function AdminDashboard() {
             <tbody className="lg:text-base lg:divide-y-0 text-sm divide-y divide-gray-200 dark:divide-gray-700">
               {users.map((user) => (
                 <tr key={user.id} className="space-y-2 lg:space-y-0">
-                  <td className="px-6 lg:py-4 pt-2 whitespace-nowrap lg:table-cell block">
+                  <TableCell className="lg:py-4 pt-2 lg:pt-0">
                     {user.name}
-                  </td>
-                  <td className="px-6 lg:py-4 whitespace-nowrap lg:table-cell block">
-                    {user.email}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap lg:table-cell block">
-                    <span className="lg:px-5 px-2 py-3 rounded-md bg-cream text-orange-dark">
-                      {user.role}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap lg:table-cell block">
-                    <span
-                      className={`lg:px-5 px-2 py-3 rounded-md ${
-                        user.status === 'Active'
-                          ? 'bg-mint text-custom-green'
-                          : 'bg-cream text-red'
-                      }`}
-                    >
-                      {user.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 cursor-pointer">...</td>
+                  </TableCell>
+                  <TableCell className="lg:py-4">{user.email}</TableCell>
+                  <TableCell className="py-4 lg:py-0">
+                    <RoleSpan role={user.role} />
+                  </TableCell>
+                  <TableCell className="py-2 lg:py-0">
+                    <StatusSpan status={user.status} />
+                  </TableCell>
+                  <td className="lg:px-6 lg:py-4 cursor-pointer">...</td>
                 </tr>
               ))}
             </tbody>
@@ -231,7 +279,7 @@ function AdminDashboard() {
             <IoFilterOutline className="text-xl absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 dark:text-custom-white" />
           </div>
         </div>
-        <Articles />
+        <Articles marginTop="8" showAdminActions={true} />
         <TechJobs />
         <TechEvents />
         <TechTool />
@@ -378,29 +426,19 @@ function AdminDashboard() {
               <tbody className="lg:text-base lg:divide-y-0 text-sm divide-y divide-gray-200 dark:divide-gray-700">
                 {tableData.map(({ title, author, date, role, status }) => (
                   <tr key={title} className="space-y-2 lg:space-y-0">
-                    <td className="px-6 lg:py-4 pt-2 whitespace-nowrap lg:table-cell block">
+                    <TableCell className="lg:py-4 pt-2 lg:pt-0">
                       {title}
-                    </td>
-                    <td className="px-6 lg:py-4 whitespace-nowrap lg:table-cell block">
-                      {author}
-                    </td>
-                    <td>{date}</td>
-                    <td className="px-6 py-4 whitespace-nowrap lg:table-cell block">
-                      <span className="lg:px-5 px-2 py-3 rounded-md bg-cream text-orange-dark">
-                        {role}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap lg:table-cell block">
-                      <span
-                        className={`lg:px-5 px-2 py-3 rounded-md ${
-                          status === 'Published'
-                            ? 'bg-mint text-custom-green'
-                            : 'bg-cream text-red'
-                        }`}
-                      >
-                        {status}
-                      </span>
-                    </td>
+                    </TableCell>
+
+                    <TableCell className="lg:py-4">{author}</TableCell>
+
+                    <TableCell className="lg:py-4">{date}</TableCell>
+                    <TableCell className="py-4 lg:py-0">
+                      <RoleSpan role={role} />
+                    </TableCell>
+                    <TableCell className="py-2 lg:py-0">
+                      <StatusSpan status={status} />
+                    </TableCell>
                     <td className="px-6 py-4 cursor-pointer">...</td>
                   </tr>
                 ))}
@@ -411,16 +449,44 @@ function AdminDashboard() {
       </>
     );
   }
+
   function Analytics() {
+    const deviceTypesData = [
+      { name: 'Mobile', value: 400, color: '#a32816' },
+      { name: 'Tablet', value: 300, color: '#F58F29' },
+      {
+        name: 'Desktop',
+        value: 200,
+        color: '#2EA316',
+      },
+    ];
+
+    const activeUsersData = [
+      { name: 'Mon', registered: 1350, visitors: 900, total: 2250 },
+      { name: 'Tue', registered: 1450, visitors: 750, total: 2200 },
+      { name: 'Wed', registered: 1200, visitors: 950, total: 2150 },
+      { name: 'Thu', registered: 1600, visitors: 600, total: 2200 },
+      { name: 'Fri', registered: 1750, visitors: 500, total: 2250 },
+      { name: 'Sat', registered: 1000, visitors: 450, total: 1450 },
+      { name: 'Sun', registered: 950, visitors: 650, total: 1600 },
+    ];
+
+    const topPerformingPostsData = [
+      { category: 'Articles', views: 2200, shares: 1400 },
+      { category: 'Jobs', views: 1500, shares: 900 },
+      { category: 'Events', views: 1800, shares: 1100 },
+      { category: 'Featured', views: 2500, shares: 1600 },
+    ];
+
     return (
       <div className="flex flex-col gap-4 px-2 lg:px-0">
         <div className="flex lg:flex-row flex-col justify-between gap-4">
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-2 flex-col gap-4">
             <div className="my-6 lg:my-0 flex flex-col lg:flex-row gap-4 justify-between text-primary dark:text-custom-white">
               <div className="flex flex-col items-center gap-y-5 px-8 py-3 rounded-md border border-primary dark:border-gray-200">
                 <span className="text-sm">Time on page</span>
                 <span className="font-semibold text-2xl">3.2 min</span>
-                <p className="inline-flex items-center gap-2 text-sm">
+                <p className="inline-flex items-center gap-2 text-xs">
                   <span>
                     <GoArrowUpRight className="text-lime-green" />
                   </span>
@@ -430,7 +496,7 @@ function AdminDashboard() {
               <div className="flex flex-col items-center gap-y-5 px-8 py-3 rounded-md border border-primary dark:border-gray-200">
                 <span className="text-sm">Bounce rate</span>
                 <span className="font-semibold text-2xl">42%</span>
-                <p className="inline-flex items-center gap-2 text-sm">
+                <p className="inline-flex items-center gap-2 text-xs">
                   <span>
                     <GoArrowUpRight className="text-lime-green" />
                   </span>
@@ -440,7 +506,7 @@ function AdminDashboard() {
               <div className="flex flex-col items-center gap-y-5 px-8 py-3 rounded-md border border-primary dark:border-gray-200">
                 <span className="text-sm">Load speed</span>
                 <span className="font-semibold text-2xl">1.0 min</span>
-                <p className="inline-flex items-center gap-2 text-sm">
+                <p className="inline-flex items-center gap-2 text-xs">
                   <span>
                     <GoArrowDownRight className="text-red" />
                   </span>
@@ -462,7 +528,7 @@ function AdminDashboard() {
               </div>
             </div>
           </div>
-          <div className="flex flex-col items-center gap-y-5 px-8 py-3 rounded-md border border-primary dark:border-gray-200">
+          <div className="flex flex-1 flex-col items-center gap-y-5 px-8 py-3 rounded-md border border-primary dark:border-gray-200">
             <div className="flex justify-between gap-4">
               <Text
                 variant="h3"
@@ -473,33 +539,49 @@ function AdminDashboard() {
               </Text>
 
               <form>
-                <select className="dark:text-custom-white dark:bg-dark text-sm py-2 px-4 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700">
+                <select className="dark:text-custom-white dark:bg-dark text-sm py-1 px-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700">
                   <option value="">Weekly</option>
                   <option value="monthly">Monthly</option>
                 </select>
               </form>
             </div>
-            <div>
-              <img src="/src/assets/images/Chart 1.png" alt="" />
-            </div>
-            <div className="flex gap-4">
-              <div className="flex items-center gap-2">
-                <p className="rounded-full w-2 h-2 bg-red"></p>
-                <p>Mobile</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <p className="rounded-full w-2 h-2 bg-honey"></p>
-                <p>Tablet</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <p className="rounded-full w-2 h-2 bg-custom-green"></p>
-                <p>Desktop</p>
-              </div>
+            {/* Width and height has to be set on a div for the piechart to display */}
+            <div className="w-full h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={deviceTypesData}
+                    nameKey="name" // property e.g Mobile
+                    dataKey="value" // value: 400
+                    innerRadius="40%" // creates a donut hole
+                    outerRadius="70%" // sets the outer boundary
+                    cx="50%" // cx and cy centres the pie chart
+                    cy="50%"
+                    paddingAngle={3} // Adds a 3-degree gap between slices
+                  >
+                    {deviceTypesData.map((entry) => (
+                      <Cell
+                        fill={entry.color} // Sets the fill color for each slice
+                        stroke={entry.color} // Sets the border color for each slice
+                        key={entry.value}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend
+                    verticalAlign="bottom"
+                    align="center"
+                    layout="horizontal"
+                    iconSize={15}
+                    iconType="circle"
+                  />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>
         <div className="flex flex-col lg:flex-row gap-4">
-          <div className="flex flex-1 flex-col  gap-y-5 px-8 py-3 rounded-md border border-primary dark:border-gray-200">
+          <div className="flex flex-1 flex-col gap-y-5 px-8 py-3 rounded-md border border-primary dark:border-gray-200">
             <div className="flex justify-between">
               <Text
                 variant="h3"
@@ -509,28 +591,73 @@ function AdminDashboard() {
                 Active users overview
               </Text>
               <form>
-                <select className="dark:text-custom-white text-sm dark:bg-dark py-2 px-4 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700">
+                <select className="dark:text-custom-white text-sm dark:bg-dark py-1 px-2  border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700">
                   <option value="">Weekly</option>
                   <option value="monthly">Monthly</option>
                 </select>
               </form>
             </div>
-            <div>
-              <img src="/src/assets/images/chart-2.png" alt="" />
-            </div>
-            <div className="flex gap-4">
-              <div className="flex items-center gap-2">
-                <p className="rounded-full w-2 h-2 bg-red"></p>
-                <p>Registered Users</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <p className="rounded-full w-2 h-2 bg-honey"></p>
-                <p>Visitors</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <p className="rounded-full w-2 h-2 bg-custom-green"></p>
-                <p>Total Active Users</p>
-              </div>
+            <div className="w-full h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                {/* creates space around the chart for axes and labels */}
+                <LineChart
+                  data={activeUsersData}
+                  margin={{
+                    top: 5,
+                    right: 30,
+                    left: 20,
+                    bottom: 5,
+                  }}
+                >
+                  {/* Creates the background grid lines with a dash pattern and light opacity */}
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                  <XAxis dataKey="name" /> {/* Displays days of the week */}
+                  {/* Automatically scales to fit your data values (450 to 2250) */}
+                  <YAxis />
+                  <Tooltip />
+                  <Legend
+                    verticalAlign="bottom"
+                    align="center"
+                    layout="horizontal"
+                    iconSize={15}
+                    iconType="circle"
+                    formatter={(value) => {
+                      // Map data keys to custom labels
+                      const customLabels = {
+                        registered: 'Registered Users',
+                        visitors: 'Visitors',
+                        total: 'Total Active Users',
+                      };
+
+                      // Return the custom label if it exists, otherwise return the original value
+                      return (
+                        <span className="text-xs lg:text-sm">
+                          {customLabels[value] || value}
+                        </span>
+                      );
+                    }}
+                  />
+                  <Line
+                    type="monotone" // creates smooth, curved lines between points
+                    dataKey="registered"
+                    stroke="#a32816" // Sets the line color (using your theme colors)
+                    strokeWidth={2} // Makes the lines thicker for better visibility
+                    activeDot={{ r: 8 }} // makes the active dot larger when hovering
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="visitors"
+                    stroke="#F58F29"
+                    strokeWidth={2}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="total"
+                    stroke="#2EA316"
+                    strokeWidth={2}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </div>
           <div className="flex flex-col flex-1 gap-y-5 px-8 py-3 rounded-md border border-primary dark:border-gray-200">
@@ -543,25 +670,49 @@ function AdminDashboard() {
                 Top Performing Post
               </Text>
               <form>
-                <select className="dark:text-custom-white text-sm dark:bg-dark py-2 px-4 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700">
+                <select className="dark:text-custom-white text-sm dark:bg-dark py-1 px-2  border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700">
                   <option value="">Weekly</option>
                   <option value="monthly">Monthly</option>
                 </select>
               </form>
             </div>
 
-            <div>
-              <img src="/src/assets/images/chart-3.png" alt="" />
-            </div>
-            <div className="flex gap-4 justify-center">
-              <div className="flex items-center gap-2">
-                <p className="rounded-full w-2 h-2 bg-red"></p>
-                <p>Views</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <p className="rounded-full w-2 h-2 bg-honey"></p>
-                <p>Shares</p>
-              </div>
+            <div className="w-full h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={topPerformingPostsData}
+                  margin={{
+                    top: 5,
+                    right: 30,
+                    left: 20,
+                    bottom: 5,
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                  <XAxis dataKey="category" />
+                  <YAxis domain={[0, 3000]} />
+                  <Tooltip />
+                  <Legend
+                    verticalAlign="bottom"
+                    align="center"
+                    layout="horizontal"
+                    iconSize={15}
+                    iconType="circle"
+                  />
+                  <Bar
+                    dataKey="views"
+                    name="Views"
+                    fill="#a32816"
+                    barSize={30}
+                  />
+                  <Bar
+                    dataKey="shares"
+                    name="Shares"
+                    fill="#F58F29"
+                    barSize={30}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>
@@ -715,7 +866,7 @@ function AdminDashboard() {
               <button
                 key={tab.id}
                 onClick={() => setIsActiveTab(tab.id)}
-                className={`flex p-2 items-center gap-2 rounded-md text-xs sm:text-base cursor-pointer ${
+                className={`flex p-2 items-center gap-2 rounded-md text-xs sm:text-base cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-red-300 transition duration-300 ${
                   isActiveTab === tab.id && 'bg-red text-custom-white'
                 }`}
               >
