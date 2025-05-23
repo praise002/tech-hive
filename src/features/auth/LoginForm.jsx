@@ -1,11 +1,18 @@
-import Button from '../../components/common/Button';
-import Form from '../../components/common/Form';
-import { IoIosEye } from 'react-icons/io';
+import { IoEye, IoEyeOff } from 'react-icons/io5';
 import { FcGoogle } from 'react-icons/fc';
 import { FaApple } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import Button from '../../components/common/Button';
+import Form from '../../components/common/Form';
+import { useState } from 'react';
 
 function LoginForm() {
+  const [showPassword, setShowPassword] = useState(false);
+
+  function togglePasswordVisibility() {
+    setShowPassword(!showPassword);
+  }
+
   const inputs = [
     {
       name: 'email',
@@ -21,10 +28,15 @@ function LoginForm() {
     },
     {
       name: 'password',
-      type: 'password',
+      type: showPassword ? 'text' : 'password',
       placeholder: 'Password',
-      icon: <IoIosEye className="text-primary cursor-pointer" />,
-      // TODO; LATER TOGGLE IT WITH STATE BY CHANGING THE EYE
+      icon: showPassword ? (
+        <IoEyeOff className="text-primary cursor-pointer" />
+      ) : (
+        <IoEye className="text-primary cursor-pointer" />
+      ),
+      onIconClick: togglePasswordVisibility,
+      iconAriaLabel: showPassword ? 'Hide password' : 'Show password',
       rules: {
         required: 'Password is required',
         minLength: {

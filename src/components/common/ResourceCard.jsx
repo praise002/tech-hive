@@ -4,6 +4,7 @@ import Description from './Description';
 import Image from './Image';
 import Tags from './Tags';
 import Text from './Text';
+import { Link } from 'react-router-dom';
 
 function ResourceCard({ resource }) {
   return (
@@ -34,7 +35,9 @@ function ResourceCard({ resource }) {
         </div>
 
         <div className="space-y-2">
-          <Button variant="outline">View details</Button>
+          <Button variant="outline">
+            <Link to="/resources/a">View details</Link>
+          </Button>
           <div className="text-xs text-secondary">
             Posted {resource.timePosted}
           </div>

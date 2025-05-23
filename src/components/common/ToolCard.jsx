@@ -31,7 +31,9 @@ function ToolCard({ tool }) {
 
         <div className="mt-2">
           <Button className="text-xs w-auto" variant="outline">
-            {tool.callToAction}
+            <a href={tool.link} target="_blank" rel="noopener noreferrer">
+              {tool.callToAction}
+            </a>
           </Button>
         </div>
       </div>
@@ -46,6 +48,7 @@ ToolCard.propTypes = {
     toolDescription: PropTypes.string.isRequired,
     toolCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
     callToAction: PropTypes.string.isRequired,
+    link: PropTypes.string.isRequired,
   }).isRequired,
 };
 

@@ -29,12 +29,12 @@ function TechEventDetail() {
           </div>
           <div className="space-y-8 text-primary">
             {/* Description */}
-            <div className="dark:invert">
+            <div className="dark:text-custom-white">
               <Text
                 variant="h5"
                 size="lg"
                 bold={false}
-                className="font-semibold mt-4"
+                className="font-semibold mt-4 dark:text-custom-white"
               >
                 Event Description
               </Text>
@@ -46,12 +46,12 @@ function TechEventDetail() {
             </div>
 
             {/* Dates */}
-            <div className="dark:invert">
+            <div className="dark:text-custom-white">
               <Text
                 variant="h5"
                 size="lg"
                 bold={false}
-                className="font-semibold mb-2"
+                className="font-semibold mb-2 dark:text-custom-white"
               >
                 Dates
               </Text>
@@ -61,12 +61,12 @@ function TechEventDetail() {
             </div>
 
             {/* Location */}
-            <div className="dark:invert">
+            <div className="dark:text-custom-white">
               <Text
                 variant="h5"
                 size="lg"
                 bold={false}
-                className="font-semibold mb-2"
+                className="font-semibold mb-2 dark:text-custom-white"
               >
                 Location
               </Text>
@@ -76,12 +76,12 @@ function TechEventDetail() {
             </div>
 
             {/* Agenda */}
-            <div className="dark:invert">
+            <div className="dark:text-custom-white">
               <Text
                 variant="h5"
                 size="lg"
                 bold={false}
-                className="font-semibold mb-2"
+                className="font-semibold mb-2 dark:text-custom-white"
               >
                 Agenda
               </Text>
@@ -98,17 +98,17 @@ function TechEventDetail() {
             </div>
 
             {/* Tickets */}
-            <div className="dark:invert">
+            <div className="dark:text-custom-white">
               <Text
                 variant="h5"
                 size="lg"
                 bold={false}
-                className="font-semibold mb-2"
+                className="font-semibold mb-2 dark:text-custom-white"
               >
                 Tickets
               </Text>
               <div className="flex gap-2 items-center text-base md:text-lg">
-                <img src="/src/assets/icons/solar_link-bold.png" alt="" />
+                <img src="/src/assets/icons/solar_link-bold.png" className='dark:invert' alt="" />
                 <a
                   href="https://www.techgiant.inc/positions"
                   target="_blank"

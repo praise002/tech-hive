@@ -101,8 +101,8 @@ ArticleCard.propTypes = {
     readTime: PropTypes.string.isRequired,
   }).isRequired,
   showAdminActions: PropTypes.bool,
-  isOpen: PropTypes.bool.isRequired,
-  onMenuClick: PropTypes.func.isRequired,
+  isOpen: PropTypes.bool,
+  onMenuClick: PropTypes.func,
 };
 
 export default ArticleCard;

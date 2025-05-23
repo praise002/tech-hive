@@ -2,6 +2,7 @@ import Button from './Button';
 import Text from './Text';
 import JobTags from './JobTags';
 import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 
 function JobPostingCard({ job }) {
   return (
@@ -27,7 +28,7 @@ function JobPostingCard({ job }) {
       <div className="space-y-2">
         {/* View Details Button */}
         <Button variant="outline" className="font-medium">
-          View Details
+          <Link to="/jobs/a">View Details</Link>
         </Button>
 
         {/* Posted Time */}

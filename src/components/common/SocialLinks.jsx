@@ -1,4 +1,4 @@
-import { MdOutlineSummarize } from 'react-icons/md';
+import { MdCancel, MdOutlineSummarize } from 'react-icons/md';
 import { RiShare2Line } from 'react-icons/ri';
 import { FaXTwitter, FaSquareFacebook, FaLinkedin } from 'react-icons/fa6';
 import {
@@ -11,13 +11,16 @@ import {
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import Button from './Button';
+import Text from './Text';
 
 // close if outside is being clicked
 
 // Helper function to generate share URLs
-function getShareUrl(platform, url, title, content) {
+function getShareUrl(platform, url, title, sharemsg, content) {
   const message = encodeURIComponent(`${title} ${url}`);
-  const shareMessage = `Check out this article on ${title}`;
+  // const shareMessage = `Check out this article on ${title}`;
+  const shareMessage = `${sharemsg} ${title}`;
   const body = `${content.slice(0, 20)}.\n\nRead more: ${url}`;
 
   switch (platform) {
@@ -50,8 +53,10 @@ function getShareUrl(platform, url, title, content) {
   }
 }
 
-function SocialLinks({ visible, title, url, content = '' }) {
+function SocialLinks({ visible, title, sharemsg, url, content = '' }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isSummarizeModal, setIsSummarizeModal] = useState(false);
+
   // const summary =
   //   'This article explores the future of UI/UX design, focusing on trends like AI-powered interfaces, immersive experiences, and personalized user interactions. Designers must adapt to these emerging technologies to stay ahead.';
 
@@ -74,8 +79,34 @@ function SocialLinks({ visible, title, url, content = '' }) {
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    function handleEscapeKey(event) {
+      if (event.key === 'Escape') {
+        closeSummarizeModal();
+        setIsOpen(false);
+      }
+    }
+
+    if (isSummarizeModal || isOpen) {
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isSummarizeModal, isOpen]);
+
   function handleToggleShare() {
     setIsOpen((prev) => !prev);
+  }
+
+  // Summarize handler
+  function openSummarizeModal() {
+    setIsSummarizeModal(true);
+  }
+
+  function closeSummarizeModal() {
+    setIsSummarizeModal(false);
   }
 
   const primaryIcons = [
@@ -130,7 +161,7 @@ function SocialLinks({ visible, title, url, content = '' }) {
 
   // Generic share handler
   function handleShare(platform) {
-    const shareUrl = getShareUrl(platform, url, title, content);
+    const shareUrl = getShareUrl(platform, url, title, sharemsg, content);
     window.open(shareUrl, '_blank');
     setIsOpen(false); // Close the dropdown after sharing
   }
@@ -149,7 +180,7 @@ function SocialLinks({ visible, title, url, content = '' }) {
     return (
       <div className="relative group">
         {children}
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-0 left-8  px-2 py-1 bg-black text-custom-white text-xs rounded whitespace-nowrap">
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-7 left-1/2 -translate-x-1/2 md:-translate-0 md:-top-0 md:left-8 px-2 py-1 bg-black text-custom-white text-xs rounded whitespace-nowrap">
           {text}
         </div>
       </div>
@@ -167,11 +198,64 @@ function SocialLinks({ visible, title, url, content = '' }) {
 
       {visible && (
         <ToolTip text="AI Summarize">
-          <MdOutlineSummarize
-            className="w-6 h-6"
-            aria-label="AI Article Summary icon"
-          />
+          <button type="button" onClick={openSummarizeModal}>
+            <MdOutlineSummarize
+              className="w-6 h-6"
+              aria-label="AI Article Summary icon"
+            />
+          </button>
         </ToolTip>
+      )}
+
+      {/* Modal Overlay */}
+      {isSummarizeModal && (
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+          onClick={closeSummarizeModal} // Close modal when clicking outside
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+        >
+          {/* Modal Content */}
+          <div
+            className="bg-white mt-30 mb-10 flex flex-col text-gray-900 text-xs sm:text-sm border dark:border-custom-white font-medium rounded-lg max-w-80"
+            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
+          >
+            <div className="flex justify-between items-center border-b border-gray px-2 pt-2 py-1">
+              <Text variant="h1" size="lg" className="mb-2">
+                AI-Generated Summary
+              </Text>
+
+              <button
+                type="button"
+                onClick={closeSummarizeModal}
+                aria-label="Close summary modal"
+              >
+                <MdCancel className="text-red w-6 h-6" />
+              </button>
+            </div>
+            <div className="m-3">
+              <p className="bg-neutral p-4 rounded-lg">
+                AI-driven interfaces, immersive experiences like VR and AR,
+                hyper-personalization through data and AI, accessibility for all
+                users, sustainable design practices, and the rise of no-code
+                tools are key trends shaping UI/UX in 2024, requiring designers
+                to adapt and innovate to stay ahead in the evolving digital
+                landscape.
+              </p>
+              <div className="bg-neutral mt-2 rounded-lg w-24 h-12 flex items-center justify-center gap-1">
+                <p className="bg-fill rounded-full w-2 h-2"></p>
+                <p className="bg-fill rounded-full w-2 h-2"></p>
+                <p className="bg-fill rounded-full w-2 h-2"></p>
+              </div>
+            </div>
+            <div className="bg-light flex flex-col justify-center items-center p-4 gap-2 rounded-b-lg">
+              <Button>Regenerate Summary</Button>
+              <Button variant="outline" onClick={closeSummarizeModal}>Read Full Article</Button>
+              <div></div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Primary Social Media Icons */}
@@ -220,8 +304,8 @@ function SocialLinks({ visible, title, url, content = '' }) {
 
 SocialLinks.propTypes = {
   visible: PropTypes.bool.isRequired,
-
   title: PropTypes.string.isRequired,
+  sharemsg: PropTypes.string,
   content: PropTypes.string,
   url: PropTypes.string.isRequired,
 };

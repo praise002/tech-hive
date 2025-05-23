@@ -1,9 +1,23 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Text from '../../components/common/Text';
 import Button from '../../components/common/Button';
 
 function SubscriptionStatus() {
   const [isRenewModalOpen, setIsRenewModalOpen] = useState(false);
+
+  useEffect(() => {
+    function handleEscapeKey(event) {
+      if (event.key === 'Escape') closeRenewModal();
+    }
+
+    if (isRenewModalOpen) {
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isRenewModalOpen]);
 
   function openRenewModal() {
     setIsRenewModalOpen(true);
@@ -15,7 +29,12 @@ function SubscriptionStatus() {
 
   return (
     <div className="mb-5 text-gray-900 px-20">
-      <Text variant="h3" size="lg" bold={false} className="dark:text-custom-white font-semibold mb-2">
+      <Text
+        variant="h3"
+        size="lg"
+        bold={false}
+        className="dark:text-custom-white font-semibold mb-2"
+      >
         Subscription Status
       </Text>
       <div className="border border-gray rounded-lg p-4 dark:text-custom-white">
@@ -36,6 +55,9 @@ function SubscriptionStatus() {
         <div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
           onClick={closeRenewModal} // Close modal when clicking outside
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
         >
           {/* Modal Content */}
           <div

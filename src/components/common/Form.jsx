@@ -6,13 +6,14 @@ function Form({ inputs, onSubmit, children, onClick, className }) {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm();
 
   // Handle form submission
   function submitForm(data) {
     if (onSubmit) {
-      onSubmit(data); // Call the parent's onSubmit function
+      onSubmit(data, reset); // Call the parent's onSubmit function
     }
   }
 
@@ -31,9 +32,12 @@ function Form({ inputs, onSubmit, children, onClick, className }) {
           />
 
           {input.icon && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <button type='button' 
+            onClick={input.onIconClick}
+            aria-label={input.iconAriaLabel || 'Toggle field options'}
+            className="absolute right-3 top-1/2 -translate-y-1/2">
               {input.icon}
-            </div>
+            </button>
           )}
 
           {/* Render error messages if validation fails */}
@@ -61,6 +65,8 @@ Form.propTypes = {
       type: PropTypes.string,
       rules: PropTypes.object,
       id: PropTypes.string,
+      onIconClick: PropTypes.func, 
+      iconAriaLabel: PropTypes.string,
     })
   ).isRequired, // The inputs array is required
   onSubmit: PropTypes.func,

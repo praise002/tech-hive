@@ -4,6 +4,7 @@ import { RiMapPinRangeLine } from 'react-icons/ri';
 import PropTypes from 'prop-types';
 import Button from './Button';
 import Text from './Text';
+import { Link } from 'react-router-dom';
 
 function EventCard({ event }) {
   return (
@@ -50,7 +51,7 @@ function EventCard({ event }) {
       <div className="space-y-2 mt-2">
         {/* View Details Button */}
         <Button variant="outline" className="font-medium">
-          View Details
+          <Link to="/events/a">View Details</Link>
         </Button>
 
         {/* Posted Time */}

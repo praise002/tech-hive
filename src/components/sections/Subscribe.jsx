@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import Form from '../common/Form';
 import Text from '../common/Text';
 
@@ -17,9 +18,10 @@ function Subscribe() {
     },
   ];
 
-  const handleFormSubmit = (data) => {
+  const handleFormSubmit = (data, reset) => {
     console.log('Form Data:', data);
-    alert('Form submitted successfully!');
+    toast.success("You're all set! Thanks for subscribing to our newsletter.");
+    reset();
   };
 
   return (

@@ -31,7 +31,7 @@ import ResetPassword from './features/auth/ResetPassword';
 import ResetPasswordSuccess from './features/auth/ResetPaswordSuccess';
 import { Toaster } from 'react-hot-toast';
 import Test from './features/profile/Test';
-import RichTextEditor from './features/articles/RichTextEditor';
+// import RichTextEditor from './features/articles/RichTextEditor';
 import AdminDashboard from './features/admin/AdminDashboard';
 import ArticleEditor from './features/articles/ArticleEditor';
 // import ProfileDetailEmpty from './features/profile/ProfileDetailEmpty';

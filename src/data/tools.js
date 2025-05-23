@@ -91,6 +91,7 @@ export const displayedTechTools = [
 
     toolCategories: ['UI/UX', 'Design', 'Collaboration'],
     callToAction: 'Try Figma for Free',
+    link: 'https://www.figma.com/',
   },
   {
     id: '4010',
@@ -101,6 +102,7 @@ export const displayedTechTools = [
 
     toolCategories: ['Productivity', 'Organization', 'Teamwork'],
     callToAction: 'Get Started with Notion',
+    link: 'https://www.notion.so/',
   },
   {
     id: '4011',
@@ -115,6 +117,7 @@ export const displayedTechTools = [
       'Data Science',
     ],
     callToAction: 'Explore TensorFlow',
+    link: 'https://www.tensorflow.org/',
   },
   {
     id: '4012',
@@ -125,5 +128,6 @@ export const displayedTechTools = [
 
     toolCategories: ['Development', 'Version Control', 'Collaboration'],
     callToAction: 'Sign Up for GitHub',
+    link: 'https://github.com/',
   },
 ];
