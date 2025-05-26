@@ -12,6 +12,7 @@ function ArticleCard({
   isOpen,
   onMenuClick,
   showAdminActions = false,
+  context = 'published',
 }) {
   return (
     <>
@@ -37,9 +38,19 @@ function ArticleCard({
             {isOpen && (
               <div className="absolute top-15 right-2">
                 <div className="relative bg-custom-white text-gray-800 gap-2 py-3 px-5 w-25 flex flex-col items-start rounded-md">
-                  <button>Edit</button>
-                  <button>Archive</button>
-                  <button>Delete</button>
+                  {context === 'published' ? (
+                    <>
+                      <button>Edit</button>
+                      <button>Archive</button>
+                      <button>Delete</button>
+                    </>
+                  ) : (
+                    <>
+                      <button>Restore</button>
+                      <button>Delete</button>
+                    </>
+                  )}
+
                   <div
                     className="absolute -top-3 right-3 w-4 h-4 bg-white"
                     style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}
@@ -103,6 +114,7 @@ ArticleCard.propTypes = {
   showAdminActions: PropTypes.bool,
   isOpen: PropTypes.bool,
   onMenuClick: PropTypes.func,
+  context: PropTypes.string,
 };
 
 export default ArticleCard;

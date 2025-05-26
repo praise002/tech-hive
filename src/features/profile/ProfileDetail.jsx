@@ -2,21 +2,23 @@ import { RiDraftFill } from 'react-icons/ri';
 import { MdArticle, MdLibraryBooks } from 'react-icons/md';
 import { BiMessageRounded } from 'react-icons/bi';
 import { FaRegBookmark } from 'react-icons/fa6';
-import ArticleCard from '../../components/common/ArticleCard';
+// import ArticleCard from '../../components/common/ArticleCard';
 import Text from '../../components/common/Text';
 import { useState } from 'react';
+import Articles from '../../components/sections/Articles';
+import { BsFillArchiveFill } from 'react-icons/bs';
 
-const article = {
-  image: '/src/assets/articles/the-future-ui-ux.jpg',
-  title: 'The Power of Data: How Analytics is Driving Business Decisions',
-  description:
-    'Learn how data analytics is transforming industries and helping businesses make smarter, data-driven decisions...',
-  tags: ['Data Analytics', 'Business', 'Technology'],
-  reactions: ['❤️', '😍', '👍', '🔥'],
-  reactionsCount: 105,
-  posted: '1 week ago',
-  readTime: '7 min',
-};
+// const article = {
+//   image: '/src/assets/articles/the-future-ui-ux.jpg',
+//   title: 'The Power of Data: How Analytics is Driving Business Decisions',
+//   description:
+//     'Learn how data analytics is transforming industries and helping businesses make smarter, data-driven decisions...',
+//   tags: ['Data Analytics', 'Business', 'Technology'],
+//   reactions: ['❤️', '😍', '👍', '🔥'],
+//   reactionsCount: 105,
+//   posted: '1 week ago',
+//   readTime: '7 min',
+// };
 
 function ProfileDetail() {
   const [isActiveTab, setIsActiveTab] = useState('saved');
@@ -52,6 +54,12 @@ function ProfileDetail() {
       icon: <MdLibraryBooks className="w-5 h-5" />,
       published: [1005, 1006],
     },
+    {
+      id: 'archived',
+      label: 'Archived Articles',
+      icon: <BsFillArchiveFill className="w-5 h-5" />,
+      published: [1005, 1006],
+    },
   ];
 
   function SavedContent() {
@@ -71,16 +79,17 @@ function ProfileDetail() {
           variant="h3"
           size="lg"
           bold={false}
-          className="font-semibold mb-1 md:text-2xl dark:text-custom-white"
+          className="font-semibold mb-1 md:text-2xl dark:text-custom-white lg:mt-4 px-4 lg:px-8"
         >
           Saved Articles
         </Text>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+        {/* <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
           <ArticleCard article={article} />
           <ArticleCard article={article} />
           <ArticleCard article={article} />
           <ArticleCard article={article} />
-        </div>
+        </div> */}
+        <Articles marginTop="8" visibleHeader={false} />
       </>
     );
   }
@@ -316,16 +325,43 @@ function ProfileDetail() {
           variant="h3"
           size="lg"
           bold={false}
-          className="font-semibold mb-1 md:text-2xl dark:text-custom-white"
+          className="font-semibold mb-1 md:text-2xl dark:text-custom-white lg:mt-4 px-4 lg:px-8"
         >
           Published Articles
         </Text>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+        {/* <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
           <ArticleCard article={article} />
           <ArticleCard article={article} />
           <ArticleCard article={article} />
           <ArticleCard article={article} />
-        </div>
+        </div> */}
+        <Articles marginTop="8" showAdminActions={true} visibleHeader={false} />
+      </>
+    );
+  }
+
+  function ArchivedContent() {
+    return (
+      <>
+        {/* <div className="md:w-xs w-60 dark:text-custom-white">
+          <img
+            className="w-full h-full"
+            src="/src/assets/icons/amico.png"
+            alt="An empty profile"
+          />
+          <div className="text-xs md:text-sm text-center mt-4">
+            No archived articles yet!
+          </div>
+        </div> */}
+        <Text
+          variant="h3"
+          size="lg"
+          bold={false}
+          className="font-semibold mb-1 md:text-2xl dark:text-custom-white lg:mt-4 px-4 lg:px-8"
+        >
+          Archived Articles
+        </Text>
+        <Articles marginTop="8" visibleHeader={false} showAdminActions={true} context="archived" />
       </>
     );
   }
@@ -342,6 +378,8 @@ function ProfileDetail() {
         return <SubmittedContent />;
       case 'published':
         return <PublishedContent />;
+      case 'archived':
+        return <ArchivedContent />;
       default:
         return null;
     }
@@ -376,8 +414,8 @@ function ProfileDetail() {
       </div>
 
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-4 items-center mt-30 md:mt-50">
-          <div className="flex bg-light gap-2 p-2 rounded-md">
+        <div className="flex flex-col gap-4 mt-30 md:mt-50">
+          <div className="flex place-self-center bg-light gap-2 p-2 rounded-md">
             {profileTabs.map((tab) => (
               <button
                 key={tab.id}
@@ -398,11 +436,11 @@ function ProfileDetail() {
             ))}
           </div>
 
-          <div className="py-8 flex justify-center">
-            <div className="dark:text-custom-white">
-              <div className="p-4 border border-gray rounded-lg">
-                {getContent()}
-              </div>
+          <div className="py-8">
+            {/* flex justify-center */}
+
+            <div className="dark:text-custom-white p-4 border border-gray rounded-lg">
+              {getContent()}
             </div>
           </div>
         </div>

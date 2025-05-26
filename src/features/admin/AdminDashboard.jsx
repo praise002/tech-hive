@@ -112,6 +112,7 @@ function AdminDashboard() {
     status: PropTypes.string,
   };
 
+  // Remove later since Django comes with admin dashboard(left with reviewer, editor actions)
   function ManageUsers() {
     const users = [
       {
@@ -289,6 +290,8 @@ function AdminDashboard() {
   }
 
   function ManageContent() {
+    const [activeRowIndex, setActiveRowIndex] = useState(null);
+
     const contentStats = [
       { label: 'All posts', count: 24 },
       { label: 'Drafts', count: 2 },
@@ -424,24 +427,55 @@ function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="lg:text-base lg:divide-y-0 text-sm divide-y divide-gray-200 dark:divide-gray-700">
-                {tableData.map(({ title, author, date, role, status }) => (
-                  <tr key={title} className="space-y-2 lg:space-y-0">
-                    <TableCell className="lg:py-4 pt-2 lg:pt-0">
-                      {title}
-                    </TableCell>
+                {tableData.map(
+                  ({ title, author, date, role, status }, index) => (
+                    <tr key={title} className="space-y-2 lg:space-y-0">
+                      <TableCell className="lg:py-4 pt-2 lg:pt-0">
+                        {title}
+                      </TableCell>
 
-                    <TableCell className="lg:py-4">{author}</TableCell>
+                      <TableCell className="lg:py-4">{author}</TableCell>
 
-                    <TableCell className="lg:py-4">{date}</TableCell>
-                    <TableCell className="py-4 lg:py-0">
-                      <RoleSpan role={role} />
-                    </TableCell>
-                    <TableCell className="py-2 lg:py-0">
-                      <StatusSpan status={status} />
-                    </TableCell>
-                    <td className="px-6 py-4 cursor-pointer">...</td>
-                  </tr>
-                ))}
+                      <TableCell className="lg:py-4">{date}</TableCell>
+                      <TableCell className="py-4 lg:py-0">
+                        <RoleSpan role={role} />
+                      </TableCell>
+                      <TableCell className="py-2 lg:py-0">
+                        <StatusSpan status={status} />
+                      </TableCell>
+                      <td className="px-6 py-4 cursor-pointer relative">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setActiveRowIndex(
+                              activeRowIndex === index ? null : index
+                            )
+                          }
+                        >
+                          ...
+                        </button>
+                        {activeRowIndex === index && (
+                          <div className="absolute top-15 right-12">
+                            <div className="relative bg-custom-white text-gray-800 gap-2 py-3 px-5 w-50 flex flex-col items-start rounded-md">
+                              {/* TODO: UNSURE FOR NOW */}
+                              <button>View Details</button>
+                              <button>Publish/Reject</button>
+                              <button>Provide Feedback</button>
+
+                              <div
+                                className="absolute -top-3 right-3 w-4 h-4 bg-white"
+                                style={{
+                                  clipPath:
+                                    'polygon(50% 0%, 0% 100%, 100% 100%)',
+                                }}
+                              ></div>
+                            </div>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                )}
               </tbody>
             </table>
           </div>
@@ -720,7 +754,10 @@ function AdminDashboard() {
     );
   }
 
+  // ONLY ADMIN
   function Settings() {
+    const [isToggle, setIsToggle] = useState(false);
+
     return (
       <div className="p-8">
         <form className="space-y-6">
@@ -733,7 +770,7 @@ function AdminDashboard() {
             />
           </div>
 
-          <div>
+          {/* <div>
             <label htmlFor="">Password</label>
             <div className="relative">
               <input
@@ -747,7 +784,7 @@ function AdminDashboard() {
                 alt="An icon to toggle the visibility of password"
               />
             </div>
-          </div>
+          </div> */}
 
           <div>
             <label htmlFor="">Tagline</label>
@@ -767,7 +804,7 @@ function AdminDashboard() {
             </select>
           </div>
 
-          <div className="">
+          {/* <div className="">
             <label htmlFor="" className="block">
               Color
             </label>
@@ -775,6 +812,20 @@ function AdminDashboard() {
               <option value="">Pink</option>
               <option value="purple">Purple</option>
             </select>
+          </div> */}
+
+          <div className="">
+            <label htmlFor="themeColor" className="block">
+              Color
+            </label>
+            <div className="border border-gray-300 rounded-md">
+              <input
+                type="color"
+                id="themeColor"
+                value="#a32816"
+                className="w-20 h-10 p-1 cursor-pointer"
+              />
+            </div>
           </div>
 
           <div className="">
@@ -789,9 +840,14 @@ function AdminDashboard() {
 
           <div className="flex items-center justify-between">
             <p>Enable Two-factor Authentication</p>
-            <p>
-              <BsToggleOn />
-            </p>
+            <button
+              type="button"
+              onClick={() => setIsToggle(!isToggle)}
+              aria-pressed={isToggle}
+              aria-label="Toggle two-factor authentication"
+            >
+              {isToggle ? <BsToggleOn /> : <BsToggleOff />}
+            </button>
           </div>
 
           <Button className="w-full">Save Changes</Button>
@@ -860,7 +916,7 @@ function AdminDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-4  mt-5">
+        <div className="flex flex-col gap-4 mt-5">
           <div className="flex place-self-center bg-light gap-2 p-2 rounded-md text-primary">
             {adminTabs.map((tab) => (
               <button
@@ -883,7 +939,7 @@ function AdminDashboard() {
           </div>
 
           <div className="py-8">
-            <div className=" lg:p-4 p-0 border border-gray rounded-lg">
+            <div className="lg:p-4 p-0 border border-gray rounded-lg">
               {getContent()}
 
               {/* Static Pagination */}
