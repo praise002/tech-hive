@@ -9,38 +9,66 @@ import StarterKit from '@tiptap/starter-kit';
 import Button from '../../components/common/Button';
 import Text from '../../components/common/Text';
 
-import Placeholder from '@tiptap/extension-placeholder';
 import MenuBar from './MenuBar';
 import TextStyle from '@tiptap/extension-text-style';
 import ListItem from '@tiptap/extension-list-item';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { common, createLowlight } from 'lowlight';
+import Color from '@tiptap/extension-color';
+import Image from '@tiptap/extension-image';
+import Table from '@tiptap/extension-table';
+import TableRow from '@tiptap/extension-table-row';
+import TableHeader from '@tiptap/extension-table-header';
+import TableCell from '@tiptap/extension-table-cell';
 
-// define your extension array
+// create a lowlight instance with all languages loaded or use common
+const lowlight = createLowlight(common);
+
 const extensions = [
   TextStyle.configure({ types: [ListItem.name] }),
-  StarterKit.configure({
-    heading: {
-      levels: [1, 2, 3, 4, 5, 6],
-    },
-    bulletList: {
-      keepMarks: true,
-      keepAttributes: false, // TODO : Making this as `false` becase marks are not preserved when I try to preserve attrs, awaiting a bit of help
-    },
-    orderedList: {
-      keepMarks: true,
-      keepAttributes: false, // TODO : Making this as `false` becase marks are not preserved when I try to preserve attrs, awaiting a bit of help
-    },
+  Color,
+  Image,
+  Table.configure({
+    resizable: true,
   }),
-  Placeholder.configure({
-    placeholder: 'Start writing your article...',
+  TableRow,
+  TableHeader,
+  TableCell,
+  StarterKit.configure({
+    // Disable the default CodeBlock extension
+    codeBlock: false,
+  }),
+  CodeBlockLowlight.configure({
+    lowlight,
+    defaultLanguage: 'javascript',
   }),
 ];
-const content = '';
+
+let content = `<pre><code class="language-javascript">const foo = "bar"</code></pre>
+      <pre><code class="language-css">body { color: red }</code></pre>
+      <pre><code class="language-python">name = "bar"</code></pre>
+      <img src="https://placehold.co/800x400" />
+      <table>
+          <tbody>
+            <tr>
+              <th>Name</th>
+              <th colspan="3">Description</th>
+            </tr>
+            <tr>
+              <td>Cyndi Lauper</td>
+              <td>Singer</td>
+              <td>Songwriter</td>
+              <td>Actress</td>
+            </tr>
+          </tbody>
+        </table>`;
+
+content = '';
 
 function RichTextEditor() {
   const editor = useEditor({
     extensions,
     content,
-    placeholder: 'Start writing your article...',
   });
   // Show contributor's Dashboard depending on who logged in using auth later
   return (
@@ -63,14 +91,15 @@ function RichTextEditor() {
         </button>
       </div>
 
-      <div className="p-2 border border-gray-800 dark:border-custom-white rounded-md">
+      <div className="w-full p-2 border border-gray-800 dark:border-custom-white rounded-md">
         <EditorProvider
           slotBefore={<MenuBar />}
           extensions={extensions}
           content={content}
           editorProps={{
             attributes: {
-              class: 'focus:outline-none min-h-[300px]',
+              class:
+                'w-full max-w-none list-decimal focus:outline-none min-h-[300px] prose dark:prose-invert',
             },
           }}
         ></EditorProvider>
@@ -88,3 +117,12 @@ function RichTextEditor() {
 }
 // for admin and contributor, change the title based on the role
 export default RichTextEditor;
+
+// NOTE: Tell user to press triple enter to exit code block
+// TODO: FIX CODE LIGHTER, FIX UNDO NOT DISABLING
+// use react syntax highlighter
+// create a custom component to replace the default code block renderer
+// just like the one shown in syntax highlighter docs
+// Finish reading the tiptap docs
+// Placeholder issue
+// Style list-disc: can't use default one

@@ -1,7 +1,17 @@
 import { useCurrentEditor } from '@tiptap/react';
+import { useCallback } from 'react';
 
 const MenuBar = () => {
   const { editor } = useCurrentEditor();
+
+  // TODO: GET THE URL FROM INPUT:FILE LATER
+  const addImage = useCallback(() => {
+    const url = window.prompt('URL');
+
+    if (url) {
+      editor.chain().focus().setImage({ src: url }).run();
+    }
+  }, [editor]);
 
   if (!editor) {
     return null;
@@ -162,10 +172,163 @@ const MenuBar = () => {
         </button>
         <button
           onClick={() => editor.chain().focus().setColor('#a32816').run()}
-          className={ButtonClass(editor.isActive('textStyle', { color: '#a32816' }))}
+          className={ButtonClass(
+            editor.isActive('textStyle', { color: '#a32816' })
+          )}
         >
           Red
         </button>
+        <button className={ButtonClass(false)} onClick={addImage}>
+          Set image
+        </button>
+        <button
+          className={ButtonClass(false)}
+          onClick={() =>
+            editor
+              .chain()
+              .focus()
+              .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+              .run()
+          }
+        >
+          Insert table
+        </button>
+        <button
+          className={ButtonClass(false)}
+          onClick={() => editor.chain().focus().addColumnBefore().run()}
+        >
+          Add column before
+        </button>
+        <button
+          className={ButtonClass(false)}
+          onClick={() => editor.chain().focus().addColumnAfter().run()}
+        >
+          Add column after
+        </button>
+        <button
+          className={ButtonClass(false)}
+          onClick={() => editor.chain().focus().deleteColumn().run()}
+        >
+          Delete column
+        </button>
+        <button
+          className={ButtonClass(false)}
+          onClick={() => editor.chain().focus().addRowBefore().run()}
+        >
+          Add row before
+        </button>
+        <button
+          className={ButtonClass(false)}
+          onClick={() => editor.chain().focus().addRowAfter().run()}
+        >
+          Add row after
+        </button>
+        <button
+          className={ButtonClass(false)}
+          onClick={() => editor.chain().focus().deleteRow().run()}
+        >
+          Delete row
+        </button>
+        <button
+          className={ButtonClass(false)}
+          onClick={() => editor.chain().focus().deleteTable().run()}
+        >
+          Delete table
+        </button>
+        <button
+          className={ButtonClass(false)}
+          onClick={() => editor.chain().focus().mergeCells().run()}
+        >
+          Merge cells
+        </button>
+        <button
+          className={ButtonClass(false)}
+          onClick={() => editor.chain().focus().splitCell().run()}
+        >
+          Split cell
+        </button>
+        <button
+          className={ButtonClass(false)}
+          onClick={() => editor.chain().focus().toggleHeaderColumn().run()}
+        >
+          Toggle header column
+        </button>
+        <button
+          className={ButtonClass(false)}
+          onClick={() => editor.chain().focus().toggleHeaderRow().run()}
+        >
+          Toggle header row
+        </button>
+        <button
+          className={ButtonClass(false)}
+          onClick={() => editor.chain().focus().toggleHeaderCell().run()}
+        >
+          Toggle header cell
+        </button>
+        <button
+          className={ButtonClass(false)}
+          onClick={() => editor.chain().focus().mergeOrSplit().run()}
+        >
+          Merge or split
+        </button>
+        <button
+          className={ButtonClass(false)}
+          onClick={() =>
+            editor.chain().focus().setCellAttribute('colspan', 2).run()
+          }
+        >
+          Set cell attribute
+        </button>
+        <button
+          className={ButtonClass(false)}
+          onClick={() => editor.chain().focus().fixTables().run()}
+        >
+          Fix tables
+        </button>
+        <button
+          className={ButtonClass(false)}
+          onClick={() => editor.chain().focus().goToNextCell().run()}
+        >
+          Go to next cell
+        </button>
+        <button
+          className={ButtonClass(false)}
+          onClick={() => editor.chain().focus().goToPreviousCell().run()}
+        >
+          Go to previous cell
+        </button>
+        {/* For the options, everything in common */}
+        {/* <div className="language-selector">
+          <select
+            value={editor.getAttributes('codeBlock').language || 'javascript'}
+            onChange={(e) => {
+              if (editor.isActive('codeBlock')) {
+                editor
+                  .chain()
+                  .focus()
+                  .updateAttributes('codeBlock', {
+                    language: e.target.value,
+                  })
+                  .run();
+              } else {
+                editor
+                  .chain()
+                  .focus()
+                  .toggleCodeBlock({ language: e.target.value })
+                  .run();
+              }
+            }}
+            disabled={!editor.isActive('codeBlock')}
+          >
+            <option value="none">None</option>
+            <option value="auto">Auto</option>
+            <option value="javascript">JavaScript</option>
+            <option value="typescript">TypeScript</option>
+            <option value="python">Python</option>
+            <option value="css">CSS</option>
+            <option value="html">HTML</option>
+          </select>
+        </div> */}
       </div>
     </div>
   );
