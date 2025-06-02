@@ -1,9 +1,4 @@
-import {
-  useEditor,
-  FloatingMenu,
-  BubbleMenu,
-  EditorProvider,
-} from '@tiptap/react';
+import { FloatingMenu, EditorProvider } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 
 import Button from '../../components/common/Button';
@@ -20,6 +15,9 @@ import Table from '@tiptap/extension-table';
 import TableRow from '@tiptap/extension-table-row';
 import TableHeader from '@tiptap/extension-table-header';
 import TableCell from '@tiptap/extension-table-cell';
+import Youtube from '@tiptap/extension-youtube';
+import Link from '@tiptap/extension-link';
+import BubbleMenuFromProvider from './BubbleMenuFromProvider';
 
 // create a lowlight instance with all languages loaded or use common
 const lowlight = createLowlight(common);
@@ -42,6 +40,80 @@ const extensions = [
     lowlight,
     defaultLanguage: 'javascript',
   }),
+  Youtube.configure({
+    controls: false,
+    nocookie: true,
+  }),
+  Link.configure({
+    openOnClick: false,
+    defaultProtocol: 'https',
+    protocols: ['http', 'https'],
+    isAllowedUri: (url, ctx) => {
+      try {
+        // construct URL
+        const parsedUrl = url.includes(':')
+          ? new URL(url)
+          : new URL(`${ctx.defaultProtocol}://${url}`);
+
+        // use default validation
+        if (!ctx.defaultValidate(parsedUrl.href)) {
+          return false;
+        }
+
+        // disallowed protocols
+        const disallowedProtocols = ['ftp', 'file', 'mailto'];
+        const protocol = parsedUrl.protocol.replace(':', '');
+
+        if (disallowedProtocols.includes(protocol)) {
+          return false;
+        }
+
+        // only allow protocols specified in ctx.protocols
+        const allowedProtocols = ctx.protocols.map((p) =>
+          typeof p === 'string' ? p : p.scheme
+        );
+
+        if (!allowedProtocols.includes(protocol)) {
+          return false;
+        }
+
+        // disallowed domains
+        const disallowedDomains = [
+          'example-phishing.com',
+          'malicious-site.net',
+        ];
+        const domain = parsedUrl.hostname;
+
+        if (disallowedDomains.includes(domain)) {
+          return false;
+        }
+
+        // all checks have passed
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    shouldAutoLink: (url) => {
+      try {
+        // construct URL
+        const parsedUrl = url.includes(':')
+          ? new URL(url)
+          : new URL(`https://${url}`);
+
+        // only auto-link if the domain is not in the disallowed list
+        const disallowedDomains = [
+          'example-no-autolink.com',
+          'another-no-autolink.com',
+        ];
+        const domain = parsedUrl.hostname;
+
+        return !disallowedDomains.includes(domain);
+      } catch {
+        return false;
+      }
+    },
+  }),
 ];
 
 let content = `<pre><code class="language-javascript">const foo = "bar"</code></pre>
@@ -61,15 +133,17 @@ let content = `<pre><code class="language-javascript">const foo = "bar"</code></
               <td>Actress</td>
             </tr>
           </tbody>
-        </table>`;
+        </table>
+        <div data-youtube-video>
+        <iframe src="https://www.youtube.com/watch?v=3lTUAWOgoHs"></iframe>
+      </div>
+      <p>
+          Wow, this editor has support for links to the whole <a href="https://en.wikipedia.org/wiki/World_Wide_Web">world wide web</a>. We tested a lot of URLs and I think you can add *every URL* you want. Isn’t that cool? Let’s try <a href="https://statamic.com/">another one!</a> Yep, seems to work.
+        </p>`;
 
-content = '';
+// content = '';
 
 function RichTextEditor() {
-  const editor = useEditor({
-    extensions,
-    content,
-  });
   // Show contributor's Dashboard depending on who logged in using auth later
   return (
     <div className="py-20 px-4 sm:px-6 lg:px-8">
@@ -96,17 +170,20 @@ function RichTextEditor() {
           slotBefore={<MenuBar />}
           extensions={extensions}
           content={content}
+          editable={true} // to allow bubble bar display
           editorProps={{
             attributes: {
               class:
-                'w-full max-w-none list-decimal focus:outline-none min-h-[300px] prose dark:prose-invert',
+                'w-full max-w-none focus:outline-none min-h-[300px] prose md:prose-lg lg:prose-xl dark:prose-invert',
             },
           }}
-        ></EditorProvider>
+        >
+          {/* It has to be inside for it to work */}
+          <BubbleMenuFromProvider />
+        </EditorProvider>
       </div>
 
-      {/* <FloatingMenu editor={editor}>+</FloatingMenu>
-      <BubbleMenu editor={editor}>+</BubbleMenu> */}
+      {/* <FloatingMenu editor={editor}>+</FloatingMenu> */}
 
       <div className="flex gap-2 mt-5">
         <Button variant="outline">Save as Draft</Button>
@@ -120,7 +197,6 @@ export default RichTextEditor;
 
 // NOTE: Tell user to press triple enter to exit code block
 // TODO: FIX CODE LIGHTER, FIX UNDO NOT DISABLING
-// use react syntax highlighter
 // create a custom component to replace the default code block renderer
 // just like the one shown in syntax highlighter docs
 // Finish reading the tiptap docs

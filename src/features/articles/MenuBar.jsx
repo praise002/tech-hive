@@ -1,5 +1,12 @@
 import { useCurrentEditor } from '@tiptap/react';
 import { useCallback } from 'react';
+import toast from 'react-hot-toast';
+
+export function ButtonClass(isActive) {
+  return `p-2 rounded-lg cursor-pointer focus-visible:outline-0 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-red-300 transition duration-300 ${
+    isActive ? 'bg-red text-white hover:bg-red-800' : 'bg-gray-200 text-black'
+  }`;
+}
 
 const MenuBar = () => {
   const { editor } = useCurrentEditor();
@@ -13,14 +20,49 @@ const MenuBar = () => {
     }
   }, [editor]);
 
+  const setLink = useCallback(() => {
+    const previousUrl = editor.getAttributes('link').href;
+    const url = window.prompt('URL', previousUrl);
+
+    // cancelled
+    if (url === null) {
+      return;
+    }
+
+    // empty
+    if (url === '') {
+      editor.chain().focus().extendMarkRange('link').unsetLink().run();
+
+      return;
+    }
+
+    // update link
+    try {
+      editor
+        .chain()
+        .focus()
+        .extendMarkRange('link')
+        .setLink({ href: url })
+        .run();
+    } catch (e) {
+      toast.error(e.message);
+    }
+  }, [editor]);
+
   if (!editor) {
     return null;
   }
 
-  function ButtonClass(isActive) {
-    return `p-2 rounded-lg cursor-pointer focus-visible:outline-0 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-red-300 transition duration-300 ${
-      isActive ? 'bg-red text-white hover:bg-red-800' : 'bg-gray-200 text-black'
-    }`;
+  function addYoutubeVideo() {
+    const url = prompt('Enter YouTube URL');
+
+    if (url) {
+      editor.commands.setYoutubeVideo({
+        src: url,
+        width: '100%',
+        height: '315',
+      });
+    }
   }
 
   return (
@@ -159,7 +201,7 @@ const MenuBar = () => {
         <button
           onClick={() => editor.chain().focus().undo().run()}
           disabled={!editor.can().chain().focus().undo().run()}
-          className="bg-gray-200 text-black p-2 rounded-lg cursor-pointer focus-visible:outline-0 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-red-300 transition duration-300"
+          className="bg-gray-200 text-black p-2 rounded-lg cursor-pointer focus-visible:outline-0 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-red-300 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Undo
         </button>
@@ -296,6 +338,26 @@ const MenuBar = () => {
           onClick={() => editor.chain().focus().goToPreviousCell().run()}
         >
           Go to previous cell
+        </button>
+        <button
+          type="button"
+          className={ButtonClass(false)}
+          onClick={addYoutubeVideo}
+        >
+          Add YouTube Video
+        </button>
+        <button
+          onClick={setLink}
+          className={ButtonClass(editor.isActive('link'))}
+        >
+          Set link
+        </button>
+        <button
+          onClick={() => editor.chain().focus().unsetLink().run()}
+          disabled={!editor.isActive('link')}
+          className="bg-gray-200 text-black p-2 rounded-lg cursor-pointer focus-visible:outline-0 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-red-300 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Unset link
         </button>
         {/* For the options, everything in common */}
         {/* <div className="language-selector">

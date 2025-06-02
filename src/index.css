@@ -31,3 +31,85 @@
 .active {
   @apply text-red-700;
 }
+
+.ProseMirror ul li,
+.ProseMirror ol li {
+  @apply text-gray-800 dark:text-custom-white my-2 ml-6;
+}
+
+/* Add spacing between nested lists */
+.ProseMirror ul ul,
+.ProseMirror ol ol,
+.ProseMirror ul ol,
+.ProseMirror ol ul {
+  @apply mt-2 mb-2;
+}
+
+/* Style for list item markers */
+.ProseMirror ul li::marker,
+.ProseMirror ol li::marker {
+  @apply text-gray-800;
+}
+
+.dark .ProseMirror ul li::marker,
+.dark .ProseMirror ol li::marker {
+  color: #fcfcfc !important;
+}
+
+/* In your global.css or similar file */
+.ProseMirror table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 1rem 0;
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
+
+.ProseMirror th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+}
+
+.ProseMirror td {
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+}
+
+.ProseMirror .selectedCell {
+  background-color: #dbeafe;
+}
+
+/* Dark mode */
+.dark .ProseMirror table th {
+  background-color: #374151;
+  border-color: #4b5563;
+}
+
+.dark .ProseMirror table td {
+  border-color: #4b5563;
+}
+
+.dark .ProseMirror .selectedCell {
+  background-color: #1e3a8a;
+}
+
+.ProseMirror iframe {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  max-width: 100%;
+  margin-inline: auto;
+  @apply lg:w-[80%] lg:mx-auto;
+}
+
+.ProseMirror img {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  margin-inline: auto;
+  @apply lg:w-[80%] lg:mx-auto;
+}
