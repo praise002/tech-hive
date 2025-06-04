@@ -66,7 +66,7 @@ const MenuBar = () => {
   }
 
   return (
-    <div className="">
+    <div>
       <div className="space-x-2 space-y-2">
         <button
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -358,6 +358,18 @@ const MenuBar = () => {
           className="bg-gray-200 text-black p-2 rounded-lg cursor-pointer focus-visible:outline-0 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-red-300 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Unset link
+        </button>
+        <button
+          onClick={() => editor.chain().focus().setTextAlign('left').run()}
+          className={ButtonClass(editor.isActive({ textAlign: 'left' }))}
+        >
+          Left
+        </button>
+        <button
+          onClick={() => editor.chain().focus().setTextAlign('center').run()}
+          className={ButtonClass(editor.isActive({ textAlign: 'center' }))}
+        >
+          Center
         </button>
         {/* For the options, everything in common */}
         {/* <div className="language-selector">

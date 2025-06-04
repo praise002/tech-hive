@@ -1,4 +1,4 @@
-import { FloatingMenu, EditorProvider } from '@tiptap/react';
+import { EditorProvider } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 
 import Button from '../../components/common/Button';
@@ -17,24 +17,45 @@ import TableHeader from '@tiptap/extension-table-header';
 import TableCell from '@tiptap/extension-table-cell';
 import Youtube from '@tiptap/extension-youtube';
 import Link from '@tiptap/extension-link';
+import TextAlign from '@tiptap/extension-text-align';
+import Placeholder from '@tiptap/extension-placeholder';
+import Typography from '@tiptap/extension-typography';
 import BubbleMenuFromProvider from './BubbleMenuFromProvider';
+import FloatingMenuFromProvider from './FloatingMenuFromProvider';
+import ArticleMetadata from './ArticleMetadata';
 
 // create a lowlight instance with all languages loaded or use common
 const lowlight = createLowlight(common);
 
 const extensions = [
-  TextStyle.configure({ types: [ListItem.name] }),
+  TextStyle.configure({ types: [ListItem.name] }), // tells the color to work with ListItem
   Color,
   Image,
-  Table.configure({
-    resizable: true,
-  }),
   TableRow,
   TableHeader,
   TableCell,
+  Typography,
   StarterKit.configure({
     // Disable the default CodeBlock extension
     codeBlock: false,
+  }),
+  Table.configure({
+    resizable: true,
+  }),
+  Placeholder.configure({
+    placeholder: 'Write something …',
+    // Use different placeholders depending on the node type:
+    // placeholder: ({ node }) => {
+    //   if (node.type.name === 'heading') {
+    //     return 'What’s the title?'
+    //   }
+
+    //   return 'Can you add some further context?'
+    // },
+  }),
+  TextAlign.configure({
+    types: ['heading', 'paragraph'],
+    alignments: ['left', 'center'],
   }),
   CodeBlockLowlight.configure({
     lowlight,
@@ -116,7 +137,12 @@ const extensions = [
   }),
 ];
 
-let content = `<pre><code class="language-javascript">const foo = "bar"</code></pre>
+let content = `<h2>Heading</h2>
+        <p style="text-align: center">first paragraph</p>
+        <p style="text-align: left">second paragraph</p>
+        <p>“I have been suffering from Typomania all my life, a sickness that is incurable but not lethal.”</p>
+        <p>— Erik Spiekermann, December 2008</p>
+        <pre><code class="language-javascript">const foo = "bar"</code></pre>
       <pre><code class="language-css">body { color: red }</code></pre>
       <pre><code class="language-python">name = "bar"</code></pre>
       <img src="https://placehold.co/800x400" />
@@ -141,7 +167,7 @@ let content = `<pre><code class="language-javascript">const foo = "bar"</code></
           Wow, this editor has support for links to the whole <a href="https://en.wikipedia.org/wiki/World_Wide_Web">world wide web</a>. We tested a lot of URLs and I think you can add *every URL* you want. Isn’t that cool? Let’s try <a href="https://statamic.com/">another one!</a> Yep, seems to work.
         </p>`;
 
-// content = '';
+content = '';
 
 function RichTextEditor() {
   // Show contributor's Dashboard depending on who logged in using auth later
@@ -165,7 +191,9 @@ function RichTextEditor() {
         </button>
       </div>
 
-      <div className="w-full p-2 border border-gray-800 dark:border-custom-white rounded-md">
+      <ArticleMetadata />
+
+      <div className="w-full">
         <EditorProvider
           slotBefore={<MenuBar />}
           extensions={extensions}
@@ -174,12 +202,13 @@ function RichTextEditor() {
           editorProps={{
             attributes: {
               class:
-                'w-full max-w-none focus:outline-none min-h-[300px] prose md:prose-lg lg:prose-xl dark:prose-invert',
+                'mt-2 w-full max-w-none focus:outline-none border border-gray-800 dark:border-custom-white rounded-md px-2 min-h-[300px] prose md:prose-lg lg:prose-xl dark:prose-invert',
             },
           }}
         >
           {/* It has to be inside for it to work */}
           <BubbleMenuFromProvider />
+          <FloatingMenuFromProvider />
         </EditorProvider>
       </div>
 
@@ -196,9 +225,6 @@ function RichTextEditor() {
 export default RichTextEditor;
 
 // NOTE: Tell user to press triple enter to exit code block
-// TODO: FIX CODE LIGHTER, FIX UNDO NOT DISABLING
-// create a custom component to replace the default code block renderer
+// TODO: create a custom component to replace the default code block renderer
 // just like the one shown in syntax highlighter docs
-// Finish reading the tiptap docs
-// Placeholder issue
-// Style list-disc: can't use default one
+// for images to upload with input:file

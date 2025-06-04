@@ -113,3 +113,16 @@
   margin-inline: auto;
   @apply lg:w-[80%] lg:mx-auto;
 }
+
+/* Placeholder (at the top) */
+p.is-editor-empty:first-child::before {
+  @apply text-gray-800;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.dark p.is-editor-empty:first-child::before {
+  @apply text-custom-white;
+}
