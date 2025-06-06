@@ -1,9 +1,13 @@
+import { useState } from 'react';
 import Button from '../../components/common/Button';
 import MarkdownTags from './MarkdownTags';
+import TagInput from './TagInput';
 
-const tags = ['Cloud Computing', 'Technology', 'Innovation'];
 const suggestedTags = [
   'JavaScript',
+  "Java",
+  "Django",
+  "Fastapi",
   'React',
   'Node.js',
   'CSS',
@@ -13,9 +17,46 @@ const suggestedTags = [
   'Database',
   'Cloud',
   'DevOps',
+  "Tag 1",
+  "Tag 2",
+  "Tag 3",
+  "Tag 4",
+  "Tag 5",
+  "Tag 6",
 ];
 
 function ArticleMetadata() {
+  const [tags, setTags] = useState([
+    'Cloud Computing',
+    'Technology',
+    'Innovation',
+  ]);
+  const [inputValue, setInputValue] = useState('');
+
+  function handleAddTag(tag) {
+    if (!tags.includes(tag) && tags.length < 5) {
+      setTags((prevTags) => [...prevTags, tag]);
+      setInputValue('');
+    }
+  }
+
+  function handleRemoveTag(tagToRemove) {
+    setTags(tags.filter((tag) => tag !== tagToRemove));
+  }
+
+  function handleInputChange(e) {
+    setInputValue(e.target.value);
+  }
+
+  function handleInputKeyDown(e) {
+    if (e.key === 'Enter' && inputValue.trim()) {
+      e.preventDefault();
+      handleAddTag(inputValue.trim());
+    } else if (e.key === 'Backspace' && !inputValue && tags.length > 0) {
+      handleRemoveTag(tags[tags.length - 1]);
+    }
+  }
+
   return (
     <div className="mb-8 mt-2">
       {/* Cover Image Section */}
@@ -36,24 +77,15 @@ function ArticleMetadata() {
       </div>
       {/* Tags Section */}
       <div className="mb-6 flex items-center">
-        <MarkdownTags tags={tags} />
-        <div className="relative flex-1">
-          <input
-            type="text"
-            list="tag-suggestions"
-            placeholder="Add tags..."
-            className="w-full p-2 focus:outline-none dark:text-custom-white"
-          />
-          {/* Add another */}
-          <datalist id="tag-suggestions">
-            {suggestedTags.map((tag) => (
-              // <option key={tag} value={tag}>
-              //   {tag}
-              // </option>
-              <option key={tag} value={tag} />
-            ))}
-          </datalist>
-        </div>
+        <MarkdownTags tags={tags} onRemove={handleRemoveTag} />
+        <TagInput
+          tags={tags}
+          onAddTag={handleAddTag}
+          suggestedTags={suggestedTags}
+          value={inputValue}
+          onInputChange={handleInputChange}
+          onInputKeyDown={handleInputKeyDown}
+        />
       </div>
     </div>
   );

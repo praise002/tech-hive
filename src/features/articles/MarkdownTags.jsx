@@ -25,18 +25,24 @@ function getTagColor(tagName) {
   return tagColors[hash % tagColors.length];
 }
 
-function MarkdownTags({ tags }) {
+function MarkdownTags({ tags, onRemove }) {
   return (
     <div className="flex gap-2 flex-wrap my-2 text-xs md:text-sm">
       {tags.map((tag) => {
         const color = getTagColor(tag);
         return (
-          <div key={tag} className="inline-flex items-center px-3 py-1 rounded-lg text-sm font-medium bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+          <div
+            key={tag}
+            className="inline-flex items-center px-3 py-1 rounded-lg text-sm font-medium bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+          >
             <span className={`text-${color}`}>#</span>
             <button type="button" className="dark:text-custom-white ml-1.5">
               {tag}
             </button>
-            <button className="cursor-pointer ml-1.5 text-gray-500 text-2xl hover:text-red dark:text-gray-400">
+            <button
+              onClick={() => onRemove(tag)}
+              className="cursor-pointer ml-1.5 text-gray-500 text-2xl hover:text-red dark:text-gray-400"
+            >
               &times;
             </button>
           </div>
@@ -48,6 +54,7 @@ function MarkdownTags({ tags }) {
 
 MarkdownTags.propTypes = {
   tags: PropTypes.arrayOf(PropTypes.string).isRequired,
+  onRemove: PropTypes.func.isRequired,
 };
 
 export default MarkdownTags;

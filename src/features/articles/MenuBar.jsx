@@ -180,6 +180,7 @@ const MenuBar = () => {
         >
           Code block
         </button>
+
         <button
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
           className={ButtonClass(editor.isActive('blockquote'))}
@@ -372,37 +373,6 @@ const MenuBar = () => {
           Center
         </button>
         {/* For the options, everything in common */}
-        {/* <div className="language-selector">
-          <select
-            value={editor.getAttributes('codeBlock').language || 'javascript'}
-            onChange={(e) => {
-              if (editor.isActive('codeBlock')) {
-                editor
-                  .chain()
-                  .focus()
-                  .updateAttributes('codeBlock', {
-                    language: e.target.value,
-                  })
-                  .run();
-              } else {
-                editor
-                  .chain()
-                  .focus()
-                  .toggleCodeBlock({ language: e.target.value })
-                  .run();
-              }
-            }}
-            disabled={!editor.isActive('codeBlock')}
-          >
-            <option value="none">None</option>
-            <option value="auto">Auto</option>
-            <option value="javascript">JavaScript</option>
-            <option value="typescript">TypeScript</option>
-            <option value="python">Python</option>
-            <option value="css">CSS</option>
-            <option value="html">HTML</option>
-          </select>
-        </div> */}
       </div>
     </div>
   );

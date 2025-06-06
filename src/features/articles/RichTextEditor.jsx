@@ -9,6 +9,7 @@ import TextStyle from '@tiptap/extension-text-style';
 import ListItem from '@tiptap/extension-list-item';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import { common, createLowlight } from 'lowlight';
+import { ReactNodeViewRenderer } from '@tiptap/react';
 import Color from '@tiptap/extension-color';
 import Image from '@tiptap/extension-image';
 import Table from '@tiptap/extension-table';
@@ -23,6 +24,7 @@ import Typography from '@tiptap/extension-typography';
 import BubbleMenuFromProvider from './BubbleMenuFromProvider';
 import FloatingMenuFromProvider from './FloatingMenuFromProvider';
 import ArticleMetadata from './ArticleMetadata';
+import CodeBlockComponent from './CodeBlockComponent';
 
 // create a lowlight instance with all languages loaded or use common
 const lowlight = createLowlight(common);
@@ -60,7 +62,12 @@ const extensions = [
   CodeBlockLowlight.configure({
     lowlight,
     defaultLanguage: 'javascript',
+    // Use the custom component
+    addNodeView() {
+      return ReactNodeViewRenderer(CodeBlockComponent);
+    },
   }),
+  CodeBlockComponent,
   Youtube.configure({
     controls: false,
     nocookie: true,
@@ -167,7 +174,7 @@ let content = `<h2>Heading</h2>
           Wow, this editor has support for links to the whole <a href="https://en.wikipedia.org/wiki/World_Wide_Web">world wide web</a>. We tested a lot of URLs and I think you can add *every URL* you want. Isn’t that cool? Let’s try <a href="https://statamic.com/">another one!</a> Yep, seems to work.
         </p>`;
 
-content = '';
+// content = '';
 
 function RichTextEditor() {
   // Show contributor's Dashboard depending on who logged in using auth later
