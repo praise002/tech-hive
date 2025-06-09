@@ -1,4 +1,4 @@
-import { EditorProvider } from '@tiptap/react';
+import { EditorProvider, ReactNodeViewRenderer } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 
 import Button from '../../components/common/Button';
@@ -9,7 +9,7 @@ import TextStyle from '@tiptap/extension-text-style';
 import ListItem from '@tiptap/extension-list-item';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import { common, createLowlight } from 'lowlight';
-import { ReactNodeViewRenderer } from '@tiptap/react';
+
 import Color from '@tiptap/extension-color';
 import Image from '@tiptap/extension-image';
 import Table from '@tiptap/extension-table';
@@ -24,6 +24,7 @@ import Typography from '@tiptap/extension-typography';
 import BubbleMenuFromProvider from './BubbleMenuFromProvider';
 import FloatingMenuFromProvider from './FloatingMenuFromProvider';
 import ArticleMetadata from './ArticleMetadata';
+
 import CodeBlockComponent from './CodeBlockComponent';
 
 // create a lowlight instance with all languages loaded or use common
@@ -46,28 +47,24 @@ const extensions = [
   }),
   Placeholder.configure({
     placeholder: 'Write something …',
-    // Use different placeholders depending on the node type:
-    // placeholder: ({ node }) => {
-    //   if (node.type.name === 'heading') {
-    //     return 'What’s the title?'
-    //   }
-
-    //   return 'Can you add some further context?'
-    // },
   }),
   TextAlign.configure({
     types: ['heading', 'paragraph'],
     alignments: ['left', 'center'],
   }),
-  CodeBlockLowlight.configure({
-    lowlight,
-    defaultLanguage: 'javascript',
-    // Use the custom component
+  // CodeBlockLowlight.configure({
+  //   lowlight,
+  //   defaultLanguage: 'javascript',
+
+  // }),
+  CodeBlockLowlight.extend({
     addNodeView() {
       return ReactNodeViewRenderer(CodeBlockComponent);
     },
+  }).configure({
+    lowlight,
+    defaultLanguage: 'javascript',
   }),
-  CodeBlockComponent,
   Youtube.configure({
     controls: false,
     nocookie: true,

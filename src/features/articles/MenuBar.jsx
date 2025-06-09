@@ -208,6 +208,7 @@ const MenuBar = () => {
         >
           Code block
         </button>
+        
 
         <button
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
