@@ -3,6 +3,7 @@ import Button from '../../components/common/Button';
 import ArticleCard from '../../components/common/ArticleCard';
 import { useState } from 'react';
 import SubscriptionStatus from '../subscription/SubscriptionStatus';
+import toast from 'react-hot-toast';
 
 const article = {
   image: '/src/assets/articles/the-future-ui-ux.jpg',
@@ -33,7 +34,8 @@ function AccountDetail() {
         profilePicture: imageUrl,
       }));
     }
-    alert('Profile picture updated successfully!');
+
+    toast.success('Profile picture updated successfully!');
   }
 
   function handleEditClick() {
@@ -41,7 +43,7 @@ function AccountDetail() {
   }
 
   function handleSaveClick() {
-    alert('Profile updated successfully!');
+    toast.success('Profile updated successfully!');
     setIsEditing(false);
   }
 
@@ -112,7 +114,7 @@ function AccountDetail() {
             {isEditing && (
               <div className="flex space-x-2 mt-2">
                 <Button variant="gradient" onClick={handleSaveClick}>
-                Save
+                  Save
                 </Button>
                 <Button variant="outline" onClick={handleCancelClick}>
                   Cancel

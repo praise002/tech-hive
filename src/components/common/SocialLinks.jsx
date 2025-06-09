@@ -14,7 +14,30 @@ import toast from 'react-hot-toast';
 import Button from './Button';
 import Text from './Text';
 
-// close if outside is being clicked
+export function ToolTip({ children, text, position = 'top' }) {
+  const positionClasses = {
+    top: 'top-7 left-1/2 -translate-x-1/2 md:-translate-0 md:-top-0 md:left-8',
+    bottom: 'top-full right-1/2 -translate-x-1/2 mt-2',
+    // left: 'right-full top-1/2 -translate-y-1/2 mr-2',
+    // right: 'left-full top-1/2 -translate-y-1/2 ml-2',
+  };
+  return (
+    <div className="relative group">
+      {children}
+      <div
+        className={`opacity-0 group-hover:opacity-100 transition-opacity absolute px-2 py-1 bg-black text-custom-white text-xs rounded whitespace-nowrap ${positionClasses[position]}`}
+      >
+        {text}
+      </div>
+    </div>
+  );
+}
+
+ToolTip.propTypes = {
+  children: PropTypes.node,
+  text: PropTypes.string.isRequired,
+  position: PropTypes.string,
+};
 
 // Helper function to generate share URLs
 function getShareUrl(platform, url, title, sharemsg, content) {
@@ -176,22 +199,6 @@ function SocialLinks({ visible, title, sharemsg, url, content = '' }) {
       .catch(() => toast.error('Failed to copy the link.'));
   }
 
-  function ToolTip({ children, text }) {
-    return (
-      <div className="relative group">
-        {children}
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-7 left-1/2 -translate-x-1/2 md:-translate-0 md:-top-0 md:left-8 px-2 py-1 bg-black text-custom-white text-xs rounded whitespace-nowrap">
-          {text}
-        </div>
-      </div>
-    );
-  }
-
-  ToolTip.propTypes = {
-    children: PropTypes.node.isRequired,
-    text: PropTypes.string.isRequired,
-  };
-
   return (
     <div className="relative dark:text-custom-white inline-flex flex-row md:flex-col p-2 gap-x-4 md:gap-y-4 items-center justify-center cursor-pointer">
       {/* Quick AI Section */}
@@ -251,7 +258,9 @@ function SocialLinks({ visible, title, sharemsg, url, content = '' }) {
             </div>
             <div className="bg-light flex flex-col justify-center items-center p-4 gap-2 rounded-b-lg">
               <Button>Regenerate Summary</Button>
-              <Button variant="outline" onClick={closeSummarizeModal}>Read Full Article</Button>
+              <Button variant="outline" onClick={closeSummarizeModal}>
+                Read Full Article
+              </Button>
               <div></div>
             </div>
           </div>

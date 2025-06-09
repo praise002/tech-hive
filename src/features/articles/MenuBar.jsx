@@ -1,6 +1,7 @@
 import { useCurrentEditor } from '@tiptap/react';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import toast from 'react-hot-toast';
+import Spinner from '../../components/common/Spinner';
 
 export function ButtonClass(isActive) {
   return `p-2 rounded-lg cursor-pointer focus-visible:outline-0 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-red-300 transition duration-300 ${
@@ -10,15 +11,42 @@ export function ButtonClass(isActive) {
 
 const MenuBar = () => {
   const { editor } = useCurrentEditor();
+  const [isImageLoading, setIsImageLoading] = useState(false);
 
-  // TODO: GET THE URL FROM INPUT:FILE LATER
-  const addImage = useCallback(() => {
-    const url = window.prompt('URL');
-
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
+  function getImageUrl(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      console.log(imageUrl);
+      return imageUrl;
     }
-  }, [editor]);
+  }
+
+  const addImage = useCallback(
+    (event) => {
+      setIsImageLoading(true);
+      const url = getImageUrl(event);
+
+      if (!url) return;
+
+      setIsImageLoading(true);
+
+      const img = new Image();
+      img.src = url;
+
+      img.onload = () => {
+        editor.chain().focus().setImage({ src: url }).run();
+        URL.revokeObjectURL(url);
+        setIsImageLoading(false);
+      };
+
+      img.onerror = () => {
+        toast.error('Failed to load image');
+        setIsImageLoading(false);
+      };
+    },
+    [editor]
+  );
 
   const setLink = useCallback(() => {
     const previousUrl = editor.getAttributes('link').href;
@@ -221,9 +249,26 @@ const MenuBar = () => {
         >
           Red
         </button>
-        <button className={ButtonClass(false)} onClick={addImage}>
-          Set image
-        </button>
+
+        <div className="inline relative">
+          <input
+            type="file"
+            accept="image/*"
+            className="appearance-none absolute opacity-0 inset-0 cursor-pointer"
+            onChange={addImage}
+          />
+
+          {isImageLoading ? (
+            <button className={`ButtonClass(false) ${isImageLoading ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'}`} disabled={isImageLoading}>
+              <Spinner />
+            </button>
+          ) : (
+            <button className={ButtonClass(false)}>
+              Set image
+            </button>
+          )}
+        </div>
+
         <button
           className={ButtonClass(false)}
           onClick={() =>
