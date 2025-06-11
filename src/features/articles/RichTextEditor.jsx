@@ -59,7 +59,7 @@ const extensions = [
   // }),
   CodeBlockLowlight.extend({
     addNodeView() {
-      return ReactNodeViewRenderer(CodeBlockComponent);
+      return ReactNodeViewRenderer(CodeBlockComponent); // This connects React to Tiptap
     },
   }).configure({
     lowlight,

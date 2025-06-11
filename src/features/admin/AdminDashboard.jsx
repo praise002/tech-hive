@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { IoPeople } from 'react-icons/io5';
+// import { IoPeople } from 'react-icons/io5';
 import { IoFilterOutline } from 'react-icons/io5';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from 'react-icons/md';
 import { GoPlus, GoArrowDownRight, GoArrowUpRight } from 'react-icons/go';
@@ -39,14 +39,14 @@ import TechTool from '../../components/sections/TechTool';
 import ResourceSpotlight from '../../components/sections/ResourceSpotlight';
 
 function AdminDashboard() {
-  const [isActiveTab, setIsActiveTab] = useState('manage users');
+  const [isActiveTab, setIsActiveTab] = useState('manage posts');
 
   const adminTabs = [
-    {
-      id: 'manage users',
-      label: 'Manage users',
-      icon: <IoPeople className="w-5 h-5" />,
-    },
+    // {
+    //   id: 'manage users',
+    //   label: 'Manage users',
+    //   icon: <IoPeople className="w-5 h-5" />,
+    // },
     {
       id: 'manage posts',
       label: 'Manage posts',
@@ -113,147 +113,147 @@ function AdminDashboard() {
   };
 
   // Remove later since Django comes with admin dashboard(left with reviewer, editor actions)
-  function ManageUsers() {
-    const users = [
-      {
-        id: crypto.randomUUID(),
-        name: 'Adebayo Samson',
-        email: 'adebayosamson@gmail.com',
-        role: 'Subscriber',
-        status: 'Suspended',
-      },
-      {
-        id: crypto.randomUUID(),
-        name: 'John Smith',
-        email: 'johnsmith@gmail.com',
-        role: 'Admin',
-        status: 'Active',
-      },
-      {
-        id: crypto.randomUUID(),
-        name: 'Alice Johnson',
-        email: 'alice.johnson@example.com',
-        role: 'Editor',
-        status: 'Active',
-      },
-      {
-        id: crypto.randomUUID(),
-        name: 'Bob Williams',
-        email: 'bob.williams@example.com',
-        role: 'Reviewer',
-        status: 'Active',
-      },
-      {
-        id: crypto.randomUUID(),
-        name: 'Charlie Brown',
-        email: 'charlie.brown@example.com',
-        role: 'Subscriber',
-        status: 'Active',
-      },
-      {
-        id: crypto.randomUUID(),
-        name: 'Diana Miller',
-        email: 'diana.miller@example.com',
-        role: 'Admin',
-        status: 'Active',
-      },
-      {
-        id: crypto.randomUUID(),
-        name: 'Ethan Davis',
-        email: 'ethan.davis@example.com',
-        role: 'Editor',
-        status: 'Suspended',
-      },
-      {
-        id: crypto.randomUUID(),
-        name: 'Fiona Wilson',
-        email: 'fiona.wilson@example.com',
-        role: 'Reviewer',
-        status: 'Active',
-      },
-      {
-        id: crypto.randomUUID(),
-        name: 'George Moore',
-        email: 'george.moore@example.com',
-        role: 'Subscriber',
-        status: 'Active',
-      },
-      {
-        id: crypto.randomUUID(),
-        name: 'Hannah Taylor',
-        email: 'hannah.taylor@example.com',
-        role: 'Admin',
-        status: 'Active',
-      },
-    ];
+  // function ManageUsers() {
+  //   const users = [
+  //     {
+  //       id: crypto.randomUUID(),
+  //       name: 'Adebayo Samson',
+  //       email: 'adebayosamson@gmail.com',
+  //       role: 'Subscriber',
+  //       status: 'Suspended',
+  //     },
+  //     {
+  //       id: crypto.randomUUID(),
+  //       name: 'John Smith',
+  //       email: 'johnsmith@gmail.com',
+  //       role: 'Admin',
+  //       status: 'Active',
+  //     },
+  //     {
+  //       id: crypto.randomUUID(),
+  //       name: 'Alice Johnson',
+  //       email: 'alice.johnson@example.com',
+  //       role: 'Editor',
+  //       status: 'Active',
+  //     },
+  //     {
+  //       id: crypto.randomUUID(),
+  //       name: 'Bob Williams',
+  //       email: 'bob.williams@example.com',
+  //       role: 'Reviewer',
+  //       status: 'Active',
+  //     },
+  //     {
+  //       id: crypto.randomUUID(),
+  //       name: 'Charlie Brown',
+  //       email: 'charlie.brown@example.com',
+  //       role: 'Subscriber',
+  //       status: 'Active',
+  //     },
+  //     {
+  //       id: crypto.randomUUID(),
+  //       name: 'Diana Miller',
+  //       email: 'diana.miller@example.com',
+  //       role: 'Admin',
+  //       status: 'Active',
+  //     },
+  //     {
+  //       id: crypto.randomUUID(),
+  //       name: 'Ethan Davis',
+  //       email: 'ethan.davis@example.com',
+  //       role: 'Editor',
+  //       status: 'Suspended',
+  //     },
+  //     {
+  //       id: crypto.randomUUID(),
+  //       name: 'Fiona Wilson',
+  //       email: 'fiona.wilson@example.com',
+  //       role: 'Reviewer',
+  //       status: 'Active',
+  //     },
+  //     {
+  //       id: crypto.randomUUID(),
+  //       name: 'George Moore',
+  //       email: 'george.moore@example.com',
+  //       role: 'Subscriber',
+  //       status: 'Active',
+  //     },
+  //     {
+  //       id: crypto.randomUUID(),
+  //       name: 'Hannah Taylor',
+  //       email: 'hannah.taylor@example.com',
+  //       role: 'Admin',
+  //       status: 'Active',
+  //     },
+  //   ];
 
-    const tableHeaders = [
-      { key: 'name', label: 'Name' },
-      { key: 'email', label: 'Email' },
-      { key: 'role', label: 'Role' },
-      { key: 'status', label: 'Status' },
-      { key: 'action', label: 'Action' },
-    ];
-    return (
-      <>
-        <div className="flex justify-between lg:flex-row flex-col gap-y-2 lg:gap-y-0">
-          <div className="pl-6 pt-8 lg:pt-0">
-            <button className="flex p-2 items-center gap-2 rounded-md text-xs sm:text-base cursor-pointer bg-red text-custom-white">
-              <span className="flex-shrink-0">
-                <GoPlus className="w-5 h-5" />
-              </span>
-              <span>Add New User</span>
-            </button>
-          </div>
-          <div className="relative hidden lg:inline-block">
-            {/* Search Icon */}
-            <CiSearch className="text-xl absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-custom-white" />
+  //   const tableHeaders = [
+  //     { key: 'name', label: 'Name' },
+  //     { key: 'email', label: 'Email' },
+  //     { key: 'role', label: 'Role' },
+  //     { key: 'status', label: 'Status' },
+  //     { key: 'action', label: 'Action' },
+  //   ];
+  //   return (
+  //     <>
+  //       <div className="flex justify-between lg:flex-row flex-col gap-y-2 lg:gap-y-0">
+  //         <div className="pl-6 pt-8 lg:pt-0">
+  //           <button className="flex p-2 items-center gap-2 rounded-md text-xs sm:text-base cursor-pointer bg-red text-custom-white">
+  //             <span className="flex-shrink-0">
+  //               <GoPlus className="w-5 h-5" />
+  //             </span>
+  //             <span>Add New User</span>
+  //           </button>
+  //         </div>
+  //         <div className="relative hidden lg:inline-block">
+  //           {/* Search Icon */}
+  //           <CiSearch className="text-xl absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-custom-white" />
 
-            {/* Input Field */}
-            <input
-              className="appearance-none w-70 dark:text-custom-white border border-gray-500 dark:border-custom-white rounded-md pl-10 pr-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-600 dark:focus-visible:ring-white dark:focus-visible:text-white focus-visible:border-gray-600 dark:focus-visible:border-white"
-              type="search"
-              placeholder="Find users by name, email..."
-            />
-            <IoFilterOutline className="text-xl absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 dark:text-custom-white" />
-          </div>
-        </div>
-        <div className="mt-4 lg:mt-7">
-          <table className="min-w-full text-left rtl:text-right">
-            <caption className="sr-only">
-              A summary of the user&apos;s table
-            </caption>
-            <thead className="hidden lg:table-header-group">
-              <tr className="font-bold">
-                {tableHeaders.map((header) => (
-                  <th key={header.key} scope="col" className="px-6 py-3">
-                    {header.label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="lg:text-base lg:divide-y-0 text-sm divide-y divide-gray-200 dark:divide-gray-700">
-              {users.map((user) => (
-                <tr key={user.id} className="space-y-2 lg:space-y-0">
-                  <TableCell className="lg:py-4 pt-2 lg:pt-0">
-                    {user.name}
-                  </TableCell>
-                  <TableCell className="lg:py-4">{user.email}</TableCell>
-                  <TableCell className="py-4 lg:py-0">
-                    <RoleSpan role={user.role} />
-                  </TableCell>
-                  <TableCell className="py-2 lg:py-0">
-                    <StatusSpan status={user.status} />
-                  </TableCell>
-                  <td className="lg:px-6 lg:py-4 cursor-pointer">...</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </>
-    );
-  }
+  //           {/* Input Field */}
+  //           <input
+  //             className="appearance-none w-70 dark:text-custom-white border border-gray-500 dark:border-custom-white rounded-md pl-10 pr-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-600 dark:focus-visible:ring-white dark:focus-visible:text-white focus-visible:border-gray-600 dark:focus-visible:border-white"
+  //             type="search"
+  //             placeholder="Find users by name, email..."
+  //           />
+  //           <IoFilterOutline className="text-xl absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 dark:text-custom-white" />
+  //         </div>
+  //       </div>
+  //       <div className="mt-4 lg:mt-7">
+  //         <table className="min-w-full text-left rtl:text-right">
+  //           <caption className="sr-only">
+  //             A summary of the user&apos;s table
+  //           </caption>
+  //           <thead className="hidden lg:table-header-group">
+  //             <tr className="font-bold">
+  //               {tableHeaders.map((header) => (
+  //                 <th key={header.key} scope="col" className="px-6 py-3">
+  //                   {header.label}
+  //                 </th>
+  //               ))}
+  //             </tr>
+  //           </thead>
+  //           <tbody className="lg:text-base lg:divide-y-0 text-sm divide-y divide-gray-200 dark:divide-gray-700">
+  //             {users.map((user) => (
+  //               <tr key={user.id} className="space-y-2 lg:space-y-0">
+  //                 <TableCell className="lg:py-4 pt-2 lg:pt-0">
+  //                   {user.name}
+  //                 </TableCell>
+  //                 <TableCell className="lg:py-4">{user.email}</TableCell>
+  //                 <TableCell className="py-4 lg:py-0">
+  //                   <RoleSpan role={user.role} />
+  //                 </TableCell>
+  //                 <TableCell className="py-2 lg:py-0">
+  //                   <StatusSpan status={user.status} />
+  //                 </TableCell>
+  //                 <td className="lg:px-6 lg:py-4 cursor-pointer">...</td>
+  //               </tr>
+  //             ))}
+  //           </tbody>
+  //         </table>
+  //       </div>
+  //     </>
+  //   );
+  // }
 
   function ManagePosts() {
     return (
@@ -858,8 +858,8 @@ function AdminDashboard() {
 
   function getContent() {
     switch (isActiveTab) {
-      case 'manage users':
-        return <ManageUsers />;
+      // case 'manage users':
+      //   return <ManageUsers />;
       case 'manage posts':
         return <ManagePosts />;
       case 'manage content':

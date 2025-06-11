@@ -208,8 +208,6 @@ const MenuBar = () => {
         >
           Code block
         </button>
-        
-
         <button
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
           className={ButtonClass(editor.isActive('blockquote'))}
@@ -260,13 +258,18 @@ const MenuBar = () => {
           />
 
           {isImageLoading ? (
-            <button className={`ButtonClass(false) ${isImageLoading ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'}`} disabled={isImageLoading}>
+            <button
+              className={`ButtonClass(false) ${
+                isImageLoading
+                  ? 'cursor-not-allowed opacity-75'
+                  : 'cursor-pointer'
+              }`}
+              disabled={isImageLoading}
+            >
               <Spinner />
             </button>
           ) : (
-            <button className={ButtonClass(false)}>
-              Set image
-            </button>
+            <button className={ButtonClass(false)}>Set image</button>
           )}
         </div>
 

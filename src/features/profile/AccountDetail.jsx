@@ -18,7 +18,8 @@ const article = {
 };
 
 function AccountDetail() {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditingPc, setIsEditingPc] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
 
   const [profile, setProfile] = useState({
     name: 'Elizabeth Stone',
@@ -35,20 +36,9 @@ function AccountDetail() {
       }));
     }
 
+    setIsEditingPc(false);
+
     toast.success('Profile picture updated successfully!');
-  }
-
-  function handleEditClick() {
-    setIsEditing(true);
-  }
-
-  function handleSaveClick() {
-    toast.success('Profile updated successfully!');
-    setIsEditing(false);
-  }
-
-  function handleCancelClick() {
-    setIsEditing(false);
   }
 
   return (
@@ -65,26 +55,58 @@ function AccountDetail() {
               />
 
               {/* Wrapper for the edit functionality */}
-              <div className="absolute top-12 right-0 md:top-25 bg-light rounded-full p-1 md:p-2">
-                {/* Hidden file input for profile picture upload */}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="appearance-none absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                  onChange={handleProfilePicChange}
-                />
+              <button
+                onClick={() => setIsEditingPc(true)}
+                className="absolute top-12 right-0 md:top-25 bg-light rounded-full p-1 md:p-2"
+              >
                 {/* Edit icon that stays fixed */}
                 <img
                   className="w-5 h-5 md:w-7 md:h-7 pointer-events-none" // Prevents clicks on the icon itself
                   src="/src/assets/icons/mynaui_edit.png"
                   alt="Edit"
                 />
-              </div>
+              </button>
+
+              {isEditingPc && (
+                <div className="p-2 absolute left-45 top-35 bg-light w-40 flex flex-col rounded-md">
+                  <div className="relative cursor-pointer duration-300 hover:bg-red-800 hover:text-white">
+                    {/* Hidden file input for profile picture upload */}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="appearance-none absolute inset-0 opacity-0  w-full h-full"
+                      onChange={handleProfilePicChange}
+                    />
+                    <button
+                      type="button"
+                      className="p-1 focus-visible:outline-0 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-red-300 transition duration-300"
+                    >
+                      Upload a photo
+                    </button>
+                  </div>
+
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsEditingPc(false);
+                        setProfile((prev) => ({
+                          ...prev,
+                          profilePicture: '/src/assets/icons/Avatars.png',
+                        }));
+                      }}
+                      className="p-1 cursor-pointer focus-visible:outline-0 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-red-300 transition duration-300 hover:bg-red-800 hover:text-white"
+                    >
+                      Remove a photo
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
           <div className="flex flex-col justify-center items-center">
-            {isEditing ? (
+            {isEditingName ? (
               <input
                 type="text"
                 className="appearance-none dark:text-custom-white mt-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
@@ -106,17 +128,26 @@ function AccountDetail() {
             <p className="text-secondary text-sm my-1">
               Joined 27th January 2025
             </p>
-            {!isEditing && (
-              <Button variant="outline" onClick={handleEditClick}>
+            {!isEditingName && (
+              <Button variant="outline" onClick={() => setIsEditingName(true)}>
                 Edit Profile
               </Button>
             )}
-            {isEditing && (
+            {isEditingName && (
               <div className="flex space-x-2 mt-2">
-                <Button variant="gradient" onClick={handleSaveClick}>
+                <Button
+                  variant="gradient"
+                  onClick={() => {
+                    toast.success('Profile updated successfully!');
+                    setIsEditingName(false);
+                  }}
+                >
                   Save
                 </Button>
-                <Button variant="outline" onClick={handleCancelClick}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEditingName(false)}
+                >
                   Cancel
                 </Button>
               </div>
