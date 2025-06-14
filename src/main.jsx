@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ErrorBoundary } from 'react-error-boundary';
 
+import 'react-image-crop/dist/ReactCrop.css';
 import './index.css';
 import App from './App.jsx';
 import 'highlight.js/styles/atom-one-dark.css';

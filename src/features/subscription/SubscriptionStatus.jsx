@@ -18,6 +18,7 @@ function SubscriptionStatus() {
       document.removeEventListener('keydown', handleEscapeKey);
     };
   }, [isRenewModalOpen]);
+  // TODO: FIX LATER: SO MANY WAYS OF DOING IT
 
   function openRenewModal() {
     setIsRenewModalOpen(true);

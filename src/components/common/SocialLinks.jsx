@@ -83,6 +83,7 @@ function SocialLinks({ visible, title, sharemsg, url, content = '' }) {
   // const summary =
   //   'This article explores the future of UI/UX design, focusing on trends like AI-powered interfaces, immersive experiences, and personalized user interactions. Designers must adapt to these emerging technologies to stay ahead.';
 
+  // TODO: FIX LATER: SO MANY WAYS OF DOING IT
   // Function to handle clicks outside the dropdown
   useEffect(() => {
     function handleClickOutside(event) {
@@ -217,7 +218,7 @@ function SocialLinks({ visible, title, sharemsg, url, content = '' }) {
       {/* Modal Overlay */}
       {isSummarizeModal && (
         <div
-          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+          className="fixed inset-0 flex items-center justify-center bg-black z-50"
           onClick={closeSummarizeModal} // Close modal when clicking outside
           role="dialog"
           aria-modal="true"

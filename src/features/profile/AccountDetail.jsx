@@ -1,9 +1,12 @@
 import Text from '../../components/common/Text';
 import Button from '../../components/common/Button';
 import ArticleCard from '../../components/common/ArticleCard';
-import { useState } from 'react';
 import SubscriptionStatus from '../subscription/SubscriptionStatus';
 import toast from 'react-hot-toast';
+import ReactCrop from 'react-image-crop';
+import PropTypes from 'prop-types';
+import { useEffect, useState } from 'react';
+import { MdCancel } from 'react-icons/md';
 
 const article = {
   image: '/src/assets/articles/the-future-ui-ux.jpg',
@@ -17,28 +20,128 @@ const article = {
   readTime: '7 min',
 };
 
+const defaultProfilePicture = '/src/assets/icons/Avatars.png';
+
+function CropImage({ src }) {
+  // Starting with a preselected crop
+  const [crop, setCrop] = useState({
+    unit: '%', // Can be 'px' or '%'
+    x: 25,
+    y: 25,
+    width: 50,
+    height: 50,
+  });
+  return (
+    <ReactCrop crop={crop} onChange={(c) => setCrop(c)}>
+      <img src={src} alt="Preview" />
+    </ReactCrop>
+  );
+}
+
+CropImage.propTypes = {
+  src: PropTypes.string.isRequired,
+};
+
 function AccountDetail() {
   const [isEditingPc, setIsEditingPc] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
+  // controls when the modal appears
+  const [showCropModal, setShowCropModal] = useState(false);
+  // Stores the uploaded image temporarily
+  const [tempImage, setTempImage] = useState(null);
 
   const [profile, setProfile] = useState({
     name: 'Elizabeth Stone',
-    profilePicture: '/src/assets/icons/Avatars.png',
+    profilePicture: defaultProfilePicture,
   });
+
+  // TODO: FIX LATER: SO MANY WAYS OF DOING IT
+  useEffect(() => {
+    function handleCloseDropdown(event) {
+      // Handle escape key
+      if (event.type === 'keydown' && event.key === 'Escape') {
+        setIsEditingPc(false);
+        return;
+      }
+
+      // Handle click outside
+      if (event.type === 'mousedown') {
+        const dropdown = document.getElementById('edit-pc-links-dropdown');
+
+        if (dropdown && !dropdown.contains(event.target)) {
+          setIsEditingPc(false);
+        }
+      }
+    }
+
+    if (isEditingPc) {
+      document.addEventListener('mousedown', handleCloseDropdown);
+      document.addEventListener('keydown', handleCloseDropdown);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleCloseDropdown);
+      document.removeEventListener('keydown', handleCloseDropdown);
+    };
+  }, [isEditingPc]);
+
+  useEffect(() => {
+    function handleCloseModal(event) {
+      // Handle escape key
+      if (event.type === 'keydown' && event.key === 'Escape') {
+        setShowCropModal(false);
+        return;
+      }
+
+      // Handle click outside
+      if (event.type === 'mousedown') {
+        setShowCropModal(false);
+      }
+    }
+
+    if (showCropModal) {
+      document.addEventListener('mousedown', handleCloseModal);
+      document.addEventListener('keydown', handleCloseModal);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleCloseModal);
+      document.removeEventListener('keydown', handleCloseModal);
+    };
+  }, [showCropModal]);
 
   function handleProfilePicChange(event) {
     const file = event.target.files[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
-      setProfile((prev) => ({
-        ...prev,
-        profilePicture: imageUrl,
-      }));
+      // Store the image temporarily and show modal
+      setTempImage(imageUrl);
+      setShowCropModal(true);
     }
 
-    setIsEditingPc(false);
+    setIsEditingPc(false); // close dropdown
+  }
 
-    toast.success('Profile picture updated successfully!');
+  function handleSetProfilePicture() {
+    // Apply cropped image to profile
+    if (tempImage) {
+      setProfile((prev) => ({
+        ...prev,
+        profilePicture: tempImage,
+      }));
+      setShowCropModal(false);
+      setTempImage(null);
+      toast.success('Profile picture updated successfully!');
+    }
+  }
+
+  function handleCloseCropModal() {
+    // Cancel the upload and clean up
+    setShowCropModal(false);
+    if (tempImage) {
+      URL.revokeObjectURL(tempImage); // Cleanup memory
+      setTempImage(null);
+    }
   }
 
   return (
@@ -57,7 +160,7 @@ function AccountDetail() {
               {/* Wrapper for the edit functionality */}
               <button
                 onClick={() => setIsEditingPc(true)}
-                className="absolute top-12 right-0 md:top-25 bg-light rounded-full p-1 md:p-2"
+                className="absolute top-12 right-0 md:top-25 bg-light rounded-full p-1 md:p-2 cursor-pointer focus-visible:outline-0 focus-visible:ring-2 focus-visible:ring-red transition duration-300"
               >
                 {/* Edit icon that stays fixed */}
                 <img
@@ -68,7 +171,10 @@ function AccountDetail() {
               </button>
 
               {isEditingPc && (
-                <div className="p-2 absolute left-45 top-35 bg-light w-40 flex flex-col rounded-md">
+                <div
+                  id="edit-pc-links-dropdown"
+                  className="p-2 absolute left-45 top-35 bg-light w-40 flex flex-col rounded-md"
+                >
                   <div className="relative cursor-pointer duration-300 hover:bg-red-800 hover:text-white">
                     {/* Hidden file input for profile picture upload */}
                     <input
@@ -92,7 +198,7 @@ function AccountDetail() {
                         setIsEditingPc(false);
                         setProfile((prev) => ({
                           ...prev,
-                          profilePicture: '/src/assets/icons/Avatars.png',
+                          profilePicture: defaultProfilePicture,
                         }));
                       }}
                       className="p-1 cursor-pointer focus-visible:outline-0 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-red-300 transition duration-300 hover:bg-red-800 hover:text-white"
@@ -154,6 +260,43 @@ function AccountDetail() {
             )}
           </div>
         </div>
+
+        {showCropModal && (
+          /* Modal Overlay */
+          <div
+            className="fixed inset-0 flex items-center justify-center backdrop-contrast-50 z-50"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+          >
+            {/* Modal Content */}
+            <div
+              className="bg-white mt-30 mb-10 flex flex-col gap-2 text-gray-900 text-xs sm:text-sm border dark:border-custom-white font-medium rounded-lg max-w-100"
+              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
+            >
+              <div className="flex items-center gap-2 border-b border-gray px-2 pt-2 py-1">
+                <Text variant="h1" size="lg" className="mb-2">
+                  Crop your new profile picture
+                </Text>
+                <button
+                  type="button"
+                  onClick={handleCloseCropModal}
+                  aria-label="Close profile modal"
+                >
+                  <MdCancel className="text-red w-6 h-6" />
+                </button>
+              </div>
+              <div className="overflow-y-scroll p-2 flex justify-center">
+                <CropImage src={tempImage} />
+              </div>
+              <div className="p-2">
+                <Button className="w-full" onClick={handleSetProfilePicture}>
+                  Set new profile picture
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ✅ Account Information */}
