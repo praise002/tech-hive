@@ -3,7 +3,7 @@ import Button from '../../components/common/Button';
 import ArticleCard from '../../components/common/ArticleCard';
 import SubscriptionStatus from '../subscription/SubscriptionStatus';
 import toast from 'react-hot-toast';
-import ReactCrop from 'react-image-crop';
+import ReactCrop, { centerCrop, makeAspectCrop } from 'react-image-crop';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { MdCancel } from 'react-icons/md';
@@ -22,24 +22,43 @@ const article = {
 
 const defaultProfilePicture = '/src/assets/icons/Avatars.png';
 
-function CropImage({ src }) {
-  // Starting with a preselected crop
-  const [crop, setCrop] = useState({
-    unit: '%', // Can be 'px' or '%'
-    x: 25,
-    y: 25,
-    width: 50,
-    height: 50,
-  });
+function CropImage({ src, aspect = 1, crop = null, onCropChange }) {
+  function onImageLoad(e) {
+    const { width, height } = e.currentTarget; // image elem that just finished loading
+    const crop = centerCrop(
+      makeAspectCrop(
+        {
+          unit: '%',
+          width: 80,
+        },
+        aspect,
+        width,
+        height
+      ),
+      width,
+      height
+    );
+
+    onCropChange(crop);
+  }
+
   return (
-    <ReactCrop crop={crop} onChange={(c) => setCrop(c)}>
-      <img src={src} alt="Preview" />
+    <ReactCrop
+      crop={crop}
+      aspect={aspect}
+      // onChange={(_, percentCrop) => onCropChange(percentCrop)}
+      onChange={onCropChange} // Notify parent when crop changes
+    >
+      <img src={src} alt="Preview" onLoad={onImageLoad} />
     </ReactCrop>
   );
 }
 
 CropImage.propTypes = {
   src: PropTypes.string.isRequired,
+  aspect: PropTypes.number,
+  crop: PropTypes.object,
+  onCropChange: PropTypes.func.isRequired,
 };
 
 function AccountDetail() {
@@ -54,6 +73,47 @@ function AccountDetail() {
     name: 'Elizabeth Stone',
     profilePicture: defaultProfilePicture,
   });
+
+  // Starting with a preselected crop
+  const [crop, setCrop] = useState({
+    unit: '%', // Can be 'px' or '%'
+    x: 25,
+    y: 25,
+    width: 50,
+    height: 50,
+  });
+
+  async function handleSetProfilePicture() {
+    if (!tempImage) return;
+
+    try {
+      // Step 1: Load the image into a canvas
+      const image = new Image();
+      image.src = tempImage;
+
+      await new Promise((resolve) => {
+        image.onload = resolve;
+      });
+
+      // Step 2: Apply the crop
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // Calculate pixel values from percentages (if crop is in %)
+      const scaleX = image.naturalWidth / image.width;
+      const scaleY = image.naturalHeight / image.height;
+
+      const pixelCrop = {
+        x: crop.unit === '%' ? (crop.x / 100) * image.naturalWidth : crop.x * scaleX,
+        y: crop.unit === '%' ? (crop.y / 100) * image.naturalHeight : crop.y * scaleY,
+        width: crop.unit === '%' ? (crop.width / 100) * image.naturalWidth : crop.width * scaleX,
+        height: crop.unit === '%' ? (crop.height / 100) * image.naturalHeight : crop.height * scaleY,
+      }
+    } catch (error) {
+      console.error('Error cropping image:', error);
+      toast.error('Failed to crop image');
+    }
+  }
 
   // TODO: FIX LATER: SO MANY WAYS OF DOING IT
   useEffect(() => {
@@ -95,7 +155,11 @@ function AccountDetail() {
 
       // Handle click outside
       if (event.type === 'mousedown') {
-        setShowCropModal(false);
+        // TODO: FIXED CLICK ON SCROLL CLOSING IMAGE PREVIEW - find alternative later
+        const modalContent = document.querySelector('.crop-modal-content');
+        if (modalContent && !modalContent.contains(event.target)) {
+          setShowCropModal(false);
+        }
       }
     }
 
@@ -173,7 +237,7 @@ function AccountDetail() {
               {isEditingPc && (
                 <div
                   id="edit-pc-links-dropdown"
-                  className="p-2 absolute left-45 top-35 bg-light w-40 flex flex-col rounded-md"
+                  className="p-2 absolute left-15 top-20 sm:left-45 sm:top-35 bg-light w-40 flex flex-col rounded-md"
                 >
                   <div className="relative cursor-pointer duration-300 hover:bg-red-800 hover:text-white">
                     {/* Hidden file input for profile picture upload */}
@@ -271,10 +335,10 @@ function AccountDetail() {
           >
             {/* Modal Content */}
             <div
-              className="bg-white mt-30 mb-10 flex flex-col gap-2 text-gray-900 text-xs sm:text-sm border dark:border-custom-white font-medium rounded-lg max-w-100"
+              className="crop-modal-content bg-white mt-30 mb-10 flex flex-col gap-2 text-gray-900 text-xs sm:text-sm border dark:border-custom-white font-medium rounded-lg max-w-80 sm:max-w-100 max-h-[80vh]"
               onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
             >
-              <div className="flex items-center gap-2 border-b border-gray px-2 pt-2 py-1">
+              <div className="flex items-center justify-between gap-2 border-b border-gray px-2 pt-2 py-1">
                 <Text variant="h1" size="lg" className="mb-2">
                   Crop your new profile picture
                 </Text>
