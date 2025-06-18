@@ -1,7 +1,11 @@
-import PropTypes from 'prop-types';
 import Text from './Text';
 
-function ErrorFallbacks({ error, resetErrorBoundary }) {
+interface ErrorFallbackProps {
+  error: Error;
+  resetErrorBoundary?: () => void;
+}
+
+function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
   return (
     <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
       <Text variant="h2" size="2xl" color="text-red-700">
@@ -18,9 +22,4 @@ function ErrorFallbacks({ error, resetErrorBoundary }) {
   );
 }
 
-ErrorFallbacks.propTypes = {
-  error: PropTypes.object,
-  resetErrorBoundary: PropTypes.func,
-};
-
-export default ErrorFallbacks;
+export default ErrorFallback;

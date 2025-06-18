@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
+@import 'tailwindcss';
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-inter: 'Inter', serif;
+  --color-dark: #1e1e1e;
+  --color-custom-white: #fcfcfc;
+  --color-gray: #c1c8c7;
+  --color-primary: #262a2a;
+  --color-secondary: #889392;
+  --color-primary-light: #ee6649;
+  --color-cream: #ffeddd;
+  --color-orange: #fdb87f;
+  --color-peach: #ffd7c9;
+  --color-orange-dark: #d67917;
+  --color-red: #a32816;
+  --color-coral: #fd8878;
+  --color-light: #ffebe4;
+  --color-neutral: #eff1f1;
+  --color-fill: #c0c0c0;
+  --color-custom-green: #2ea316;
+  --color-mint: #effdee;
+  --color-lime-green: #34c759;
+  --color-honey: #f58f29;
+  --color-cyan-light: #2eeeee;
+}
+
+.active {
+  @apply text-red-700;
+}
+
+.ProseMirror ul li,
+.ProseMirror ol li {
+  @apply text-gray-800 dark:text-custom-white my-2 ml-6;
+}
+
+/* Add spacing between nested lists */
+.ProseMirror ul ul,
+.ProseMirror ol ol,
+.ProseMirror ul ol,
+.ProseMirror ol ul {
+  @apply mt-2 mb-2;
+}
+
+/* Style for list item markers */
+.ProseMirror ul li::marker,
+.ProseMirror ol li::marker {
+  @apply text-gray-800;
+}
+
+.dark .ProseMirror ul li::marker,
+.dark .ProseMirror ol li::marker {
+  color: #fcfcfc !important;
+}
+
+/* In your global.css or similar file */
+.ProseMirror table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 1rem 0;
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
+
+.ProseMirror th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+}
+
+.ProseMirror td {
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+}
+
+.ProseMirror .selectedCell {
+  background-color: #dbeafe;
+}
+
+/* Dark mode */
+.dark .ProseMirror table th {
+  background-color: #374151;
+  border-color: #4b5563;
+}
+
+.dark .ProseMirror table td {
+  border-color: #4b5563;
+}
+
+.dark .ProseMirror .selectedCell {
+  background-color: #1e3a8a;
+}
+
+.ProseMirror iframe {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  max-width: 100%;
+  margin-inline: auto;
+  @apply lg:w-[80%] lg:mx-auto;
+}
+
+.ProseMirror img {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  margin-inline: auto;
+  @apply lg:w-[80%] lg:mx-auto;
+}
+
+/* Placeholder (at the top) */
+p.is-editor-empty:first-child::before {
+  @apply text-gray-800;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.dark p.is-editor-empty:first-child::before {
+  @apply text-custom-white;
+}
