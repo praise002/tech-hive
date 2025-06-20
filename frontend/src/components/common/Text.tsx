@@ -1,16 +1,4 @@
-type TextVariant = 'h1' | 'h2' | 'h3'| 'h4' | 'h5' | 'h6' | 'p';
-type TextSize = 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
-type TextAlign = 'left' | 'center' | 'right';
-
-interface TextProps {
-  children: React.ReactNode;
-  variant?: TextVariant;
-  className?: string;
-  size?: TextSize;
-  align?: TextAlign;
-  bold?: boolean;
-  color?: string;
-}
+import { TextProps } from "../../types";
 
 function Text({
   children,

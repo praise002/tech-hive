@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+import { ButtonProps } from '../../types';
 
 function Button({
   children,
@@ -7,7 +7,7 @@ function Button({
   onClick,
   type = 'button',
   ...props
-}) {
+}: ButtonProps) {
   const baseStyles =
     'cursor-pointer focus-visible:outline-0 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-red-300 transition duration-300';
 
@@ -31,13 +31,5 @@ function Button({
     </button>
   );
 }
-
-Button.propTypes = {
-  children: PropTypes.node.isRequired, // Content inside the button (text, icons, etc.)
-  className: PropTypes.string, // Additional custom classes
-  variant: PropTypes.oneOf(['primary', 'outline', 'gradient']), // Button style variant
-  onClick: PropTypes.func, // Click handler function
-  type: PropTypes.oneOf(['button', 'submit', 'reset']), // Button type
-};
 
 export default Button;

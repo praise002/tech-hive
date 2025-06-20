@@ -1,5 +1,5 @@
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import { TagsProps } from '../../types';
 
 // Define a Color Palette
 const tagColors = [
@@ -12,30 +12,26 @@ const tagColors = [
 ];
 
 // Create a Hashing Function
-function hashTagName(tagName) {
-  const stringTagName = String(tagName);
-  return stringTagName
+function hashTagName(tagName: string) {
+  return tagName
     .toLowerCase()
     .split('')
     .reduce((sum, char) => sum + char.charCodeAt(0), 0);
 }
 
 // Map the Hash to a Color
-function getTagColor(tagName) {
+function getTagColor(tagName: string) {
   const hash = hashTagName(tagName);
   return tagColors[hash % tagColors.length];
 }
 
-function Tags({ tags }) {
+function Tags({ tags }: TagsProps) {
   return (
     <div className="flex gap-2 flex-wrap my-2 text-xs md:text-sm cursor-pointer">
       {tags.map((tag) => {
         const color = getTagColor(tag);
         return (
-          <div
-            key={tag}
-            className="inline-flex items-center"
-          >
+          <div key={tag} className="inline-flex items-center">
             <span className={`text-${color}`}>#</span>
             <button type="button" className="dark:text-custom-white">
               <Link to={`/articles?tag=${encodeURIComponent(tag)}`}>{tag}</Link>
@@ -46,9 +42,5 @@ function Tags({ tags }) {
     </div>
   );
 }
-
-Tags.propTypes = {
-  tags: PropTypes.arrayOf(PropTypes.string).isRequired,
-};
 
 export default Tags;

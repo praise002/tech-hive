@@ -13,8 +13,11 @@ function ArticleTitle({ children }) {
     </Text>
   );
 }
+
 ArticleTitle.propTypes = {
   children: PropTypes.node.isRequired,
 };
+
+
 
 export default ArticleTitle;

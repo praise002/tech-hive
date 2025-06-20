@@ -1,9 +1,9 @@
 import { FaRegBookmark } from 'react-icons/fa6';
 import { FaBookmark } from 'react-icons/fa';
 import { useState } from 'react';
-import PropTypes from 'prop-types';
+import { BookmarkProps } from '../../types';
 
-function Bookmark( { className= '' }) {
+function Bookmark({ className = '' }: BookmarkProps) {
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   return (
@@ -24,9 +24,5 @@ function Bookmark( { className= '' }) {
     </span>
   );
 }
-
-Bookmark.propTypes = {
-  className: PropTypes.string
-};
 
 export default Bookmark;

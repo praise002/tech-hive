@@ -1,7 +1,7 @@
+import { ArticleTitleProps } from '../../types';
 import Text from './Text';
-import PropTypes from 'prop-types';
 
-function ArticleTitle({ children }) {
+function ArticleTitle({ children }: ArticleTitleProps) {
   return (
     <Text
       variant="h4"
@@ -13,8 +13,5 @@ function ArticleTitle({ children }) {
     </Text>
   );
 }
-ArticleTitle.propTypes = {
-  children: PropTypes.node.isRequired,
-};
 
 export default ArticleTitle;

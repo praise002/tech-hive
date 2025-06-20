@@ -1,7 +1,12 @@
-import PropTypes from 'prop-types';
+import { ArticleReactionsProps } from '../../types';
 import Bookmark from './Bookmark';
 
-function ArticleReactions({ reactions, reactionsCount, posted, readTime }) {
+function ArticleReactions({
+  reactions,
+  reactionsCount,
+  posted,
+  readTime,
+}: ArticleReactionsProps) {
   return (
     <div className="flex flex-col">
       {/* Reactions and Bookmark Section */}
@@ -41,12 +46,5 @@ function ArticleReactions({ reactions, reactionsCount, posted, readTime }) {
     </div>
   );
 }
-
-ArticleReactions.propTypes = {
-  reactions: PropTypes.arrayOf(PropTypes.string).isRequired,
-  reactionsCount: PropTypes.number.isRequired,
-  posted: PropTypes.string.isRequired,
-  readTime: PropTypes.string.isRequired,
-};
 
 export default ArticleReactions;

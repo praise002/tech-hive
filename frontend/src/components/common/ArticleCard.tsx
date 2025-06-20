@@ -1,19 +1,21 @@
-import Description from './Description';
-import Image from './Image';
-import ArticleReactions from './ArticleReactions';
 import Tags from './Tags';
 import ArticleTitle from './ArticleTitle';
-import Button from './Button';
-import PropTypes from 'prop-types';
+
 import { Link } from 'react-router-dom';
+import { ArticleCardProps } from '../../types';
+import Description from './Description';
+
+import ArticleReactions from './ArticleReactions';
+import Image from './Image';
+import Button from './Button';
 
 function ArticleCard({
   article,
   isOpen,
   onMenuClick,
   showAdminActions = false,
-  context = 'published',
-}) {
+  context = 'published', // TODO: GET BACK TO WHAT IT IS LATER
+}: ArticleCardProps) {
   return (
     <>
       <div className="relative overflow-hidden rounded-lg shadow-lg h-full flex flex-col">
@@ -98,23 +100,5 @@ function ArticleCard({
     </>
   );
 }
-
-ArticleCard.propTypes = {
-  article: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    image: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-    tags: PropTypes.arrayOf(PropTypes.string).isRequired,
-    reactions: PropTypes.arrayOf(PropTypes.string).isRequired,
-    reactionsCount: PropTypes.number.isRequired,
-    posted: PropTypes.string.isRequired,
-    readTime: PropTypes.string.isRequired,
-  }).isRequired,
-  showAdminActions: PropTypes.bool,
-  isOpen: PropTypes.bool,
-  onMenuClick: PropTypes.func,
-  context: PropTypes.string,
-};
 
 export default ArticleCard;

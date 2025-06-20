@@ -23,7 +23,7 @@ import TechJobDetail from './features/jobs/TechJobDetail';
 import TechJobsList from './features/jobs/TechJobsList';
 import TechToolDetail from './features/tools/TechToolDetail';
 import TechToolList from './features/tools/TechToolList';
-// import ProfileDetailEmpty from './features/profile/ProfileDetailEmpty';
+
 import ResourceList from './features/resource/ResourceList';
 import ResourceDetail from './features/resource/ResourceDetail';
 import ChangePassword from './features/auth/ChangePassword';
@@ -31,11 +31,10 @@ import ResetPassword from './features/auth/ResetPassword';
 import ResetPasswordSuccess from './features/auth/ResetPaswordSuccess';
 import { Toaster } from 'react-hot-toast';
 import Test from './features/profile/Test';
-// import RichTextEditor from './features/articles/RichTextEditor';
+
 import AdminDashboard from './features/admin/AdminDashboard';
-import ArticleEditor from './features/articles/ArticleEditor';
+
 import RichTextEditor from './features/articles/RichTextEditor';
-// import ProfileDetailEmpty from './features/profile/ProfileDetailEmpty';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -78,10 +77,10 @@ function App() {
             <Route path="about" element={<About />} />
             <Route path="contact" element={<Contact />} />
             <Route path="dashboard" element={<Dashboard />} />
-            {/* <Route path="new" element={<ArticleEditor />} /> */}
+
             <Route path="new" element={<RichTextEditor />} />
             <Route path="profile" element={<ProfileDetail />} />
-            {/* <Route path="profile" element={<ProfileDetailEmpty />} /> */}
+
             <Route path="account" element={<AccountDetail />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
@@ -91,16 +90,9 @@ function App() {
               path="reset-password-success"
               element={<ResetPasswordSuccess />}
             />
-            <Route
-              path="test"
-              element={<Test />}
-            />
-            <Route
-              path="admin"
-              element={<AdminDashboard />}
-            />
+            <Route path="test" element={<Test />} />
+            <Route path="admin" element={<AdminDashboard />} />
           </Route>
-          
 
           {/* Catch-all route for 404 errors */}
           <Route path="*" element={<PageNotFound />} />
@@ -108,7 +100,6 @@ function App() {
       </BrowserRouter>
       <Toaster
         position="top-right"
-        
         toastOptions={{
           className: 'dark:!bg-dark dark:!text-white',
           style: {
@@ -116,8 +107,6 @@ function App() {
             fontSize: '16px',
             maxWidth: '500px',
           },
-
-          
         }}
       />
     </QueryClientProvider>

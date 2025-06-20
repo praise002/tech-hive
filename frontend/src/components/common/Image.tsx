@@ -1,6 +1,6 @@
-import PropTypes from 'prop-types';
+import { ImageProps } from '../../types';
 
-function Image({ src, alt, className, imgClassName }) {
+function Image({ src, alt, className, imgClassName }: ImageProps) {
   return (
     <div className={className}>
       <img
@@ -8,19 +8,11 @@ function Image({ src, alt, className, imgClassName }) {
         alt={alt}
         className={`w-full h-full object-cover ${imgClassName}`}
       />
-      {/* h-full */}
     </div>
   );
 }
 
 export default Image;
-
-Image.propTypes = {
-  src: PropTypes.string.isRequired,
-  alt: PropTypes.string.isRequired,
-  className: PropTypes.string,
-  imgClassName: PropTypes.string,
-};
 
 // transition-transform duration-300 hover:scale-105 hover:-translate-y-4
 // change to image and reuse everywhere, use props

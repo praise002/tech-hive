@@ -1,9 +1,5 @@
+import { ErrorFallbackProps } from '../../types';
 import Text from './Text';
-
-interface ErrorFallbackProps {
-  error: Error;
-  resetErrorBoundary?: () => void;
-}
 
 function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
   return (
