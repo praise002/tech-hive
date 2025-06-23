@@ -1,10 +1,11 @@
 import Button from './Button';
 import Text from './Text';
 import JobTags from './JobTags';
-import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
 
-function JobPostingCard({ job }) {
+import { Link } from 'react-router-dom';
+import { JobPostingCardProps } from '../../types';
+
+function JobPostingCard({ job }: JobPostingCardProps) {
   return (
     <div className="p-6 rounded-lg border border-gray dark:border-gray-700 shadow-lg h-full flex flex-col">
       <div className="flex-grow space-y-2">
@@ -40,14 +41,5 @@ function JobPostingCard({ job }) {
     </div>
   );
 }
-
-JobPostingCard.propTypes = {
-  job: PropTypes.shape({
-    title: PropTypes.string.isRequired,
-    company: PropTypes.string.isRequired,
-    lastPosted: PropTypes.string.isRequired,
-    tags: PropTypes.arrayOf(PropTypes.string).isRequired,
-  }).isRequired,
-};
 
 export default JobPostingCard;

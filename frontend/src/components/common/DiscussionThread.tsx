@@ -2,9 +2,10 @@ import { useState } from 'react';
 import Like from './Like';
 import Text from './Text';
 import Button from './Button';
+import { Comment } from '../../types';
 
 function DiscussionThread() {
-  const [comments, setComments] = useState([
+  const [comments, setComments] = useState<Comment[]>([
     {
       id: crypto.randomUUID(),
       author: 'Adebayo Abibat',
@@ -13,8 +14,8 @@ function DiscussionThread() {
       replies: [],
     },
   ]); // Stores the list of existing comments
-  const [newComment, setNewComment] = useState(''); // Tracks the user's input in the textarea
-  const [replyText, setReplyText] = useState({}); // For replies (keyed by comment ID)
+  const [newComment, setNewComment] = useState<string>(''); // Tracks the user's input in the textarea
+  const [replyText, setReplyText] = useState<Record<string, string>>({}); // For replies (keyed by comment ID)
 
   function handleAddComment() {
     if (newComment.trim() === '') return; // Prevent empty comments
@@ -31,7 +32,7 @@ function DiscussionThread() {
     setNewComment(''); // Clear the textarea
   }
 
-  function handleAddReply(commentId) {
+  function handleAddReply(commentId: string) {
     const reply = replyText[commentId]?.trim();
 
     if (!reply) return;

@@ -12,11 +12,11 @@ const initialReactions = [
 
 function Reaction() {
   const [reactions, setReactions] = useState(initialReactions); // Keeps track of all the reactions and their counts
-  const [selectedReactions, setSelectedReactions] = useState([]); // Remembers which reactions YOU have selected
+  const [selectedReactions, setSelectedReactions] = useState<string[]>([]); // Remembers which reactions YOU have selected
   const [showReactions, setShowReactions] = useState(false); // Shows or hides the list of emojis
-  const [hoveredId, setHoveredId] = useState(null); // Remembers which emoji you're hovering over with your mouse
+  const [hoveredId, setHoveredId] = useState<string | null>(null); // Remembers which emoji you're hovering over with your mouse
 
-  function toggleReaction(reactionId) {
+  function toggleReaction(reactionId: string) {
     setSelectedReactions((prevSelected) => {
       // Check if reaction is already selected
       const isSelected = prevSelected.includes(reactionId);

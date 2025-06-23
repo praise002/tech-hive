@@ -3,7 +3,7 @@ export interface ErrorFallbackProps {
   resetErrorBoundary?: () => void;
 }
 
-type TextVariant = 'h1' | 'h2' | 'h3'| 'h4' | 'h5' | 'h6' | 'p';
+type TextVariant = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p';
 type TextSize = 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
 type TextAlign = 'left' | 'center' | 'right';
 
@@ -31,10 +31,10 @@ export interface Article {
 
 export interface ArticleCardProps {
   article: Article;
-  showAdminActions: boolean;
-  isOpen: boolean;
+  showAdminActions?: boolean;
+  isOpen?: boolean;
   onMenuClick: (id: string) => void;
-  context: string;
+  context?: string;
 }
 
 export interface DescriptionProps {
@@ -73,7 +73,107 @@ type ButtonType = 'button' | 'submit' | 'reset';
 export interface ButtonProps {
   children: React.ReactNode;
   className?: string;
-  variant: ButtonVariant;
+  variant?: ButtonVariant;
   onClick?: () => void;
   type?: ButtonType;
+}
+
+interface Reply {
+  id: string;
+  author: string;
+  text: string;
+  timestamp: string;
+}
+
+export interface Comment {
+  id: string;
+  author: string;
+  text: string;
+  timestamp: string;
+  replies: Reply[];
+}
+
+interface Event {
+  title: string;
+  organizer: string;
+  date: string;
+  location: string;
+  type: string;
+  lastPosted: string;
+}
+
+export interface EventCardProps {
+  event: Event;
+}
+
+interface Job {
+  title: string;
+  company: string;
+  lastPosted: string;
+  tags: string[];
+}
+
+export interface JobPostingCardProps {
+  job: Job;
+}
+
+export interface JobTagsProps {
+  tags: string[];
+}
+
+interface Resource {
+  resourceName: string;
+  resourceImage: string;
+  resourceType: string;
+  resourceDescription: string;
+  resourceCategories: string[];
+  timePosted: string;
+}
+
+export interface ResourceCardProps {
+  resource: Resource;
+}
+
+export interface SearchInputProps {
+  inputWidth: string;
+  iconSize: string;
+}
+
+interface Tool {
+  toolName: string;
+  toolImage: string;
+  toolDescription: string;
+  toolCategories: string[];
+  callToAction: string;
+  link: string;
+}
+
+export interface ToolCardProps {
+  tool: Tool;
+}
+
+export interface SocialIconProps {
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+export interface SocialLinksProps {
+  visible: boolean;
+  title: string;
+  sharemsg: string;
+  content?: string;
+  url: string;
+}
+
+export interface ToolTipProps {
+  children: React.ReactNode;
+  text: string;
+  position?: string;
+}
+
+export interface ArticlesProps {
+  marginTop?: number;
+  showAdminActions: boolean;
+  visibleHeader?: boolean;
+  context: string;
 }

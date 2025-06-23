@@ -1,14 +1,20 @@
-import PropTypes from 'prop-types';
 import ArticleCard from '../common/ArticleCard';
 import Text from '../common/Text';
-import { displayedArticles } from '../../data/articles';
+
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import { displayedArticles } from '../../data/articles';
+import { ArticlesProps } from '../../types';
 
-function Articles({ marginTop = 20, showAdminActions, context, visibleHeader = true }) {
-  const [openArticleId, setOpenArticleId] = useState(null);
+function Articles({
+  marginTop = 20,
+  showAdminActions,
+  context,
+  visibleHeader = true,
+}: ArticlesProps) {
+  const [openArticleId, setOpenArticleId] = useState<string | null>(null);
 
-  function handleMenuClick(articleId) {
+  function handleMenuClick(articleId: string) {
     setOpenArticleId((prevId) => (prevId === articleId ? null : articleId));
   }
 
@@ -58,12 +64,5 @@ function Articles({ marginTop = 20, showAdminActions, context, visibleHeader = t
     </div>
   );
 }
-
-Articles.propTypes = {
-  marginTop: PropTypes.string,
-  showAdminActions: PropTypes.bool,
-  visibleHeader: PropTypes.bool,
-  context: PropTypes.string,
-};
 
 export default Articles;

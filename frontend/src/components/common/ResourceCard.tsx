@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+import { ResourceCardProps } from '../../types';
 import Button from './Button';
 import Description from './Description';
 import Image from './Image';
@@ -6,7 +6,7 @@ import Tags from './Tags';
 import Text from './Text';
 import { Link } from 'react-router-dom';
 
-function ResourceCard({ resource }) {
+function ResourceCard({ resource }: ResourceCardProps) {
   return (
     <div className="relative overflow-hidden rounded-lg shadow-lg h-full flex flex-col">
       <Image
@@ -46,16 +46,5 @@ function ResourceCard({ resource }) {
     </div>
   );
 }
-
-ResourceCard.propTypes = {
-  resource: PropTypes.shape({
-    resourceName: PropTypes.string.isRequired,
-    resourceImage: PropTypes.string.isRequired,
-    resourceType: PropTypes.string.isRequired,
-    resourceDescription: PropTypes.string.isRequired,
-    resourceCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
-    timePosted: PropTypes.string.isRequired,
-  }).isRequired,
-};
 
 export default ResourceCard;

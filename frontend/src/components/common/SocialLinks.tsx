@@ -8,14 +8,15 @@ import {
   FaReddit,
   FaLink,
 } from 'react-icons/fa';
-import PropTypes from 'prop-types';
+
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import Button from './Button';
 import Text from './Text';
+import { SocialLinksProps, ToolTipProps } from '../../types';
 
-export function ToolTip({ children, text, position = 'top' }) {
-  const positionClasses = {
+export function ToolTip({ children, text, position = 'top' }: ToolTipProps) {
+  const positionClasses: Record<string, string> = {
     top: 'top-7 left-1/2 -translate-x-1/2 md:-translate-0 md:-top-0 md:left-8',
     bottom: 'top-full right-1/2 -translate-x-1/2 mt-2',
     // left: 'right-full top-1/2 -translate-y-1/2 mr-2',
@@ -33,14 +34,14 @@ export function ToolTip({ children, text, position = 'top' }) {
   );
 }
 
-ToolTip.propTypes = {
-  children: PropTypes.node,
-  text: PropTypes.string.isRequired,
-  position: PropTypes.string,
-};
-
 // Helper function to generate share URLs
-function getShareUrl(platform, url, title, sharemsg, content) {
+function getShareUrl(
+  platform: string,
+  url: string,
+  title: string,
+  sharemsg: string,
+  content: string
+) {
   const message = encodeURIComponent(`${title} ${url}`);
   // const shareMessage = `Check out this article on ${title}`;
   const shareMessage = `${sharemsg} ${title}`;
@@ -76,7 +77,13 @@ function getShareUrl(platform, url, title, sharemsg, content) {
   }
 }
 
-function SocialLinks({ visible, title, sharemsg, url, content = '' }) {
+function SocialLinks({
+  visible,
+  title,
+  sharemsg,
+  url,
+  content = '',
+}: SocialLinksProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSummarizeModal, setIsSummarizeModal] = useState(false);
 
@@ -86,10 +93,14 @@ function SocialLinks({ visible, title, sharemsg, url, content = '' }) {
   // TODO: FIX LATER: SO MANY WAYS OF DOING IT
   // Function to handle clicks outside the dropdown
   useEffect(() => {
-    function handleClickOutside(event) {
+    interface MouseEvent {
+      target: EventTarget | null;
+    }
+
+    function handleClickOutside(event: MouseEvent): void {
       const dropdown = document.getElementById('social-links-dropdown');
 
-      if (dropdown && !dropdown.contains(event.target)) {
+      if (dropdown && !dropdown.contains(event.target as Node)) {
         setIsOpen(false);
       }
     }
@@ -104,7 +115,11 @@ function SocialLinks({ visible, title, sharemsg, url, content = '' }) {
   }, [isOpen]);
 
   useEffect(() => {
-    function handleEscapeKey(event) {
+    interface KeyEvent {
+      key: string;
+    }
+
+    function handleEscapeKey(event: KeyEvent): void {
       if (event.key === 'Escape') {
         closeSummarizeModal();
         setIsOpen(false);
@@ -184,7 +199,7 @@ function SocialLinks({ visible, title, sharemsg, url, content = '' }) {
   ];
 
   // Generic share handler
-  function handleShare(platform) {
+  function handleShare(platform: string) {
     const shareUrl = getShareUrl(platform, url, title, sharemsg, content);
     window.open(shareUrl, '_blank');
     setIsOpen(false); // Close the dropdown after sharing
@@ -311,13 +326,5 @@ function SocialLinks({ visible, title, sharemsg, url, content = '' }) {
     </div>
   );
 }
-
-SocialLinks.propTypes = {
-  visible: PropTypes.bool.isRequired,
-  title: PropTypes.string.isRequired,
-  sharemsg: PropTypes.string,
-  content: PropTypes.string,
-  url: PropTypes.string.isRequired,
-};
 
 export default SocialLinks;

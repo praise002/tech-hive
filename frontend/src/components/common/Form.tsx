@@ -1,17 +1,42 @@
-import { useForm } from 'react-hook-form';
-import PropTypes from 'prop-types';
+import { useForm, FieldValues, Path } from 'react-hook-form';
+
 import Button from './Button';
 
-function Form({ inputs, onSubmit, children, onClick, className }) {
+interface Inputs<T> {
+  name: Path<T>;
+  placeholder?: string;
+  type?: string;
+  rules: Record<string, T>;
+  id?: string;
+  onIconClick?: () => void;
+  iconAriaLabel?: string;
+  icon?: React.ReactNode;
+}
+
+interface FormProps<T> {
+  inputs: Inputs<T>[];
+  onSubmit: (data: T, reset: () => void) => void;
+  children: React.ReactNode;
+  onClick?: () => void;
+  className?: string;
+}
+
+function Form<T extends FieldValues>({
+  inputs,
+  onSubmit,
+  children,
+  onClick,
+  className,
+}: FormProps<T>) {
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm();
+  } = useForm<T>();
 
   // Handle form submission
-  function submitForm(data) {
+  function submitForm(data: T) {
     if (onSubmit) {
       onSubmit(data, reset); // Call the parent's onSubmit function
     }
@@ -32,10 +57,12 @@ function Form({ inputs, onSubmit, children, onClick, className }) {
           />
 
           {input.icon && (
-            <button type='button' 
-            onClick={input.onIconClick}
-            aria-label={input.iconAriaLabel || 'Toggle field options'}
-            className="absolute right-3 top-1/2 -translate-y-1/2">
+            <button
+              type="button"
+              onClick={input.onIconClick}
+              aria-label={input.iconAriaLabel || 'Toggle field options'}
+              className="absolute right-3 top-1/2 -translate-y-1/2"
+            >
               {input.icon}
             </button>
           )}
@@ -43,7 +70,7 @@ function Form({ inputs, onSubmit, children, onClick, className }) {
           {/* Render error messages if validation fails */}
           {errors[input.name] && (
             <p className="text-red-500 text-sm mt-1">
-              {errors[input.name]?.message}
+              {errors[input.name]?.message?.toString()}
             </p>
           )}
         </div>
@@ -56,23 +83,5 @@ function Form({ inputs, onSubmit, children, onClick, className }) {
     </form>
   );
 }
-
-Form.propTypes = {
-  inputs: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      placeholder: PropTypes.string,
-      type: PropTypes.string,
-      rules: PropTypes.object,
-      id: PropTypes.string,
-      onIconClick: PropTypes.func, 
-      iconAriaLabel: PropTypes.string,
-    })
-  ).isRequired, // The inputs array is required
-  onSubmit: PropTypes.func,
-  children: PropTypes.node.isRequired,
-  onClick: PropTypes.func,
-  className: PropTypes.string,
-};
 
 export default Form;

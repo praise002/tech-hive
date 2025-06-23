@@ -3,7 +3,12 @@ import Form from '../common/Form';
 import Text from '../common/Text';
 
 function Subscribe() {
-  const inputs = [
+  const inputs: Array<{
+    name: keyof FormData;
+    placeholder: string;
+    type: string;
+    rules: any;
+  }> = [
     {
       name: 'email',
       placeholder: 'jack@example.com',
@@ -18,7 +23,15 @@ function Subscribe() {
     },
   ];
 
-  const handleFormSubmit = (data, reset) => {
+  interface FormData {
+    email: string;
+  }
+
+  interface ResetFunction {
+    (): void;
+  }
+
+  const handleFormSubmit = (data: FormData, reset: ResetFunction): void => {
     console.log('Form Data:', data);
     toast.success("You're all set! Thanks for subscribing to our newsletter.");
     reset();

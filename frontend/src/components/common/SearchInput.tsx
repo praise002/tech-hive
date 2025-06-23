@@ -1,11 +1,13 @@
-import PropTypes from 'prop-types';
 import { CiSearch } from 'react-icons/ci';
+import { SearchInputProps } from '../../types';
 
-function SearchInput({ inputWidth, iconSize }) {
+function SearchInput({ inputWidth, iconSize }: SearchInputProps) {
   return (
     <div className="relative">
       {/* Search Icon */}
-      <CiSearch className={`${iconSize} absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-custom-white`} />
+      <CiSearch
+        className={`${iconSize} absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-custom-white`}
+      />
 
       {/* Input Field */}
       <input
@@ -16,11 +18,5 @@ function SearchInput({ inputWidth, iconSize }) {
     </div>
   );
 }
-
-// ✅ Props Validation
-SearchInput.propTypes = {
-  inputWidth: PropTypes.string,
-  iconSize: PropTypes.string,
-};
 
 export default SearchInput;

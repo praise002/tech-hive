@@ -2,9 +2,9 @@ import Image from './Image';
 import Tags from './Tags';
 import Text from './Text';
 import Button from './Button';
-import PropTypes from 'prop-types';
+import { ToolCardProps } from '../../types';
 
-function ToolCard({ tool }) {
+function ToolCard({ tool }: ToolCardProps) {
   return (
     <div className="relative overflow-hidden rounded-lg shadow-lg h-full flex flex-col">
       <Image
@@ -40,16 +40,5 @@ function ToolCard({ tool }) {
     </div>
   );
 }
-
-ToolCard.propTypes = {
-  tool: PropTypes.shape({
-    toolName: PropTypes.string.isRequired,
-    toolImage: PropTypes.string.isRequired,
-    toolDescription: PropTypes.string.isRequired,
-    toolCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
-    callToAction: PropTypes.string.isRequired,
-    link: PropTypes.string.isRequired,
-  }).isRequired,
-};
 
 export default ToolCard;

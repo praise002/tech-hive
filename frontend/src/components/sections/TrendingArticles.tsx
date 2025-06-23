@@ -27,7 +27,7 @@ function TrendingArticles() {
       <div>
         <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4 h-full">
           {trendingArticles.map((article) => (
-            <ArticleCard key={article.id} article={article} />
+            <ArticleCard key={article.id} article={article} onMenuClick={} />
           ))}
         </div>
       </div>

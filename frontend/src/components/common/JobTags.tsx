@@ -1,11 +1,11 @@
-import PropTypes from 'prop-types';
+import { JobTagsProps } from '../../types';
 
-function JobTags({ tags }) {
+function JobTags({ tags }: JobTagsProps) {
   return (
     <div className="flex gap-2 flex-wrap mb-4">
-      {tags.map((tag, index) => (
+      {tags.map((tag) => (
         <span
-          key={index}
+          key={tag}
           className="inline-flex items-center px-2 py-1 bg-cream text-xs font-medium text-gray-700 rounded-sm"
         >
           {tag}
@@ -14,9 +14,5 @@ function JobTags({ tags }) {
     </div>
   );
 }
-
-JobTags.propTypes = {
-  tags: PropTypes.array.isRequired,
-};
 
 export default JobTags;
