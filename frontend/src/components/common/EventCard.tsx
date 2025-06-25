@@ -5,7 +5,7 @@ import { RiMapPinRangeLine } from 'react-icons/ri';
 import Button from './Button';
 import Text from './Text';
 import { Link } from 'react-router-dom';
-import { EventCardProps } from '../../types';
+import { EventCardProps } from '../../types/types';
 
 function EventCard({ event }: EventCardProps) {
   return (

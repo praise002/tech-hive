@@ -1,4 +1,4 @@
-import { ImageProps } from '../../types';
+import { ImageProps } from '../../types/types';
 
 function Image({ src, alt, className, imgClassName }: ImageProps) {
   return (

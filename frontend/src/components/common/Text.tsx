@@ -1,4 +1,4 @@
-import { TextProps } from "../../types";
+import { TextProps } from '../../types/types';
 
 function Text({
   children,
@@ -9,7 +9,7 @@ function Text({
   bold = true,
   color = 'gray-800',
   ...props
-} : TextProps) {
+}: TextProps) {
   const sizeClasses = {
     xs: 'text-xs',
     sm: 'text-sm',
@@ -27,7 +27,10 @@ function Text({
     right: 'text-right',
   };
 
-  const VariantElement = ({ children, ...props } : { children: React.ReactNode } & React.HTMLAttributes<HTMLElement>) => {
+  const VariantElement = ({
+    children,
+    ...props
+  }: { children: React.ReactNode } & React.HTMLAttributes<HTMLElement>) => {
     switch (variant) {
       case 'h1':
         return <h1 {...props}>{children}</h1>;

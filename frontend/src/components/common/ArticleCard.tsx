@@ -2,17 +2,18 @@ import Tags from './Tags';
 import ArticleTitle from './ArticleTitle';
 
 import { Link } from 'react-router-dom';
-import { ArticleCardProps } from '../../types';
+
 import Description from './Description';
 
 import ArticleReactions from './ArticleReactions';
 import Image from './Image';
 import Button from './Button';
+import { ArticleCardProps } from '../../types/types';
 
 function ArticleCard({
   article,
   isOpen,
-  onMenuClick,
+  onMenuClick = () => {},
   showAdminActions = false,
   context = 'published', // TODO: GET BACK TO WHAT IT IS LATER
 }: ArticleCardProps) {

@@ -31,7 +31,9 @@ import CodeBlockComponent from './CodeBlockComponent';
 const lowlight = createLowlight(common);
 
 const extensions = [
-  TextStyle.configure({ types: [ListItem.name] }), // tells the color to work with ListItem
+  TextStyle.configure({
+    types: [ListItem.name],
+  } as any), // tells the color to work with ListItem: any: tells ts to trust me
   Color,
   Image,
   TableRow,
@@ -229,6 +231,3 @@ function RichTextEditor() {
 export default RichTextEditor;
 
 // NOTE: Tell user to press triple enter to exit code block
-// TODO: create a custom component to replace the default code block renderer
-// just like the one shown in syntax highlighter docs
-// for images to upload with input:file

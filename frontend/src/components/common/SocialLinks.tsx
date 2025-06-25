@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import Button from './Button';
 import Text from './Text';
-import { SocialLinksProps, ToolTipProps } from '../../types';
+import { SocialLinksProps, ToolTipProps } from '../../types/types';
 
 export function ToolTip({ children, text, position = 'top' }: ToolTipProps) {
   const positionClasses: Record<string, string> = {

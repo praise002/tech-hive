@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Like from './Like';
 import Text from './Text';
 import Button from './Button';
-import { Comment } from '../../types';
+import { Comment } from '../../types/types';
 
 function DiscussionThread() {
   const [comments, setComments] = useState<Comment[]>([

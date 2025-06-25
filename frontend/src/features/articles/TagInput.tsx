@@ -1,5 +1,5 @@
-import PropTypes from 'prop-types';
 import { useState } from 'react';
+import { TagInputProps } from '../../types/types';
 
 function TagInput({
   tags,
@@ -9,7 +9,7 @@ function TagInput({
   onInputChange = () => {},
   onInputKeyDown = () => {},
   maxTags = 5,
-}) {
+}: TagInputProps) {
   const [isFocused, setIsFocused] = useState(false); // Tracks whether the input is focused (to show/hide suggestions)
 
   const filteredSuggestions = value
@@ -54,18 +54,5 @@ function TagInput({
     </div>
   );
 }
-
-TagInput.propTypes = {
-  // Required props
-  tags: PropTypes.arrayOf(PropTypes.string).isRequired,
-  suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
-  onAddTag: PropTypes.func.isRequired,
-
-  // Optional props
-  value: PropTypes.string,
-  onInputChange: PropTypes.func,
-  onInputKeyDown: PropTypes.func,
-  maxTags: PropTypes.number,
-};
 
 export default TagInput;

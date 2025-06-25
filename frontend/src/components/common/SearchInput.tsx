@@ -1,5 +1,5 @@
 import { CiSearch } from 'react-icons/ci';
-import { SearchInputProps } from '../../types';
+import { SearchInputProps } from '../../types/types';
 
 function SearchInput({ inputWidth, iconSize }: SearchInputProps) {
   return (

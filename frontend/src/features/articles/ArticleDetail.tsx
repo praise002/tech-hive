@@ -64,6 +64,7 @@ function ArticleDetail() {
             title={article.title}
             url={article.url}
             content={article.content}
+            sharemsg={article.title}
           />
         </div>
 
@@ -129,6 +130,7 @@ function ArticleDetail() {
             title={article.title}
             url={article.url}
             content={article.content}
+            sharemsg={article.title}
           />
         </div>
       </div>

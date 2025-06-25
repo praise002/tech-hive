@@ -7,14 +7,14 @@ import { GrBlockQuote } from "react-icons/gr";
 export function BubbleMenuFromProvider() {
   const { editor } = useCurrentEditor();
 
+  if (!editor) return;
+
   const setLink = useCallback(() => {
     const previousUrl = editor.getAttributes('link').href;
     const url = window.prompt('URL', previousUrl);
 
     // cancelled
-    if (url === null) {
-      return;
-    }
+    if (url === null) return;
 
     // empty
     if (url === '') {
@@ -32,7 +32,8 @@ export function BubbleMenuFromProvider() {
         .setLink({ href: url })
         .run();
     } catch (e) {
-      toast.error(e.message);
+      const error = e as Error;
+      toast.error(error.message);
     }
   }, [editor]);
 

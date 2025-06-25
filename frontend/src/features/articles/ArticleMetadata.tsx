@@ -43,9 +43,9 @@ function ArticleMetadata() {
     coverImage: '',
   });
 
-  function handleCoverImageChange(event) {
+  function handleCoverImageChange(event: React.ChangeEvent<HTMLInputElement>) {
     setIsImageLoading(true);
-    const file = event.target.files[0];
+    const file = event.target.files?.[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setTimeout(() => {
@@ -67,29 +67,29 @@ function ArticleMetadata() {
     }));
   }
 
-  function handleTitleChange(e) {
+  function handleTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setMetadata((prev) => ({
       ...prev,
       title: e.target.value,
     }));
   }
 
-  function handleAddTag(tag) {
+  function handleAddTag(tag: string) {
     if (!tags.includes(tag) && tags.length < 5) {
       setTags((prevTags) => [...prevTags, tag]);
       setInputValue('');
     }
   }
 
-  function handleRemoveTag(tagToRemove) {
+  function handleRemoveTag(tagToRemove: string) {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   }
 
-  function handleInputChange(e) {
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     setInputValue(e.target.value);
   }
 
-  function handleInputKeyDown(e) {
+  function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter' && inputValue.trim()) {
       e.preventDefault();
       handleAddTag(inputValue.trim());
@@ -133,7 +133,10 @@ function ArticleMetadata() {
             </div>
           </div>
         ) : (
-          <ToolTip position='bottom' text="Use a ratio of 1000:420 for best results">
+          <ToolTip
+            position="bottom"
+            text="Use a ratio of 1000:420 for best results"
+          >
             <Button
               className={`${
                 isImageLoading

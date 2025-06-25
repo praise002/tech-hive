@@ -1,4 +1,4 @@
-import { ArticleTitleProps } from '../../types';
+import { ArticleTitleProps } from '../../types/types';
 import Text from './Text';
 
 function ArticleTitle({ children }: ArticleTitleProps) {

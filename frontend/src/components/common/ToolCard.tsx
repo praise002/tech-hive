@@ -2,7 +2,7 @@ import Image from './Image';
 import Tags from './Tags';
 import Text from './Text';
 import Button from './Button';
-import { ToolCardProps } from '../../types';
+import { ToolCardProps } from '../../types/types';
 
 function ToolCard({ tool }: ToolCardProps) {
   return (

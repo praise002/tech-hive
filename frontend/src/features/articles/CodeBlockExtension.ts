@@ -27,14 +27,14 @@ export const CodeBlockExtension = Node.create({
     ];
   },
 
-  renderHTML({ HTMLAtrributes }) {
+  renderHTML({ HTMLAttributes }) {
     return [
       'pre',
       {},
       [
         'code',
         {
-          class: `language-${HTMLAtrributes.language}`,
+          class: `language-${HTMLAttributes.language}`,
         },
         0, // placeholder for the actual code content
       ],
@@ -48,11 +48,9 @@ export const CodeBlockExtension = Node.create({
         ({ commands }) => {
           return commands.toggleNode('codeBlock', 'paragraph');
         }, // turns a paragraph into a code block
-      setCodeBlock:
-        () =>
-        ({ commands }) => {
-          return commands.setNode('codeBlock');
-        },
+      setCodeBlock: () => () => {
+        return this.editor.commands.setNode('codeBlock');
+      },
     };
   },
 

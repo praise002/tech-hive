@@ -1,4 +1,4 @@
-import { DescriptionProps } from "../../types";
+import { DescriptionProps } from '../../types/types';
 
 function Description({ children }: DescriptionProps) {
   return (

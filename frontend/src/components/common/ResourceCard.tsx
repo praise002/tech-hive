@@ -1,4 +1,4 @@
-import { ResourceCardProps } from '../../types';
+import { ResourceCardProps } from '../../types/types';
 import Button from './Button';
 import Description from './Description';
 import Image from './Image';

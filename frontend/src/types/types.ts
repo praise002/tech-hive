@@ -29,13 +29,26 @@ export interface Article {
   readTime: string;
 }
 
-export interface ArticleCardProps {
-  article: Article;
-  showAdminActions?: boolean;
-  isOpen?: boolean;
+// Version 1: showAdminActions is true, onMenuClick is REQUIRED
+interface PropsWithAdminActions {
+  showAdminActions: true;
+  isOpen: boolean;
   onMenuClick: (id: string) => void;
+  article: Article;
   context?: string;
 }
+
+// Version 2: showAdminActions is false, onMenuClick is OPTIONAL
+interface PropsWithoutAdminActions {
+  showAdminActions?: false;
+  isOpen?: boolean;
+  onMenuClick?: (id: string) => void;
+  article: Article;
+  context?: string;
+}
+
+// Combine the two versions using a union type
+export type ArticleCardProps = PropsWithAdminActions | PropsWithoutAdminActions;
 
 export interface DescriptionProps {
   children: React.ReactNode;
@@ -70,7 +83,8 @@ export interface ArticleTitleProps {
 type ButtonVariant = 'primary' | 'outline' | 'gradient';
 type ButtonType = 'button' | 'submit' | 'reset';
 
-export interface ButtonProps {
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   className?: string;
   variant?: ButtonVariant;
@@ -175,5 +189,25 @@ export interface ArticlesProps {
   marginTop?: number;
   showAdminActions: boolean;
   visibleHeader?: boolean;
-  context: string;
+  context?: string;
+}
+
+export interface MarkdownTagsProps {
+  tags: string[];
+  onRemove: (tag: string) => void;
+}
+
+export interface KeyboardEvent extends React.KeyboardEvent<HTMLInputElement> {
+  key: string;
+}
+
+export interface TagInputProps {
+  tags: string[];
+  suggestedTags: string[];
+  onAddTag: (tag: string) => void;
+
+  value?: string;
+  onInputChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onInputKeyDown?: (e: KeyboardEvent) => void;
+  maxTags?: number;
 }

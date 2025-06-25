@@ -1,4 +1,4 @@
-import { ArticleReactionsProps } from '../../types';
+import { ArticleReactionsProps } from '../../types/types';
 import Bookmark from './Bookmark';
 
 function ArticleReactions({

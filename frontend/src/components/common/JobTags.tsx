@@ -1,4 +1,4 @@
-import { JobTagsProps } from '../../types';
+import { JobTagsProps } from '../../types/types';
 
 function JobTags({ tags }: JobTagsProps) {
   return (

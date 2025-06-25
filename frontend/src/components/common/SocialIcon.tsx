@@ -1,4 +1,4 @@
-import { SocialIconProps } from "../../types";
+import { SocialIconProps } from '../../types/types';
 
 export const SocialIcon = ({ href, icon: Icon }: SocialIconProps) => (
   <li>

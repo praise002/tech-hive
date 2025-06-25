@@ -3,7 +3,7 @@ import Text from './Text';
 import JobTags from './JobTags';
 
 import { Link } from 'react-router-dom';
-import { JobPostingCardProps } from '../../types';
+import { JobPostingCardProps } from '../../types/types';
 
 function JobPostingCard({ job }: JobPostingCardProps) {
   return (

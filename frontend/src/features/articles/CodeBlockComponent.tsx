@@ -1,6 +1,16 @@
 import { NodeViewWrapper, NodeViewContent } from '@tiptap/react';
 import { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
+
+interface CodeBlockAttrs {
+  language?: string;
+}
+
+interface CodeBlockProps {
+  node: {
+    attrs: CodeBlockAttrs;
+  };
+  updateAttributes: (attrs: CodeBlockAttrs) => void;
+}
 
 const languages = [
   { value: 'arduino', label: 'Arduino' },
@@ -31,7 +41,10 @@ const languages = [
   { value: 'yaml', label: 'YAML' },
 ];
 
-export default function CodeBlockComponent({ node, updateAttributes }) {
+export default function CodeBlockComponent({
+  node,
+  updateAttributes,
+}: CodeBlockProps) {
   const [language, setLanguage] = useState(node.attrs.language);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -39,7 +52,7 @@ export default function CodeBlockComponent({ node, updateAttributes }) {
     updateAttributes({ language });
   }, [language, updateAttributes]);
 
-  function handleLanguageChange(lang) {
+  function handleLanguageChange(lang: string) {
     setLanguage(lang);
     setIsDropdownOpen(false);
   }
@@ -99,17 +112,8 @@ export default function CodeBlockComponent({ node, updateAttributes }) {
 
       {/* Code content with default styling */}
       <pre className="!mt-2">
-        <NodeViewContent as='code' />
+        <NodeViewContent as="code" />
       </pre>
     </NodeViewWrapper>
   );
 }
-
-CodeBlockComponent.propTypes = {
-  node: PropTypes.shape({
-    attrs: PropTypes.shape({
-      language: PropTypes.string,
-    }).isRequired,
-  }).isRequired,
-  updateAttributes: PropTypes.func.isRequired,
-};

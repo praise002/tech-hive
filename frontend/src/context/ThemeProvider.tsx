@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
+
 import { ThemeContext } from './ThemeContext';
 
+interface ThemeProviderProps {
+  children: React.ReactNode;
+}
+
 // Create the provider
-function ThemeProvider({ children }) {
+function ThemeProvider({ children }: ThemeProviderProps) {
   const [theme, setTheme] = useState(() => {
     // Check if the user has a saved preference in localStorage
     const savedTheme = localStorage.getItem('theme');
@@ -35,9 +39,5 @@ function ThemeProvider({ children }) {
     </ThemeContext.Provider>
   );
 }
-
-ThemeProvider.propTypes = {
-  children: PropTypes.node.isRequired,
-};
 
 export default ThemeProvider;

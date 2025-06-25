@@ -1,4 +1,4 @@
-import { ErrorFallbackProps } from '../../types';
+import { ErrorFallbackProps } from '../../types/types';
 import Text from './Text';
 
 function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {

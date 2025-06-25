@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+import { MarkdownTagsProps } from '../../types/types';
 
 // Define a Color Palette
 const tagColors = [
@@ -11,21 +11,20 @@ const tagColors = [
 ];
 
 // Create a Hashing Function
-function hashTagName(tagName) {
-  const stringTagName = String(tagName);
-  return stringTagName
+function hashTagName(tagName: string) {
+  return tagName
     .toLowerCase()
     .split('')
     .reduce((sum, char) => sum + char.charCodeAt(0), 0);
 }
 
 // Map the Hash to a Color
-function getTagColor(tagName) {
+function getTagColor(tagName: string) {
   const hash = hashTagName(tagName);
   return tagColors[hash % tagColors.length];
 }
 
-function MarkdownTags({ tags, onRemove }) {
+function MarkdownTags({ tags, onRemove }: MarkdownTagsProps) {
   return (
     <div className="flex gap-2 flex-wrap my-2 text-xs md:text-sm">
       {tags.map((tag) => {
@@ -51,10 +50,5 @@ function MarkdownTags({ tags, onRemove }) {
     </div>
   );
 }
-
-MarkdownTags.propTypes = {
-  tags: PropTypes.arrayOf(PropTypes.string).isRequired,
-  onRemove: PropTypes.func.isRequired,
-};
 
 export default MarkdownTags;

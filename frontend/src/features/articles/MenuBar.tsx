@@ -1,9 +1,10 @@
 import { useCurrentEditor } from '@tiptap/react';
 import { useCallback, useState } from 'react';
 import toast from 'react-hot-toast';
+
 import Spinner from '../../components/common/Spinner';
 
-export function ButtonClass(isActive) {
+export function ButtonClass(isActive: boolean) {
   return `p-2 rounded-lg cursor-pointer focus-visible:outline-0 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-red-300 transition duration-300 ${
     isActive ? 'bg-red text-white hover:bg-red-800' : 'bg-gray-200 text-black'
   }`;
@@ -13,17 +14,16 @@ const MenuBar = () => {
   const { editor } = useCurrentEditor();
   const [isImageLoading, setIsImageLoading] = useState(false);
 
-  function getImageUrl(event) {
-    const file = event.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      console.log(imageUrl);
-      return imageUrl;
-    }
+  function getImageUrl(
+    event: React.ChangeEvent<HTMLInputElement>
+  ): string | null {
+    const file = event.target.files?.[0];
+
+    return file ? URL.createObjectURL(file) : null;
   }
 
   const addImage = useCallback(
-    (event) => {
+    (event: React.ChangeEvent<HTMLInputElement>) => {
       setIsImageLoading(true);
       const url = getImageUrl(event);
 
@@ -35,7 +35,7 @@ const MenuBar = () => {
       img.src = url;
 
       img.onload = () => {
-        editor.chain().focus().setImage({ src: url }).run();
+        editor?.chain().focus().setImage({ src: url }).run();
         URL.revokeObjectURL(url);
         setIsImageLoading(false);
       };
@@ -49,18 +49,18 @@ const MenuBar = () => {
   );
 
   const setLink = useCallback(() => {
+    if (!editor) return;
+
     const previousUrl = editor.getAttributes('link').href;
+
     const url = window.prompt('URL', previousUrl);
 
     // cancelled
-    if (url === null) {
-      return;
-    }
+    if (url === null) return;
 
     // empty
     if (url === '') {
       editor.chain().focus().extendMarkRange('link').unsetLink().run();
-
       return;
     }
 
@@ -73,16 +73,13 @@ const MenuBar = () => {
         .setLink({ href: url })
         .run();
     } catch (e) {
-      toast.error(e.message);
+      toast.error((e as Error).message);
     }
   }, [editor]);
 
-  if (!editor) {
-    return null;
-  }
-
   function addYoutubeVideo() {
     const url = prompt('Enter YouTube URL');
+    if (!editor) return null;
 
     if (url) {
       editor.commands.setYoutubeVideo({
@@ -92,6 +89,8 @@ const MenuBar = () => {
       });
     }
   }
+
+  if (!editor) return null;
 
   return (
     <div>
@@ -421,7 +420,6 @@ const MenuBar = () => {
         >
           Center
         </button>
-        {/* For the options, everything in common */}
       </div>
     </div>
   );

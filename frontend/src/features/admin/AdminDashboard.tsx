@@ -1,5 +1,3 @@
-import PropTypes from 'prop-types';
-// import { IoPeople } from 'react-icons/io5';
 import { IoFilterOutline } from 'react-icons/io5';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from 'react-icons/md';
 import { GoPlus, GoArrowDownRight, GoArrowUpRight } from 'react-icons/go';
@@ -19,7 +17,6 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  // Tooltip as RechartsTooltip,
 } from 'recharts';
 import Text from '../../components/common/Text';
 import {
@@ -69,7 +66,12 @@ function AdminDashboard() {
     },
   ];
 
-  function TableCell({ children, className }) {
+  interface TableCellProps {
+    children: React.ReactNode;
+    className: string;
+  }
+
+  function TableCell({ children, className }: TableCellProps) {
     return (
       <td className={`px-6 whitespace-nowrap lg:table-cell block ${className}`}>
         {children}
@@ -77,12 +79,11 @@ function AdminDashboard() {
     );
   }
 
-  TableCell.propTypes = {
-    children: PropTypes.node.isRequired, // Content inside the button (text, icons, etc.)
-    className: PropTypes.string,
-  };
+  interface RoleSpanProps {
+    role: string;
+  }
 
-  function RoleSpan({ role }) {
+  function RoleSpan({ role }: RoleSpanProps) {
     return (
       <span className="lg:px-5 px-2 py-3 rounded-md bg-cream text-orange-dark">
         {role}
@@ -90,11 +91,11 @@ function AdminDashboard() {
     );
   }
 
-  RoleSpan.propTypes = {
-    role: PropTypes.string,
-  };
+  interface StatusSpanProps {
+    status: string;
+  }
 
-  function StatusSpan({ status }) {
+  function StatusSpan({ status }: StatusSpanProps) {
     return (
       <span
         className={`lg:px-5 px-2 py-3 rounded-md ${
@@ -107,10 +108,6 @@ function AdminDashboard() {
       </span>
     );
   }
-
-  StatusSpan.propTypes = {
-    status: PropTypes.string,
-  };
 
   // Remove later since Django comes with admin dashboard(left with reviewer, editor actions)
   // function ManageUsers() {
@@ -280,7 +277,7 @@ function AdminDashboard() {
             <IoFilterOutline className="text-xl absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 dark:text-custom-white" />
           </div>
         </div>
-        <Articles marginTop="8" showAdminActions={true} />
+        <Articles marginTop={8} showAdminActions={true} />
         <TechJobs />
         <TechEvents />
         <TechTool />
@@ -290,7 +287,7 @@ function AdminDashboard() {
   }
 
   function ManageContent() {
-    const [activeRowIndex, setActiveRowIndex] = useState(null);
+    const [activeRowIndex, setActiveRowIndex] = useState<number | null>(null);
 
     const contentStats = [
       { label: 'All posts', count: 24 },
@@ -657,7 +654,7 @@ function AdminDashboard() {
                     iconType="circle"
                     formatter={(value) => {
                       // Map data keys to custom labels
-                      const customLabels = {
+                      const customLabels: { [key: string]: string } = {
                         registered: 'Registered Users',
                         visitors: 'Visitors',
                         total: 'Total Active Users',
@@ -922,7 +919,7 @@ function AdminDashboard() {
               <button
                 key={tab.id}
                 onClick={() => setIsActiveTab(tab.id)}
-                className={`flex p-2 items-center gap-2 rounded-md text-xs sm:text-base cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-red-300 transition duration-300 ${
+                className={`flex p-2 items-center gap-2 rounded-md text-xs sm:text-base cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700 focus-visible:ring-offset-2 focus-visible:ring-offset-red-300 transition duration-300 ${
                   isActiveTab === tab.id && 'bg-red text-custom-white'
                 }`}
               >

@@ -4,7 +4,7 @@ import Text from '../common/Text';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { displayedArticles } from '../../data/articles';
-import { ArticlesProps } from '../../types';
+import { ArticlesProps } from '../../types/types';
 
 function Articles({
   marginTop = 20,
