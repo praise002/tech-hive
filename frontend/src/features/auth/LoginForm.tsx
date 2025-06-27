@@ -6,6 +6,11 @@ import Button from '../../components/common/Button';
 import Form from '../../components/common/Form';
 import { useState } from 'react';
 
+interface LoginFormData {
+  email: string;
+  password: string;
+}
+
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -13,7 +18,15 @@ function LoginForm() {
     setShowPassword(!showPassword);
   }
 
-  const inputs = [
+  const inputs: Array<{
+    name: keyof LoginFormData;
+    placeholder: string;
+    type: string;
+    rules: any;
+    icon?: React.ReactNode;
+    onIconClick?: () => void;
+    iconAriaLabel?: string;
+  }> = [
     {
       name: 'email',
       placeholder: 'Email',
@@ -46,9 +59,10 @@ function LoginForm() {
       },
     },
   ];
-  const handleFormSubmit = (data) => {
+  const handleFormSubmit = (data: LoginFormData, reset: () => void) => {
     console.log('Form Data:', data);
     alert('Form Submitted successfully!');
+    reset();
   };
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-20 flex flex-col md:flex-row">

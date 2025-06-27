@@ -1,8 +1,19 @@
 import Form from '../../components/common/Form';
 import Text from '../../components/common/Text';
 
+interface ChangePasswordFormData {
+  currentPassword: string;
+  newPassword: string;
+  password: string;
+}
+
 function ChangePassword() {
-  const inputs = [
+  const inputs:  Array<{
+    name: keyof ChangePasswordFormData;
+    placeholder: string;
+    type: string;
+    rules: any;
+  }> = [
     {
       name: 'currentPassword',
       placeholder: 'Current Password',
@@ -38,9 +49,10 @@ function ChangePassword() {
     }, // Backend will confirm if they are the same
   ];
 
-  const handleFormSubmit = (data) => {
+  const handleFormSubmit = (data: ChangePasswordFormData, reset : () => void) => {
     console.log('Form Data:', data);
     alert('Password Changed successfully!');
+    reset();
   };
 
   return (

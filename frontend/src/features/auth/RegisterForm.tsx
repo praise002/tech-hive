@@ -7,6 +7,13 @@ import Button from '../../components/common/Button';
 import Form from '../../components/common/Form';
 import { useState } from 'react';
 
+interface RegisterFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  
+}
 function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -14,7 +21,15 @@ function RegisterForm() {
     setShowPassword(!showPassword);
   }
 
-  const inputs = [
+  const inputs: Array<{
+    name: keyof RegisterFormData;
+    placeholder: string;
+    type?: string;
+    rules: any;
+    icon?: React.ReactNode;
+    onIconClick?: () => void;
+    iconAriaLabel?: string;
+  }> = [
     {
       name: 'firstName',
       placeholder: 'First Name',
@@ -57,9 +72,10 @@ function RegisterForm() {
       },
     },
   ];
-  const handleFormSubmit = (data) => {
+  const handleFormSubmit = (data: RegisterFormData, reset: () => void) => {
     console.log('Form Data:', data);
     alert('Form Submitted successfully!');
+    reset();
   };
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-20 flex flex-col md:flex-row">

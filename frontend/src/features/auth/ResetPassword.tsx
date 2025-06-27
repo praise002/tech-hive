@@ -2,6 +2,19 @@ import { useState } from 'react';
 import Form from '../../components/common/Form';
 import Text from '../../components/common/Text';
 
+interface EmailFormData {
+  email: string;
+}
+
+interface OtpFormData {
+  otp: string;
+}
+
+interface SetNewPasswordFormData {
+  newPassword: string;
+  password: string;
+}
+
 function ResetPassword() {
   const [step, setStep] = useState(3); // Step 1: Email input, Step 2: OTP, Step 3: Set new password 4: Password reset complete
 
@@ -9,7 +22,12 @@ function ResetPassword() {
     if (step < 4) setStep((s) => s + 1);
   }
 
-  const emailInput = [
+  const emailInput: Array<{
+    name: keyof EmailFormData;
+    placeholder: string;
+    type: string;
+    rules: any;
+  }> = [
     {
       name: 'email',
       placeholder: 'jack@example.com',
@@ -24,7 +42,12 @@ function ResetPassword() {
     },
   ];
 
-  const otpInput = [
+  const otpInput: Array<{
+    name: keyof OtpFormData;
+    placeholder: string;
+    type: string;
+    rules: any;
+  }> = [
     {
       name: 'otp',
       placeholder: 'Enter OTP',
@@ -46,7 +69,13 @@ function ResetPassword() {
       },
     },
   ];
-  const setNewPasswordInput = [
+
+  const setNewPasswordInput: Array<{
+    name: keyof SetNewPasswordFormData;
+    placeholder: string;
+    type: string;
+    rules: any;
+  }> = [
     {
       name: 'newPassword',
       placeholder: 'New Password',
@@ -73,9 +102,13 @@ function ResetPassword() {
     },
   ];
 
-  const handleFormSubmit = (data) => {
+  const handleFormSubmit = (
+    data: EmailFormData | OtpFormData | SetNewPasswordFormData,
+    reset: () => void
+  ) => {
     console.log('Form Data:', data);
     alert('Form Submitted successfully!');
+    reset();
   };
 
   if (step === 1) {
