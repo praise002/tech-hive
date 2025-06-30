@@ -149,7 +149,7 @@ export interface ResourceCardProps {
 }
 
 export interface SearchInputProps {
-  inputWidth: string;
+  inputWidth?: string;
   iconSize: string;
 }
 

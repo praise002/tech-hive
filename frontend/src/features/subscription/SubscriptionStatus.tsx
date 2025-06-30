@@ -6,7 +6,7 @@ function SubscriptionStatus() {
   const [isRenewModalOpen, setIsRenewModalOpen] = useState(false);
 
   useEffect(() => {
-    function handleEscapeKey(event) {
+    function handleEscapeKey(event: KeyboardEvent) {
       if (event.key === 'Escape') closeRenewModal();
     }
 

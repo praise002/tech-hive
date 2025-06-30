@@ -8,9 +8,9 @@ interface ThemeProviderProps {
 
 // Create the provider
 function ThemeProvider({ children }: ThemeProviderProps) {
-  const [theme, setTheme] = useState(() => {
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     // Check if the user has a saved preference in localStorage
-    const savedTheme = localStorage.getItem('theme');
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
     if (savedTheme) return savedTheme;
 
     // Otherwise, check the system preference
