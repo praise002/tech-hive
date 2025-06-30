@@ -14,13 +14,13 @@ declare module '@tiptap/core' {
       setLink: (attributes: { href: string }) => ReturnType;
       unsetLink: () => ReturnType;
     };
-    youtube: {
-      setYoutubeVideo: (options: {
-        src: string;
-        width?: string;
-        height?: string;
-      }) => ReturnType;
-    };
+    // youtube: {
+    //   setYoutubeVideo: (options: {
+    //     src: string;
+    //     width?: string;
+    //     height?: string;
+    //   }) => ReturnType;
+    // };
     bold: {
       toggleBold: () => ReturnType;
     };

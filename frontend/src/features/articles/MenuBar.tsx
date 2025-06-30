@@ -84,8 +84,9 @@ const MenuBar = () => {
     if (url) {
       editor.commands.setYoutubeVideo({
         src: url,
-        width: '100%',
-        height: '315',
+        width: 640,
+        // width: '100%';
+        height: 315,
       });
     }
   }

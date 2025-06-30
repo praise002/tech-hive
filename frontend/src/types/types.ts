@@ -187,7 +187,7 @@ export interface ToolTipProps {
 
 export interface ArticlesProps {
   marginTop?: number;
-  showAdminActions: boolean;
+  showAdminActions?: boolean;
   visibleHeader?: boolean;
   context?: string;
 }

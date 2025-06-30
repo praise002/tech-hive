@@ -7,6 +7,7 @@ export const tools = [
       'A cloud-based design tool for creating, prototyping, and collaborating on user interfaces.',
     toolCategories: ['UI/UX', 'Design', 'Collaboration'],
     callToAction: 'Try Figma for Free',
+    link: 'https://google.com',
   },
   {
     id: '4002',
@@ -16,6 +17,7 @@ export const tools = [
       'An all-in-one workspace for notes, tasks, databases, and collaboration.',
     toolCategories: ['Productivity', 'Organization', 'Teamwork'],
     callToAction: 'Get Started with Notion',
+    link: 'https://google.com',
   },
   {
     id: '4003',
@@ -29,6 +31,7 @@ export const tools = [
       'Data Science',
     ],
     callToAction: 'Explore TensorFlow',
+    link: 'https://google.com',
   },
   {
     id: '4004',
@@ -38,6 +41,7 @@ export const tools = [
       'A web-based platform for version control, code hosting, and collaboration in software development.',
     toolCategories: ['Development', 'Version Control', 'Collaboration'],
     callToAction: 'Sign Up for GitHub',
+    link: 'https://google.com',
   },
   {
     id: '4005',
@@ -48,6 +52,7 @@ export const tools = [
 
     toolCategories: ['Design', 'Graphics', 'Marketing'],
     callToAction: 'Start Designing with Canva',
+    link: 'https://google.com',
   },
   {
     id: '4006',
@@ -58,6 +63,7 @@ export const tools = [
 
     toolCategories: ['Communication', 'Teamwork', 'Productivity'],
     callToAction: 'Try Slack for Free',
+    link: 'https://google.com',
   },
   {
     id: '4007',
@@ -68,6 +74,7 @@ export const tools = [
 
     toolCategories: ['Project Management', 'Agile', 'Software Development'],
     callToAction: 'Start Using Jira',
+    link: 'https://google.com',
   },
   {
     id: '4008',
@@ -78,6 +85,7 @@ export const tools = [
 
     toolCategories: ['DevOps', 'Containerization', 'Automation'],
     callToAction: 'Learn More About Docker',
+    link: 'https://google.com',
   },
 ];
 

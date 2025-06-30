@@ -30,7 +30,6 @@ import ChangePassword from './features/auth/ChangePassword';
 import ResetPassword from './features/auth/ResetPassword';
 import ResetPasswordSuccess from './features/auth/ResetPaswordSuccess';
 import { Toaster } from 'react-hot-toast';
-import Test from './features/profile/Test';
 
 import AdminDashboard from './features/admin/AdminDashboard';
 
@@ -90,7 +89,7 @@ function App() {
               path="reset-password-success"
               element={<ResetPasswordSuccess />}
             />
-            <Route path="test" element={<Test />} />
+
             <Route path="admin" element={<AdminDashboard />} />
           </Route>
 
