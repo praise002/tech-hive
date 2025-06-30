@@ -8,7 +8,7 @@ function HeroSection() {
     <div className="relative mt-12 bg-gradient-to-r from-coral/50 to-peach py-10 px-7 sm:py-20 sm:px-14 overflow-hidden">
       {/* ✅ SVG Background */}
       <img
-        src="/src/assets/hero-section.svg"
+        src="/assets/hero-section.svg"
         alt="Background"
         className="pointer-events-none absolute inset-0 w-full h-full object-cover opacity-70"
       />

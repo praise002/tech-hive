@@ -1,7 +1,7 @@
 export const tools = [
   {
     id: '4001',
-    toolImage: '/src/assets/tech-tool/figma.png',
+    toolImage: '/assets/tech-tool/figma.png',
     toolName: 'Figma',
     toolDescription:
       'A cloud-based design tool for creating, prototyping, and collaborating on user interfaces.',
@@ -11,7 +11,7 @@ export const tools = [
   },
   {
     id: '4002',
-    toolImage: '/src/assets/tech-tool/figma.png',
+    toolImage: '/assets/tech-tool/figma.png',
     toolName: 'Notion',
     toolDescription:
       'An all-in-one workspace for notes, tasks, databases, and collaboration.',
@@ -21,7 +21,7 @@ export const tools = [
   },
   {
     id: '4003',
-    toolImage: '/src/assets/tech-tool/figma.png',
+    toolImage: '/assets/tech-tool/figma.png',
     toolName: 'TensorFlow',
     toolDescription:
       'An open-source platform for building and deploying machine learning models at scale.',
@@ -35,7 +35,7 @@ export const tools = [
   },
   {
     id: '4004',
-    toolImage: '/src/assets/tech-tool/figma.png',
+    toolImage: '/assets/tech-tool/figma.png',
     toolName: 'GitHub',
     toolDescription:
       'A web-based platform for version control, code hosting, and collaboration in software development.',
@@ -45,7 +45,7 @@ export const tools = [
   },
   {
     id: '4005',
-    toolImage: '/src/assets/tech-tool/figma.png',
+    toolImage: '/assets/tech-tool/figma.png',
     toolName: 'Canva',
     toolDescription:
       'A graphic design platform that allows users to create visual content easily and professionally.',
@@ -56,7 +56,7 @@ export const tools = [
   },
   {
     id: '4006',
-    toolImage: '/src/assets/tech-tool/figma.png',
+    toolImage: '/assets/tech-tool/figma.png',
     toolName: 'Slack',
     toolDescription:
       'A communication and collaboration platform designed for teams and businesses.',
@@ -67,7 +67,7 @@ export const tools = [
   },
   {
     id: '4007',
-    toolImage: '/src/assets/tech-tool/figma.png',
+    toolImage: '/assets/tech-tool/figma.png',
     toolName: 'Jira',
     toolDescription:
       'A project management tool used for agile software development, issue tracking, and team collaboration.',
@@ -78,7 +78,7 @@ export const tools = [
   },
   {
     id: '4008',
-    toolImage: '/src/assets/tech-tool/figma.png',
+    toolImage: '/assets/tech-tool/figma.png',
     toolName: 'Docker',
     toolDescription:
       'A platform for developing, shipping, and running applications using containerization technology.',
@@ -92,7 +92,7 @@ export const tools = [
 export const displayedTechTools = [
   {
     id: '4009',
-    toolImage: '/src/assets/tech-tool/figma.png',
+    toolImage: '/assets/tech-tool/figma.png',
     toolName: 'Figma',
     toolDescription:
       'A cloud-based design tool for creating, prototyping, and collaborating on user interfaces.',
@@ -103,7 +103,7 @@ export const displayedTechTools = [
   },
   {
     id: '4010',
-    toolImage: '/src/assets/tech-tool/figma.png',
+    toolImage: '/assets/tech-tool/figma.png',
     toolName: 'Notion',
     toolDescription:
       'An all-in-one workspace for notes, tasks, databases, and collaboration.',
@@ -114,7 +114,7 @@ export const displayedTechTools = [
   },
   {
     id: '4011',
-    toolImage: '/src/assets/tech-tool/figma.png',
+    toolImage: '/assets/tech-tool/figma.png',
     toolName: 'TensorFlow',
     toolDescription:
       'An open-source platform for building and deploying machine learning models at scale.',
@@ -129,7 +129,7 @@ export const displayedTechTools = [
   },
   {
     id: '4012',
-    toolImage: '/src/assets/tech-tool/figma.png',
+    toolImage: '/assets/tech-tool/figma.png',
     toolName: 'GitHub',
     toolDescription:
       'A web-based platform for version control, code hosting, and collaboration in software development.',

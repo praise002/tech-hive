@@ -114,7 +114,7 @@ function TechEventDetail() {
               </Text>
               <div className="flex gap-2 items-center text-base md:text-lg">
                 <img
-                  src="/src/assets/icons/solar_link-bold.png"
+                  src="/assets/icons/solar_link-bold.png"
                   className="dark:invert"
                   alt=""
                 />

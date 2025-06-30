@@ -44,7 +44,7 @@ function Navbar() {
         {/* Search & Icons */}
         <div className="hidden lg:flex items-center gap-4 text-sm">
           {/* Theme Toggle Button */}
-          <button aria-label='Toggle theme' onClick={toggleTheme}>
+          <button aria-label="Toggle theme" onClick={toggleTheme}>
             {theme === 'light' ? (
               <MdOutlineDarkMode className="w-6 h-6 text-gray-900 dark:text-white" />
             ) : (
@@ -58,13 +58,17 @@ function Navbar() {
         <div className="hidden lg:block">
           <img
             className="w-10 h-10 rounded-full object-cover"
-            src="/src/assets/icons/Avatars.png"
+            src="/assets/icons/Avatars.png"
             alt="Profile Picture"
           />
         </div>
 
         {/* Mobile Menu Toggle */}
-        <button aria-label='Toggle menu' onClick={toggleMenu} className="lg:hidden p-2">
+        <button
+          aria-label="Toggle menu"
+          onClick={toggleMenu}
+          className="lg:hidden p-2"
+        >
           {isMenuOpen ? (
             <svg
               className="w-6 h-6 text-gray-800 dark:text-custom-white"
@@ -105,7 +109,7 @@ function Navbar() {
 
         <li className="flex flex-col items-center gap-4 text-xs">
           {/* Theme Toggle Button */}
-          <button  aria-label='Toggle theme' onClick={toggleTheme}>
+          <button aria-label="Toggle theme" onClick={toggleTheme}>
             {theme === 'light' ? (
               <MdOutlineDarkMode className="w-6 h-6 text-gray-900 dark:text-white" />
             ) : (
@@ -130,7 +134,7 @@ function Navbar() {
         <li className="flex items-center">
           <img
             className="w-7 h-7 rounded-full object-cover"
-            src="/src/assets/icons/Avatars.png"
+            src="/assets/icons/Avatars.png"
             alt="Profile Picture"
           />
           <span className="ml-2 font-medium text-gray-800 dark:text-custom-white">

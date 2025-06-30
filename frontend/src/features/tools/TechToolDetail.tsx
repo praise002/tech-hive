@@ -24,7 +24,7 @@ function TechToolDetail() {
         <div className="w-full md:w-3/4 mt-20 md:mt-10 border border-gray rounded-tl-lg rounded-tr-lg overflow-hidden">
           <Image
             alt="Figma"
-            src="/src/assets/tech-tool/figma.png"
+            src="/assets/tech-tool/figma.png"
             className="w-full h-auto shadow-md"
           />
           <div className="space-y-8 px-2 text-primary dark:invert">
@@ -103,7 +103,7 @@ function TechToolDetail() {
                 How to Access
               </Text>
               <div className="flex gap-2 items-center text-base md:text-lg">
-                <img src="/src/assets/icons/solar_link-bold.png" alt="" />
+                <img src="/assets/icons/solar_link-bold.png" alt="" />
                 <a
                   href="https://www.figma.com"
                   target="_blank"

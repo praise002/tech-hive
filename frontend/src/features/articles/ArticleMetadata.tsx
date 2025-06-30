@@ -39,7 +39,7 @@ function ArticleMetadata() {
 
   const [metadata, setMetadata] = useState({
     title: 'Test Title',
-    // coverImage: '/src/assets/about.png',
+    // coverImage: '/assets/about.png',
     coverImage: '',
   });
 

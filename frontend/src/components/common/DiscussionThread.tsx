@@ -77,7 +77,7 @@ function DiscussionThread() {
           <div className="w-6 h-6 rounded-full border p-1">
             <img
               className="w-full h-full dark:invert"
-              src="/src/assets/icons/iconamoon_profile-light.png"
+              src="/assets/icons/iconamoon_profile-light.png"
               alt="Profile picture"
             />
           </div>
@@ -101,7 +101,7 @@ function DiscussionThread() {
               <div className="w-6 h-6">
                 <img
                   className="h-full w-full rounded-full"
-                  src="/src/assets/icons/profile.jpg"
+                  src="/assets/icons/profile.jpg"
                   alt="Profile icon"
                 />
               </div>
@@ -174,7 +174,7 @@ function DiscussionThread() {
                     <div className="w-6 h-6">
                       <img
                         className="h-full w-full rounded-full"
-                        src="/src/assets/icons/profile.jpg"
+                        src="/assets/icons/profile.jpg"
                         alt="Profile picture"
                       />
                     </div>

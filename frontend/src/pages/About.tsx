@@ -23,7 +23,7 @@ function About() {
           {/* Image */}
 
           <Image
-            src="/src/assets/about.png"
+            src="/assets/about.png"
             alt="About Tech Hive"
             className="w-full h-auto shadow-md"
           />

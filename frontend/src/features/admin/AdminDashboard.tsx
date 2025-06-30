@@ -777,7 +777,7 @@ function AdminDashboard() {
               />
               <img
                 className="w-5 h-5 absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer"
-                src="/src/assets/icons/streamline_invisible-2.png"
+                src="/assets/icons/streamline_invisible-2.png"
                 alt="An icon to toggle the visibility of password"
               />
             </div>
@@ -875,7 +875,7 @@ function AdminDashboard() {
       <div className="relative mt-12 bg-gradient-to-r from-coral/50 to-peach py-10 px-7 sm:py-20 sm:px-14 h-40">
         {/* ✅ SVG Background */}
         <img
-          src="/src/assets/hero-section.svg"
+          src="/assets/hero-section.svg"
           alt="Background"
           className="pointer-events-none absolute inset-0 w-full h-full object-cover opacity-70"
         />
@@ -884,7 +884,7 @@ function AdminDashboard() {
           <div className="relative">
             <img
               className="w-20 h-20 md:w-40 md:h-40 rounded-full object-cover"
-              src="/src/assets/icons/techhive.png"
+              src="/assets/icons/techhive.png"
               alt="Tech Hive Picture"
             />
 
@@ -892,7 +892,7 @@ function AdminDashboard() {
             <div className="absolute top-12 right-0 md:top-25 bg-light rounded-full p-1 md:p-2">
               <img
                 className="w-5 h-5 md:w-7 md:h-7 pointer-events-none" // Prevents clicks on the icon itself
-                src="/src/assets/icons/mynaui_edit.png"
+                src="/assets/icons/mynaui_edit.png"
                 alt="Edit"
               />
             </div>

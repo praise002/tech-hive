@@ -51,7 +51,7 @@ function Subscribe() {
         </div>
         <div className="flex-1 order-1 sm:order-none">
           <img
-            src="/src/assets/realistic-post-mailbox-letter-hand-composition-with-human-hand-envelopes-classic-mail-box_1284-26890-removebg-preview 1.png"
+            src="/assets/realistic-post-mailbox-letter-hand-composition-with-human-hand-envelopes-classic-mail-box_1284-26890-removebg-preview 1.png"
             alt="mailbox"
             className="max-w-full h-auto"
           />

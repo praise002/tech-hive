@@ -12,7 +12,7 @@ import Reaction from '../../components/common/Reaction';
 function ArticleDetail() {
   const article = {
     title: 'The Future of UI/UX: Trends to Watch in 2024',
-    image: '/src/assets/articles/the-future-ui-ux.jpg',
+    image: '/assets/articles/the-future-ui-ux.jpg',
     timePosted: '1 hour',
     content: `From AI-powered interfaces to immersive experiences, here are the
                 key trends shaping UI/UX design and how designers can stay ahead
@@ -48,7 +48,7 @@ function ArticleDetail() {
     url: 'https://dev.to/praise002/hacktoberfest-2024-my-contributor-experience-4mf1',
     author: {
       name: 'Bob Janet',
-      image: '/src/assets/icons/profile.jpg',
+      image: '/assets/icons/profile.jpg',
     },
   };
   const tags = ['UIUXDesign', 'UserExperience', 'InterfaceDesign'];

@@ -9,7 +9,7 @@ import Articles from '../../components/sections/Articles';
 import { BsFillArchiveFill } from 'react-icons/bs';
 
 // const article = {
-//   image: '/src/assets/articles/the-future-ui-ux.jpg',
+//   image: '/assets/articles/the-future-ui-ux.jpg',
 //   title: 'The Power of Data: How Analytics is Driving Business Decisions',
 //   description:
 //     'Learn how data analytics is transforming industries and helping businesses make smarter, data-driven decisions...',
@@ -68,7 +68,7 @@ function ProfileDetail() {
         {/* <div className="md:w-xs w-60 dark:text-custom-white">
           <img
             className="w-full h-full"
-            src="/src/assets/icons/amico.png"
+            src="/assets/icons/amico.png"
             alt="An empty profile"
           />
           <div className="text-xs md:text-sm text-center mt-4">
@@ -131,7 +131,7 @@ function ProfileDetail() {
         {/* <div className="md:w-xs w-60 dark:text-custom-white">
           <img
             className="w-full h-full"
-            src="/src/assets/icons/amico.png"
+            src="/assets/icons/amico.png"
             alt="An empty profile"
           />
           <div className="text-xs md:text-sm text-center mt-4">
@@ -314,7 +314,7 @@ function ProfileDetail() {
         {/* <div className="md:w-xs w-60 dark:text-custom-white">
           <img
             className="w-full h-full"
-            src="/src/assets/icons/amico.png"
+            src="/assets/icons/amico.png"
             alt="An empty profile"
           />
           <div className="text-xs md:text-sm text-center mt-4">
@@ -346,7 +346,7 @@ function ProfileDetail() {
         {/* <div className="md:w-xs w-60 dark:text-custom-white">
           <img
             className="w-full h-full"
-            src="/src/assets/icons/amico.png"
+            src="/assets/icons/amico.png"
             alt="An empty profile"
           />
           <div className="text-xs md:text-sm text-center mt-4">
@@ -361,7 +361,12 @@ function ProfileDetail() {
         >
           Archived Articles
         </Text>
-        <Articles marginTop={8} visibleHeader={false} showAdminActions={true} context="archived" />
+        <Articles
+          marginTop={8}
+          visibleHeader={false}
+          showAdminActions={true}
+          context="archived"
+        />
       </>
     );
   }
@@ -393,7 +398,7 @@ function ProfileDetail() {
             <div className="relative">
               <img
                 className="w-20 h-20 md:w-40 md:h-40"
-                src="/src/assets/icons/Avatars.png"
+                src="/assets/icons/Avatars.png"
                 alt=""
               />
             </div>

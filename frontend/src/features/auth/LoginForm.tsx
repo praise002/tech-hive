@@ -68,7 +68,7 @@ function LoginForm() {
     <div className="px-4 sm:px-6 lg:px-8 py-20 flex flex-col md:flex-row">
       <div className="md:flex-1">
         <img
-          src="/src/assets/abstract-network-com-bg.jpg"
+          src="/assets/abstract-network-com-bg.jpg"
           className="w-full h-full object-cover"
           alt="Abstract Network Background"
         />

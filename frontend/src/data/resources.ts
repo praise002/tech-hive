@@ -1,7 +1,7 @@
 export const resources = [
   {
     id: '3001',
-    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceImage: '/assets/resources/github-learning-lab.png',
     resourceName: 'GitHub Learning Lab',
     resourceType: 'Educational Platform',
     resourceDescription:
@@ -16,7 +16,7 @@ export const resources = [
   },
   {
     id: '3002',
-    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceImage: '/assets/resources/github-learning-lab.png',
     resourceName: 'FreeCodeCamp',
     resourceType: 'Coding Community',
     resourceDescription:
@@ -31,7 +31,7 @@ export const resources = [
   },
   {
     id: '3003',
-    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceImage: '/assets/resources/github-learning-lab.png',
     resourceName: 'Coursera',
     resourceType: 'Online Learning Platform',
     resourceDescription:
@@ -46,7 +46,7 @@ export const resources = [
   },
   {
     id: '3004',
-    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceImage: '/assets/resources/github-learning-lab.png',
     resourceName: 'Khan Academy',
     resourceType: 'Educational Website',
     resourceDescription:
@@ -61,7 +61,7 @@ export const resources = [
   },
   {
     id: '3005',
-    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceImage: '/assets/resources/github-learning-lab.png',
     resourceName: 'Udemy',
     resourceType: 'E-Learning Marketplace',
     resourceDescription:
@@ -77,7 +77,7 @@ export const resources = [
   },
   {
     id: '3006',
-    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceImage: '/assets/resources/github-learning-lab.png',
     resourceName: 'edX',
     resourceType: 'Online Education Platform',
     resourceDescription:
@@ -93,7 +93,7 @@ export const resources = [
   },
   {
     id: '3007',
-    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceImage: '/assets/resources/github-learning-lab.png',
     resourceName: 'LeetCode',
     resourceType: 'Algorithm Practice Platform',
     resourceDescription:
@@ -109,7 +109,7 @@ export const resources = [
   },
   {
     id: '3008',
-    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceImage: '/assets/resources/github-learning-lab.png',
     resourceName: 'MDN Web Docs',
     resourceType: 'Web Development Documentation',
     resourceDescription:
@@ -125,7 +125,7 @@ export const resources = [
   },
   {
     id: '3009',
-    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceImage: '/assets/resources/github-learning-lab.png',
     resourceName: 'Stack Overflow',
     resourceType: 'Q&A Community',
     resourceDescription:
@@ -141,7 +141,7 @@ export const resources = [
   },
   {
     id: '3010',
-    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceImage: '/assets/resources/github-learning-lab.png',
     resourceName: 'The Odin Project',
     resourceType: 'Open-Source Curriculum',
     resourceDescription:
@@ -160,7 +160,7 @@ export const resources = [
 export const displayedResources = [
   {
     id: '3011',
-    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceImage: '/assets/resources/github-learning-lab.png',
     resourceName: 'GitHub Learning Lab',
     resourceType: 'Educational Platform',
     resourceDescription:
@@ -176,7 +176,7 @@ export const displayedResources = [
   },
   {
     id: '3012',
-    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceImage: '/assets/resources/github-learning-lab.png',
     resourceName: 'FreeCodeCamp',
     resourceType: 'Coding Community',
     resourceDescription:
@@ -192,7 +192,7 @@ export const displayedResources = [
   },
   {
     id: '3013',
-    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceImage: '/assets/resources/github-learning-lab.png',
     resourceName: 'Coursera',
     resourceType: 'Online Learning Platform',
     resourceDescription:
@@ -208,7 +208,7 @@ export const displayedResources = [
   },
   {
     id: '3014',
-    resourceImage: '/src/assets/resources/github-learning-lab.png',
+    resourceImage: '/assets/resources/github-learning-lab.png',
     resourceName: 'Khan Academy',
     resourceType: 'Educational Website',
     resourceDescription:

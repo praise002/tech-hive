@@ -84,7 +84,7 @@ function ArticleCard({
         </div>
       </div>
       {/* <div className="relative overflow-hidden rounded-lg shadow-lg flex">
-        <Image alt="Article" src="/src/assets/articles/the-future-ui-ux.jpg" />
+        <Image alt="Article" src="/assets/articles/the-future-ui-ux.jpg" />
         <div className="p-5 border-t border-r border-b border-gray rounded-br-lg rounded-tr-lg overflow-hidden">
           <ArticleTitle>{article.title}</ArticleTitle>
           <Description>{article.description}</Description>

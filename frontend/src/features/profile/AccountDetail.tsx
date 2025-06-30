@@ -11,7 +11,7 @@ import SubscriptionStatus from '../subscription/SubscriptionStatus';
 
 const article = {
   id: '1002',
-  image: '/src/assets/articles/the-future-ui-ux.jpg',
+  image: '/assets/articles/the-future-ui-ux.jpg',
   title: 'The Power of Data: How Analytics is Driving Business Decisions',
   description:
     'Learn how data analytics is transforming industries and helping businesses make smarter, data-driven decisions...',
@@ -22,7 +22,7 @@ const article = {
   readTime: '7 min',
 };
 
-const defaultProfilePicture = '/src/assets/icons/Avatars.png';
+const defaultProfilePicture = '/assets/icons/Avatars.png';
 
 interface CropImageProps {
   src: string;
@@ -289,7 +289,7 @@ function AccountDetail() {
                 {/* Edit icon that stays fixed */}
                 <img
                   className="w-5 h-5 md:w-7 md:h-7 pointer-events-none" // Prevents clicks on the icon itself
-                  src="/src/assets/icons/mynaui_edit.png"
+                  src="/assets/icons/mynaui_edit.png"
                   alt="Edit"
                 />
               </button>
@@ -462,7 +462,7 @@ function AccountDetail() {
             <div className="w-4 h-4">
               <img
                 className="w-full h-full dark:invert"
-                src="/src/assets/icons/Chat.png"
+                src="/assets/icons/Chat.png"
                 alt=""
               />
             </div>
@@ -476,7 +476,7 @@ function AccountDetail() {
             <div className="w-4 h-4">
               <img
                 className="w-full h-full dark:invert"
-                src="/src/assets/icons/bookmark-light.png"
+                src="/assets/icons/bookmark-light.png"
                 alt=""
               />
             </div>
