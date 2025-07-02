@@ -461,3 +461,5 @@ function ProfileDetail() {
 }
 
 export default ProfileDetail;
+
+// NOTE: OTHERS CAN ONLY SEE YOUR COMMENTS AND SUBMITTED ARTICLES IN PROFILEDETAIL VIEW

@@ -1,6 +1,5 @@
 import Text from '../../components/common/Text';
 import Button from '../../components/common/Button';
-import ArticleCard from '../../components/common/ArticleCard';
 
 import toast from 'react-hot-toast';
 import ReactCrop, { centerCrop, Crop, makeAspectCrop } from 'react-image-crop';
@@ -8,19 +7,20 @@ import ReactCrop, { centerCrop, Crop, makeAspectCrop } from 'react-image-crop';
 import { useEffect, useState } from 'react';
 import { MdCancel } from 'react-icons/md';
 import SubscriptionStatus from '../subscription/SubscriptionStatus';
+import { Link } from 'react-router-dom';
 
-const article = {
-  id: '1002',
-  image: '/assets/articles/the-future-ui-ux.jpg',
-  title: 'The Power of Data: How Analytics is Driving Business Decisions',
-  description:
-    'Learn how data analytics is transforming industries and helping businesses make smarter, data-driven decisions...',
-  tags: ['Data Analytics', 'Business', 'Technology'],
-  reactions: ['❤️', '😍', '👍', '🔥'],
-  reactionsCount: 105,
-  posted: '1 week ago',
-  readTime: '7 min',
-};
+// const article = {
+//   id: '1002',
+//   image: '/assets/articles/the-future-ui-ux.jpg',
+//   title: 'The Power of Data: How Analytics is Driving Business Decisions',
+//   description:
+//     'Learn how data analytics is transforming industries and helping businesses make smarter, data-driven decisions...',
+//   tags: ['Data Analytics', 'Business', 'Technology'],
+//   reactions: ['❤️', '😍', '👍', '🔥'],
+//   reactionsCount: 105,
+//   posted: '1 week ago',
+//   readTime: '7 min',
+// };
 
 const defaultProfilePicture = '/assets/icons/Avatars.png';
 
@@ -436,8 +436,33 @@ function AccountDetail() {
       </div>
 
       <div className="flex flex-col px-10 md:px-20">
-        {/* ✅ Account Information */}
+        {/* ✅ Profile Management */}
         <div className="dark:text-custom-white mt-45 md:mt-50 mb-5 text-gray-900">
+          <Text
+            variant="h3"
+            size="lg"
+            bold={false}
+            className="font-semibold mb-2 dark:text-custom-white"
+          >
+            Profile Management
+          </Text>
+          <div className="space-y-4">
+            <div className="border border-gray rounded-lg p-4 space-y-2">
+              <div>
+                <p className="font-semibold mb-1">Content & Public Profile</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Manage your articles
+                </p>
+              </div>
+              <Button variant="outline">
+                <Link to="/profile">View My Profile</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* ✅ Account Settings */}
+        <div className="dark:text-custom-white mb-5 text-gray-900">
           <Text
             variant="h3"
             size="lg"
@@ -463,7 +488,7 @@ function AccountDetail() {
         <SubscriptionStatus />
 
         {/* ✅ Recent Comments & Saved Articles */}
-        <div className="text-gray-900 dark:text-custom-white flex-col md:items-start md:flex-row flex gap-4 mb-8">
+        {/* <div className="text-gray-900 dark:text-custom-white flex-col md:items-start md:flex-row flex gap-4 mb-8">
           <div className="p-3 w-full md:w-fit md:h-fit border border-gray rounded-lg">
             <div className="flex gap-2 items-center mb-2">
               <div className="w-4 h-4">
@@ -533,7 +558,7 @@ function AccountDetail() {
               <ArticleCard article={article} />
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
