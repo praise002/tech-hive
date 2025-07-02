@@ -29,7 +29,7 @@ function SubscriptionStatus() {
   }
 
   return (
-    <div className="mb-5 text-gray-900 px-20">
+    <div className="mb-5 text-gray-900">
       <Text
         variant="h3"
         size="lg"

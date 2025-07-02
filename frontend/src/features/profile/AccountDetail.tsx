@@ -272,6 +272,12 @@ function AccountDetail() {
     <div className="mt-15">
       {/* ✅ Profile Header */}
       <div className="bg-light w-full h-40 relative">
+        {/* ✅ SVG Background */}
+        <img
+          src="/assets/hero-section.svg"
+          alt="Background"
+          className="pointer-events-none absolute inset-0 w-full h-full object-cover opacity-70"
+        />
         <div className="absolute transform -translate-x-1/2 top-30 md:top-1/2 left-1/2 flex flex-col items-center">
           <div>
             <div className="relative">
@@ -429,101 +435,103 @@ function AccountDetail() {
         )}
       </div>
 
-      {/* ✅ Account Information */}
-      <div className="dark:text-custom-white mt-45 md:mt-50 mb-5 px-20 text-gray-900">
-        <Text
-          variant="h3"
-          size="lg"
-          bold={false}
-          className="font-semibold mb-2 dark:text-custom-white"
-        >
-          Account Settings
-        </Text>
-        <div className="space-y-4">
-          <div className="border border-gray rounded-lg p-4">
-            <p className="font-semibold mb-1">Change Password</p>
-            <Button
-              variant="outline"
-              onClick={() => alert('Redirecting to Change Password')}
-            >
-              Update Password
-            </Button>
+      <div className="flex flex-col px-10 md:px-20">
+        {/* ✅ Account Information */}
+        <div className="dark:text-custom-white mt-45 md:mt-50 mb-5 text-gray-900">
+          <Text
+            variant="h3"
+            size="lg"
+            bold={false}
+            className="font-semibold mb-2 dark:text-custom-white"
+          >
+            Account Settings
+          </Text>
+          <div className="space-y-4">
+            <div className="border border-gray rounded-lg p-4">
+              <p className="font-semibold mb-1">Change Password</p>
+              <Button
+                variant="outline"
+                onClick={() => alert('Redirecting to Change Password')}
+              >
+                Update Password
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* ✅ Subscription Status */}
-      <SubscriptionStatus />
+        {/* ✅ Subscription Status */}
+        <SubscriptionStatus />
 
-      {/* ✅ Recent Comments & Saved Articles */}
-      <div className="text-gray-900 dark:text-custom-white flex-col items-center md:items-start md:flex-row flex gap-4 mb-8 px-20">
-        <div className="p-3 md:w-fit md:h-fit border border-gray rounded-lg">
-          <div className="flex gap-2 items-center mb-2">
-            <div className="w-4 h-4">
-              <img
-                className="w-full h-full dark:invert"
-                src="/assets/icons/Chat.png"
-                alt=""
-              />
+        {/* ✅ Recent Comments & Saved Articles */}
+        <div className="text-gray-900 dark:text-custom-white flex-col md:items-start md:flex-row flex gap-4 mb-8">
+          <div className="p-3 w-full md:w-fit md:h-fit border border-gray rounded-lg">
+            <div className="flex gap-2 items-center mb-2">
+              <div className="w-4 h-4">
+                <img
+                  className="w-full h-full dark:invert"
+                  src="/assets/icons/Chat.png"
+                  alt=""
+                />
+              </div>
+              <div>
+                <p className="font-semibold text-xs sm:text-sm md:text-lg">
+                  0 Comments{' '}
+                </p>
+              </div>
             </div>
-            <div>
+            <div className="flex gap-2 items-center">
+              <div className="w-4 h-4">
+                <img
+                  className="w-full h-full dark:invert"
+                  src="/assets/icons/bookmark-light.png"
+                  alt=""
+                />
+              </div>
               <p className="font-semibold text-xs sm:text-sm md:text-lg">
-                0 Comments{' '}
+                0 Saved{' '}
               </p>
             </div>
           </div>
-          <div className="flex gap-2 items-center">
-            <div className="w-4 h-4">
-              <img
-                className="w-full h-full dark:invert"
-                src="/assets/icons/bookmark-light.png"
-                alt=""
-              />
-            </div>
-            <p className="font-semibold text-xs sm:text-sm md:text-lg">
-              0 Saved{' '}
-            </p>
-          </div>
-        </div>
-        <div className="flex-1 flex flex-col gap-4">
-          <div className="p-4 border border-gray rounded-lg">
-            <Text
-              variant="h3"
-              size="lg"
-              bold={false}
-              className="font-semibold mb-2 dark:text-custom-white"
-            >
-              Recent Comments
-            </Text>
-            <div>
+          <div className="flex-1 flex flex-col gap-4">
+            <div className="p-4 border border-gray rounded-lg">
               <Text
                 variant="h3"
-                size="base"
+                size="lg"
                 bold={false}
                 className="font-semibold mb-2 dark:text-custom-white"
               >
-                Africa Fintech Summit 2024
+                Recent Comments
               </Text>
-              <p className="text-secondary text-sm mb-1">
-                Africa Fintech Summit
-              </p>
+              <div>
+                <Text
+                  variant="h3"
+                  size="base"
+                  bold={false}
+                  className="font-semibold mb-2 dark:text-custom-white"
+                >
+                  Africa Fintech Summit 2024
+                </Text>
+                <p className="text-secondary text-sm mb-1">
+                  Africa Fintech Summit
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-xs md:text-sm">
+                <p className="font-bold">Thanks for the info</p>
+                <p className="text-secondary">27th January, 2025</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-xs md:text-sm">
-              <p className="font-bold">Thanks for the info</p>
-              <p className="text-secondary">27th January, 2025</p>
-            </div>
-          </div>
 
-          <div className="p-4 border border-gray rounded-lg">
-            <Text
-              variant="h3"
-              size="lg"
-              bold={false}
-              className="font-semibold mb-1 md:text-2xl dark:text-custom-white"
-            >
-              Saved Articles
-            </Text>
-            <ArticleCard article={article} />
+            <div className="p-4 border border-gray rounded-lg">
+              <Text
+                variant="h3"
+                size="lg"
+                bold={false}
+                className="font-semibold mb-1 md:text-2xl dark:text-custom-white"
+              >
+                Saved Articles
+              </Text>
+              <ArticleCard article={article} />
+            </div>
           </div>
         </div>
       </div>

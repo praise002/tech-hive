@@ -935,7 +935,7 @@ function AdminDashboard() {
             ))}
           </div>
 
-          <div className="py-8">
+          <div className="py-8 px-2 md:px-0">
             <div className="lg:p-4 p-0 border border-gray rounded-lg">
               {getContent()}
 

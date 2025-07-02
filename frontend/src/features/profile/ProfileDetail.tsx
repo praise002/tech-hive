@@ -393,6 +393,12 @@ function ProfileDetail() {
   return (
     <div className="mt-15">
       <div className="bg-light w-full h-40 relative">
+        {/* ✅ SVG Background */}
+        <img
+          src="/assets/hero-section.svg"
+          alt="Background"
+          className="pointer-events-none absolute inset-0 w-full h-full object-cover opacity-70"
+        />
         <div className="absolute transform -translate-x-1/2 top-30 md:top-1/2 left-1/2 flex flex-col items-center">
           <div>
             <div className="relative">
@@ -444,7 +450,7 @@ function ProfileDetail() {
           <div className="py-8">
             {/* flex justify-center */}
 
-            <div className="dark:text-custom-white p-4 border border-gray rounded-lg">
+            <div className="dark:text-custom-white p-4 md:border border-gray rounded-lg">
               {getContent()}
             </div>
           </div>
