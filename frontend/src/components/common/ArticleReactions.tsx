@@ -25,7 +25,7 @@ function ArticleReactions({
               </span>
             ))}
           </div>
-          <div className="whitespace-nowrap text-sm text-primary dark:text-custom-white font-medium">
+          <div className="whitespace-nowrap pr-2 md:pr-0 text-xs md:text-sm text-primary dark:text-custom-white font-medium">
             {reactionsCount} reactions
           </div>
         </div>
@@ -33,7 +33,7 @@ function ArticleReactions({
         {/* Bookmark */}
         <div className="flex items-center space-x-2">
           {/* Read Time */}
-          <div className="whitespace-nowrap text-sm text-primary dark:text-custom-white font-medium">
+          <div className="whitespace-nowrap text-xs md:text-sm text-primary dark:text-custom-white font-medium">
             {readTime} read
           </div>
 

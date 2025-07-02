@@ -521,7 +521,7 @@ function AccountDetail() {
               </div>
             </div>
 
-            <div className="p-4 border border-gray rounded-lg">
+            <div className="p-2 md:p-4 border border-gray rounded-lg">
               <Text
                 variant="h3"
                 size="lg"
