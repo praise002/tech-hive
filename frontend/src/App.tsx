@@ -34,6 +34,7 @@ import { Toaster } from 'react-hot-toast';
 import AdminDashboard from './features/admin/AdminDashboard';
 
 import RichTextEditor from './features/articles/RichTextEditor';
+import Liveblock from './features/articles/Liveblock';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -91,6 +92,7 @@ function App() {
             />
 
             <Route path="admin" element={<AdminDashboard />} />
+            <Route path="liveblock" element={<Liveblock />} />
           </Route>
 
           {/* Catch-all route for 404 errors */}
