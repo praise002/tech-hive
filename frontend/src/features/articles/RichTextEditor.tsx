@@ -218,8 +218,6 @@ function RichTextEditor() {
         </EditorProvider>
       </div>
 
-      {/* <FloatingMenu editor={editor}>+</FloatingMenu> */}
-
       <div className="flex gap-2 mt-5">
         <Button variant="outline">Save as Draft</Button>
         <Button>Publish</Button>

@@ -13,7 +13,7 @@ function Liveblock() {
   return (
     <LiveblocksProvider publicApiKey={publicApiKey}>
       <RoomProvider id="my-room">
-        <ClientSideSuspense fallback={<div className='mt-50 bg-white'>Loading…</div>}>
+        <ClientSideSuspense fallback={<div className='py-50 bg-white'>Loading…</div>}>
           <Editor />
         </ClientSideSuspense>
       </RoomProvider>
