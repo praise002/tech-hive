@@ -197,7 +197,7 @@ function RichTextEditor() {
         </button>
       </div>
 
-      <ArticleMetadata />
+      <ArticleMetadata mode="edit" />
 
       <div className="w-full">
         <EditorProvider

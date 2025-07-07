@@ -34,3 +34,9 @@
     display: none;
   }
 }
+
+/* @media (max-width: 768px) {
+  .lb-root lb-tiptap-toolbar {
+    overflow-x: auto;
+}
+} */

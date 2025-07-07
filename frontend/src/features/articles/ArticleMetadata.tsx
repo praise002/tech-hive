@@ -5,6 +5,7 @@ import TagInput from './TagInput';
 import toast from 'react-hot-toast';
 import Spinner from '../../components/common/Spinner';
 import { ToolTip } from '../../components/common/SocialLinks';
+import Text from '../../components/common/Text';
 
 const suggestedTags = [
   'JavaScript',
@@ -28,7 +29,9 @@ const suggestedTags = [
   'Tag 6',
 ];
 
-function ArticleMetadata() {
+// TODO: REFACTOR LATER TO USE A SINGLE ARTICLE STATE
+
+function ArticleMetadata({ mode }: { mode: string }) {
   const [tags, setTags] = useState([
     'Cloud Computing',
     'Technology',
@@ -99,86 +102,117 @@ function ArticleMetadata() {
   }
 
   return (
-    <div className="mb-8 mt-2">
+    <div className={`${mode === "edit" ? "mb-8" : "mb-2"} mt-2`}>
       {/* Cover Image Section */}
 
-      <div className="mb-6 relative">
-        {metadata.coverImage ? (
-          <div className="relative group">
-            <img
-              src={metadata.coverImage}
-              alt="Cover Image"
-              className="w-full h-64 sm:h-80 object-cover rounded-lg"
-            />
-            <div className="absolute inset-0 group-hover:bg-opacity-30 transition-all duration-300 flex justify-center items-center">
-              <div className="space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <button
-                  disabled={isImageLoading}
-                  className={`bg-white relative text-gray-800 px-4 py-2 rounded-md ${
-                    isImageLoading
-                      ? 'cursor-not-allowed opacity-75'
-                      : 'cursor-pointer'
-                  }`}
-                >
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="appearance-none opacity-0 absolute inset-0"
-                    onChange={handleCoverImageChange}
-                  />
-                  {isImageLoading ? <Spinner /> : 'Change'}
-                </button>
-                <Button onClick={handleCoverImageRemove}>Remove</Button>
+      {mode === 'edit' && (
+        <div className="mb-6 relative">
+          {metadata.coverImage ? (
+            <div className="relative group">
+              <img
+                src={metadata.coverImage}
+                alt="Cover Image"
+                className="w-full h-64 sm:h-80 object-cover rounded-lg"
+              />
+              <div className="absolute inset-0 group-hover:bg-opacity-30 transition-all duration-300 flex justify-center items-center">
+                <div className="space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <button
+                    disabled={isImageLoading}
+                    className={`bg-white relative text-gray-800 px-4 py-2 rounded-md ${
+                      isImageLoading
+                        ? 'cursor-not-allowed opacity-75'
+                        : 'cursor-pointer'
+                    }`}
+                  >
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="appearance-none opacity-0 absolute inset-0"
+                      onChange={handleCoverImageChange}
+                    />
+                    {isImageLoading ? <Spinner /> : 'Change'}
+                  </button>
+                  <Button onClick={handleCoverImageRemove}>Remove</Button>
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <ToolTip
-            position="bottom"
-            text="Use a ratio of 1000:420 for best results"
-          >
-            <Button
-              className={`${
-                isImageLoading
-                  ? 'cursor-not-allowed opacity-75'
-                  : 'cursor-pointer'
-              }`}
-              disabled={isImageLoading}
-              variant="outline"
+          ) : (
+            <ToolTip
+              position="bottom"
+              text="Use a ratio of 1000:420 for best results"
             >
-              {/* accept=".jpg, .jpeg, .png, .gif, .webp" */}
-              <input
-                type="file"
-                accept="image/*"
-                className="appearance-none absolute inset-0 opacity-0"
-                onChange={handleCoverImageChange}
-              />
-              {isImageLoading ? <Spinner /> : 'Add a cover image'}
-            </Button>
-          </ToolTip>
-        )}
-      </div>
+              <Button
+                className={`${
+                  isImageLoading
+                    ? 'cursor-not-allowed opacity-75'
+                    : 'cursor-pointer'
+                }`}
+                disabled={isImageLoading}
+                variant="outline"
+              >
+                {/* accept=".jpg, .jpeg, .png, .gif, .webp" */}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="appearance-none absolute inset-0 opacity-0"
+                  onChange={handleCoverImageChange}
+                />
+                {isImageLoading ? <Spinner /> : 'Add a cover image'}
+              </Button>
+            </ToolTip>
+          )}
+        </div>
+      )}
+
+      {mode === 'preview' && metadata.coverImage && (
+        <img
+          src={metadata.coverImage}
+          alt="Cover Image"
+          className="w-full h-64 sm:h-80 object-cover rounded-lg"
+        />
+      )}
+
       {/* Title Section */}
-      <div className="mb-6">
-        <input
-          type="text"
-          placeholder="Enter your new post title..."
-          value={metadata.title}
-          onChange={handleTitleChange}
-          className="w-full text-3xl sm:text-4xl font-bold border-0 focus:ring-0 focus:outline-none placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-custom-white"
-        />
-      </div>
+      {mode === 'edit' ? (
+        <div className="mb-6">
+          <input
+            type="text"
+            placeholder="Enter your new post title..."
+            value={metadata.title}
+            onChange={handleTitleChange}
+            className="w-full text-3xl sm:text-4xl font-bold border-0 focus:ring-0 focus:outline-none placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-custom-white"
+          />
+        </div>
+      ) : (
+        <Text
+          variant="h1"
+          size="lg"
+          bold={false}
+          className="font-semibold my-2 text-gray-900 dark:text-custom-white"
+        >
+          {metadata.title}
+        </Text>
+      )}
+
       {/* Tags Section */}
-      <div className="mb-6 flex items-center">
-        <MarkdownTags tags={tags} onRemove={handleRemoveTag} />
-        <TagInput
-          tags={tags}
-          onAddTag={handleAddTag}
-          suggestedTags={suggestedTags}
-          value={inputValue}
-          onInputChange={handleInputChange}
-          onInputKeyDown={handleInputKeyDown}
-        />
+      <div
+        className={`${mode === 'edit' ? 'mb-6 ' : 'mb-2'} flex items-center`}
+      >
+        {mode === 'edit' ? (
+          <>
+            <MarkdownTags tags={tags} mode="edit" onRemove={handleRemoveTag} />
+            <TagInput
+              tags={tags}
+              onAddTag={handleAddTag}
+              suggestedTags={suggestedTags}
+              value={inputValue}
+              onInputChange={handleInputChange}
+              onInputKeyDown={handleInputKeyDown}
+            />
+          </>
+        ) : (
+          <MarkdownTags tags={tags} mode="preview" onRemove={() => {}} />
+        )}
       </div>
     </div>
   );

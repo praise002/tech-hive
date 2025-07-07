@@ -29,7 +29,7 @@ import {
 import Spinner from '../../components/common/Spinner';
 
 function CustomToolbar({ editor }: { editor: Editor | null }) {
-  if (!editor) return;
+  if (!editor) return null;
 
   const [isImageLoading, setIsImageLoading] = useState(false);
 
@@ -115,12 +115,7 @@ function CustomToolbar({ editor }: { editor: Editor | null }) {
       editor={editor}
       after={
         <>
-          <Toolbar.Toggle
-            name="Code block"
-            icon={<FaCode />}
-            active={editor.isActive('codeBlock')}
-            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-          />
+          {/* TEXT FORMATTING */}
           <Toolbar.Toggle
             name="Center"
             icon={<FaAlignCenter />}
@@ -133,43 +128,44 @@ function CustomToolbar({ editor }: { editor: Editor | null }) {
             active={editor.isActive('textAlign', { align: 'left' })}
             onClick={() => editor.chain().focus().setTextAlign('left').run()}
           />
+          {/* LINKS */}
           <Toolbar.Button name="Set link" icon={<FaLink />} onClick={setLink} />
           <Toolbar.Button
             name="Unset link"
             icon={<FaUnlink />}
             onClick={() => editor.chain().focus().unsetLink().run()}
           />
+          {/* MEDIA */}
+          <>
+            <Toolbar.Button
+              name="Add Image"
+              icon={isImageLoading ? <Spinner /> : <FaImage />}
+              onClick={() => document.getElementById('file-upload')?.click()}
+              disabled={isImageLoading}
+            />
+
+            <input
+              id="file-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={addImage}
+            />
+          </>
           <Toolbar.Button
             name="Add YouTube Video"
             icon={<FaYoutube />}
             onClick={addYoutubeVideo}
           />
-          // TODO: NOT WORKING
-          <div className="inline relative">
-            <input
-              type="file"
-              accept="image/*"
-              className="appearance-none absolute opacity-0 inset-0 cursor-pointer"
-              onChange={addImage}
-            />
+          {/* CODE BLOCKS */}
+          <Toolbar.Toggle
+            name="Code block"
+            icon={<FaCode />}
+            active={editor.isActive('codeBlock')}
+            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+          />
 
-            {isImageLoading ? (
-              <button
-                className={`${
-                  isImageLoading
-                    ? 'cursor-not-allowed opacity-75'
-                    : 'cursor-pointer'
-                }`}
-                disabled={isImageLoading}
-              >
-                <Spinner />
-              </button>
-            ) : (
-              // <button>Set image</button>
-              // <FaImage />
-              <Toolbar.Button name="Add Image" icon={<FaImage />} />
-            )}
-          </div>
+          {/* TABLES */}
           <Toolbar.BlockSelector
             items={() => [
               {
@@ -180,7 +176,8 @@ function CustomToolbar({ editor }: { editor: Editor | null }) {
                     <span>Insert Table 2x2</span>
                   </div>
                 ),
-                isActive: (editor) => editor.isActive('table'),
+                // isActive: (editor) => editor.isActive('table'),
+                isActive: 'default',
                 setActive: (editor) =>
                   editor
                     .chain()
@@ -407,12 +404,32 @@ function CustomToolbar({ editor }: { editor: Editor | null }) {
               },
             ]}
           />
-
+          {/* HELP */}
           <Toolbar.Button
             name="Help"
             icon={<Icon.QuestionMark />}
             shortcut="CMD-H"
-            onClick={() => console.log('help')}
+            // onClick={() => console.log('help')}
+            onClick={() => {
+              toast(
+                <div className="flex flex-col justify-items-start gap-2 text-sm">
+                  <h3 className="font-bold">Need help?</h3>
+                  <button
+                    onClick={() => window.open('/docs')}
+                    className="text-blue-500 hover:underline"
+                  >
+                    View Documentation →
+                  </button>
+                  <button
+                    // onClick={() => setShowFeedback(true)}
+                    className="text-blue-500 hover:underline"
+                  >
+                    Send Feedback
+                  </button>
+                </div>,
+                { duration: 7000 }
+              );
+            }}
           />
         </>
       }

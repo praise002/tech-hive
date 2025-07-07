@@ -24,7 +24,7 @@ function getTagColor(tagName: string) {
   return tagColors[hash % tagColors.length];
 }
 
-function MarkdownTags({ tags, onRemove }: MarkdownTagsProps) {
+function MarkdownTags({ tags, mode, onRemove }: MarkdownTagsProps) {
   return (
     <div className="flex gap-2 flex-wrap my-2 text-xs md:text-sm">
       {tags.map((tag) => {
@@ -38,12 +38,14 @@ function MarkdownTags({ tags, onRemove }: MarkdownTagsProps) {
             <button type="button" className="dark:text-custom-white ml-1.5">
               {tag}
             </button>
-            <button
-              onClick={() => onRemove(tag)}
-              className="cursor-pointer ml-1.5 text-gray-500 text-2xl hover:text-red dark:text-gray-400"
-            >
-              &times;
-            </button>
+            {mode === 'edit' && (
+              <button
+                onClick={() => onRemove(tag)}
+                className="cursor-pointer ml-1.5 text-gray-500 text-2xl hover:text-red dark:text-gray-400"
+              >
+                &times;
+              </button>
+            )}
           </div>
         );
       })}

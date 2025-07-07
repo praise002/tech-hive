@@ -29,6 +29,12 @@ export interface Article {
   readTime: string;
 }
 
+export interface MarkdownTagsProps {
+  tags: string[];
+  mode: 'edit' | 'preview';
+  onRemove: (tag: string) => void;
+}
+
 // Version 1: showAdminActions is true, onMenuClick is REQUIRED
 interface PropsWithAdminActions {
   showAdminActions: true;

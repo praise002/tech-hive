@@ -33,7 +33,6 @@ import { Toaster } from 'react-hot-toast';
 
 import AdminDashboard from './features/admin/AdminDashboard';
 
-import RichTextEditor from './features/articles/RichTextEditor';
 import Liveblock from './features/articles/Liveblock';
 
 const queryClient = new QueryClient({
@@ -78,7 +77,7 @@ function App() {
             <Route path="contact" element={<Contact />} />
             <Route path="dashboard" element={<Dashboard />} />
 
-            <Route path="new" element={<RichTextEditor />} />
+            <Route path="new" element={<Liveblock />} />
             <Route path="profile" element={<ProfileDetail />} />
 
             <Route path="account" element={<AccountDetail />} />
@@ -92,7 +91,6 @@ function App() {
             />
 
             <Route path="admin" element={<AdminDashboard />} />
-            <Route path="liveblock" element={<Liveblock />} />
           </Route>
 
           {/* Catch-all route for 404 errors */}
