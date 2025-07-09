@@ -149,7 +149,7 @@ function TextEditor() {
     editorProps: {
       attributes: {
         class:
-          'mt-5 w-full max-w-none focus:outline-none border border-gray-800 rounded-md dark:border-custom-white dark:text-white px-2 mx-2 min-h-[300px] prose md:prose-lg lg:prose-xl dark:proae-invert',
+          'mt-5 w-full max-w-none focus:outline-none border border-gray-800 rounded-md dark:border-custom-white dark:text-white px-3 mx-2 min-h-[300px] prose md:prose-lg lg:prose-xl dark:proae-invert',
       },
     },
   });

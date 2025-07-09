@@ -102,7 +102,7 @@ function ArticleMetadata({ mode }: { mode: string }) {
   }
 
   return (
-    <div className={`${mode === "edit" ? "mb-8" : "mb-2"} mt-2`}>
+    <div className={`${mode === 'edit' ? 'mb-8' : 'mb-2'} mt-2`}>
       {/* Cover Image Section */}
 
       {mode === 'edit' && (
@@ -195,11 +195,9 @@ function ArticleMetadata({ mode }: { mode: string }) {
       )}
 
       {/* Tags Section */}
-      <div
-        className={`${mode === 'edit' ? 'mb-6 ' : 'mb-2'} flex items-center`}
-      >
+      <>
         {mode === 'edit' ? (
-          <>
+          <div className="flex items-center gap-2 flex-wrap my-2 text-xs md:text-sm">
             <MarkdownTags tags={tags} mode="edit" onRemove={handleRemoveTag} />
             <TagInput
               tags={tags}
@@ -209,11 +207,13 @@ function ArticleMetadata({ mode }: { mode: string }) {
               onInputChange={handleInputChange}
               onInputKeyDown={handleInputKeyDown}
             />
-          </>
+          </div>
         ) : (
-          <MarkdownTags tags={tags} mode="preview" onRemove={() => {}} />
+          <div className="flex items-center gap-2 flex-wrap my-2 text-xs md:text-sm">
+            <MarkdownTags tags={tags} mode="preview" onRemove={() => {}} />
+          </div>
         )}
-      </div>
+      </>
     </div>
   );
 }

@@ -23,7 +23,7 @@ function TagInput({
     : [];
 
   return (
-    <div className="relative flex-1">
+    <div className="relative">
       {tags.length < maxTags && (
         <input
           type="text"

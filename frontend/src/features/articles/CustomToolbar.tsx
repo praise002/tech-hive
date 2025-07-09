@@ -3,6 +3,7 @@ import { Icon } from '@liveblocks/react-ui';
 import { Editor } from '@tiptap/react';
 import { useCallback, useState } from 'react';
 import toast from 'react-hot-toast';
+
 import {
   FaColumns,
   FaPlus,
@@ -409,10 +410,9 @@ function CustomToolbar({ editor }: { editor: Editor | null }) {
             name="Help"
             icon={<Icon.QuestionMark />}
             shortcut="CMD-H"
-            // onClick={() => console.log('help')}
             onClick={() => {
               toast(
-                <div className="flex flex-col justify-items-start gap-2 text-sm">
+                <div className="flex flex-col items-start gap-2 text-sm">
                   <h3 className="font-bold">Need help?</h3>
                   <button
                     onClick={() => window.open('/docs')}

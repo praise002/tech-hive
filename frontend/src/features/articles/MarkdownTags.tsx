@@ -26,7 +26,8 @@ function getTagColor(tagName: string) {
 
 function MarkdownTags({ tags, mode, onRemove }: MarkdownTagsProps) {
   return (
-    <div className="flex gap-2 flex-wrap my-2 text-xs md:text-sm">
+    // <div className="flex gap-2 flex-wrap my-2 text-xs md:text-sm">
+    <>
       {tags.map((tag) => {
         const color = getTagColor(tag);
         return (
@@ -49,7 +50,8 @@ function MarkdownTags({ tags, mode, onRemove }: MarkdownTagsProps) {
           </div>
         );
       })}
-    </div>
+    </>
+    // </div>
   );
 }
 
