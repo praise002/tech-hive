@@ -39,7 +39,6 @@ function TagInput({
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
             placeholder={tags.length === 0 ? 'Add tags...' : 'Add another...'}
             className="w-full p-2 focus:outline-none dark:text-custom-white"
-            enterKeyHint="enter"
           />
         </form>
       )}
