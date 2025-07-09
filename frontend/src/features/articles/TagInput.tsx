@@ -25,16 +25,23 @@ function TagInput({
   return (
     <div className="relative">
       {tags.length < maxTags && (
-        <input
-          type="text"
-          value={value}
-          onChange={onInputChange}
-          onKeyDown={onInputKeyDown}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-          placeholder={tags.length === 0 ? 'Add tags...' : 'Add another...'}
-          className="w-full p-2 focus:outline-none dark:text-custom-white"
-        />
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
+        >
+          <input
+            type="text"
+            value={value}
+            onChange={onInputChange}
+            onKeyDown={onInputKeyDown}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+            placeholder={tags.length === 0 ? 'Add tags...' : 'Add another...'}
+            className="w-full p-2 focus:outline-none dark:text-custom-white"
+            enterKeyHint="enter"
+          />
+        </form>
       )}
 
       {/* Suggestions Dropdown */}

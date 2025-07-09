@@ -3,6 +3,7 @@ import { useContext, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import SearchInput from '../common/SearchInput';
 import { ThemeContext } from '../../context/ThemeContext';
+import { IoMdNotificationsOutline } from 'react-icons/io';
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -55,12 +56,22 @@ function Navbar() {
           <SearchInput iconSize="text-xl" />
         </div>
 
-        <div className="hidden lg:block">
-          <img
-            className="w-10 h-10 rounded-full object-cover"
-            src="/assets/icons/Avatars.png"
-            alt="Profile Picture"
-          />
+        <div className="lg:flex items-center gap-6 hidden">
+          <div className="relative">
+            <div className="absolute right-0 rounded-full bg-red w-5 h-5 flex items-center justify-center">
+              <span className="text-white text-xs">2</span>
+              {/* FIXME: IT BREAKS AT 3 DIGIT NUMBER */}
+            </div>
+            <IoMdNotificationsOutline className="w-10 h-10 text-gray-900 dark:text-white" />
+          </div>
+
+          <div>
+            <img
+              className="w-10 h-10 rounded-full object-cover"
+              src="/assets/icons/Avatars.png"
+              alt="Profile Picture"
+            />
+          </div>
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -131,13 +142,20 @@ function Navbar() {
         ))}
 
         {/* Profile Picture */}
-        <li className="flex items-center">
+        <li className="flex items-center space-x-2">
+          <div className='relative'>
+            <div className="absolute right-0 rounded-full bg-red w-5 h-5 flex items-center justify-center">
+              <span className="text-white text-xs">2</span>
+              {/* FIXME: IT BREAKS AT 3 DIGIT NUMBER */}
+            </div>
+            <IoMdNotificationsOutline className="w-7 h-7 text-gray-900 dark:text-white" />
+          </div>
           <img
             className="w-7 h-7 rounded-full object-cover"
             src="/assets/icons/Avatars.png"
             alt="Profile Picture"
           />
-          <span className="ml-2 font-medium text-gray-800 dark:text-custom-white">
+          <span className="font-medium text-gray-800 dark:text-custom-white">
             Elizabeth Stone
           </span>
         </li>
