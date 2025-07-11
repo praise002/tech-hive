@@ -134,3 +134,7 @@ p.is-editor-empty:first-child::before {
 .dark p.is-editor-empty:first-child::before {
   @apply text-custom-white;
 }
+
+.ProseMirror-selectednode {
+  outline: 3px solid #a32816; 
+}

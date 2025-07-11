@@ -55,7 +55,7 @@ function CustomToolbar({ editor }: { editor: Editor | null }) {
       img.src = url;
 
       img.onload = () => {
-        editor?.chain().focus().setImage({ src: url }).run();
+        editor?.chain().focus().setImage({ src: url, alt: '' }).run();
         URL.revokeObjectURL(url);
         setIsImageLoading(false);
       };

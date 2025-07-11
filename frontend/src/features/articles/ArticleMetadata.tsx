@@ -44,7 +44,45 @@ function ArticleMetadata({ mode }: { mode: string }) {
     title: 'Test Title',
     // coverImage: '/assets/about.png',
     coverImage: '',
+    coverImageAlt: '',
   });
+
+  const [isAltTextModalOpen, setIsAltTextModalOpen] = useState(false);
+  const [altTextInput, setAltTextInput] = useState('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  function handleAltTextInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setAltTextInput(e.target.value);
+    setHasUnsavedChanges(e.target.value !== metadata.coverImageAlt);
+  }
+
+  function handleSaveAltText() {
+    setMetadata((prev) => ({
+      ...prev,
+      coverImageAlt: altTextInput,
+    }));
+    setHasUnsavedChanges(false);
+    setIsAltTextModalOpen(false);
+  }
+
+  function handleOpenAltTextModal() {
+    setAltTextInput(metadata.coverImageAlt);
+    setHasUnsavedChanges(false);
+    setIsAltTextModalOpen(true);
+  }
+
+  function handleCloseAltTextModal() {
+    if (hasUnsavedChanges) {
+      const shouldDiscard = window.confirm(
+        'You have unsaved changes. Do you want to discard them?'
+      );
+      if (!shouldDiscard) return;
+    }
+
+    setIsAltTextModalOpen(false);
+    setAltTextInput('');
+    setHasUnsavedChanges(false);
+  }
 
   function handleCoverImageChange(event: React.ChangeEvent<HTMLInputElement>) {
     setIsImageLoading(true);
@@ -111,7 +149,7 @@ function ArticleMetadata({ mode }: { mode: string }) {
             <div className="relative group">
               <img
                 src={metadata.coverImage}
-                alt="Cover Image"
+                alt={metadata.coverImageAlt || 'Cover Image'}
                 className="w-full h-64 sm:h-80 object-cover rounded-lg"
               />
               <div className="absolute inset-0 group-hover:bg-opacity-30 transition-all duration-300 flex justify-center items-center">
@@ -133,6 +171,13 @@ function ArticleMetadata({ mode }: { mode: string }) {
                     {isImageLoading ? <Spinner /> : 'Change'}
                   </button>
                   <Button onClick={handleCoverImageRemove}>Remove</Button>
+                  <button
+                    type="button"
+                    onClick={handleOpenAltTextModal}
+                    className="bg-white relative text-gray-800 px-4 py-2 rounded-md"
+                  >
+                    {metadata.coverImageAlt ? 'Edit Alt Text' : 'Add Alt Text'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -161,6 +206,53 @@ function ArticleMetadata({ mode }: { mode: string }) {
               </Button>
             </ToolTip>
           )}
+        </div>
+      )}
+
+      {/* Modal Overlay */}
+      {isAltTextModalOpen && (
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+          onClick={handleCloseAltTextModal} // Close modal when clicking outside
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+        >
+          {/* Modal Content */}
+          <div
+            className="bg-white w-full max-w-xl p-6 rounded-lg shadow-lg relative"
+            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
+          >
+            <Text
+              variant="h3"
+              size="xl"
+              bold={false}
+              className="font-semibold text-gray-900 mb-4"
+            >
+              Alternative text
+            </Text>
+            <p className="text-gray-700 mb-6">
+              Write a brief description of this image for readers with visual
+              impairments
+            </p>
+
+            <input
+              type="text"
+              value={altTextInput}
+              onChange={handleAltTextInputChange}
+              placeholder="Example: A cat sitting on a couch"
+              className="appearance-none block w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-800 focus-visible:border-gray-800"
+            />
+
+            <div className="space-x-4 mt-4">
+              <Button variant="outline" onClick={handleSaveAltText}>
+                Save
+              </Button>
+              <Button onClick={handleCloseAltTextModal}>
+                {hasUnsavedChanges ? 'Discard' : 'Cancel'}
+              </Button>
+            </div>
+          </div>
         </div>
       )}
 
