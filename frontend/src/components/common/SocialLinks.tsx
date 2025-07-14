@@ -115,11 +115,7 @@ function SocialLinks({
   }, [isOpen]);
 
   useEffect(() => {
-    interface KeyEvent {
-      key: string;
-    }
-
-    function handleEscapeKey(event: KeyEvent): void {
+    function handleEscapeKey(event: KeyboardEvent): void {
       if (event.key === 'Escape') {
         closeSummarizeModal();
         setIsOpen(false);

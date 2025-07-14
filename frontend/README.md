@@ -45,7 +45,6 @@ A modern, collaborative platform for the tech community featuring article writin
   - [ ] Replace blob URLs with localStorage for temporary storage
   - [ ] Implement IndexedDB fallback for large images
   - [ ] Only save images to backend on article save/publish
-  - [ ] Add image compression and optimization
   - [ ] Alt text support for accessibility
 
 - [ ] **Code Quality & Maintenance**
@@ -55,7 +54,7 @@ A modern, collaborative platform for the tech community featuring article writin
   - [ ] Remove unused dependencies and dead code
 
 - [ ] **Documentation & DevOps**
-  - [ ] Create comprehensive docs page for editor help section
+  - ✅ Create comprehensive docs page for editor help section
   - [ ] Dockerize the application for consistent deployment
   
 
@@ -64,8 +63,8 @@ A modern, collaborative platform for the tech community featuring article writin
   - [ ] Article list skeleton loaders
   - [ ] Job listings skeleton loaders  
   - [ ] Resource cards skeleton loaders
-  - [ ] Editor loading states
-  - [ ] Image upload progress indicators
+  - ✅ Editor loading states
+  - ✅ Image upload progress indicators
 
 - [ ] **Performance Optimization**
   - [ ] Implement lazy loading for images
@@ -85,25 +84,11 @@ A modern, collaborative platform for the tech community featuring article writin
 ### Phase 3: Advanced Features (Priority: Medium)
 - [ ] **Enhanced Editor Features**
   - [ ] Custom blocks (callouts, quotes, etc.)
-  - [ ] Markdown import/export
-  - [ ] Document templates
-  - [ ] Auto-save functionality
-  - [ ] Version history
-  - [ ] Comment system on articles
 
 - [ ] **Search & Discovery**
   - [ ] Full-text search across articles
   - [ ] Advanced filtering options
-  - [ ] Tag system implementation
   - [ ] Recommendation engine
-  - [ ] Bookmarking functionality
-
-- [ ] **Social Features**
-  - [ ] User profiles and portfolios
-  - [ ] Following/followers system
-  - [ ] Article reactions (likes, shares)
-  - [ ] Discussion threads
-  - [ ] Notifications system
 
 ### Phase 4: Advanced Functionality (Priority: Low)
 - [ ] **Analytics & Insights**
@@ -121,8 +106,6 @@ A modern, collaborative platform for the tech community featuring article writin
 - [ ] **Content Management**
   - [ ] Editorial workflow
   - [ ] Content moderation tools
-  - [ ] Scheduled publishing
-  - [ ] Content categories and curation
 
 ## 🛠 Technical Stack
 
@@ -146,6 +129,8 @@ A modern, collaborative platform for the tech community featuring article writin
 - [TipTap Update Attributes API](https://tiptap.dev/docs/editor/api/commands/nodes-and-marks/update-attributes)
 - [TipTap Image Upload Guide](https://stackoverflow.com/questions/78147060/how-to-upload-inserted-images-with-image-extension-in-tiptap)
 - [TipTap Node Selection Issue](https://stackoverflow.com/questions/78161917/updating-attributes-on-the-image-caused-the-node-to-be-deselected-in-tiptap)
+- [How to add editing image alt tiptap](https://angelika.me/2023/02/26/how-to-add-editing-image-alt-text-tiptap/)
+- [Tiptap Drag Drop Image](https://www.codemzy.com/blog/tiptap-drag-drop-image)
 
 ## 🚀 Getting Started
 

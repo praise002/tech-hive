@@ -135,6 +135,16 @@ p.is-editor-empty:first-child::before {
   @apply text-custom-white;
 }
 
-.ProseMirror-selectednode {
+/* Works when using the default image */
+/* .ProseMirror-selectednode {
   outline: 3px solid #a32816; 
+} */
+
+.image {
+  width: fit-content;
+  position: relative;
+}
+
+.ProseMirror-selectednode img {
+  outline: 3px solid #a32816;
 }

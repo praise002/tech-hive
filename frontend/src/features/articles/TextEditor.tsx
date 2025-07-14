@@ -17,7 +17,7 @@ import TableCell from '@tiptap/extension-table-cell';
 import Table from '@tiptap/extension-table';
 import TextAlign from '@tiptap/extension-text-align';
 import Link from '@tiptap/extension-link';
-import Image from '@tiptap/extension-image';
+
 import Placeholder from '@tiptap/extension-placeholder';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import { common, createLowlight } from 'lowlight';
@@ -28,6 +28,8 @@ import ArticleMetadata from './ArticleMetadata';
 import Button from '../../components/common/Button';
 import { useState } from 'react';
 import PreviewMode from './PreviewMode';
+import Dropcursor from '@tiptap/extension-dropcursor';
+import Image from './Image';
 
 // create a lowlight instance with all languages loaded or use common
 const lowlight = createLowlight(common);
@@ -48,6 +50,7 @@ function TextEditor() {
         history: false,
       }),
       Image,
+      Dropcursor,
       Typography,
       Placeholder.configure({
         placeholder: 'Write something …',
@@ -195,6 +198,7 @@ function TextEditor() {
           <ArticleMetadata mode="edit" />
           <CustomToolbar editor={editor} />
           <EditorContent editor={editor} className="editor" />
+
           {/* To prevent it from rendering until threads are loaded */}
           <ClientSideSuspense fallback={null}>
             <Threads editor={editor} />
