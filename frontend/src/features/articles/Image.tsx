@@ -13,12 +13,11 @@ function ImageNode(props: NodeViewWrapperProps) {
   const [altTextInput, setAltTextInput] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isImageSelected, setIsImageSelected] = useState(false);
-  // const [imageWidth, setImageWidth] = useState(0);
 
   const { updateAttributes } = props;
   const { src, alt } = props.node.attrs;
   const nodeViewRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
+
   // const { ...rest } = props.node.attrs;
   // console.log(rest);
 
@@ -41,14 +40,6 @@ function ImageNode(props: NodeViewWrapperProps) {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-
-  // useEffect(() => {
-  //   if (imageRef.current) {
-  //     setImageWidth(imageRef.current.offsetWidth);
-  //     console.log(imageRef.current.offsetWidth);
-  //     console.log(imageWidth);
-  //   }
-  // }, [src]);
 
   function handleAltTextInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     setAltTextInput(e.target.value);
@@ -80,8 +71,6 @@ function ImageNode(props: NodeViewWrapperProps) {
     setHasUnsavedChanges(false);
   }
 
-  // const indicatorLeft = imageWidth ? (imageWidth / 2) : 0;
-
   return (
     <>
       {/* IMAGE DRAG AND DROP */}
@@ -94,10 +83,7 @@ function ImageNode(props: NodeViewWrapperProps) {
         <div className="relative">
           <img src={src} alt={alt} />
           {isImageSelected && (
-            <p
-              className="absolute text-nowrap -top-15 -translate-x-1/2 left-1/2 bg-gray-500 text-white dark:bg-white/80 dark:text-black p-1 rounded text-sm flex items-center gap-2 z-10"
-              // style={{ left: `${indicatorLeft}px` }}
-            >
+            <p className="absolute text-nowrap -top-15 -translate-x-1/2 left-1/2 bg-gray-500 text-white dark:bg-white/80 dark:text-black p-1 rounded text-sm flex items-center gap-2 z-10">
               {alt ? (
                 <span className="font-bold text-green-500">✔</span>
               ) : (

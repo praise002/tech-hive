@@ -30,6 +30,7 @@ import { useState } from 'react';
 import PreviewMode from './PreviewMode';
 import Dropcursor from '@tiptap/extension-dropcursor';
 import Image from './Image';
+import toast from 'react-hot-toast';
 
 // create a lowlight instance with all languages loaded or use common
 const lowlight = createLowlight(common);
@@ -49,9 +50,7 @@ function TextEditor() {
         // The Liveblocks extension comes with its own history handling
         history: false,
       }),
-      Image,
-      Dropcursor,
-      Typography,
+
       Placeholder.configure({
         placeholder: 'Write something …',
       }),
@@ -66,6 +65,9 @@ function TextEditor() {
       Table.configure({
         resizable: true,
       }),
+      Image,
+      Dropcursor,
+      Typography,
       TableRow,
       TableHeader,
       TableCell,
@@ -153,6 +155,57 @@ function TextEditor() {
       attributes: {
         class:
           'mt-5 w-full max-w-none focus:outline-none border border-gray-800 rounded-md dark:border-custom-white dark:text-white px-3 mx-2 min-h-[300px] prose md:prose-lg lg:prose-xl dark:proae-invert',
+      },
+      handleDrop: function (view, event, moved) {
+        if (
+          !moved &&
+          event.dataTransfer &&
+          event.dataTransfer.files &&
+          event.dataTransfer.files[0]
+        ) {
+          const file = event.dataTransfer.files[0];
+          const fileSize = parseFloat((file.size / 1024 / 1024).toFixed(4)); // get the filesize in MB
+          if (
+            (file.type === 'image/jpeg' || file.type === 'image/png') &&
+            fileSize < 10
+          ) {
+            let _URL = window.URL || window.webkitURL;
+            setIsLoading(true);
+            const img = new window.Image();
+            const url = _URL.createObjectURL(file);
+            img.src = url;
+            img.onload = function (e: Event) {
+              const imgElement = e.target as HTMLImageElement;
+              if (imgElement.width > 5000 || imgElement.height > 5000) {
+                toast.error(
+                  'Your images need to be less than 5000 pixels in height and width.'
+                );
+              } else {
+                setIsLoading(false);
+                // place the now uploaded image in the editor where it was dropped
+                const { schema } = view.state;
+                const coordinates = view.posAtCoords({
+                  left: event.clientX,
+                  top: event.clientY,
+                });
+                if (!coordinates) return;
+                const node = schema.nodes.image.create({ src: url });  // creates the image element
+                const transaction = view.state.tr.insert(coordinates.pos, node); // places it in the correct position
+                return view.dispatch(transaction);
+              }
+            };
+            img.onerror = () => {
+              toast.error('Failed to load image');
+            };
+          } else {
+            toast.error(
+              'Images need to be in jpg or png format and less than 10mb in size.'
+            );
+          }
+
+          return true; // handled
+        }
+        return false; // not handled use default behaviour
       },
     },
   });
