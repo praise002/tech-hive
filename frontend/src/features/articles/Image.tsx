@@ -76,6 +76,7 @@ function ImageNode(props: NodeViewWrapperProps) {
     <>
       {/* TODO: FIX THE POS OF IS IMAGE SELECTED TEXT */}
       {/* center IMAGE */}
+      {/* IMAGE DRAG AND DROP */}
       <NodeViewWrapper
         className={className}
         data-drag-handle

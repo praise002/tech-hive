@@ -144,14 +144,14 @@ function Navbar() {
         {/* Profile Picture */}
         <li className="flex items-center space-x-2">
           <div className='relative'>
-            <div className="absolute right-0 rounded-full bg-red w-5 h-5 flex items-center justify-center">
+            <div className="absolute right-0 rounded-full bg-red w-4 h-4 flex items-center justify-center">
               <span className="text-white text-xs">2</span>
               {/* FIXME: IT BREAKS AT 3 DIGIT NUMBER */}
             </div>
-            <IoMdNotificationsOutline className="w-7 h-7 text-gray-900 dark:text-white" />
+            <IoMdNotificationsOutline className="w-8 h-8 text-gray-900 dark:text-white" />
           </div>
           <img
-            className="w-7 h-7 rounded-full object-cover"
+            className="w-8 h-8 rounded-full object-cover"
             src="/assets/icons/Avatars.png"
             alt="Profile Picture"
           />
