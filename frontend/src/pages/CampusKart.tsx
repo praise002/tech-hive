@@ -45,7 +45,15 @@ const CampusKart = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const handleEmailSubmit = (e) => {
+  interface FormEvent {
+    preventDefault: () => void;
+  }
+
+  interface EmailSubmitHandler {
+    (e: FormEvent): void;
+  }
+
+  const handleEmailSubmit: EmailSubmitHandler = (e) => {
     e.preventDefault();
     if (!email) return;
     
