@@ -156,13 +156,14 @@ function TextEditor() {
         class:
           'mt-5 w-full max-w-none focus:outline-none border border-gray-800 rounded-md dark:border-custom-white dark:text-white px-3 mx-2 min-h-[300px] prose md:prose-lg lg:prose-xl dark:proae-invert',
       },
-      handleDrop: function (view, event, moved) {
+      handleDrop: function (view, event, slice, moved) {
         if (
           !moved &&
           event.dataTransfer &&
           event.dataTransfer.files &&
           event.dataTransfer.files[0]
         ) {
+          // TODO: ALLOW DROPPING OF MULTIPLE IMAGES
           const file = event.dataTransfer.files[0];
           const fileSize = parseFloat((file.size / 1024 / 1024).toFixed(4)); // get the filesize in MB
           if (
@@ -189,7 +190,7 @@ function TextEditor() {
                   top: event.clientY,
                 });
                 if (!coordinates) return;
-                const node = schema.nodes.image.create({ src: url });  // creates the image element
+                const node = schema.nodes.image.create({ src: url }); // creates the image element
                 const transaction = view.state.tr.insert(coordinates.pos, node); // places it in the correct position
                 return view.dispatch(transaction);
               }
@@ -197,6 +198,8 @@ function TextEditor() {
             img.onerror = () => {
               toast.error('Failed to load image');
             };
+
+            _URL.revokeObjectURL(url);
           } else {
             toast.error(
               'Images need to be in jpg or png format and less than 10mb in size.'

@@ -52,7 +52,7 @@ function CustomToolbar({ editor }: { editor: Editor | null }) {
       setIsImageLoading(true);
 
       const img = new Image();
-      // TODO: WHY IS IMG.SRC REPEATED
+
       img.src = url;
 
       img.onload = () => {

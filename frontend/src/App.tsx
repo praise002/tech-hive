@@ -35,6 +35,8 @@ import AdminDashboard from './features/admin/AdminDashboard';
 
 import Liveblock from './features/articles/Liveblock';
 import Docs from './features/articles/Docs';
+import ComingSoon from './pages/coming-soon';
+import CampusKart from './pages/CampusKart';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -93,9 +95,12 @@ function App() {
 
             <Route path="admin" element={<AdminDashboard />} />
             <Route path="docs" element={<Docs />} />
+            
           </Route>
 
           {/* Catch-all route for 404 errors */}
+          <Route path="coming-soon" element={<ComingSoon />} />
+          <Route path="campuskart" element={<CampusKart />} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </BrowserRouter>
