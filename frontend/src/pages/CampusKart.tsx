@@ -15,7 +15,7 @@ import {
   FaHandshake
 } from 'react-icons/fa';
 
-const CampusKart = () => {
+function CampusKart() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [timeLeft, setTimeLeft] = useState({
