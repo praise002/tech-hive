@@ -157,55 +157,55 @@ function TextEditor() {
           'mt-5 w-full max-w-none focus:outline-none border border-gray-800 rounded-md dark:border-custom-white dark:text-white px-3 mx-2 min-h-[300px] prose md:prose-lg lg:prose-xl dark:proae-invert',
       },
       // handleDrop: function (view, event, slice, moved) {
-      handleDrop: function (view, event, moved) {
-        if (
-          !moved &&
-          event.dataTransfer &&
-          event.dataTransfer.files &&
-          event.dataTransfer.files[0]
-        ) {
-          // TODO: ALLOW DROPPING OF MULTIPLE IMAGES
-          const file = event.dataTransfer.files[0];
-          const fileSize = parseFloat((file.size / 1024 / 1024).toFixed(4)); // get the filesize in MB
-          if (
-            (file.type === 'image/jpeg' || file.type === 'image/png') &&
-            fileSize < 10
-          ) {
-            let _URL = window.URL || window.webkitURL;
-            setIsLoading(true);
-            const img = new window.Image();
+      handleDrop: function (view, event, _slice, moved) {
+        if (!moved && event.dataTransfer?.files?.length) {
+          const files = Array.from(event.dataTransfer.files);
+          const coordinates = view.posAtCoords({
+            left: event.clientX,
+            top: event.clientY,
+          });
+          if (!coordinates) return false;
+
+          files.forEach((file, index) => {
+            const fileSize = parseFloat((file.size / 1024 / 1024).toFixed(4)); // get the filesize in MB
+            if (
+              !['image/jpeg', 'image/png'].includes(file.type) ||
+              fileSize >= 10
+            ) {
+              toast.error(`Skipped: ${file.name} - Must be JPG/PNG under 10MB`);
+              return; // skip this file
+            }
+
+            const _URL = window.URL || window.webkitURL;
             const url = _URL.createObjectURL(file);
-            img.src = url;
+            const img = new window.Image();
+
             img.onload = function (e: Event) {
               const imgElement = e.target as HTMLImageElement;
               if (imgElement.width > 5000 || imgElement.height > 5000) {
-                toast.error(
-                  'Your images need to be less than 5000 pixels in height and width.'
-                );
-              } else {
-                setIsLoading(false);
-                // place the now uploaded image in the editor where it was dropped
-                const { schema } = view.state;
-                const coordinates = view.posAtCoords({
-                  left: event.clientX,
-                  top: event.clientY,
-                });
-                if (!coordinates) return;
-                const node = schema.nodes.image.create({ src: url }); // creates the image element
-                const transaction = view.state.tr.insert(coordinates.pos, node); // places it in the correct position
-                return view.dispatch(transaction);
+                toast.error(`Skipped: ${file.name} - Dimensions exceed 5000px`);
+                URL.revokeObjectURL(url);
+                return;
               }
-            };
-            img.onerror = () => {
-              toast.error('Failed to load image');
+
+              // Calculate position with offset for multiple images
+              const insertPos = coordinates.pos + index;
+              const { schema } = view.state;
+              const node = schema.nodes.image.create({
+                src: url,
+                alt: `Image ${index + 1}`,
+              }); // creates the image element
+              const transaction = view.state.tr.insert(insertPos, node); // places it in the correct position
+              view.dispatch(transaction);
+              URL.revokeObjectURL(url);
             };
 
-            _URL.revokeObjectURL(url);
-          } else {
-            toast.error(
-              'Images need to be in jpg or png format and less than 10mb in size.'
-            );
-          }
+            img.onerror = () => {
+              toast.error(`Failed to load: ${file.name}`);
+            };
+
+            img.src = url;
+          });
 
           return true; // handled
         }
