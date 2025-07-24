@@ -32,7 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 DJANGO_APPS = [
-    "jazzmin",
+    # "jazzmin",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -57,8 +57,9 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
-    "apps.auth",
+    "apps.accounts",
     "apps.common",
+    "apps.general",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -129,7 +130,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
     {
-        "NAME": "apps.auth.validators.CustomPasswordValidator",
+        "NAME": "apps.accounts.validators.CustomPasswordValidator",
     },
 ]
 
@@ -183,7 +184,7 @@ STORAGES = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = "auth.User"
+AUTH_USER_MODEL = "accounts.User"
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = config("EMAIL_HOST")
@@ -265,7 +266,7 @@ JAZZMIN_SETTINGS = {
         # Url that gets reversed (Permissions can be added)
         {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
         # App with dropdown menu to all its models pages (Permissions checked against models)
-        {"app": "auth"},
+        {"app": "accounts"},
     ],
     #############
     # User Menu #
@@ -273,7 +274,7 @@ JAZZMIN_SETTINGS = {
     # Additional links to include in the user menu on the top right ("app" url type is not allowed)
     "usermenu_links": [
         {"name": "Tech Hive Frontpage", "url": "/", "new_window": True},
-        {"model": "auth.user"},
+        {"model": "accounts.user"},
     ],
     #############
     # Side Menu #
