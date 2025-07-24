@@ -39,4 +39,7 @@ urlpatterns = [
         views.GoogleOAuth2LoginCallbackView.as_view(),
         name="google_login_callback",
     ),
+    
+    path("profile/", views.ProfileViewGeneric.as_view()),
+    path("profile/avatar/", views.AvatarUpdateView.as_view()),
 ]

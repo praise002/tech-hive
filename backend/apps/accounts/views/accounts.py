@@ -512,6 +512,7 @@ class RefreshTokensView(TokenRefreshView):
 
         return response
 
+profile_tag = ["Profiles"]
 
 class ProfileView(APIView):
     """
@@ -524,7 +525,7 @@ class ProfileView(APIView):
     @extend_schema(
         summary="View a user profile",
         description="This endpoint allows authenticated users to view their profile details. Users can retrieve their account information. Only the account owner can access their profile.",
-        tags=tags,
+        tags=profile_tag,
         responses=PROFILE_RETRIEVE_RESPONSE_EXAMPLE,
     )
     def get(self, request):
@@ -539,7 +540,7 @@ class ProfileView(APIView):
     @extend_schema(
         summary="Update user profile",
         description="This endpoint allows authenticated users to edit their profile details. Users can update their personal information. Only the account owner can modify their profile.",
-        tags=tags,
+        tags=profile_tag,
         responses=PROFILE_UPDATE_RESPONSE_EXAMPLE,
     )
     def patch(self, request):
@@ -578,7 +579,7 @@ class ProfileViewGeneric(RetrieveUpdateAPIView):
     @extend_schema(
         summary="View a user profile",
         description="This endpoint allows authenticated users to view their profile details. Users can retrieve their account information. Only the account owner can access their profile.",
-        tags=tags,
+        tags=profile_tag,
         responses=PROFILE_RETRIEVE_RESPONSE_EXAMPLE,
     )
     def get(self, request, *args, **kwargs):
@@ -599,7 +600,7 @@ class ProfileViewGeneric(RetrieveUpdateAPIView):
     @extend_schema(
         summary="Update user profile",
         description="This endpoint allows authenticated users to edit their profile details. Users can update their personal information. Only the account owner can modify their profile.",
-        tags=tags,
+        tags=profile_tag,
         responses=PROFILE_UPDATE_RESPONSE_EXAMPLE,
     )
     def patch(self, request, *args, **kwargs):
@@ -631,7 +632,7 @@ class AvatarUpdateView(APIView):
     @extend_schema(
         summary="Update user avatar",
         description="This endpoint allows authenticated users to upload or update their profile avatar.",
-        tags=tags,
+        tags=profile_tag,
         request=build_avatar_request_schema(),
         responses=AVATAR_UPDATE_RESPONSE_EXAMPLE,
     )

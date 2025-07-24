@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Stop the script immediately if any command fails
+set -e
+
+echo "Running migrations..."
+python manage.py migrate --noinput
+
+echo "Creating sample data..."
+python manage.py loaddata fixtures/shop.json
+python manage.py initd
+
+# Collect static files
+echo "Collecting static files..."
+python manage.py collectstatic --noinput
+
+RUNTIME_PORT=${PORT:-8080}
+RUNTIME_HOST=${HOST:-0.0.0.0}
+
+# Start Celery (using the deployment folder path)
+echo "Starting Celery worker..."
+./deployment/celery &
+
+gunicorn tech_hive.wsgi:application --bind $RUNTIME_HOST:$RUNTIME_PORT

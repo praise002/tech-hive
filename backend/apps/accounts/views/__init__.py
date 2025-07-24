@@ -10,6 +10,9 @@ from .accounts import (
     VerifyOtpView,
     PasswordResetDoneView,
     RefreshTokensView,
+    ProfileView,
+    ProfileViewGeneric,
+    AvatarUpdateView,
 )
 
 from .google_oauth_signup import GoogleOAuth2SignUpView
@@ -35,4 +38,8 @@ __all__ = [
     "GoogleOAuth2SignUpCallbackView",
     "GoogleOAuth2LoginView",
     "GoogleOAuth2LoginCallbackView"
+    
+    "ProfileView",
+    "ProfileViewGeneric",
+    "AvatarUpdateView",
 ]

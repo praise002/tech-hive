@@ -20,7 +20,6 @@ A scalable Django REST framework backend providing APIs for:
 - **Redis** - Caching and session storage
 - **Celery** - Background task processing
 - **Docker** - Containerization
-- **Nginx** - Reverse proxy and static files
 
 ### Additional Libraries
 - **Pillow** - Image processing
