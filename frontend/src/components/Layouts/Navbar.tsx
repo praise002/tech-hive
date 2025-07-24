@@ -23,18 +23,22 @@ function Navbar() {
   ];
 
   return (
-    <nav className="fixed left-0 right-0 top-0 z-50 bg-white shadow-md dark:bg-dark">
+    <nav
+      className="fixed left-0 right-0 top-0 z-50 bg-white shadow-md dark:bg-dark"
+      role="navigation"
+      aria-label="Main navigation"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center py-3">
         {/* Logo & Nav Links */}
 
         <div className="flex items-center gap-6">
           <div className="uppercase text-gray-900 dark:text-custom-white text-xl font-bold">
-            Tec<span className="text-red-700">Hive.</span>
+            Tec<span className="text-red-600">Hive.</span>
           </div>
           <ul className="hidden lg:flex items-center gap-6 text-gray-900 dark:text-custom-white font-medium">
             {navLinks.map(({ to, name }) => (
               <li key={to}>
-                <NavLink to={to} className="hover:text-red-700">
+                <NavLink to={to} className="hover:text-red-600">
                   {name}
                 </NavLink>
               </li>
@@ -45,11 +49,21 @@ function Navbar() {
         {/* Search & Icons */}
         <div className="hidden lg:flex items-center gap-4 text-sm">
           {/* Theme Toggle Button */}
-          <button aria-label="Toggle theme" onClick={toggleTheme}>
+          <button
+            aria-label="Notifications, you have 2 unread notifications"
+            type="button"
+            onClick={toggleTheme}
+          >
             {theme === 'light' ? (
-              <MdOutlineDarkMode className="w-6 h-6 text-gray-900 dark:text-white" />
+              <MdOutlineDarkMode
+                className="w-6 h-6 text-gray-900 dark:text-white"
+                aria-hidden="true"
+              />
             ) : (
-              <MdOutlineLightMode className="w-6 h-6 text-gray-900 dark:text-white" />
+              <MdOutlineLightMode
+                className="w-6 h-6 text-gray-900 dark:text-white"
+                aria-hidden="true"
+              />
             )}
           </button>
 
@@ -57,13 +71,23 @@ function Navbar() {
         </div>
 
         <div className="lg:flex items-center gap-6 hidden">
-          <div className="relative">
-            <div className="absolute right-0 rounded-full bg-red w-5 h-5 flex items-center justify-center">
+          <button
+            className="relative"
+            aria-label="Notifications, you have 2 unread notifications"
+            type="button"
+          >
+            <div
+              aria-hidden="true"
+              className="absolute right-0 rounded-full bg-red w-5 h-5 flex items-center justify-center"
+            >
               <span className="text-white text-xs">2</span>
               {/* FIXME: IT BREAKS AT 3 DIGIT NUMBER */}
             </div>
-            <IoMdNotificationsOutline className="w-10 h-10 text-gray-900 dark:text-white" />
-          </div>
+            <IoMdNotificationsOutline
+              className="w-10 h-10 text-gray-900 dark:text-white"
+              aria-hidden="true"
+            />
+          </button>
 
           <div>
             <img
@@ -76,8 +100,11 @@ function Navbar() {
 
         {/* Mobile Menu Toggle */}
         <button
-          aria-label="Toggle menu"
+          aria-label={`${isMenuOpen ? 'Close' : 'Open'} navigation menu`}
           onClick={toggleMenu}
+          type="button"
+          aria-expanded={isMenuOpen}
+          aria-controls="mobile-menu"
           className="lg:hidden p-2"
         >
           {isMenuOpen ? (
@@ -115,12 +142,20 @@ function Navbar() {
         className={`lg:hidden flex-col items-center space-y-4 px-6 pb-6 ${
           isMenuOpen ? 'flex' : 'hidden'
         }`}
+        role="menu"
+        aria-labelledby="mobile-menu-button"
       >
         {/* Search & Icons */}
 
         <li className="flex flex-col items-center gap-4 text-xs">
           {/* Theme Toggle Button */}
-          <button aria-label="Toggle theme" onClick={toggleTheme}>
+          <button
+            aria-label={`Switch to ${
+              theme === 'light' ? 'dark' : 'light'
+            } mode`}
+            type="button"
+            onClick={toggleTheme}
+          >
             {theme === 'light' ? (
               <MdOutlineDarkMode className="w-6 h-6 text-gray-900 dark:text-white" />
             ) : (
@@ -143,13 +178,23 @@ function Navbar() {
 
         {/* Profile Picture */}
         <li className="flex items-center space-x-2">
-          <div className='relative'>
-            <div className="absolute right-0 rounded-full bg-red w-4 h-4 flex items-center justify-center">
+          <button
+            type="button"
+            className="relative"
+            aria-label="Notifications, you have 2 unread notifications"
+          >
+            <div
+              aria-hidden="true"
+              className="absolute right-0 rounded-full bg-red w-4 h-4 flex items-center justify-center"
+            >
               <span className="text-white text-xs">2</span>
               {/* FIXME: IT BREAKS AT 3 DIGIT NUMBER */}
             </div>
-            <IoMdNotificationsOutline className="w-8 h-8 text-gray-900 dark:text-white" />
-          </div>
+            <IoMdNotificationsOutline
+              aria-hidden="true"
+              className="w-8 h-8 text-gray-900 dark:text-white"
+            />
+          </button>
           <img
             className="w-8 h-8 rounded-full object-cover"
             src="/assets/icons/Avatars.png"

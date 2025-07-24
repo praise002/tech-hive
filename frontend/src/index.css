@@ -33,7 +33,7 @@
 }
 
 .active {
-  @apply text-red-700;
+  @apply text-red-600;
 }
 
 .ProseMirror ul li,
