@@ -9,7 +9,7 @@ function HeroSection() {
       {/* ✅ SVG Background */}
       <img
         src="/assets/hero-section.svg"
-        alt="Background"
+        alt=""
         className="pointer-events-none absolute inset-0 w-full h-full object-cover opacity-70"
       />
 

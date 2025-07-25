@@ -42,7 +42,7 @@ function ArticleReactions({
       </div>
 
       {/* Posted Time */}
-      <div className="text-xs text-secondary">Posted {posted}</div>
+      <div className="text-xs text-gray-700 dark:text-secondary">Posted {posted}</div>
     </div>
   );
 }

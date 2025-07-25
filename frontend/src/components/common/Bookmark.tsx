@@ -7,7 +7,7 @@ function Bookmark({ className = '' }: BookmarkProps) {
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   return (
-    <span>
+    <button>
       {isBookmarked ? (
         <FaBookmark
           className={`cursor-pointer ${className}`}
@@ -21,7 +21,7 @@ function Bookmark({ className = '' }: BookmarkProps) {
           onClick={() => setIsBookmarked(true)}
         />
       )}
-    </span>
+    </button>
   );
 }
 

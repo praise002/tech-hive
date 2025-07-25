@@ -22,7 +22,7 @@ function TrendingArticles() {
         <div>
           <Link
             to="/articles"
-            className="cursor-pointer text-secondary hover:text-red transition-colors"
+            className="cursor-pointer text-red-800 dark:text-secondary dark:hover:text-white hover:text-red transition-colors"
           >
             See all
           </Link>

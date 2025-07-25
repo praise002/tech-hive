@@ -1,12 +1,24 @@
 import { CiSearch } from 'react-icons/ci';
 import { SearchInputProps } from '../../types/types';
+import React, { useState } from 'react';
 
 function SearchInput({ inputWidth, iconSize }: SearchInputProps) {
+  const [searchValue, setSearchValue] = useState('');
+
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setSearchValue(e.target.value);
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    console.log('Search query:', searchValue);
+  }
+
   return (
-    <div className="relative">
+    <form onSubmit={handleSubmit} className="relative">
       {/* Search Icon */}
       <CiSearch
-        className={`${iconSize} absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-custom-white`}
+        className={`${iconSize} absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-custom-white pointer-events-none`}
         aria-hidden="true"
       />
 
@@ -16,9 +28,10 @@ function SearchInput({ inputWidth, iconSize }: SearchInputProps) {
         type="search"
         placeholder="Search articles..."
         aria-label="Search articles"
-        role="searchbox"
+        value={searchValue}
+        onChange={handleInputChange}
       />
-    </div>
+    </form>
   );
 }
 
