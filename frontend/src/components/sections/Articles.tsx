@@ -19,7 +19,7 @@ function Articles({
   }
 
   return (
-    <div
+    <section
       className={`lg:mt-4 max-w-7xl mx-auto px-4 lg:px-8 mb-4 mt-${marginTop}`}
     >
       {visibleHeader && (
@@ -40,6 +40,7 @@ function Articles({
             <Link
               to="/articles"
               className="cursor-pointer text-red-800 dark:text-secondary dark:hover:text-whitedark:text-secondary dark:hover:text-white hover:text-red transition-colors"
+              aria-label="See all articles"
             >
               See all
             </Link>
@@ -47,21 +48,22 @@ function Articles({
         </div>
       )}
       <div>
-        <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4 h-full">
+        <ul className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4 h-full">
           {/* <div className="flex flex-col gap-y-2"> */}
           {displayedArticles.map((article) => (
-            <ArticleCard
-              showAdminActions={showAdminActions}
-              key={article.id}
-              article={article}
-              isOpen={openArticleId === article.id}
-              onMenuClick={handleMenuClick}
-              context={context}
-            />
+            <li key={article.id}>
+              <ArticleCard
+                showAdminActions={showAdminActions}
+                article={article}
+                isOpen={openArticleId === article.id}
+                onMenuClick={handleMenuClick}
+                context={context}
+              />
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
-    </div>
+    </section>
   );
 }
 

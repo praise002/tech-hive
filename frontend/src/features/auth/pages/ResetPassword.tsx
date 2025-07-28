@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import Form from '../../components/common/Form';
-import Text from '../../components/common/Text';
+import Form from '../../../components/common/Form';
+import Text from '../../../components/common/Text';
 
 interface EmailFormData {
   email: string;

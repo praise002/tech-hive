@@ -10,25 +10,33 @@ function TechJobsList() {
         <Text variant="h3" size="xl" className="sm:2xl dark:text-custom-white">
           All Jobs
         </Text>
-        <div className="w-[20px]">
+        <div className="w-[20px]" aria-hidden="true">
           <hr className="border-b-2 border-red" />
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4 h-full">
+      <ul className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4 h-full">
         {techJobs.map((job) => (
-          <JobPostingCard key={job.id} job={job} />
+          <li key={job.id}>
+            <JobPostingCard job={job} />
+          </li>
         ))}
-      </div>
+      </ul>
 
       {/* Static Pagination */}
-      <div className="max-w-7xl mx-auto mt-8 flex items-center justify-center">
+      <nav className="max-w-7xl mx-auto mt-8 flex items-center justify-center">
         <div className="flex items-center space-x-2">
-          <Button variant="primary">Previous</Button>
+          <Button variant="primary" aria-label="Go to previous page">
+            Previous
+          </Button>
 
-          <span className="text-gray-600">Page 1 of 5</span>
-          <Button variant="primary">Next</Button>
+          <span className="text-gray-600" aria-live="polite">
+            Page 1 of 5
+          </span>
+          <Button variant="primary" aria-label="Go to next page">
+            Next
+          </Button>
         </div>
-      </div>
+      </nav>
     </div>
   );
 }

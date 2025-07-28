@@ -127,6 +127,7 @@ function TechJobDetail() {
                   href="https://www.techgiant.inc/positions"
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="View Job website (opens in new tab)"
                 >
                   https://www.techgiant.inc/positions
                 </a>

@@ -27,19 +27,25 @@ function getTagColor(tagName: string) {
 
 function Tags({ tags }: TagsProps) {
   return (
-    <div className="flex gap-2 flex-wrap my-2 text-xs md:text-sm cursor-pointer">
+    <ul className="flex gap-2 flex-wrap my-2 text-xs md:text-sm cursor-pointer">
       {tags.map((tag) => {
         const color = getTagColor(tag);
         return (
-          <div key={tag} className="inline-flex items-center">
-            <span className={`text-${color}`}>#</span>
-            <button type="button" className="dark:text-custom-white">
-              <Link to={`/articles?tag=${encodeURIComponent(tag)}`}>{tag}</Link>
-            </button>
-          </div>
+          <li key={tag} className="inline-flex items-center">
+            <span className={`text-${color}`} aria-hidden="true">
+              #
+            </span>
+            <Link
+              to={`/articles?tag=${encodeURIComponent(tag)}`}
+              className="dark:text-custom-white"
+              aria-label={`Filter articles by tag: ${tag}`}
+            >
+              {tag}
+            </Link>
+          </li>
         );
       })}
-    </div>
+    </ul>
   );
 }
 

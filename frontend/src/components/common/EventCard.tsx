@@ -9,7 +9,7 @@ import { EventCardProps } from '../../types/types';
 
 function EventCard({ event }: EventCardProps) {
   return (
-    <div className="p-6 rounded-lg border border-gray dark:border-gray-700 shadow-lg h-full flex flex-col">
+    <article className="p-6 rounded-lg border border-gray dark:border-gray-700 shadow-lg h-full flex flex-col">
       <div className="flex-grow space-y-2">
         {/* Event Title */}
         <Text
@@ -25,7 +25,7 @@ function EventCard({ event }: EventCardProps) {
         <div className="text-sm text-primary dark:text-custom-white space-y-2">
           {/* Date */}
           <div className="flex gap-2 items-center">
-            <div>
+            <div aria-hidden="true">
               <MdOutlineDateRange className="w-5 h-5 md:w-7 md:h-7" />
             </div>
             <p>{event.date}</p>
@@ -33,7 +33,7 @@ function EventCard({ event }: EventCardProps) {
 
           {/* Location */}
           <div className="flex gap-2 items-center">
-            <div>
+            <div aria-hidden="true">
               <HiOutlineLocationMarker className="w-5 h-5 md:w-7 md:h-7" />
             </div>
             <p>{event.location}</p>
@@ -41,7 +41,7 @@ function EventCard({ event }: EventCardProps) {
 
           {/* Virtual or Physical */}
           <div className="flex gap-2 items-center">
-            <div>
+            <div aria-hidden="true">
               <RiMapPinRangeLine className="w-5 h-5 md:w-7 md:h-7" />
             </div>
             <p>{event.type}</p>
@@ -52,7 +52,12 @@ function EventCard({ event }: EventCardProps) {
       <div className="space-y-2 mt-2">
         {/* View Details Button */}
         <Button variant="outline" className="font-medium">
-          <Link to="/events/a">View Details</Link>
+          <Link
+            to="/events/a"
+            aria-label={`View details for ${event.title} by ${event.organizer}`}
+          >
+            View Details
+          </Link>
         </Button>
 
         {/* Posted Time */}
@@ -61,7 +66,7 @@ function EventCard({ event }: EventCardProps) {
           Posted {event.lastPosted} ago
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 

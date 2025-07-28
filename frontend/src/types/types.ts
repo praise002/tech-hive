@@ -175,6 +175,7 @@ export interface ToolCardProps {
 export interface SocialIconProps {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
+  ariaLabel: string;
 }
 
 export interface SocialLinksProps {

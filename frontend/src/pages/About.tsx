@@ -24,12 +24,12 @@ function About() {
 
           <Image
             src="/assets/about.png"
-            alt="About Tech Hive"
+            alt="Tech Hive team collaborating and sharing ideas"
             className="w-full h-auto shadow-md"
           />
 
           {/* Welcome Section */}
-          <div>
+          <section>
             <Text
               variant="h2"
               size="2xl"
@@ -39,15 +39,15 @@ function About() {
             </Text>
             <p className="text-base md:text-lg leading-relaxed">
               At Tech Hive, we are passionate about everything tech. Whether
-              you’re a budding developer, a seasoned professional, or a tech
+              you're a budding developer, a seasoned professional, or a tech
               enthusiast exploring the latest innovations, our platform is your
               ultimate destination for insights, resources, and opportunities in
               the tech world.
             </p>
-          </div>
+          </section>
 
           {/* Mission Section */}
-          <div>
+          <section>
             <Text
               variant="h3"
               size="xl"
@@ -61,10 +61,10 @@ function About() {
               high-quality content, tools, and resources that fuel innovation
               and drive progress.
             </p>
-          </div>
+          </section>
 
           {/* Offer Section */}
-          <div>
+          <section>
             <Text
               variant="h3"
               size="xl"
@@ -95,10 +95,10 @@ function About() {
                 tech industry.
               </li>
             </ul>
-          </div>
+          </section>
 
           {/* Why Section */}
-          <div>
+          <section>
             <Text
               variant="h3"
               size="xl"
@@ -113,10 +113,10 @@ function About() {
               community where knowledge meets opportunity and ideas come to
               life.
             </p>
-          </div>
+          </section>
 
           {/* Join the Buzz Section */}
-          <div>
+          <section>
             <Text
               variant="h3"
               size="xl"
@@ -129,7 +129,7 @@ function About() {
               Stay updated with the latest in tech by following us on our
               journey. Let&apos;s shape the future of technology together!
             </p>
-          </div>
+          </section>
         </div>
 
         {/* Mobile social link */}

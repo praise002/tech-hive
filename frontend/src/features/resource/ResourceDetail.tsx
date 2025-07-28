@@ -112,6 +112,7 @@ function ResourceDetail() {
                   href="https://www.github.com"
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="Visit Github Learning Lab (opens in new tab)"
                 >
                   https://www.github.com
                 </a>

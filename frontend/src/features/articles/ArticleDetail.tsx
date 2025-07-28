@@ -93,7 +93,7 @@ function ArticleDetail() {
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full overflow-hidden">
                   <Image
-                    alt="Author"
+                    alt={article.author.name}
                     src={article.author.image}
                     className="w-full h-full"
                   />

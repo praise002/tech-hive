@@ -1,5 +1,5 @@
-import Form from '../../components/common/Form';
-import Text from '../../components/common/Text';
+import Form from '../../../components/common/Form';
+import Text from '../../../components/common/Text';
 
 interface ChangePasswordFormData {
   currentPassword: string;
@@ -8,7 +8,7 @@ interface ChangePasswordFormData {
 }
 
 function ChangePassword() {
-  const inputs:  Array<{
+  const inputs: Array<{
     name: keyof ChangePasswordFormData;
     placeholder: string;
     type: string;
@@ -49,7 +49,10 @@ function ChangePassword() {
     }, // Backend will confirm if they are the same
   ];
 
-  const handleFormSubmit = (data: ChangePasswordFormData, reset : () => void) => {
+  const handleFormSubmit = (
+    data: ChangePasswordFormData,
+    reset: () => void
+  ) => {
     console.log('Form Data:', data);
     alert('Password Changed successfully!');
     reset();

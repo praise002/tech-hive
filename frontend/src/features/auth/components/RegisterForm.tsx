@@ -3,9 +3,10 @@ import { IoEye, IoEyeOff } from 'react-icons/io5';
 import { FcGoogle } from 'react-icons/fc';
 import { FaApple } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-import Button from '../../components/common/Button';
-import Form from '../../components/common/Form';
+
 import { useState } from 'react';
+import Form from '../../../components/common/Form';
+import Button from '../../../components/common/Button';
 
 interface RegisterFormData {
   firstName: string;

@@ -6,7 +6,7 @@ import { ToolCardProps } from '../../types/types';
 
 function ToolCard({ tool }: ToolCardProps) {
   return (
-    <div className="relative overflow-hidden rounded-lg shadow-lg h-full flex flex-col">
+    <article className="relative overflow-hidden rounded-lg shadow-lg h-full flex flex-col">
       <Image
         alt={tool.toolName}
         src={tool.toolImage}
@@ -31,13 +31,18 @@ function ToolCard({ tool }: ToolCardProps) {
 
         <div className="mt-2">
           <Button className="text-xs w-auto" variant="outline">
-            <a href={tool.link} target="_blank" rel="noopener noreferrer">
+            <a
+              href={tool.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Learn more about ${tool.toolName}: ${tool.callToAction}`}
+            >
               {tool.callToAction}
             </a>
           </Button>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 

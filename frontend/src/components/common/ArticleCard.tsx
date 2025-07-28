@@ -19,7 +19,7 @@ function ArticleCard({
 }: ArticleCardProps) {
   return (
     <>
-      <div className="relative overflow-hidden rounded-lg shadow-lg h-full flex flex-col">
+      <article className="relative overflow-hidden rounded-lg shadow-lg h-full flex flex-col">
         <Image
           alt={article.title}
           src={article.image}
@@ -32,31 +32,48 @@ function ArticleCard({
                 type="button"
                 onClick={() => onMenuClick(article.id)}
                 className="flex flex-col items-center justify-center gap-1 m-auto bg-red rounded-sm p-2"
+                aria-label="Open article actions menu"
+                aria-haspopup="true"
+                aria-expanded={isOpen}
               >
-                <p className="bg-fill rounded-full w-1 h-1"></p>
-                <p className="bg-fill rounded-full w-1 h-1"></p>
-                <p className="bg-fill rounded-full w-1 h-1"></p>
+                <p
+                  className="bg-fill rounded-full w-1 h-1"
+                  aria-hidden="true"
+                ></p>
+                <p
+                  className="bg-fill rounded-full w-1 h-1"
+                  aria-hidden="true"
+                ></p>
+                <p
+                  className="bg-fill rounded-full w-1 h-1"
+                  aria-hidden="true"
+                ></p>
               </button>
             </div>
             {isOpen && (
               <div className="absolute top-15 right-2">
-                <div className="relative bg-custom-white text-gray-800 gap-2 py-3 px-5 w-25 flex flex-col items-start rounded-md">
+                <div
+                  className="relative bg-custom-white text-gray-800 gap-2 py-3 px-5 w-25 flex flex-col items-start rounded-md"
+                  role="menu"
+                  aria-label="Article actions"
+                >
                   {context === 'published' ? (
                     <>
-                      <button>Edit</button>
-                      <button>Archive</button>
-                      <button>Delete</button>
+                      <button role="menuitem">Edit</button>
+                      <button role="menuitem">Archive</button>
+                      <button role="menuitem">Delete</button>
                     </>
                   ) : (
                     <>
-                      <button>Restore</button>
-                      <button>Delete</button>
+                      <button role="menuitem">Restore</button>
+                      <button role="menuitem">Delete</button>
                     </>
                   )}
 
                   <div
                     className="absolute -top-3 right-3 w-4 h-4 bg-white"
                     style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}
+                    aria-hidden="true"
                   ></div>
                 </div>
               </div>
@@ -82,7 +99,7 @@ function ArticleCard({
             />
           </div>
         </div>
-      </div>
+      </article>
       {/* <div className="relative overflow-hidden rounded-lg shadow-lg flex">
         <Image alt="Article" src="/assets/articles/the-future-ui-ux.jpg" />
         <div className="p-5 border-t border-r border-b border-gray rounded-br-lg rounded-tr-lg overflow-hidden">

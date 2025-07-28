@@ -11,6 +11,7 @@ interface Inputs<T> {
   onIconClick?: () => void;
   iconAriaLabel?: string;
   icon?: React.ReactNode;
+  ariaLabel?: string;
 }
 
 interface FormProps<T> {
@@ -53,6 +54,7 @@ function Form<T extends FieldValues>({
             id={input.id || input.name}
             placeholder={input.placeholder || ''}
             type={input.type || 'text'}
+            aria-label={input.ariaLabel}
             className="appearance-none block w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-800 focus-visible:border-gray-800"
           />
 
@@ -69,7 +71,7 @@ function Form<T extends FieldValues>({
 
           {/* Render error messages if validation fails */}
           {errors[input.name] && (
-            <p className="text-red-500 text-sm mt-1">
+            <p className="text-red-500 text-sm mt-1" role="alert">
               {errors[input.name]?.message?.toString()}
             </p>
           )}

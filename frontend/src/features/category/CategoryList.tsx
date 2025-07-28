@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import Text from '../../components/common/Text';
 import Button from '../../components/common/Button';
 
-
 const allCategories = [
   {
     id: 1,
@@ -66,13 +65,23 @@ function CategoryList() {
       <div className="">
         {/* Page Title */}
         <div className="flex items-center justify-between">
-          <Text variant="h1" size="xl" className="lg:text-2xl dark:text-custom-white">
+          <Text
+            variant="h1"
+            size="xl"
+            className="lg:text-2xl dark:text-custom-white"
+          >
             All Categories
           </Text>
 
           {/* Sorting Dropdown (Static) */}
           <form>
-            <select className="dark:text-custom-white dark:bg-dark py-2 px-4 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700">
+            <label htmlFor="sort-categories" className="sr-only">
+              Sort categories
+            </label>
+            <select
+              id="sort-categories"
+              className="dark:text-custom-white dark:bg-dark py-2 px-4 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700"
+            >
               {options.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.name}
@@ -82,9 +91,14 @@ function CategoryList() {
           </form>
         </div>
         {/* Search Bar */}
+        <label htmlFor="search-categories" className="sr-only">
+          Search categories
+        </label>
         <input
+          id="search-categories"
           type="search"
           placeholder="Search categories..."
+          aria-label="Search categories"
           className="appearance-none dark:text-custom-white w-full py-2 px-4 mt-4 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700"
         />
       </div>
@@ -99,6 +113,7 @@ function CategoryList() {
             <Link
               to={category.link}
               className="text-lg font-medium text-gray-800 hover:text-red-700"
+              aria-label={`Browse articles in ${category.name}`}
             >
               {category.name}
             </Link>
@@ -109,14 +124,14 @@ function CategoryList() {
         ))}
       </div>
       {/* Static Pagination */}
-      <div className="max-w-7xl mx-auto mt-8 flex items-center justify-center">
+      <nav className="max-w-7xl mx-auto mt-8 flex items-center justify-center">
         <div className="flex items-center space-x-2">
-          <Button variant="primary">Previous</Button>
+          <Button variant="primary" aria-label="Go to previous page">Previous</Button>
 
-          <span className="text-gray-600">Page 1 of 5</span>
-          <Button variant="primary">Next</Button>
+          <span className="text-gray-600" aria-live="polite">Page 1 of 5</span>
+          <Button variant="primary" aria-label="Go to next page">Next</Button>
         </div>
-      </div>
+      </nav>
     </div>
   );
 }

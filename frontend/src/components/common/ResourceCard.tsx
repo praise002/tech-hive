@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 
 function ResourceCard({ resource }: ResourceCardProps) {
   return (
-    <div className="relative overflow-hidden rounded-lg shadow-lg h-full flex flex-col">
+    <article className="relative overflow-hidden rounded-lg shadow-lg h-full flex flex-col">
       <Image
         alt={resource.resourceName}
         src={resource.resourceImage}
@@ -36,14 +36,19 @@ function ResourceCard({ resource }: ResourceCardProps) {
 
         <div className="space-y-2">
           <Button variant="outline">
-            <Link to="/resources/a">View details</Link>
+            <Link
+              to="/resources/a"
+              aria-label={`View details for ${resource.resourceName} (${resource.resourceType})`}
+            >
+              View details
+            </Link>
           </Button>
           <div className="text-xs text-secondary">
             Posted {resource.timePosted}
           </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 

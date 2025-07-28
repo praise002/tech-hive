@@ -6,7 +6,10 @@ import { displayedEvents } from '../../data/events';
 
 function TechEvents() {
   return (
-    <div className="mt-20 lg:mt-4 max-w-7xl mx-auto px-4 lg:px-8 mb-4">
+    <section
+      className="mt-20 lg:mt-4 max-w-7xl mx-auto px-4 lg:px-8 mb-4"
+      aria-label="Tech events"
+    >
       <div className="flex justify-between items-center">
         <div className="my-4">
           <Text
@@ -16,7 +19,7 @@ function TechEvents() {
           >
             Tech Events
           </Text>
-          <div className="w-[20px]">
+          <div className="w-[20px]" aria-hidden="true">
             <hr className="border-b-2 border-red" />
           </div>
         </div>
@@ -24,20 +27,23 @@ function TechEvents() {
           <Link
             to="/events"
             className="cursor-pointer text-secondary hover:text-red transition-colors"
+            aria-label="See all tech events"
           >
             See all
           </Link>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 h-full">
+      <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 h-full">
         {/* <div className="flex flex-col gap-y-2"> */}
         {displayedEvents.map((event) => (
-          <EventCard key={event.id} event={event} />
+          <li key={event.id}>
+            <EventCard event={event} />
+          </li>
         ))}
-      </div>
+      </ul>
       {/* <Button>Explore More Jobs &rarr;</Button> */}
-    </div>
+    </section>
   );
 }
 

@@ -122,6 +122,7 @@ function TechEventDetail() {
                   href="https://www.techgiant.inc/positions"
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="Get tickets for Africa Fintech Summit 2024 (opens in new tab)"
                 >
                   https://www.techgiant.inc/positions
                 </a>

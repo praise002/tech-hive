@@ -108,6 +108,7 @@ function TechToolDetail() {
                   href="https://www.figma.com"
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="Visit Figma website (opens in new tab)"
                 >
                   https://www.figma.com
                 </a>

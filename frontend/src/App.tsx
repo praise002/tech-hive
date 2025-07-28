@@ -5,17 +5,16 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import About from './pages/About';
 import AccountDetail from './features/profile/AccountDetail';
 import AppLayout from './components/Layouts/AppLayout';
-import ArticleDetail from './features/articles/ArticleDetail';
-import ArticleList from './features/articles/ArticleList';
+
 import CategoryDetail from './features/category/CategoryDetail';
 import CategoryList from './features/category/CategoryList';
 import Contact from './pages/Contact';
-import Dashboard from './pages/Dashboard';
+
 import Home from './pages/Home';
-import Login from './features/auth/Login';
+import Login from './features/auth/pages/Login';
 import PageNotFound from './pages/PageNotFound';
 import ProfileDetail from './features/profile/ProfileDetail';
-import Register from './features/auth/Register';
+import Register from './features/auth/pages/Register';
 import TechEventList from './features/events/TechEventList';
 import TechEventDetail from './features/events/TechEventDetail';
 
@@ -26,9 +25,9 @@ import TechToolList from './features/tools/TechToolList';
 
 import ResourceList from './features/resource/ResourceList';
 import ResourceDetail from './features/resource/ResourceDetail';
-import ChangePassword from './features/auth/ChangePassword';
-import ResetPassword from './features/auth/ResetPassword';
-import ResetPasswordSuccess from './features/auth/ResetPaswordSuccess';
+import ChangePassword from './features/auth/pages/ChangePassword';
+import ResetPassword from './features/auth/pages/ResetPassword';
+import ResetPasswordSuccess from './features/auth/pages/ResetPaswordSuccess';
 import { Toaster } from 'react-hot-toast';
 
 import AdminDashboard from './features/admin/AdminDashboard';
@@ -37,6 +36,8 @@ import Liveblock from './features/articles/Liveblock';
 import Docs from './features/articles/Docs';
 import ComingSoon from './pages/coming-soon';
 import CampusKart from './pages/CampusKart';
+import ArticleList from './features/articles/ArticleList';
+import ArticleDetail from './features/articles/ArticleDetail';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -78,7 +79,6 @@ function App() {
 
             <Route path="about" element={<About />} />
             <Route path="contact" element={<Contact />} />
-            <Route path="dashboard" element={<Dashboard />} />
 
             <Route path="new" element={<Liveblock />} />
             <Route path="profile" element={<ProfileDetail />} />
@@ -95,7 +95,6 @@ function App() {
 
             <Route path="admin" element={<AdminDashboard />} />
             <Route path="docs" element={<Docs />} />
-            
           </Route>
 
           {/* Catch-all route for 404 errors */}

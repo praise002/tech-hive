@@ -55,18 +55,35 @@ function Reaction() {
         <button
           className="hover:opacity-80 transition cursor-pointer"
           onClick={() => setShowReactions((show) => !show)}
+          aria-haspopup="true"
+          aria-expanded={showReactions}
         >
           {selectedReactions.length > 0 ? (
-            <MdAddReaction className="w-6 h-6 dark:text-custom-white" />
+            <MdAddReaction
+              className="w-6 h-6 dark:text-custom-white"
+              aria-hidden="true"
+            />
           ) : (
-            <MdOutlineAddReaction className="w-6 h-6 dark:text-custom-white" />
+            <MdOutlineAddReaction
+              className="w-6 h-6 dark:text-custom-white"
+              aria-hidden="true"
+            />
           )}
         </button>
-        <span className="dark:text-custom-white">{totalReactions}</span>
+        <span
+          className="dark:text-custom-white"
+          aria-label={`Total reactions: ${totalReactions}`}
+        >
+          {totalReactions}
+        </span>
       </div>
 
       {showReactions && (
-        <div className="px-1 flex absolute -top-7 left-8 mt-2 bg-white dark:bg-dark border border-gray dark:border-0 rounded-2xl shadow-lg p-2 z-10">
+        <div
+          className="px-1 flex absolute -top-7 left-8 mt-2 bg-white dark:bg-dark border border-gray dark:border-0 rounded-2xl shadow-lg p-2 z-10"
+          role="menu"
+          aria-label="Pick a reaction"
+        >
           {reactions.map((reaction) => (
             <div
               key={reaction.id}
@@ -75,13 +92,29 @@ function Reaction() {
               onMouseLeave={() => setHoveredId(null)} // reset
               onClick={() => toggleReaction(reaction.id)}
             >
-              <button className="cursor-pointer hover:scale-125 transition-transform">
-                <span className="w-6 h-6">{reaction.emoji}</span>
-                <span className="text-xs"> {reaction.numReactions}</span>
+              <button
+                className="cursor-pointer hover:scale-125 transition-transform"
+                aria-label={`React with ${reaction.id} emoji`}
+                aria-pressed={selectedReactions.includes(reaction.id)}
+                role="menuitem"
+              >
+                <span className="w-6 h-6" aria-hidden="true">
+                  {reaction.emoji}
+                </span>
+                <span
+                  className="text-xs"
+                  aria-label={`${reaction.numReactions} ${reaction.id} reactions`}
+                >
+                  {' '}
+                  {reaction.numReactions}
+                </span>
               </button>
 
               {hoveredId === reaction.id && (
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black text-custom-white text-xs rounded whitespace-nowrap">
+                <div
+                  className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black text-custom-white text-xs rounded whitespace-nowrap"
+                  role="tooltip"
+                >
                   {reaction.id}
                 </div>
               )}

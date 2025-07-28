@@ -7,7 +7,10 @@ import { displayedResources } from '../../data/resources';
 
 function ResourceSpotlight() {
   return (
-    <div className="mt-20 lg:mt-4 max-w-7xl mx-auto px-4 lg:px-8 mb-4">
+    <section
+      className="mt-20 lg:mt-4 max-w-7xl mx-auto px-4 lg:px-8 mb-4"
+      aria-label="Tech resources"
+    >
       <div className="flex justify-between items-center">
         <div className="my-4">
           <Text
@@ -17,7 +20,7 @@ function ResourceSpotlight() {
           >
             Resource Spotlight
           </Text>
-          <div className="w-[20px]">
+          <div className="w-[20px]" aria-hidden="true">
             <hr className="border-b-2 border-red" />
           </div>
         </div>
@@ -25,19 +28,22 @@ function ResourceSpotlight() {
           <Link
             to="/resources"
             className="cursor-pointer text-secondary hover:text-red transition-colors"
+            aria-label="See all tech resources"
           >
             See all
           </Link>
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 h-full">
+      <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 h-full">
         {displayedResources.map((resource) => (
-          <ResourceCard key={resource.id} resource={resource} />
+          <li key={resource.id}>
+            <ResourceCard resource={resource} />
+          </li>
         ))}
-      </div>
+      </ul>
 
       {/* <Button>Explore More Resources &rarr;</Button> */}
-    </div>
+    </section>
   );
 }
 

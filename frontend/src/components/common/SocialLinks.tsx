@@ -286,6 +286,7 @@ function SocialLinks({
             onClick={() => {
               icon.onClick ? icon.onClick() : handleShare(icon.platform);
             }}
+            type="button"
           >
             {icon.icon}
           </button>
@@ -297,22 +298,28 @@ function SocialLinks({
         <div
           id="social-links-dropdown"
           className="absolute -bottom-62 left-1/2 sm:-bottom-55 sm:left-50 md:left-12 md:-bottom-55 space-y-2 flex flex-col justify-center shadow-2xl rounded-md p-2 border bg-white dark:bg-black border-primary dark:border-secondary"
+          role="menu"
+          aria-label="More sharing options"
         >
           {secondaryIcons.map((icon) => (
             <button
               key={icon.id}
               className="flex items-center gap-4 p-2 hover:bg-red hover:text-custom-white transition-colors"
               onClick={() => handleShare(icon.platform)}
+              role="menuitem"
+              type="button"
             >
-              <div>{icon.icon}</div>
+              <div aria-hidden="true">{icon.icon}</div>
               <div className="text-nowrap ">Share to {icon.id}</div>
             </button>
           ))}
           <button
             onClick={handleCopyLink}
             className="flex items-center gap-4 p-2 hover:bg-red hover:text-custom-white transition-colors"
+            role="menuitem"
+            type="button"
           >
-            <div>
+            <div aria-hidden="true">
               <FaLink className="w-6 h-6" />
             </div>
             <div className="text-nowrap ">Copy link</div>

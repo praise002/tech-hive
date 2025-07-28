@@ -4,9 +4,11 @@ function Like() {
   const [isLiked, setIsLiked] = useState(false);
 
   return (
-    <div
+    <button
       className="inline-flex gap-2 items-center"
       onClick={() => setIsLiked((like) => !like)}
+      aria-pressed={isLiked}
+      aria-label={isLiked ? 'Unlike' : 'Like'}
     >
       <span>
         <svg
@@ -17,6 +19,7 @@ function Like() {
           strokeWidth={1.5}
           stroke="currentColor"
           className="size-5"
+          aria-hidden="true"
         >
           <path
             strokeLinecap="round"
@@ -26,7 +29,7 @@ function Like() {
         </svg>
       </span>
       <span>{isLiked ? 'Liked' : 'Like'}</span>
-    </div>
+    </button>
   );
 }
 

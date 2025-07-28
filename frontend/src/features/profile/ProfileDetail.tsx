@@ -391,7 +391,7 @@ function ProfileDetail() {
   }
 
   return (
-    <div className="mt-15">
+    <div className="mt-15" aria-label="User profile details">
       <div className="bg-light w-full h-40 relative">
         {/* ✅ SVG Background */}
         <img
@@ -405,7 +405,7 @@ function ProfileDetail() {
               <img
                 className="w-20 h-20 md:w-40 md:h-40"
                 src="/assets/icons/Avatars.png"
-                alt=""
+                alt="Elizabeth Stone's profile picture"
               />
             </div>
           </div>
@@ -425,7 +425,10 @@ function ProfileDetail() {
       </div>
 
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-4 mt-30 md:mt-50">
+        <nav
+          className="flex flex-col gap-4 mt-30 md:mt-50"
+          aria-label="Profile tabs"
+        >
           <div className="flex place-self-center bg-light gap-2 p-2 rounded-md">
             {profileTabs.map((tab) => (
               <button
@@ -434,6 +437,8 @@ function ProfileDetail() {
                 className={`flex p-2 items-center gap-2 rounded-md text-xs sm:text-base cursor-pointer ${
                   isActiveTab === tab.id && 'bg-red text-custom-white'
                 }`}
+                aria-label={`View ${tab.label}`}
+                aria-pressed={isActiveTab === tab.id}
               >
                 <span className="flex-shrink-0">{tab.icon}</span>
                 <span
@@ -454,7 +459,7 @@ function ProfileDetail() {
               {getContent()}
             </div>
           </div>
-        </div>
+        </nav>
       </div>
     </div>
   );

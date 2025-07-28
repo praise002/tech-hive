@@ -21,11 +21,12 @@ function ContactForm() {
               type="text"
               id="firstName"
               placeholder="First Name"
+              aria-label="First Name"
               {...register('firstName', { required: 'First name is required' })}
               className="appearance-none block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800"
             />
             {errors.firstName && (
-              <p className="text-red-500 text-sm mt-1">
+              <p className="text-red-500 text-sm mt-1" role="alert">
                 {errors.firstName?.message as string}
               </p>
             )}
@@ -34,11 +35,12 @@ function ContactForm() {
             <input
               id="lastName"
               placeholder="Last Name"
+              aria-label="Last Name"
               {...register('lastName', { required: 'Last name is required' })}
               className="appearance-none block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800"
             />
             {errors.lastName && (
-              <p className="text-red-500 text-sm mt-1">
+              <p className="text-red-500 text-sm mt-1" role="alert">
                 Last name is required.
               </p>
             )}
@@ -50,6 +52,7 @@ function ContactForm() {
             id="email"
             type="email"
             placeholder="Email"
+            aria-label="Email address"
             {...register('email', {
               required: 'Email is required',
               pattern: {
@@ -60,7 +63,7 @@ function ContactForm() {
             className="appearance-none block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800"
           />
           {errors.email && (
-            <p className="text-red-500 text-sm mt-1">{errors.email.message as string}</p>
+            <p className="text-red-500 text-sm mt-1" role='alert'>{errors.email.message as string}</p>
           )}
         </div>
 
@@ -68,12 +71,13 @@ function ContactForm() {
           <textarea
             id="message"
             placeholder="What can we help you with?"
+            aria-label="Message"
             {...register('message', { required: 'Message is required' })}
             className="block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800"
             rows={4}
           />
           {errors.message && (
-            <p className="text-red-500 text-sm mt-1">
+            <p className="text-red-500 text-sm mt-1" role='alert'>
               {errors.message.message as string}
             </p>
           )}

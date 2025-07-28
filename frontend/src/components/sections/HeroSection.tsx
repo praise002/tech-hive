@@ -5,12 +5,13 @@ import Text from '../common/Text';
 
 function HeroSection() {
   return (
-    <div className="relative mt-12 dark:bg-light bg-gradient-to-r from-coral/50 to-peach py-10 px-7 sm:py-20 sm:px-14 overflow-hidden">
+    <section className="relative mt-12 dark:bg-light bg-gradient-to-r from-coral/50 to-peach py-10 px-7 sm:py-20 sm:px-14 overflow-hidden">
       {/* ✅ SVG Background */}
       <img
         src="/assets/hero-section.svg"
         alt=""
         className="pointer-events-none absolute inset-0 w-full h-full object-cover opacity-70"
+        aria-hidden="true"
       />
 
       {/* ✅ Text and Buttons */}
@@ -20,16 +21,16 @@ function HeroSection() {
 
       <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
         <Button variant="outline">
-          <Link to="/login">Login</Link>
+          <Link to="/login" aria-label="Login to your account">Login</Link>
         </Button>
 
         <Button>
-          <Link to="/register">Register</Link>
+          <Link to="/register" aria-label="Register a new account">Register</Link>
         </Button>
       </div>
 
       <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-        <p className="italic text-gray-800">Never miss an update!</p>
+        <span className="italic text-gray-800">Never miss an update!</span>
 
         <Button variant="gradient">
           <ScrollLink to="subscribe" smooth={true} duration={500}>
@@ -37,7 +38,7 @@ function HeroSection() {
           </ScrollLink>
         </Button>
       </div>
-    </div>
+    </section>
   );
 }
 

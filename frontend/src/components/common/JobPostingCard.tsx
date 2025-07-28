@@ -7,7 +7,7 @@ import { JobPostingCardProps } from '../../types/types';
 
 function JobPostingCard({ job }: JobPostingCardProps) {
   return (
-    <div className="p-6 rounded-lg border border-gray dark:border-gray-700 shadow-lg h-full flex flex-col">
+    <article className="p-6 rounded-lg border border-gray dark:border-gray-700 shadow-lg h-full flex flex-col">
       <div className="flex-grow space-y-2">
         {/* Job Title */}
         <Text
@@ -29,7 +29,7 @@ function JobPostingCard({ job }: JobPostingCardProps) {
       <div className="space-y-2">
         {/* View Details Button */}
         <Button variant="outline" className="font-medium">
-          <Link to="/jobs/a">View Details</Link>
+          <Link to="/jobs/a" aria-label={`View details for ${job.title} at ${job.company}`}>View Details</Link>
         </Button>
 
         {/* Posted Time */}
@@ -38,7 +38,7 @@ function JobPostingCard({ job }: JobPostingCardProps) {
           Posted {job.lastPosted} ago
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 

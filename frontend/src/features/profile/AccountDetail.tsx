@@ -291,12 +291,13 @@ function AccountDetail() {
               <button
                 onClick={() => setIsEditingPc(true)}
                 className="absolute top-12 right-0 md:top-25 bg-light rounded-full p-1 md:p-2 cursor-pointer focus-visible:outline-0 focus-visible:ring-2 focus-visible:ring-red transition duration-300"
+                aria-label="Edit profile picture"
               >
                 {/* Edit icon that stays fixed */}
                 <img
                   className="w-5 h-5 md:w-7 md:h-7 pointer-events-none" // Prevents clicks on the icon itself
                   src="/assets/icons/mynaui_edit.png"
-                  alt="Edit"
+                  alt=""
                 />
               </button>
 
@@ -304,6 +305,8 @@ function AccountDetail() {
                 <div
                   id="edit-pc-links-dropdown"
                   className="p-2 absolute left-15 top-20 sm:left-45 sm:top-35 bg-light w-40 flex flex-col rounded-md"
+                  role="menu"
+                  aria-label="Profile picture actions"
                 >
                   <div className="relative cursor-pointer duration-300 hover:bg-red-800 hover:text-white">
                     {/* Hidden file input for profile picture upload */}
@@ -413,7 +416,7 @@ function AccountDetail() {
                   onClick={handleCloseCropModal}
                   aria-label="Close profile modal"
                 >
-                  <MdCancel className="text-red w-6 h-6" />
+                  <MdCancel className="text-red w-6 h-6" aria-hidden="true" />
                 </button>
               </div>
               <div className="overflow-y-scroll p-2 flex justify-center">
