@@ -362,13 +362,11 @@ from apps.common.schema_examples import (
 )
 
 PROFILE_EXAMPLE = {
-    "user": {
-        "id": UUID_EXAMPLE,
-        "email": EMAIL_EXAMPLE,
-        "first_name": "Bob",
-        "last_name": "Doe",
-    },
-    "last_updated": DATETIME_EXAMPLE,
+    "id": UUID_EXAMPLE,
+    "first_name": "Bob",
+    "last_name": "Joe",
+    "email": EMAIL_EXAMPLE,
+    "updated_at": DATETIME_EXAMPLE,
     "avatar_url": AVATAR_URL,
 }
 

@@ -62,8 +62,8 @@ COPY . .
 
 # Create logs directory and set permissions
 RUN mkdir -p /app/logs && \
-    touch /app/logs/clothing_store.log &&  \
-    chmod -R 777 /app/logs/clothing_store.log 
+    touch /app/logs/tech_hive.log &&  \
+    chmod -R 777 /app/logs/tech_hive.log 
 
 # Make scripts executable
 RUN chmod +x entrypoint.dev wait-for-it.sh

@@ -529,7 +529,7 @@ class ProfileView(APIView):
         responses=PROFILE_RETRIEVE_RESPONSE_EXAMPLE,
     )
     def get(self, request):
-        profile = request.user.profile
+        profile = request.user
         serializer = self.serializer_class(profile)
         return CustomResponse.success(
             message="Profile retrieved successfully.",
@@ -544,7 +544,7 @@ class ProfileView(APIView):
         responses=PROFILE_UPDATE_RESPONSE_EXAMPLE,
     )
     def patch(self, request):
-        profile = request.user.profile
+        profile = request.user
         serializer = self.serializer_class(profile, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         profile = serializer.save()
@@ -574,7 +574,7 @@ class ProfileViewGeneric(RetrieveUpdateAPIView):
         """
         Return the profile of the authenticated user.
         """
-        return self.request.user.profile
+        return self.request.user
 
     @extend_schema(
         summary="View a user profile",
@@ -637,7 +637,7 @@ class AvatarUpdateView(APIView):
         responses=AVATAR_UPDATE_RESPONSE_EXAMPLE,
     )
     def patch(self, request):
-        profile = request.user.profile
+        profile = request.user
         serializer = self.serializer_class(profile, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         profile = serializer.save()
