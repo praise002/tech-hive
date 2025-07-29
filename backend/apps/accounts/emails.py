@@ -1,8 +1,10 @@
 import random
 import threading
+
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
+
 from .models import Otp
 
 
@@ -49,6 +51,14 @@ class SendEmail:
         }
         message = render_to_string("welcome_message.html", context)
         email_message = EmailMessage(subject=subject, body=message, to=[user.email])
+        email_message.content_subtype = "html"
+        EmailThread(email_message).start()
+
+    @staticmethod
+    def subscription(request, email):
+        subject = "Newsletter Subscription Confirmation"
+        message = render_to_string("newsletter_subscribe_message.html")
+        email_message = EmailMessage(subject=subject, body=message, to=[email])
         email_message.content_subtype = "html"
         EmailThread(email_message).start()
 

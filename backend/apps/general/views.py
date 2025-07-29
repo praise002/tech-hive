@@ -18,6 +18,8 @@ from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.accounts.emails import SendEmail
+
 tags = ["General"]
 
 
@@ -34,7 +36,10 @@ class NewsletterView(APIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        email = serializer.save()
+        print(email)
+
+        SendEmail.subscription(request, email)  # TODO: EMAIL NOT SENDING
 
         return CustomResponse.success(
             message="Subscribed to newsletter successfully.",

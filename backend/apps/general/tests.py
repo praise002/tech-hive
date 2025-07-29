@@ -64,12 +64,10 @@ class TestGeneral(APITestCase):
             f"{self.newsletter_url}?email=notfound@example.com"
         )
         self.assertEqual(response.status_code, 422)
-        
+
         # no email
-        response = self.client.delete(
-            f"{self.newsletter_url}?email="
-        )
-        print(response.json())
+        response = self.client.delete(f"{self.newsletter_url}?email=")
+
         self.assertEqual(response.status_code, 422)
 
 
