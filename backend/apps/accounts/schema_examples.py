@@ -12,12 +12,24 @@ from apps.accounts.serializers import (
 from apps.common.errors import ErrorCode
 from apps.common.schema_examples import (
     ACCESS_TOKEN,
+    AVATAR_URL,
+    DATETIME_EXAMPLE,
+    EMAIL_EXAMPLE,
     ERR_RESPONSE_STATUS,
     SUCCESS_RESPONSE_STATUS,
+    UUID_EXAMPLE,
 )
 from apps.common.serializers import ErrorDataResponseSerializer, ErrorResponseSerializer
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse
 
+PROFILE_EXAMPLE = {
+    "id": UUID_EXAMPLE,
+    "first_name": "Bob",
+    "last_name": "Joe",
+    "email": EMAIL_EXAMPLE,
+    "updated_at": DATETIME_EXAMPLE,
+    "avatar_url": AVATAR_URL,
+}
 REGISTER_EXAMPLE = {"email": "bob123@example.com"}
 
 LOGIN_EXAMPLE = {
@@ -348,26 +360,6 @@ REFRESH_TOKEN_RESPONSE_EXAMPLE = {
         response=ErrorDataResponseSerializer,
         description="Validation Error",
     ),
-}
-
-from apps.accounts.schema_examples import UNAUTHORIZED_USER_RESPONSE
-from apps.common.errors import ErrorCode
-from apps.common.schema_examples import (
-    AVATAR_URL,
-    DATETIME_EXAMPLE,
-    EMAIL_EXAMPLE,
-    ERR_RESPONSE_STATUS,
-    SUCCESS_RESPONSE_STATUS,
-    UUID_EXAMPLE,
-)
-
-PROFILE_EXAMPLE = {
-    "id": UUID_EXAMPLE,
-    "first_name": "Bob",
-    "last_name": "Joe",
-    "email": EMAIL_EXAMPLE,
-    "updated_at": DATETIME_EXAMPLE,
-    "avatar_url": AVATAR_URL,
 }
 
 

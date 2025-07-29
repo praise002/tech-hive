@@ -1,4 +1,6 @@
 # Tech Hive
+![Django Tests](https://github.com/praise002/tech-hive/actions/workflows/django-tests.yml/badge.svg)
+
 This repository contains the full-stack source code for the Tech Hive project, organized into two main folders:
 
 - backend/: Django backend API, authentication, and business logic. See README.md for backend-specific details.
