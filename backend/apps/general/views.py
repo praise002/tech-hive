@@ -1,3 +1,4 @@
+from apps.accounts.emails import SendEmail
 from apps.common.errors import ErrorCode
 from apps.common.responses import CustomResponse
 from apps.general.models import Newsletter, SiteDetail
@@ -18,8 +19,6 @@ from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.accounts.emails import SendEmail
-
 tags = ["General"]
 
 
@@ -37,9 +36,8 @@ class NewsletterView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.save()
-        print(email)
 
-        SendEmail.subscription(request, email)  # TODO: EMAIL NOT SENDING
+        SendEmail.subscription(request, email)
 
         return CustomResponse.success(
             message="Subscribed to newsletter successfully.",

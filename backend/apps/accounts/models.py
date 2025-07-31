@@ -13,6 +13,7 @@ from .managers import CustomUserManager
 class UserRoleChoices(models.TextChoices):
     EDITOR = "editor", "Editor"
     REVIEWER = "reviewer", "Reviewer"
+    MANAGER = "manager", "Manager"
     USER = "user", "User"
 
 

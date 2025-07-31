@@ -1,9 +1,10 @@
+from apps.common.models import BaseModel
+from autoslug import AutoSlugField
 from django.conf import settings
 from django.core.validators import URLValidator
 from django.db import models
+from django.db.models import Count
 from django.utils import timezone
-
-from apps.common.models import BaseModel
 
 
 class Tag(BaseModel):
@@ -19,7 +20,14 @@ class ArticleStatusChoices(models.TextChoices):
 
 class Category(BaseModel):
     name = models.CharField(max_length=250)
+    slug = AutoSlugField(populate_from="name", unique=True, always_update=True)
     desc = models.TextField()
+    
+    class Meta:
+        ordering = ["name"]
+        indexes = [
+            models.Index(fields=["name"]),
+        ]
 
     def __str__(self):
         return self.name
@@ -30,6 +38,7 @@ class Article(BaseModel):
         Category, related_name="articles", on_delete=models.SET_NULL, null=True
     )
     title = models.CharField(max_length=250)
+    slug = AutoSlugField(populate_from="title", unique=True, always_update=True)
     content = (
         models.TextField()
     )  # TODO: WOULD USE A TEXTEDITOR WHICH WILL CONTAIN IMAGES
@@ -60,8 +69,18 @@ class Article(BaseModel):
             url = ""
         return url
 
-    def get_reaction_count(self):
-        self.reactions.count()  # TODO; MIGHT EDIT LATER
+    # NOTE: IF THESE BECOMES A PERFORMANCE ISSUE CACHE THE COUNT
+    @property
+    def total_reaction_counts(self):
+        return self.reactions.count()
+
+    @property
+    def reaction_counts(self):
+        """
+        Returns a dict like {'❤️': 5, '👍': 2, ...} for this article.
+        """
+        counts = self.reactions.values("reaction_type").annotate(count=Count("id"))
+        return {item["reaction_type"]: item["count"] for item in counts}
 
     class Meta:
         ordering = ["-created_at"]
@@ -162,7 +181,7 @@ class Event(BaseModel):
     location = models.CharField(max_length=100)
     agenda = models.TextField()
     ticket_url = models.CharField(max_length=250, validators=[URLValidator()])
-    
+
     def __str__(self):
         return self.title
 
@@ -180,14 +199,14 @@ class Resource(BaseModel):
         except:
             url = ""
         return url
-    
+
     def __str__(self):
         return self.name
 
 
 class ToolTag(BaseModel):
     name = models.CharField(max_length=20)
-    
+
     def __str__(self):
         return self.name
 
@@ -203,6 +222,6 @@ class Tool(BaseModel):
         default="Explore",
         help_text="Dynamic button text (e.g., 'Sign Up to GitHub', 'Try Figma for Free')",
     )
-    
+
     def __str__(self):
         return self.name
