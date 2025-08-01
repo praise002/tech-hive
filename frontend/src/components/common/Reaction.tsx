@@ -53,7 +53,7 @@ function Reaction() {
     <div className="relative">
       <div className="inline-flex flex-col gap-1">
         <button
-          className="hover:opacity-80 transition cursor-pointer"
+          className="hover:opacity-80 transition cursor-pointer min-w-[48px] min-h-[48px]"
           onClick={() => setShowReactions((show) => !show)}
           aria-haspopup="true"
           aria-expanded={showReactions}

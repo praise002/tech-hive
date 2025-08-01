@@ -18,7 +18,6 @@ function SubscriptionStatus() {
       document.removeEventListener('keydown', handleEscapeKey);
     };
   }, [isRenewModalOpen]);
-  // TODO: FIX LATER: SO MANY WAYS OF DOING IT
 
   function openRenewModal() {
     setIsRenewModalOpen(true);
@@ -46,9 +45,6 @@ function SubscriptionStatus() {
         <Button type="submit" variant="gradient" onClick={openRenewModal}>
           Renew Subscription
         </Button>
-        {/* <Button type="submit" variant="gradient" onClick={openRenewModal}>
-          Subscribe to Premium
-        </Button> */}
       </div>
 
       {/* Modal Overlay */}

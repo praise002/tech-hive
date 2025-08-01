@@ -12,7 +12,7 @@ function PageNotFound() {
         The page you&apos;re looking for doesn&apos;t exist or has been moved.
       </p>
       <button
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        className="min-w-[48px] min-h-[48px] bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         onClick={moveBack}
         aria-label="Go back to previous page"
       >

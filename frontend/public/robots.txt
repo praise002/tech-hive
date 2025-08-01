@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://tech-hive-react.vercel.app/sitemap.xml

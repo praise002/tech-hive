@@ -2,23 +2,10 @@ import { RiDraftFill } from 'react-icons/ri';
 import { MdArticle, MdLibraryBooks } from 'react-icons/md';
 import { BiMessageRounded } from 'react-icons/bi';
 import { FaRegBookmark } from 'react-icons/fa6';
-// import ArticleCard from '../../components/common/ArticleCard';
 import Text from '../../components/common/Text';
 import { useState } from 'react';
 import Articles from '../../components/sections/Articles';
 import { BsFillArchiveFill } from 'react-icons/bs';
-
-// const article = {
-//   image: '/assets/articles/the-future-ui-ux.jpg',
-//   title: 'The Power of Data: How Analytics is Driving Business Decisions',
-//   description:
-//     'Learn how data analytics is transforming industries and helping businesses make smarter, data-driven decisions...',
-//   tags: ['Data Analytics', 'Business', 'Technology'],
-//   reactions: ['❤️', '😍', '👍', '🔥'],
-//   reactionsCount: 105,
-//   posted: '1 week ago',
-//   readTime: '7 min',
-// };
 
 function ProfileDetail() {
   const [isActiveTab, setIsActiveTab] = useState('saved');
@@ -83,12 +70,7 @@ function ProfileDetail() {
         >
           Saved Articles
         </Text>
-        {/* <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
-          <ArticleCard article={article} />
-          <ArticleCard article={article} />
-          <ArticleCard article={article} />
-          <ArticleCard article={article} />
-        </div> */}
+
         <Articles marginTop={8} visibleHeader={false} />
       </>
     );
@@ -329,12 +311,7 @@ function ProfileDetail() {
         >
           Published Articles
         </Text>
-        {/* <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
-          <ArticleCard article={article} />
-          <ArticleCard article={article} />
-          <ArticleCard article={article} />
-          <ArticleCard article={article} />
-        </div> */}
+
         <Articles marginTop={8} showAdminActions={true} visibleHeader={false} />
       </>
     );
@@ -453,8 +430,6 @@ function ProfileDetail() {
           </div>
 
           <div className="py-8">
-            {/* flex justify-center */}
-
             <div className="dark:text-custom-white p-4 md:border border-gray rounded-lg">
               {getContent()}
             </div>

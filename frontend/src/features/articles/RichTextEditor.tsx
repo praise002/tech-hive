@@ -227,5 +227,3 @@ function RichTextEditor() {
 }
 // for admin and contributor, change the title based on the role
 export default RichTextEditor;
-
-// NOTE: Tell user to press triple enter to exit code block

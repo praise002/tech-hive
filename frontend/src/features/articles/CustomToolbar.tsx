@@ -421,12 +421,6 @@ function CustomToolbar({ editor }: { editor: Editor | null }) {
                   >
                     View Documentation →
                   </button>
-                  <button
-                    // onClick={() => setShowFeedback(true)}
-                    className="text-blue-500 hover:underline"
-                  >
-                    Send Feedback
-                  </button>
                 </div>,
                 { duration: 7000 }
               );

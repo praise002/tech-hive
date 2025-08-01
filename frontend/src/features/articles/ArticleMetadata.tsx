@@ -29,8 +29,6 @@ const suggestedTags = [
   'Tag 6',
 ];
 
-// TODO: REFACTOR LATER TO USE A SINGLE ARTICLE STATE
-
 function ArticleMetadata({ mode }: { mode: string }) {
   const [tags, setTags] = useState([
     'Cloud Computing',

@@ -15,7 +15,7 @@ function ArticleCard({
   isOpen,
   onMenuClick = () => {},
   showAdminActions = false,
-  context = 'published', // TODO: GET BACK TO WHAT IT IS LATER
+  context = 'published', 
 }: ArticleCardProps) {
   return (
     <>

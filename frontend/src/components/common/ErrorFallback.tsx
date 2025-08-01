@@ -10,7 +10,7 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
       <p className="mb-4">{error.message}</p>
       <button
         onClick={resetErrorBoundary}
-        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+        className="min-w-[48px] min-h-[48px] bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
       >
         Try Again
       </button>

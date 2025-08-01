@@ -14,7 +14,7 @@ function Subscribe() {
       name: 'email',
       placeholder: 'jack@example.com',
       type: 'email',
-      ariaLabel: "Email address",
+      ariaLabel: 'Email address',
       rules: {
         required: 'Email is required',
         pattern: {
@@ -62,7 +62,5 @@ function Subscribe() {
     </section>
   );
 }
-
-// TODO: BUTTON CHANGES TO SUBSCRIBED
 
 export default Subscribe;

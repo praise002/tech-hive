@@ -126,10 +126,16 @@ function CategoryList() {
       {/* Static Pagination */}
       <nav className="max-w-7xl mx-auto mt-8 flex items-center justify-center">
         <div className="flex items-center space-x-2">
-          <Button variant="primary" aria-label="Go to previous page">Previous</Button>
+          <Button variant="primary" aria-label="Go to previous page">
+            Previous
+          </Button>
 
-          <span className="text-gray-600" aria-live="polite">Page 1 of 5</span>
-          <Button variant="primary" aria-label="Go to next page">Next</Button>
+          <span className="text-gray-600" aria-live="polite">
+            Page 1 of 5
+          </span>
+          <Button variant="primary" aria-label="Go to next page">
+            Next
+          </Button>
         </div>
       </nav>
     </div>
@@ -137,4 +143,3 @@ function CategoryList() {
 }
 
 export default CategoryList;
-// ADD SORTING, PAGINATION

@@ -5,7 +5,7 @@ function Like() {
 
   return (
     <button
-      className="inline-flex gap-2 items-center"
+      className="inline-flex gap-2 items-center min-w-[48px] min-h-[48px]"
       onClick={() => setIsLiked((like) => !like)}
       aria-pressed={isLiked}
       aria-label={isLiked ? 'Unlike' : 'Like'}
