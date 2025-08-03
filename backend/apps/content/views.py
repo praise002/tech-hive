@@ -1,18 +1,15 @@
+from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
-from apps.content.filters import TagFilter
-from rest_framework.filters import OrderingFilter
-
+from apps.content.models import Category, Tag
 from apps.content.schema_examples import CATEGORY_RESPONSE_EXAMPLE, TAG_RESPONSE_EXAMPLE
 from apps.content.serializers import CategorySerializer, TagSerializer
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
 from rest_framework import status
-from rest_framework.filters import SearchFilter
-from rest_framework.generics import ListAPIView
+from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.generics import ListAPIView, ListCreateAPIView
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
-
-from apps.common.pagination import DefaultPagination
-from apps.content.models import Category, Tag
 
 category_tags = ["Categories"]
 article_tags = ["Articles"]
@@ -23,7 +20,7 @@ class CategoryGenericView(ListAPIView):
     pagination_class = DefaultPagination
     filter_backends = (SearchFilter, OrderingFilter)
     search_fields = ["name"]
-    ordering_fields = ["name"]    # TODO: Add by popularity later
+    ordering_fields = ["name"]  # TODO: Add by popularity later
     # ordering = ["name"] # might not need use tyhe model default ordering
     queryset = Category.objects.all()
 
@@ -58,17 +55,26 @@ class CategoryGenericView(ListAPIView):
         return self.list(request, *args, **kwargs)
 
 
+# TODO: RETURN ARTICLE WITH IT'S TAGS,
+# TODO: FOR POST, IT CONVERTS THE TAGS TO LOWERCASE THEN POST IT
+
+
 class TagGenericView(ListAPIView):
     serializer_class = TagSerializer
-    filterset_class = TagFilter
     filter_backends = (DjangoFilterBackend, SearchFilter)
     search_fields = ["name"]
     queryset = Tag.objects.all()
+    default_limit = 10
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
-        limit = int(request.query_params.get("limit", 10))
+        try:
+            limit = int(request.query_params.get("limit", self.default_limit))
+        except ValueError:
+            # TODO: TEST IT: if an invalid integer uses the default instead of crashing
+            limit = self.default_limit
+
         queryset = queryset[:limit]
 
         page = self.paginate_queryset(queryset)
@@ -94,14 +100,30 @@ class TagGenericView(ListAPIView):
         tags=article_tags,
         responses=TAG_RESPONSE_EXAMPLE,
         auth=[],
+        parameters=[
+            OpenApiParameter(
+                name="limit",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Maximum number of tags to return (default is 10).",
+            ),
+        ],
     )
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
-    
-    def post(self, reequest):
-        # get_or_create
+
+# Article Management Endpoints
+
+class ArticleGenericView(ListCreateAPIView):
+    # List published article
+    # /api/articles/
+    def get(self, request):
         pass
 
+    # Create new draft
+    def post(self, request):
+        pass
 
 class ArticleView(APIView):
     def get(self, request):
@@ -112,3 +134,49 @@ class ArticleView(APIView):
 
     def patch(self, request):
         pass
+
+class ArticleRetrieveView(APIView):
+    # Published article, owner/staff - unpublished(draft)
+    # /api/articles/{id}/
+    def get(self, request):
+        pass
+    
+class ArticleSubmitView(APIView):
+    # /api/articles/{id}/submit/ - is it restful?
+    # Submit draft for review - owner
+    def post(self, request):
+        pass
+    
+class ArticleWithdrawView(APIView):
+    # /api/articles/{id}/withdraw/ - is it restful?
+    # Withdraw from review - owner
+    def post(self, request):
+        pass
+    
+class ArticlePublishView(APIView):
+    # /api/articles/{id}/publish/ - is it restful?
+    # Publish article - Editor/Manager
+    def post(self, request):
+        pass
+    
+class ArticlePublishView(APIView):
+    # /api/articles/{id}/archive/ - is it restful?
+    # Archive article -	Manager/Owner of article
+    def post(self, request):
+        pass
+    
+# Review Workflow Endpoints 
+class ArticleRequestChangesView(APIView):
+    # /api/articles/{id}/request-changes/ - is it restful?
+    # Request revisions - Reviewer
+    def post(self, request):
+        pass
+    
+class ArticleApproveToEditView(APIView):
+    # /api/articles/{id}/approve/ - is it restful?
+    # Approve for publishing - Reviewer
+    def post(self, request):
+        pass
+    
+# /api/articles/{id}/comments/	GET	List comments	Participant
+# /api/articles/{id}/comments/	POST	Add comment	Reviewer/Editor/Manager

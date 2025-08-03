@@ -20,7 +20,7 @@ class ArticleStatusChoices(models.TextChoices):
 
 class Category(BaseModel):
     name = models.CharField(max_length=250)
-    slug = AutoSlugField(populate_from="name", unique=True, always_update=True)
+    # slug = AutoSlugField(populate_from="name", unique=True, always_update=True)
     desc = models.TextField()
     
     class Meta:
@@ -38,7 +38,7 @@ class Article(BaseModel):
         Category, related_name="articles", on_delete=models.SET_NULL, null=True
     )
     title = models.CharField(max_length=250)
-    slug = AutoSlugField(populate_from="title", unique=True, always_update=True)
+    # slug = AutoSlugField(populate_from="title", unique=True, always_update=True)
     content = (
         models.TextField()
     )  # TODO: WOULD USE A TEXTEDITOR WHICH WILL CONTAIN IMAGES
@@ -154,6 +154,9 @@ class Job(BaseModel):
         ("HYBRID", "Hybrid"),
         ("ONSITE", "Onsite"),
     ]
+    category = models.ForeignKey(
+        Category, related_name="jobs", on_delete=models.SET_NULL, null=True
+    )
     title = models.CharField(max_length=250)
     company = models.CharField(max_length=250)
     desc = models.TextField()
@@ -174,6 +177,9 @@ class Job(BaseModel):
 
 
 class Event(BaseModel):
+    category = models.ForeignKey(
+        Category, related_name="events", on_delete=models.SET_NULL, null=True
+    )
     title = models.CharField(max_length=250)
     desc = models.TextField()
     start_date = models.DateTimeField(default=timezone.now)
@@ -187,6 +193,9 @@ class Event(BaseModel):
 
 
 class Resource(BaseModel):
+    category = models.ForeignKey(
+        Category, related_name="resources", on_delete=models.SET_NULL, null=True
+    )
     name = models.CharField(max_length=250)
     image = models.ImageField(upload_to="resources/", null=True, blank=True)
     body = models.TextField()
@@ -212,6 +221,9 @@ class ToolTag(BaseModel):
 
 
 class Tool(BaseModel):
+    category = models.ForeignKey(
+        Category, related_name="tools", on_delete=models.SET_NULL, null=True
+    )
     name = models.CharField(max_length=250)
     desc = models.TextField()
     url = models.CharField(max_length=250, validators=[URLValidator()])

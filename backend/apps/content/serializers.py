@@ -11,8 +11,8 @@ class TagSerializer(serializers.ModelSerializer):
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Category
-        fields = ["id", "name", "slug", "desc"]
+        model = models.Category  # "slug",
+        fields = ["id", "name", "desc"]
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -27,7 +27,7 @@ class ArticleSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "title",
-            "slug",
+            # "slug",
             "content",
             "cover_image_url",
             "read_time",
@@ -114,16 +114,19 @@ class ResourceSerializer(serializers.ModelSerializer):
         model = models.Resource
         fields = ["id", "name", "image_url", "body", "url"]
 
+
 class ToolTagSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ToolTag
         fields = ["id", "name"]
-        
+
+
 class ToolSerializer(serializers.ModelSerializer):
     tags = ToolTagSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = models.Tool
         fields = ["id", "name", "desc", "url", "image_url", "call_to_action", "tags"]
-        
+
+
 # TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH

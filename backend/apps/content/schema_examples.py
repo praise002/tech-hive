@@ -6,13 +6,19 @@ CATEGORY_LIST_EXAMPLE = {
     "id": UUID_EXAMPLE,
     "name": "Technology",
     "slug": "technology",
-    "desc": "All articles and tutorials related to technology and innovation."
+    "desc": "All articles and tutorials related to technology and innovation.",
 }
 
-TAG_LIST_EXAMPLE = {
-    "id": UUID_EXAMPLE,
-    "name": "technology",
-}
+TAG_LIST_EXAMPLE = [
+    {
+        "id": UUID_EXAMPLE,
+        "name": "technology",
+    },
+    {
+        "id": UUID_EXAMPLE,
+        "name": "python",
+    },
+]
 
 CATEGORY_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(
