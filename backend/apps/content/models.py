@@ -20,7 +20,7 @@ class ArticleStatusChoices(models.TextChoices):
 
 class Category(BaseModel):
     name = models.CharField(max_length=250)
-    # slug = AutoSlugField(populate_from="name", unique=True, always_update=True)
+    slug = AutoSlugField(populate_from="name", unique=True, always_update=True)
     desc = models.TextField()
     
     class Meta:
@@ -38,7 +38,7 @@ class Article(BaseModel):
         Category, related_name="articles", on_delete=models.SET_NULL, null=True
     )
     title = models.CharField(max_length=250)
-    # slug = AutoSlugField(populate_from="title", unique=True, always_update=True)
+    slug = AutoSlugField(populate_from="title", unique=True, always_update=True)
     content = (
         models.TextField()
     )  # TODO: WOULD USE A TEXTEDITOR WHICH WILL CONTAIN IMAGES
