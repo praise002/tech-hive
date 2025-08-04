@@ -103,7 +103,8 @@ class LoginView(TokenObtainPairView):
             # Check if the user's email is verified
             if not user.is_email_verified:
                 # If email is not verified, prompt them to request an OTP
-
+                
+                # TODO: 403 USED ERRORDATARESPONSE
                 return CustomResponse.error(
                     message="Email not verified. Please verify your email before logging in.",
                     status_code=status.HTTP_403_FORBIDDEN,
@@ -649,3 +650,16 @@ class AvatarUpdateView(APIView):
             },
             status_code=status.HTTP_200_OK,
         )
+
+# TODO:
+# /api/v1/profiles/<username>/
+# from rest_framework.generics import RetrieveAPIView
+# from apps.accounts.models import User
+# from apps.accounts.serializers import UserSerializer
+
+# class PublicProfileView(RetrieveAPIView):
+#     queryset = User.objects.all()
+#     serializer_class = UserSerializer
+#     lookup_field = "id"  # or "username" if you prefer
+
+    # Optionally, you can add permission_classes if you want to restrict access

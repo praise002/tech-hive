@@ -5,6 +5,8 @@ from datetime import timedelta
 from decouple import config
 from django.utils.log import DEFAULT_LOGGING
 
+# http://127.0.0.1:4040/inspect/http - inspect ngrok
+
 from .base import *
 
 DEBUG = True
@@ -16,6 +18,7 @@ CSRF_TRUSTED_ORIGINS = ["https://*.ngrok.io", "https://*.ngrok-free.app"]
 
 CORS_ALLOWED_ORIGINS = [
     config("FRONTEND_URL_DEV"),
+    "https://tech-hive-react.vercel.app"  # TODO: REMOVE LATER
 ]
 
 FRONTEND_URL = config("FRONTEND_URL_DEV")

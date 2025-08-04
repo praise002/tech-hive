@@ -62,3 +62,9 @@ down:
 
 show-logs:
 	docker-compose logs
+
+redis:
+	docker run -it --rm --name redis -p 6379:6379 redis
+
+celery:
+	celery -A tech_hive worker -l info --pool=solo
