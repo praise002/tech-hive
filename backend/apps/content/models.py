@@ -28,6 +28,7 @@ class Category(BaseModel):
         indexes = [
             models.Index(fields=["name"]),
         ]
+        verbose_name_plural = "Categories"
 
     def __str__(self):
         return self.name

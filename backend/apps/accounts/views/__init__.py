@@ -13,6 +13,7 @@ from .accounts import (
     ProfileView,
     ProfileViewGeneric,
     AvatarUpdateView,
+    PublicProfileView,
 )
 
 from .google_oauth_signup import GoogleOAuth2SignUpView
@@ -41,5 +42,6 @@ __all__ = [
     
     "ProfileView",
     "ProfileViewGeneric",
+    "PublicProfileView",
     "AvatarUpdateView",
 ]

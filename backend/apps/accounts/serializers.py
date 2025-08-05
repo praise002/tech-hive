@@ -120,8 +120,8 @@ class UserSerializer(serializers.ModelSerializer):
             "id",
             "first_name",
             "last_name",
+            "username",
             "email",
-            "updated_at",
             "avatar_url",
         ]
         extra_kwargs = {

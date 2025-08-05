@@ -1,6 +1,8 @@
 import uuid
 from datetime import timedelta
 
+from autoslug import AutoSlugField
+
 from apps.common.models import BaseModel, IsDeletedModel
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
@@ -9,6 +11,8 @@ from django.utils import timezone
 
 from .managers import CustomUserManager
 
+def slugify_two_fields(self):
+    return f"{self.first_name}-{self.last_name}"
 
 class UserRoleChoices(models.TextChoices):
     EDITOR = "editor", "Editor"
@@ -21,6 +25,9 @@ class User(AbstractBaseUser, IsDeletedModel, PermissionsMixin):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+    username = AutoSlugField(
+        populate_from=slugify_two_fields, unique=True, always_update=True
+    )
     email = models.EmailField(unique=True)
     google_id = models.CharField(max_length=255, unique=True, null=True)
 
@@ -77,6 +84,7 @@ class Otp(models.Model):
         )
         return timezone.now() < expiration_time
 
+
 class SubscriptionPlan(BaseModel):
     PLAN_CHOICES = [
         ("BASIC", "Basic"),
@@ -85,13 +93,10 @@ class SubscriptionPlan(BaseModel):
     name = models.CharField(max_length=20, choices=PLAN_CHOICES, default="BASIC")
     price = models.DecimalField(max_digits=6, decimal_places=2)
     features = models.TextField()
-    
+
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     subscription = models.ForeignKey(
-        SubscriptionPlan, 
-        on_delete=models.SET_NULL, 
-        null=True
+        SubscriptionPlan, on_delete=models.SET_NULL, null=True
     )
-    
-

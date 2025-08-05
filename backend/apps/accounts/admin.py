@@ -23,6 +23,7 @@ class UserAdmin(BaseUserAdmin):
                 "fields": (
                     "first_name",
                     "last_name",
+                    "username",
                     "id",
                     "google_id",
                     "avatar",
@@ -68,6 +69,7 @@ class UserAdmin(BaseUserAdmin):
                     "google_id",
                     "first_name",
                     "last_name",
+                    "username",
                     "email",
                     "password1",
                     "password2",
@@ -82,7 +84,7 @@ class UserAdmin(BaseUserAdmin):
         ),
     )
 
-    readonly_fields = ("created_at", "updated_at", "id", "google_id")
+    readonly_fields = ("created_at", "username", "updated_at", "id", "google_id")
     search_fields = ("first_name", "last_name", "email")
 
 

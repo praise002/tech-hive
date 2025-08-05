@@ -11,6 +11,7 @@ from apps.accounts.schema_examples import (
     PASSWORD_CHANGE_RESPONSE_EXAMPLE,
     PASSWORD_RESET_DONE_RESPONSE_EXAMPLE,
     PASSWORD_RESET_REQUEST_RESPONSE_EXAMPLE,
+    PROFILE_DETAIL_RESPONSE_EXAMPLE,
     PROFILE_RETRIEVE_RESPONSE_EXAMPLE,
     PROFILE_UPDATE_RESPONSE_EXAMPLE,
     REFRESH_TOKEN_RESPONSE_EXAMPLE,
@@ -33,12 +34,13 @@ from apps.accounts.serializers import (
 )
 from apps.accounts.utils import invalidate_previous_otps
 from apps.common.errors import ErrorCode
+from apps.common.exceptions import NotFoundError
 from apps.common.responses import CustomResponse
 from django.conf import settings
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.generics import RetrieveAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
@@ -103,7 +105,7 @@ class LoginView(TokenObtainPairView):
             # Check if the user's email is verified
             if not user.is_email_verified:
                 # If email is not verified, prompt them to request an OTP
-                
+
                 # TODO: 403 USED ERRORDATARESPONSE
                 return CustomResponse.error(
                     message="Email not verified. Please verify your email before logging in.",
@@ -513,7 +515,9 @@ class RefreshTokensView(TokenRefreshView):
 
         return response
 
+
 profile_tag = ["Profiles"]
+
 
 class ProfileView(APIView):
     """
@@ -521,7 +525,7 @@ class ProfileView(APIView):
     """
 
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = (IsAuthenticated,)
 
     @extend_schema(
         summary="View a user profile",
@@ -626,6 +630,42 @@ class ProfileViewGeneric(RetrieveUpdateAPIView):
         )
 
 
+# My reason for ProfileView and PublicProfileView is because the frontend will need to get
+# current logged in user with /user so putting .username in the url will be a problem
+
+
+class PublicProfileView(RetrieveAPIView):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+    lookup_field = "username"
+    
+    def get_object(self):
+        username = self.kwargs.get('username')
+        try:
+            return User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise NotFoundError("User profile not found.")
+        
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return CustomResponse.success(
+            message="Profile retrieved successfully.",
+            data=serializer.data,
+            status_code=status.HTTP_200_OK,
+        )
+
+    @extend_schema(
+        summary="Retrieve a user's public profile",
+        description="This endpoint allows anyone to view a user's public profile details.  It retrieves account information based on the user's ID.",
+        tags=profile_tag,
+        responses=PROFILE_DETAIL_RESPONSE_EXAMPLE,
+    )
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+
 class AvatarUpdateView(APIView):
     serializer_class = AvatarSerializer
     permission_classes = [IsAuthenticated]
@@ -651,15 +691,12 @@ class AvatarUpdateView(APIView):
             status_code=status.HTTP_200_OK,
         )
 
+
 # TODO:
 # /api/v1/profiles/<username>/
 # from rest_framework.generics import RetrieveAPIView
 # from apps.accounts.models import User
 # from apps.accounts.serializers import UserSerializer
 
-# class PublicProfileView(RetrieveAPIView):
-#     queryset = User.objects.all()
-#     serializer_class = UserSerializer
-#     lookup_field = "id"  # or "username" if you prefer
 
-    # Optionally, you can add permission_classes if you want to restrict access
+# Optionally, you can add permission_classes if you want to restrict access

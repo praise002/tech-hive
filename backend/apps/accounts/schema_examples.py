@@ -388,7 +388,7 @@ PROFILE_RETRIEVE_RESPONSE_EXAMPLE = {
         response=UserSerializer,
         examples=[
             OpenApiExample(
-                name="Profile Retrieve Successful",
+                name="Success Response",
                 value={
                     "status": SUCCESS_RESPONSE_STATUS,
                     "message": "Profile retrieved successfully.",
@@ -398,6 +398,37 @@ PROFILE_RETRIEVE_RESPONSE_EXAMPLE = {
         ],
     ),
     401: UNAUTHORIZED_USER_RESPONSE,
+}
+
+PROFILE_DETAIL_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Profile Retrieve Successful",
+        response=UserSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Profile retrieved successfully.",
+                    "data": PROFILE_EXAMPLE,
+                },
+            ),
+        ],
+    ),
+    404: OpenApiResponse(
+        response=ErrorResponseSerializer,
+        description="Profile not found",
+        examples=[
+            OpenApiExample(
+                name="Profile not found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "User profile not found.",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
 }
 
 AVATAR_UPDATE_RESPONSE_EXAMPLE = {
