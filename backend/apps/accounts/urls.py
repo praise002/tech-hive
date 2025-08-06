@@ -40,7 +40,7 @@ urlpatterns = [
         name="google_login_callback",
     ),
     
-    path("profile/me/", views.ProfileViewGeneric.as_view()),
-    path("profile/avatar/", views.AvatarUpdateView.as_view()),
-    path("profile/<str:username>/", views.PublicProfileView.as_view()),
+    path("profiles/me/", views.ProfileViewGeneric.as_view()),
+    path("profiles/avatar/", views.AvatarUpdateView.as_view()),
+    path("profiles/<str:username>/", views.PublicProfileView.as_view()),
 ]
