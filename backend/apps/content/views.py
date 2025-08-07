@@ -1,8 +1,12 @@
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
-from apps.content.models import Category, Tag
+from apps.content.models import Article, Category, Tag
 from apps.content.schema_examples import CATEGORY_RESPONSE_EXAMPLE, TAG_RESPONSE_EXAMPLE
-from apps.content.serializers import CategorySerializer, TagSerializer
+from apps.content.serializers import (
+    ArticleSerializer,
+    CategorySerializer,
+    TagSerializer,
+)
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
 from rest_framework import status
@@ -115,23 +119,54 @@ class TagGenericView(ListAPIView):
 
 
 # Article Management Endpoints
-
-
 class ArticleGenericView(ListCreateAPIView):
     # List published article
-    # /api/articles/
-    def get(self, request):
-        pass
+    queryset = Article.published.select_related("category", "author").all()
+    serializer_class = ArticleSerializer
+    filter_backends = (DjangoFilterBackend, SearchFilter)
+    search_fields = ["title", "content"]
+    pagination_class = DefaultPagination
+
+    @extend_schema(
+        summary="Retrieve a list of articles",
+        description="This endpoint allows.",
+        parameters=[
+            OpenApiParameter(
+                name="search",
+                description="Search across title, and description.",
+            ),
+        ],
+        tags=article_tags,
+        auth=[],
+        # responses=ARTICLE_LIST_RESPONSE_EXAMPLE,
+    )
+    def get(self, request, *args, **kwargs):
+        """
+        Handle GET requests to retrieve profiles with pagination, search, and filtering.
+        """
+        return super().get(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            paginated_data = self.get_paginated_response(serializer.data)
+            return CustomResponse.success(
+                message="Articles retrieved successfully.",
+                data=paginated_data.data,
+                status_code=status.HTTP_200_OK,
+            )
+
+        serializer = self.get_serializer(queryset, many=True)
+        return CustomResponse.success(
+            message="Articles retrieved successfully.",
+            data=serializer.data,
+            status_code=status.HTTP_200_OK,
+        )
 
     # Create new draft
-    def post(self, request):
-        pass
-
-
-class ArticleView(APIView):
-    def get(self, request):
-        pass
-
     def post(self, request):
         pass
 
@@ -204,8 +239,8 @@ class RSSFeedInfoView(APIView):
                 "properties": {
                     "rss_url": {"type": "string"},
                     "description": {"type": "string"},
-                    "items_count": {"type": "integer"}
-                }
+                    "items_count": {"type": "integer"},
+                },
             }
         },
     )

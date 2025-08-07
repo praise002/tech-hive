@@ -99,6 +99,14 @@ class Article(BaseModel):
         indexes = [
             models.Index(fields=["-title"]),
         ]
+        permissions = [
+            ("can_publish_article", "Can publish article"),
+            ("can_archive_techive_article", "Can archive techive article"),
+            ("can_request_revisions", "Can request revisions"),
+            ("can_submit_for_review", "Can submit for review"),
+            ("can_approve_for_publishing", "Can approve for publishing"),
+            ("can_withdraw_from_review", "Can withdraw from review"),
+        ]
 
 
 class ArticleReaction(BaseModel):

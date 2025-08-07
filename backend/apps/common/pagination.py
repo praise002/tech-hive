@@ -1,5 +1,5 @@
-from apps.common.responses import CustomResponse
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 
 
 class DefaultPagination(PageNumberPagination):
@@ -14,6 +14,4 @@ class DefaultPagination(PageNumberPagination):
             "previous": self.get_previous_link(),
             "results": data,
         }
-        return CustomResponse.success(
-            message="Paginated data retrieved successfully", data=data
-        )
+        return Response(data=data, status=200)

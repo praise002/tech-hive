@@ -1,7 +1,7 @@
 import logging
 
 from apps.accounts.emails import SendEmail
-from apps.accounts.models import Otp, User
+from apps.accounts.models import Otp, User, UserRoleChoices
 from apps.accounts.permissions import IsUnauthenticated
 from apps.accounts.schema_examples import (
     AVATAR_UPDATE_RESPONSE_EXAMPLE,
@@ -37,6 +37,7 @@ from apps.common.errors import ErrorCode
 from apps.common.exceptions import NotFoundError
 from apps.common.responses import CustomResponse
 from django.conf import settings
+from django.contrib.auth.models import Group
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -58,6 +59,16 @@ logger = logging.getLogger(__name__)
 tags = ["Auth"]
 
 
+# Anyone that signs up automatically has User group
+def assign_user_to_group(user):
+    """Example: Assign a new user to the 'Author' group."""
+    role = user.role
+    if role == UserRoleChoices.USER:
+        role_name = "Author"
+        group = Group.objects.get(name=role_name)
+        user.groups.add(group)
+
+
 class RegisterView(APIView):
     serializer_class = RegisterSerializer
     permission_classes = (IsUnauthenticated,)
@@ -74,6 +85,7 @@ class RegisterView(APIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         data = serializer.validated_data
+        assign_user_to_group(user)
 
         # Send OTP for email verification
         SendEmail.send_email(request, user)
@@ -638,14 +650,13 @@ class PublicProfileView(RetrieveAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()
     lookup_field = "username"
-    
+
     def get_object(self):
-        username = self.kwargs.get('username')
+        username = self.kwargs.get("username")
         try:
             return User.objects.get(username=username)
         except User.DoesNotExist:
             raise NotFoundError("User profile not found.")
-        
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()

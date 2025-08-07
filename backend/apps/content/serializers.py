@@ -11,15 +11,15 @@ class TagSerializer(serializers.ModelSerializer):
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Category  # "slug",
-        fields = ["id", "name", "desc"]
+        model = models.Category  
+        fields = ["id", "name", "desc", "slug"]
 
 
 class ArticleSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     cover_image_url = serializers.SerializerMethodField(read_only=True)
     author = serializers.SerializerMethodField(read_only=True)
-    total_reaction_count = serializers.SerializerMethodField(read_only=True)
+    total_reaction_counts = serializers.SerializerMethodField(read_only=True)
     reaction_counts = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -27,7 +27,7 @@ class ArticleSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "title",
-            # "slug",
+            "slug",
             "content",
             "cover_image_url",
             "read_time",
@@ -35,14 +35,14 @@ class ArticleSerializer(serializers.ModelSerializer):
             "created_at",
             "is_featured",
             "author",
-            "total_reaction_count",
+            "total_reaction_counts",
             "reaction_counts",
             "tags",
         ]
 
     @extend_schema_field(serializers.URLField)
     def get_cover_image_url(self, obj):
-        return obj.get_cover_image_url
+        return obj.cover_image_url
 
     def get_author(self, obj):
         return obj.author.full_name
