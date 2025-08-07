@@ -582,8 +582,9 @@ class TestAccounts(APITestCase):
 
 
 class TestProfiles(APITestCase):
-    profile_url = "/api/v1/auth/profile/"
-    avatar_update_url = "/api/v1/auth/profile/avatar/"
+    profile_url = "/api/v1/auth/profiles/me/"
+    profile_detail_url = "/api/v1/auth/profiles/<str:username>/"
+    avatar_update_url = "/api/v1/auth/profiles/avatar/"
 
     def setUp(self):
         self.user1 = TestUtil.verified_user()
@@ -616,6 +617,19 @@ class TestProfiles(APITestCase):
         response = self.client.get(self.profile_url)
         self.assertEqual(response.status_code, 401)
 
+    def test_profile_detail_get(self):
+        username = self.user1.username
+
+        # Authenticated User
+        self.client.force_authenticate(user=self.user1)
+        response = self.client.get(self.profile_detail_url.replace("<str:username>", username))
+        self.assertEqual(response.status_code, 200)
+
+        # Unauthenticated User
+        self.client.force_authenticate(user=None)
+        response = self.client.get(self.profile_detail_url.replace("<str:username>", username))
+        self.assertEqual(response.status_code, 200)
+        
     def test_avatar_update(self):
         # Test success
         

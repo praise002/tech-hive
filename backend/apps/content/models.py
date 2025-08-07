@@ -6,9 +6,16 @@ from django.db import models
 from django.db.models import Count
 from django.utils import timezone
 
+class PublishedManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset()\
+                     .filter(status=ArticleStatusChoices.PUBLISHED)
 
 class Tag(BaseModel):
     name = models.CharField(max_length=20)
+    
+    def __str__(self):
+        return self.name
 
 
 class ArticleStatusChoices(models.TextChoices):
@@ -36,7 +43,7 @@ class Category(BaseModel):
 
 class Article(BaseModel):
     category = models.ForeignKey(
-        Category, related_name="articles", on_delete=models.SET_NULL, null=True
+        Category, related_name="articles", on_delete=models.SET_NULL, null=True, blank=True
     )
     title = models.CharField(max_length=250)
     slug = AutoSlugField(populate_from="title", unique=True, always_update=True)
@@ -45,7 +52,7 @@ class Article(BaseModel):
     )  # TODO: WOULD USE A TEXTEDITOR WHICH WILL CONTAIN IMAGES
     cover_image = models.ImageField(upload_to="articles/", null=True, blank=True)
     read_time = models.PositiveIntegerField(help_text="Read time in minutes", default=0)
-    tags = models.ManyToManyField(Tag)
+    tags = models.ManyToManyField(Tag, blank=True)
     status = models.CharField(
         max_length=20,
         choices=ArticleStatusChoices.choices,
@@ -53,11 +60,15 @@ class Article(BaseModel):
     )
     is_featured = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True)
+    published_at = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="authored_articles",
     )
+    
+    objects = models.Manager() 
+    published = PublishedManager() 
 
     def __str__(self):
         return self.title

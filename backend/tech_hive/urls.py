@@ -11,9 +11,10 @@ from drf_spectacular.views import (
 )
 from rest_framework import status
 from rest_framework.views import APIView
-
+from django.contrib.sitemaps.views import sitemap
 from apps.common.responses import CustomResponse
 from apps.common.serializers import SuccessResponseSerializer
+from apps.content.sitemaps import ArticleSitemap
 
 
 class HealthCheckView(APIView):
@@ -58,12 +59,18 @@ def handler500(request, exception=None):
 handler404 = handler404
 handler500 = handler500
 
+sitemaps = {
+    'articles': ArticleSitemap,
+ }
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/", include("apps.general.urls")),
     path("api/v1/", include("apps.content.urls")),
     path("api/v1/auth/", include("apps.accounts.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps},
+         name='django.contrib.sitemaps.views.sitemap'),
     path(
         "",
         SpectacularSwaggerView.as_view(url_name="schema"),

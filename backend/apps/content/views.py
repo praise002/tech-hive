@@ -113,7 +113,9 @@ class TagGenericView(ListAPIView):
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
+
 # Article Management Endpoints
+
 
 class ArticleGenericView(ListCreateAPIView):
     # List published article
@@ -125,6 +127,7 @@ class ArticleGenericView(ListCreateAPIView):
     def post(self, request):
         pass
 
+
 class ArticleView(APIView):
     def get(self, request):
         pass
@@ -135,48 +138,87 @@ class ArticleView(APIView):
     def patch(self, request):
         pass
 
+
 class ArticleRetrieveView(APIView):
     # Published article, owner/staff - unpublished(draft)
     # /api/articles/{id}/
     def get(self, request):
         pass
-    
+
+
 class ArticleSubmitView(APIView):
     # /api/articles/{id}/submit/ - is it restful?
     # Submit draft for review - owner
     def post(self, request):
         pass
-    
+
+
 class ArticleWithdrawView(APIView):
     # /api/articles/{id}/withdraw/ - is it restful?
     # Withdraw from review - owner
     def post(self, request):
         pass
-    
+
+
 class ArticlePublishView(APIView):
     # /api/articles/{id}/publish/ - is it restful?
     # Publish article - Editor/Manager
     def post(self, request):
         pass
-    
+
+
 class ArticlePublishView(APIView):
     # /api/articles/{id}/archive/ - is it restful?
     # Archive article -	Manager/Owner of article
     def post(self, request):
         pass
-    
-# Review Workflow Endpoints 
+
+
+# Review Workflow Endpoints
 class ArticleRequestChangesView(APIView):
     # /api/articles/{id}/request-changes/ - is it restful?
     # Request revisions - Reviewer
     def post(self, request):
         pass
-    
+
+
 class ArticleApproveToEditView(APIView):
     # /api/articles/{id}/approve/ - is it restful?
     # Approve for publishing - Reviewer
     def post(self, request):
         pass
-    
+
+
 # /api/articles/{id}/comments/	GET	List comments	Participant
 # /api/articles/{id}/comments/	POST	Add comment	Reviewer/Editor/Manager
+
+
+class RSSFeedInfoView(APIView):
+    @extend_schema(
+        summary="RSS Feed Information",
+        description="Get information about subscribing to Tech Hive's RSS feed.",
+        tags=article_tags,
+        responses={
+            200: {
+                "type": "object",
+                "properties": {
+                    "rss_url": {"type": "string"},
+                    "description": {"type": "string"},
+                    "items_count": {"type": "integer"}
+                }
+            }
+        },
+    )
+    def get(self, request):
+        base_url = request.build_absolute_uri("/").rstrip("/")
+        return CustomResponse.success(
+            message="Tags retrieved successfully.",
+            data={
+                "rss_url": f"{base_url}/api/v1/articles/feed/",
+                "description": "Subscribe to get the latest Tech Hive articles",
+                "format": "RSS 2.0 XML",
+                "items_count": 10,
+                "update_frequency": "When new articles are published",
+            },
+            status_code=status.HTTP_200_OK,
+        )
