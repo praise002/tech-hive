@@ -1,17 +1,17 @@
 import logging
 
-from django.urls import reverse
-from drf_spectacular.utils import extend_schema
-from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
-
 from apps.accounts.emails import SendEmail
 from apps.accounts.models import User
 from apps.accounts.tasks import download_and_upload_avatar
 from apps.accounts.utils import google_callback
 from apps.common.errors import ErrorCode
 from apps.common.responses import CustomResponse
+from decouple import config
+from django.urls import reverse
+from drf_spectacular.utils import extend_schema
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 logger = logging.getLogger(__name__)
 
@@ -77,4 +77,5 @@ class GoogleOAuth2SignUpCallbackView(APIView):
             },
             status_code=status.HTTP_201_CREATED,
         )
+
 

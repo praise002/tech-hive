@@ -8,6 +8,7 @@ from drf_spectacular.utils import extend_schema
 
 from apps.accounts.utils import google_setup
 from apps.common.responses import CustomResponse
+from apps.accounts.schema_examples import GOOGLE_RESPONSE_EXAMPLE
 from .accounts import tags
 
 
@@ -18,6 +19,7 @@ class GoogleOAuth2LoginView(APIView):
         summary="Google OAuth2 Login",
         description="This endpoint is the login URL for Google OAuth2. It returns an authorization URL that should be used to redirect the user to Google.",
         tags=tags,
+        responses=GOOGLE_RESPONSE_EXAMPLE,
         auth=[],
     )
     def get(self, request):

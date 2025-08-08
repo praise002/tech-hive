@@ -19,7 +19,7 @@ from apps.common.schema_examples import (
     SUCCESS_RESPONSE_STATUS,
     UUID_EXAMPLE,
 )
-from apps.common.serializers import ErrorDataResponseSerializer, ErrorResponseSerializer
+from apps.common.serializers import ErrorDataResponseSerializer, ErrorResponseSerializer, SuccessResponseSerializer
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse
 
 PROFILE_EXAMPLE = {
@@ -43,6 +43,9 @@ REFRESH_TOKEN_EXAMPLE = {
     # "refresh": REFRESH_TOKEN,
 }
 
+GOOGLE_OAUTH_EXAMPLE = {"authorization_url": ""}
+
+
 UNAUTHORIZED_USER_RESPONSE = OpenApiResponse(
     response=ErrorResponseSerializer,
     description="Unauthorized User or Invalid Access Token",
@@ -65,6 +68,23 @@ UNAUTHORIZED_USER_RESPONSE = OpenApiResponse(
         ),
     ],
 )
+
+GOOGLE_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        response=SuccessResponseSerializer,
+        description="Authorization URL Successful",
+        examples=[
+            OpenApiExample(
+                name="Authorization URL Successful",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Authorization URL generated successfully.",
+                    "data": GOOGLE_OAUTH_EXAMPLE,
+                },
+            ),
+        ],
+    ),
+}
 
 REGISTER_RESPONSE_EXAMPLE = {
     201: OpenApiResponse(

@@ -5,6 +5,8 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.views import APIView
 
+from apps.accounts.schema_examples import GOOGLE_RESPONSE_EXAMPLE
+
 from .accounts import tags
 
 
@@ -15,6 +17,7 @@ class GoogleOAuth2SignUpView(APIView):
         summary="Google OAuth2 Sign Up",
         description="This endpoint is the sign up URL for Google OAuth2. It returns an authorization URL that should be used to redirect the user to Google.",
         tags=tags,
+        responses=GOOGLE_RESPONSE_EXAMPLE,
         auth=[],
     )
     def get(self, request):
