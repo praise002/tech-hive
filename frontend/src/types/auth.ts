@@ -5,6 +5,14 @@ export interface RegisterUserData {
   password: string;
 }
 
+export interface RegisterResponse {
+  status: string;
+  message: string;
+  data: {
+    email: string;
+  };
+}
+
 export interface LoginUserData {
   email: string;
   password: string;

@@ -2,6 +2,7 @@ import {
   ChangePasswordData,
   LoginUserData,
   PasswordResetCompleteData,
+  RegisterResponse,
   RegisterUserData,
   UpdateUserData,
   VerifyOtpData,
@@ -10,7 +11,7 @@ import { API_URL } from '../../../utils/constants';
 
 const AUTH_URL = `${API_URL}/auth`;
 
-export async function register(userData: RegisterUserData): Promise<void> {
+export async function register(userData: RegisterUserData): Promise<RegisterResponse> {
   const response = await fetch(`${AUTH_URL}/register/`, {
     method: 'POST',
     headers: {
@@ -26,7 +27,7 @@ export async function register(userData: RegisterUserData): Promise<void> {
 
   const data = await response.json();
   localStorage.setItem('email', data.data.email);
-  return data.data;
+  return data;
 }
 
 export async function verifyRegistrationOtp(otpData: VerifyOtpData) {
@@ -84,7 +85,7 @@ export async function login(credentials: LoginUserData) {
   const data = await response.json();
   localStorage.setItem('token', data.data.access); // USE HTTP-ONLY LATER
   localStorage.setItem('refresh', data.data.refresh);
-  return data.data;
+  return data;
 }
 
 export async function logout() {
