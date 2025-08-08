@@ -1,24 +1,17 @@
+import {
+  ChangePasswordData,
+  LoginUserData,
+  PasswordResetCompleteData,
+  RegisterUserData,
+  UpdateUserData,
+  VerifyOtpData,
+} from '../../../types/auth';
 import { API_URL } from '../../../utils/constants';
 
-interface RegisterUserData {
-  first_name: string;
-  last_name: string;
-  email: string;
-  password: string;
-}
-
-interface LoginUserData {
-  email: string;
-  password: string;
-}
-
-interface UpdateUserData {
-  first_name: string;
-  last_name: string;
-}
+const AUTH_URL = `${API_URL}/auth`;
 
 export async function register(userData: RegisterUserData): Promise<void> {
-  const response = await fetch(`${API_URL}/register/`, {
+  const response = await fetch(`${AUTH_URL}/register/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -36,8 +29,46 @@ export async function register(userData: RegisterUserData): Promise<void> {
   return data.data;
 }
 
+export async function verifyRegistrationOtp(otpData: VerifyOtpData) {
+  const response = await fetch(`${AUTH_URL}/verification/verify/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(otpData),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+
+  const data = await response.json();
+  localStorage.removeItem('email');
+  return data;
+}
+
+export async function resendRegistrationOtp(email: string) {
+  const response = await fetch(`${AUTH_URL}/verification/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+
+  const data = await response.json();
+  localStorage.removeItem('email');
+  return data;
+}
+
 export async function login(credentials: LoginUserData) {
-  const response = await fetch(`${API_URL}/token/`, {
+  const response = await fetch(`${AUTH_URL}/token/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -58,7 +89,7 @@ export async function login(credentials: LoginUserData) {
 
 export async function logout() {
   const refresh = localStorage.getItem('refresh');
-  const response = await fetch(`${API_URL}/sessions/`, {
+  const response = await fetch(`${AUTH_URL}/sessions/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -79,7 +110,7 @@ export async function logout() {
 
 export async function logoutAll() {
   const token = localStorage.getItem('token');
-  const response = await fetch(`${API_URL}/sessions/all/`, {
+  const response = await fetch(`${AUTH_URL}/sessions/all/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -106,7 +137,7 @@ export async function getCurrentUser() {
     throw new Error('No authentication token found');
   }
 
-  const response = await fetch(`${API_URL}/profiles/me/`, {
+  const response = await fetch(`${AUTH_URL}/profiles/me/`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -131,7 +162,7 @@ export async function getCurrentUserProfile() {
   const username = currentUser.data.username;
   const token = localStorage.getItem('token');
 
-  const response = await fetch(`${API_URL}/profiles/${username}/`, {
+  const response = await fetch(`${AUTH_URL}/profiles/${username}/`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -149,7 +180,7 @@ export async function getCurrentUserProfile() {
 }
 
 export async function getUserProfile(username: string) {
-  const response = await fetch(`${API_URL}/profiles/${username}/`, {
+  const response = await fetch(`${AUTH_URL}/profiles/${username}/`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -171,7 +202,7 @@ export async function updateCurrentUserProfile(updateData: UpdateUserData) {
     throw new Error('No authentication token found');
   }
 
-  const response = await fetch(`${API_URL}/profiles/me/`, {
+  const response = await fetch(`${AUTH_URL}/profiles/me/`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -198,7 +229,7 @@ export async function updateUserAvatar(avatarFile: File) {
   const formData = new FormData();
   formData.append('avatar', avatarFile);
 
-  const response = await fetch(`${API_URL}/profiles/avatar/`, {
+  const response = await fetch(`${AUTH_URL}/profiles/avatar/`, {
     method: 'PATCH',
     headers: {
       // Don't set Content-Type header - let browser set it with boundary for FormData
@@ -215,3 +246,132 @@ export async function updateUserAvatar(avatarFile: File) {
   const data = await response.json();
   return data.data;
 }
+
+export async function changePassword(passwordData: ChangePasswordData) {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    throw new Error('No authentication token found');
+  }
+
+  const response = await fetch(`${AUTH_URL}/passwords/change/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(passwordData),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+
+  const data = await response.json();
+  return data;
+}
+
+export async function requestPasswordReset(email: string) {
+  const response = await fetch(`${AUTH_URL}/passwords/reset/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+
+  const data = await response.json();
+
+  localStorage.setItem('email', email);
+
+  return data;
+}
+
+export async function verifyPasswordResetOtp(otpData: VerifyOtpData) {
+  const response = await fetch(`${AUTH_URL}/passwords/reset/verify/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(otpData),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+
+  const data = await response.json();
+  localStorage.removeItem('email');
+  return data;
+}
+
+export async function completePasswordReset(
+  resetData: PasswordResetCompleteData
+) {
+  const response = await fetch(`${AUTH_URL}/passwords/reset/complete/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(resetData),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+
+  const data = await response.json();
+  return data;
+}
+
+export async function initiateGoogleSignup() {
+  const response = await fetch(`${AUTH_URL}/signup/google/`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+
+  // Step 2: Get Google OAuth URL
+  const data = await response.json();
+  const googleAuthUrl = data.data.authorization_url;
+
+  // Step 3: Redirect user to Google OAuth page
+  window.location.href = googleAuthUrl;
+  // User will be redirected to Google, then back to your callback URL
+}
+
+export async function initiateGoogleLogin() {
+  const response = await fetch(`${AUTH_URL}/login/google/`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+
+  // Step 2: Get Google OAuth URL
+  const data = await response.json();
+  const googleAuthUrl = data.data.authorization_url;
+
+  // Step 3: Redirect to Google OAuth
+  window.location.href = googleAuthUrl;
+}
+
+// TODO: HANDLING GOOGLE CALLBACK FOR FRONTEND NOT TO SEE UGLY DRF SREEN
