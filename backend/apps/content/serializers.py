@@ -11,7 +11,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Category  
+        model = models.Category
         fields = ["id", "name", "desc", "slug"]
 
 
@@ -52,6 +52,32 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     def get_reaction_counts(self, obj):
         return obj.reaction_counts
+
+
+class ArticleCreateDraftSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Article
+        fields = [
+            "title",
+            "content",
+        ]
+        # TODO: Editor will add it to the right category
+
+    def create(self, validated_data):
+        # Get the authenticated user's profile
+        user = self.context["request"].user
+
+        # Create the author and associate it with the user
+        article = models.Article.objects.create(author=user, **validated_data)
+        return article
+
+
+class ArticleAvatarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Article
+        fields = [
+            "cover_image",
+        ]
 
 
 class ArticleReaction(serializers.ModelSerializer):

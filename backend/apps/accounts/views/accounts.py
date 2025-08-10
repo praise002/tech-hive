@@ -1,7 +1,7 @@
 import logging
 
 from apps.accounts.emails import SendEmail
-from apps.accounts.models import Otp, User, UserRoleChoices
+from apps.accounts.models import Otp, User
 from apps.accounts.permissions import IsUnauthenticated
 from apps.accounts.schema_examples import (
     AVATAR_UPDATE_RESPONSE_EXAMPLE,
@@ -62,11 +62,9 @@ tags = ["Auth"]
 # Anyone that signs up automatically has User group
 def assign_user_to_group(user):
     """Example: Assign a new user to the 'Author' group."""
-    role = user.role
-    if role == UserRoleChoices.USER:
-        role_name = "Author"
-        group = Group.objects.get(name=role_name)
-        user.groups.add(group)
+    role_name = "Contributor"
+    group = Group.objects.get(name=role_name)
+    user.groups.add(group)
 
 
 class RegisterView(APIView):

@@ -53,3 +53,5 @@ TAG_RESPONSE_EXAMPLE = {
         ],
     ),
 }
+
+ARTICLE_LIST_RESPONSE_EXAMPLE = {}

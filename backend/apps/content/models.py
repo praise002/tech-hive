@@ -6,14 +6,15 @@ from django.db import models
 from django.db.models import Count
 from django.utils import timezone
 
+
 class PublishedManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset()\
-                     .filter(status=ArticleStatusChoices.PUBLISHED)
+        return super().get_queryset().filter(status=ArticleStatusChoices.PUBLISHED)
+
 
 class Tag(BaseModel):
     name = models.CharField(max_length=20)
-    
+
     def __str__(self):
         return self.name
 
@@ -29,7 +30,7 @@ class Category(BaseModel):
     name = models.CharField(max_length=250)
     slug = AutoSlugField(populate_from="name", unique=True, always_update=True)
     desc = models.TextField()
-    
+
     class Meta:
         ordering = ["name"]
         indexes = [
@@ -43,8 +44,13 @@ class Category(BaseModel):
 
 class Article(BaseModel):
     category = models.ForeignKey(
-        Category, related_name="articles", on_delete=models.SET_NULL, null=True, blank=True
+        Category,
+        related_name="articles",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
     )
+
     title = models.CharField(max_length=250)
     slug = AutoSlugField(populate_from="title", unique=True, always_update=True)
     content = (
@@ -66,12 +72,30 @@ class Article(BaseModel):
         on_delete=models.CASCADE,
         related_name="authored_articles",
     )
-    
-    objects = models.Manager() 
-    published = PublishedManager() 
+    current_editor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        related_name="assigned_articles",
+        limit_choices_to={"groups__name": "Editor"},
+        on_delete=models.SET_NULL,
+    )
+
+    objects = models.Manager()
+    published = PublishedManager()
 
     def __str__(self):
         return self.title
+
+    # TODO:
+    def calculate_read_time(content):
+        """
+        Calculate read time with consideration for:
+        - Code blocks (read slower)
+        - Images (add time)
+        - Lists (read faster)
+        """
+        pass
 
     @property
     def cover_image_url(self):
@@ -101,11 +125,13 @@ class Article(BaseModel):
         ]
         permissions = [
             ("can_publish_article", "Can publish article"),
-            ("can_archive_techive_article", "Can archive techive article"),
             ("can_request_revisions", "Can request revisions"),
+            ("can_assign_categories", "Can assign categories"),
             ("can_submit_for_review", "Can submit for review"),
-            ("can_approve_for_publishing", "Can approve for publishing"),
             ("can_withdraw_from_review", "Can withdraw from review"),
+            ("can_feature_article", "Can feature article"),
+            ("can_assign_editor", "Can assign editors to articles"),
+            ("can_reassign_editor", "Can reassign articles to different editors"),
         ]
 
 
@@ -146,6 +172,16 @@ class SavedArticle(BaseModel):
 
     def __str__(self):
         return self.article.name
+
+
+class AssignmentLog(models.Model):  # Simple history tracking
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    old_editor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="+", null=True
+    )
+    new_editor = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="+")
+    changed_at = models.DateTimeField(auto_now_add=True)
+    changed_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="+")
 
 
 class Comment(BaseModel):

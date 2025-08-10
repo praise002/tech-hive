@@ -3,6 +3,7 @@ from apps.common.responses import CustomResponse
 from apps.content.models import Article, Category, Tag
 from apps.content.schema_examples import CATEGORY_RESPONSE_EXAMPLE, TAG_RESPONSE_EXAMPLE
 from apps.content.serializers import (
+    ArticleCreateDraftSerializer,
     ArticleSerializer,
     CategorySerializer,
     TagSerializer,
@@ -126,6 +127,16 @@ class ArticleGenericView(ListCreateAPIView):
     filter_backends = (DjangoFilterBackend, SearchFilter)
     search_fields = ["title", "content"]
     pagination_class = DefaultPagination
+    
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAuthenticated()]
+    
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return ArticleCreateDraftSerializer
+        return ArticleSerializer
 
     @extend_schema(
         summary="Retrieve a list of articles",

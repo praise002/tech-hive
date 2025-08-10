@@ -1,9 +1,8 @@
 import uuid
 from datetime import timedelta
 
-from autoslug import AutoSlugField
-
 from apps.common.models import BaseModel, IsDeletedModel
+from autoslug import AutoSlugField
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
@@ -11,14 +10,9 @@ from django.utils import timezone
 
 from .managers import CustomUserManager
 
+
 def slugify_two_fields(self):
     return f"{self.first_name}-{self.last_name}"
-
-class UserRoleChoices(models.TextChoices):
-    EDITOR = "editor", "Editor"
-    REVIEWER = "reviewer", "Reviewer"
-    MANAGER = "manager", "Manager"
-    USER = "user", "User"
 
 
 class User(AbstractBaseUser, IsDeletedModel, PermissionsMixin):
@@ -41,9 +35,6 @@ class User(AbstractBaseUser, IsDeletedModel, PermissionsMixin):
     updated_at = models.DateTimeField(auto_now=True)
 
     avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
-    role = models.CharField(
-        max_length=20, choices=UserRoleChoices.choices, default=UserRoleChoices.USER
-    )
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["first_name", "last_name"]

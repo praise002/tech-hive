@@ -7,25 +7,16 @@ class Command(BaseCommand):
     help = "Creates default roles (Author, Editor, Manager) and assigns permissions."
 
     def handle(self, *args, **options):
-
-        author_group, _ = Group.objects.get_or_create(name="Author")
-        reviewer_group, _ = Group.objects.get_or_create(name="Reviewer")
+        contributor_group, _ = Group.objects.get_or_create(name="Author")
         editor_group, _ = Group.objects.get_or_create(name="Editor")
         manager_group, _ = Group.objects.get_or_create(name="Manager")
 
-        author_perms = [
+        contributor_perms = [
             "can_submit_for_review",
             "can_withdraw_from_review",
         ]
-        for perm in author_perms:
-            author_group.permissions.add(Permission.objects.get(codename=perm))
-
-        reviewer_perms = [
-            "can_approve_for_publishing",
-            "can_request_revisions",
-        ]
-        for perm in reviewer_perms:
-            reviewer_group.permissions.add(Permission.objects.get(codename=perm))
+        for perm in contributor_perms:
+            contributor_group.permissions.add(Permission.objects.get(codename=perm))
 
         editor_perms = [
             "can_publish_article",
