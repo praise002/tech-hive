@@ -9,7 +9,7 @@ import {
 } from '../../../types/auth';
 import { API_URL } from '../../../utils/constants';
 
-const AUTH_URL = `${API_URL}/auth`;
+export const AUTH_URL = `${API_URL}/auth`;
 
 export async function register(userData: RegisterUserData): Promise<RegisterResponse> {
   const response = await fetch(`${AUTH_URL}/register/`, {
@@ -373,6 +373,26 @@ export async function initiateGoogleLogin() {
 
   // Step 3: Redirect to Google OAuth
   window.location.href = googleAuthUrl;
+}
+
+export async function fetchTokens(state: string, fullUrl: string) {
+  if (!state) throw new Error('Missing state');
+
+  
+  console.log('Full url for backend: ', fullUrl);
+  const apiUrl = new URL(`${AUTH_URL}/google/callback/signup`);
+  apiUrl.searchParams.append('state', state);
+  apiUrl.searchParams.append('auth_uri', fullUrl);
+  console.log('API url for backend: ', apiUrl);
+
+  const response = await fetch(apiUrl);
+
+  if (!response.ok) {
+    throw new Error(`HTTP error!  status: ${response.status}`);
+  }
+
+  const jsonData = await response.json();
+  return jsonData.data;  // Return the data with tokens
 }
 
 // TODO: HANDLING GOOGLE CALLBACK FOR FRONTEND NOT TO SEE UGLY DRF SREEN

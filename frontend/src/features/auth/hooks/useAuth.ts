@@ -1,24 +1,28 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import {
   register as registerApi,
   login as loginApi,
-  getCurrentUser,
 } from '../services/apiAuth';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { LoginUserData } from '../../../types/auth';
 
 export function useRegister() {
-  const { mutate: register, isPending } = useMutation({
+  const navigate = useNavigate();
+
+  const { mutate: register, isPending, error } = useMutation({
     mutationFn: registerApi,
     onSuccess: (data) => {
       console.log(data); // TODO: REMOVE later
-      // TODO: Navigate to page to input OTP
       toast.success(data?.message);
+      // Navigate to page to input OTP
+      navigate('/verify-email');
     },
-    // TODO: ONERROR
+    onError: (error) => {
+      console.error('Registration error:', error);
+    },
   });
-  return { register, isPending };
+  return { register, isPending, error };
 }
 
 export function useLogin() {
@@ -37,4 +41,37 @@ export function useLogin() {
   });
 
   return { login, isPending };
+}
+
+// TODO: FIX LATER
+export function useGoogleCallback(fetchTokens: () => Promise<any>) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const params = new URLSearchParams(location.search);
+  const state = params.get('state');
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['googleCallback', state],
+    queryFn: fetchTokens,
+    enabled: !!state,
+    staleTime: Infinity,
+    // cacheTime: 0,
+    refetchOnMount: false,
+    // refetchOnWindowsFocus: false,
+    retry: false,
+  });
+
+  if (data) {
+    const { refresh, access } = data;
+    localStorage.setItem('refreshToken', refresh);
+    localStorage.setItem('accessToken', access);
+    navigate('/');
+  }
+
+  if (isError) {
+    navigate(''); // TODO: LATER
+  }
+
+  return { isLoading };
 }

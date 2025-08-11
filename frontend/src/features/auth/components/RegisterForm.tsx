@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import Form from '../../../components/common/Form';
 import Button from '../../../components/common/Button';
+import { useRegister } from '../hooks/useAuth';
 
 interface RegisterFormData {
   firstName: string;
@@ -16,6 +17,9 @@ interface RegisterFormData {
 }
 function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const { register, isPending, error } = useRegister();
+  console.log(isPending, error);
+  // TODO: FINISH IT
 
   function togglePasswordVisibility() {
     setShowPassword(!showPassword);
@@ -66,16 +70,22 @@ function RegisterForm() {
       rules: {
         required: 'Password is required',
         minLength: {
-          value: 6,
-          message: 'Password must be at least 6 characters',
+          value: 8,
+          message: 'Password must be at least 8 characters',
         },
       },
     },
   ];
-  const handleFormSubmit = (data: RegisterFormData, reset: () => void) => {
+  const handleFormSubmit = (data: RegisterFormData) => {
     console.log('Form Data:', data);
-    alert('Form Submitted successfully!');
-    reset();
+    const registerData = {
+      first_name: data.firstName,
+      last_name: data.lastName,
+      email: data.email,
+      password: data.password,
+    };
+    register(registerData);
+    
   };
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-20 flex flex-col md:flex-row">
