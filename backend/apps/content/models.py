@@ -21,7 +21,11 @@ class Tag(BaseModel):
 
 class ArticleStatusChoices(models.TextChoices):
     DRAFT = "draft", "Draft"
-    SUBMITTED = "submitted", "Submitted"
+    SUBMITTED_FOR_REVIEW = "submitted_for_review", "Submitted for Review"
+    UNDER_REVIEW = "under_review", "Under Review"
+    CHANGES_REQUESTED = "changes_requested", "Changes Requested"
+    REVIEW_COMPLETED = "review_completed", "Review Completed"
+    READY = "ready_for_publishing", "Ready for Publishing"
     PUBLISHED = "published", "Published"
     ARCHIVED = "archived", "Archived"
 
@@ -72,14 +76,6 @@ class Article(BaseModel):
         on_delete=models.CASCADE,
         related_name="authored_articles",
     )
-    current_editor = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        null=True,
-        blank=True,
-        related_name="assigned_articles",
-        limit_choices_to={"groups__name": "Editor"},
-        on_delete=models.SET_NULL,
-    )
 
     objects = models.Manager()
     published = PublishedManager()
@@ -123,16 +119,6 @@ class Article(BaseModel):
         indexes = [
             models.Index(fields=["-title"]),
         ]
-        permissions = [
-            ("can_publish_article", "Can publish article"),
-            ("can_request_revisions", "Can request revisions"),
-            ("can_assign_categories", "Can assign categories"),
-            ("can_submit_for_review", "Can submit for review"),
-            ("can_withdraw_from_review", "Can withdraw from review"),
-            ("can_feature_article", "Can feature article"),
-            ("can_assign_editor", "Can assign editors to articles"),
-            ("can_reassign_editor", "Can reassign articles to different editors"),
-        ]
 
 
 class ArticleReaction(BaseModel):
@@ -152,11 +138,11 @@ class ArticleReaction(BaseModel):
     )
     reaction_type = models.CharField(max_length=20, choices=EMOJI_CHOICES)
 
-    # class Meta:
-    #     unique_together = ("user", "article", "emoji")
+    class Meta:
+        unique_together = ("user", "article", "reaction_type")
 
     def __str__(self):
-        return self.article.title
+        return f"{self.user} {self.reaction_type} {self.article}"
 
 
 class SavedArticle(BaseModel):
@@ -169,22 +155,34 @@ class SavedArticle(BaseModel):
         Article, on_delete=models.CASCADE, related_name="saved_by_user"
     )
     saved_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ("article", "user")
 
     def __str__(self):
-        return self.article.name
+        return self.article.title
 
 
-class AssignmentLog(models.Model):  # Simple history tracking
-    article = models.ForeignKey(Article, on_delete=models.CASCADE)
-    old_editor = models.ForeignKey(
-        settings.AUTH_USER_MODEL, related_name="+", null=True
+class ArticleReview(BaseModel):
+    article = models.ForeignKey(
+        Article, on_delete=models.CASCADE, related_name="reviews"
     )
-    new_editor = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="+")
-    changed_at = models.DateTimeField(auto_now_add=True)
-    changed_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="+")
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="article_reviews",
+        on_delete=models.CASCADE,
+    )
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ("article", "is_active")
+
+    def __str__(self):
+        return f"Review of {self.article} by {self.reviewed_by}"
 
 
 class Comment(BaseModel):
+    # TODO: Threaded comments
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -196,7 +194,7 @@ class Comment(BaseModel):
     text = models.CharField(max_length=250)
 
     def __str__(self):
-        return f"{self.user.name} comments on {self.user.article}"
+        return f"{self.user.full_name} comments on {self.article}"
 
 
 class Job(BaseModel):

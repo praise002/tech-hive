@@ -14,7 +14,8 @@ from apps.common.responses import CustomResponse
 class GoogleOAuth2LoginCallbackView(APIView):
 
     def get(self, request):
-        redirect_uri = request.build_absolute_uri(reverse("google_login_callback"))
+        # redirect_uri = request.build_absolute_uri(reverse("google_login_callback"))
+        redirect_uri = "http://localhost:5173/auth/google/callback"
         auth_uri = request.build_absolute_uri()
 
         state = request.query_params.get("state")

@@ -68,3 +68,6 @@ redis:
 
 celery:
 	celery -A tech_hive worker -l info --pool=solo
+
+ngrok:
+	ngrok http 9000

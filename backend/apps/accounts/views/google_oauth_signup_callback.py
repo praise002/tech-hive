@@ -20,7 +20,8 @@ logger = logging.getLogger(__name__)
 class GoogleOAuth2SignUpCallbackView(APIView):
 
     def get(self, request):
-        redirect_uri = request.build_absolute_uri(reverse("google_signup_callback"))
+        # redirect_uri = request.build_absolute_uri(reverse("google_signup_callback"))
+        redirect_uri = "http://localhost:5173/auth/google/callback"
         auth_uri = request.build_absolute_uri()
         state = request.query_params.get("state")
 

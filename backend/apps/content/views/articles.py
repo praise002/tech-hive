@@ -1,67 +1,16 @@
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
-from apps.content.models import Article, Category, Tag
-from apps.content.schema_examples import CATEGORY_RESPONSE_EXAMPLE, TAG_RESPONSE_EXAMPLE
-from apps.content.serializers import (
-    ArticleCreateDraftSerializer,
-    ArticleSerializer,
-    CategorySerializer,
-    TagSerializer,
-)
+from apps.content.models import Article, Tag
+from apps.content.schema_examples import TAG_RESPONSE_EXAMPLE
+from apps.content.serializers import ArticleSerializer, TagSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
 from rest_framework import status
-from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView, ListCreateAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 
-category_tags = ["Categories"]
 article_tags = ["Articles"]
-
-
-class CategoryGenericView(ListAPIView):
-    serializer_class = CategorySerializer
-    pagination_class = DefaultPagination
-    filter_backends = (SearchFilter, OrderingFilter)
-    search_fields = ["name"]
-    ordering_fields = ["name"]  # TODO: Add by popularity later
-    # ordering = ["name"] # might not need use tyhe model default ordering
-    queryset = Category.objects.all()
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            paginated_data = self.get_paginated_response(serializer.data)
-            return CustomResponse.success(
-                message="Categories retrieved successfully.",
-                data=paginated_data.data,
-                status_code=status.HTTP_200_OK,
-            )
-
-        serializer = self.get_serializer(queryset, many=True)
-        return CustomResponse.success(
-            message="Categories retrieved successfully.",
-            data=serializer.data,
-            status_code=status.HTTP_200_OK,
-        )
-
-    @extend_schema(
-        summary="List all categories",
-        description="Retrieve a list of all blog categories. Categories are broad groupings used to organize articles and help users browse content by topic.",
-        tags=category_tags,
-        responses=CATEGORY_RESPONSE_EXAMPLE,
-        auth=[],
-    )
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
-
-
-# TODO: RETURN ARTICLE WITH IT'S TAGS,
-# TODO: FOR POST, IT CONVERTS THE TAGS TO LOWERCASE THEN POST IT
 
 
 class TagGenericView(ListAPIView):
@@ -119,6 +68,10 @@ class TagGenericView(ListAPIView):
         return self.list(request, *args, **kwargs)
 
 
+# TODO: RETURN ARTICLE WITH IT'S TAGS,
+# TODO: FOR POST, IT CONVERTS THE TAGS TO LOWERCASE THEN POST IT
+
+
 # Article Management Endpoints
 class ArticleGenericView(ListCreateAPIView):
     # List published article
@@ -127,16 +80,6 @@ class ArticleGenericView(ListCreateAPIView):
     filter_backends = (DjangoFilterBackend, SearchFilter)
     search_fields = ["title", "content"]
     pagination_class = DefaultPagination
-    
-    def get_permissions(self):
-        if self.request.method == "GET":
-            return [AllowAny()]
-        return [IsAuthenticated()]
-    
-    def get_serializer_class(self):
-        if self.request.method == "POST":
-            return ArticleCreateDraftSerializer
-        return ArticleSerializer
 
     @extend_schema(
         summary="Retrieve a list of articles",
@@ -177,13 +120,6 @@ class ArticleGenericView(ListCreateAPIView):
             status_code=status.HTTP_200_OK,
         )
 
-    # Create new draft
-    def post(self, request):
-        pass
-
-    def patch(self, request):
-        pass
-
 
 class ArticleRetrieveView(APIView):
     # Published article, owner/staff - unpublished(draft)
@@ -192,53 +128,7 @@ class ArticleRetrieveView(APIView):
         pass
 
 
-class ArticleSubmitView(APIView):
-    # /api/articles/{id}/submit/ - is it restful?
-    # Submit draft for review - owner
-    def post(self, request):
-        pass
-
-
-class ArticleWithdrawView(APIView):
-    # /api/articles/{id}/withdraw/ - is it restful?
-    # Withdraw from review - owner
-    def post(self, request):
-        pass
-
-
-class ArticlePublishView(APIView):
-    # /api/articles/{id}/publish/ - is it restful?
-    # Publish article - Editor/Manager
-    def post(self, request):
-        pass
-
-
-class ArticlePublishView(APIView):
-    # /api/articles/{id}/archive/ - is it restful?
-    # Archive article -	Manager/Owner of article
-    def post(self, request):
-        pass
-
-
-# Review Workflow Endpoints
-class ArticleRequestChangesView(APIView):
-    # /api/articles/{id}/request-changes/ - is it restful?
-    # Request revisions - Reviewer
-    def post(self, request):
-        pass
-
-
-class ArticleApproveToEditView(APIView):
-    # /api/articles/{id}/approve/ - is it restful?
-    # Approve for publishing - Reviewer
-    def post(self, request):
-        pass
-
-
-# /api/articles/{id}/comments/	GET	List comments	Participant
-# /api/articles/{id}/comments/	POST	Add comment	Reviewer/Editor/Manager
-
-
+# Do for every content
 class RSSFeedInfoView(APIView):
     @extend_schema(
         summary="RSS Feed Information",
