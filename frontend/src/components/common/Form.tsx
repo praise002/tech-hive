@@ -20,6 +20,7 @@ interface FormProps<T> {
   children: React.ReactNode;
   onClick?: () => void;
   className?: string;
+  isLoading?: boolean;
 }
 
 function Form<T extends FieldValues>({
@@ -28,6 +29,7 @@ function Form<T extends FieldValues>({
   children,
   onClick,
   className,
+  isLoading,
 }: FormProps<T>) {
   const {
     register,
@@ -51,6 +53,7 @@ function Form<T extends FieldValues>({
           {/* Render the input field */}
           <input
             {...register(input.name, input.rules)} // Apply validation rules
+            disabled={isLoading}
             id={input.id || input.name}
             placeholder={input.placeholder || ''}
             type={input.type || 'text'}
@@ -79,7 +82,7 @@ function Form<T extends FieldValues>({
       ))}
 
       {/* Submit button */}
-      <Button type="submit" onClick={onClick} className={className}>
+      <Button type="submit" disabled={isLoading} onClick={onClick} className={className}>
         {children}
       </Button>
     </form>

@@ -85,7 +85,6 @@ function RegisterForm() {
       password: data.password,
     };
     register(registerData);
-    
   };
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-20 flex flex-col md:flex-row">
@@ -111,8 +110,13 @@ function RegisterForm() {
           </div>
         </div>
 
-        <Form inputs={inputs} onSubmit={handleFormSubmit} className="w-full">
-          Register
+        <Form
+          inputs={inputs}
+          onSubmit={handleFormSubmit}
+          isLoading={isPending}
+          className="w-full"
+        >
+          {isPending ? 'Creating Account...' : 'Register'}
         </Form>
 
         <div className="my-4 flex items-center gap-2">
