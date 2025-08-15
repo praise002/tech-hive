@@ -5,10 +5,31 @@ import { FaRegBookmark } from 'react-icons/fa6';
 import Text from '../../components/common/Text';
 import { useState } from 'react';
 import Articles from '../../components/sections/Articles';
-import { BsFillArchiveFill } from 'react-icons/bs';
+import { useProfile } from './useProfile';
+import Spinner from '../../components/common/Spinner';
+// import { BsFillArchiveFill } from 'react-icons/bs';
 
 function ProfileDetail() {
   const [isActiveTab, setIsActiveTab] = useState('saved');
+  const { isPending, isError, profile, error } = useProfile();
+
+  const {
+    first_name: firstName,
+    last_name: lastName,
+    avatar_url: avatarUrl,
+  } = profile;
+
+  if (isPending)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Spinner />
+      </div>
+    );
+
+  if (isError) {
+    // TODO: STYLE LETER
+    return <span>Error: {error?.message}</span>;
+  }
 
   const profileTabs = [
     {
@@ -41,12 +62,12 @@ function ProfileDetail() {
       icon: <MdLibraryBooks className="w-5 h-5" />,
       published: [1005, 1006],
     },
-    {
-      id: 'archived',
-      label: 'Archived Articles',
-      icon: <BsFillArchiveFill className="w-5 h-5" />,
-      published: [1005, 1006],
-    },
+    // {
+    //   id: 'archived',
+    //   label: 'Archived Articles',
+    //   icon: <BsFillArchiveFill className="w-5 h-5" />,
+    //   published: [1005, 1006],
+    // },
   ];
 
   function SavedContent() {
@@ -317,10 +338,11 @@ function ProfileDetail() {
     );
   }
 
-  function ArchivedContent() {
-    return (
-      <>
-        {/* <div className="md:w-xs w-60 dark:text-custom-white">
+  // function ArchivedContent() {
+  //   return (
+  //     <>
+  {
+    /* <div className="md:w-xs w-60 dark:text-custom-white">
           <img
             className="w-full h-full"
             src="/assets/icons/amico.png"
@@ -329,24 +351,25 @@ function ProfileDetail() {
           <div className="text-xs md:text-sm text-center mt-4">
             No archived articles yet!
           </div>
-        </div> */}
-        <Text
-          variant="h3"
-          size="lg"
-          bold={false}
-          className="font-semibold mb-1 md:text-2xl dark:text-custom-white lg:mt-4 px-4 lg:px-8"
-        >
-          Archived Articles
-        </Text>
-        <Articles
-          marginTop={8}
-          visibleHeader={false}
-          showAdminActions={true}
-          context="archived"
-        />
-      </>
-    );
+        </div> */
   }
+  //       <Text
+  //         variant="h3"
+  //         size="lg"
+  //         bold={false}
+  //         className="font-semibold mb-1 md:text-2xl dark:text-custom-white lg:mt-4 px-4 lg:px-8"
+  //       >
+  //         Archived Articles
+  //       </Text>
+  //       <Articles
+  //         marginTop={8}
+  //         visibleHeader={false}
+  //         showAdminActions={true}
+  //         context="archived"
+  //       />
+  //     </>
+  //   );
+  // }
 
   function getContent() {
     switch (isActiveTab) {
@@ -360,8 +383,8 @@ function ProfileDetail() {
         return <SubmittedContent />;
       case 'published':
         return <PublishedContent />;
-      case 'archived':
-        return <ArchivedContent />;
+      // case 'archived':
+      //   return <ArchivedContent />;
       default:
         return null;
     }
@@ -381,8 +404,8 @@ function ProfileDetail() {
             <div className="relative">
               <img
                 className="w-20 h-20 md:w-40 md:h-40"
-                src="/assets/icons/Avatars.png"
-                alt="Elizabeth Stone's profile picture"
+                src={avatarUrl || "/assets/icons/Avatars.png"}
+                alt={`${firstName} ${lastName}'s profile picture` || "Elizabeth Stone's profile picture"}
               />
             </div>
           </div>
@@ -394,7 +417,7 @@ function ProfileDetail() {
               bold={false}
               className="font-semibold mb-1 text-gray-900 dark:text-custom-white"
             >
-              Elizabeth Stone
+              {`${firstName} ${lastName}` || 'Elizabeth Stone'}
             </Text>
             <p className="text-secondary text-sm">Joined 27th January 2025</p>
           </div>

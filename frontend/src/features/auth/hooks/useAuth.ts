@@ -59,7 +59,7 @@ export function useGoogleCallback(fetchTokens: () => Promise<any>) {
     // cacheTime: 0,
     refetchOnMount: false,
     // refetchOnWindowsFocus: false,
-    retry: false,
+    retry: false,  // default=3
   });
 
   if (data) {

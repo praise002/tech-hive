@@ -4,14 +4,15 @@ import {
   PasswordResetCompleteData,
   RegisterResponse,
   RegisterUserData,
-  UpdateUserData,
   VerifyOtpData,
 } from '../../../types/auth';
 import { API_URL } from '../../../utils/constants';
 
 export const AUTH_URL = `${API_URL}/auth`;
 
-export async function register(userData: RegisterUserData): Promise<RegisterResponse> {
+export async function register(
+  userData: RegisterUserData
+): Promise<RegisterResponse> {
   const response = await fetch(`${AUTH_URL}/register/`, {
     method: 'POST',
     headers: {
@@ -125,123 +126,6 @@ export async function logoutAll() {
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.message || 'Logout failed');
-  }
-
-  const data = await response.json();
-  return data.data;
-}
-
-// to display /account
-export async function getCurrentUser() {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    throw new Error('No authentication token found');
-  }
-
-  const response = await fetch(`${AUTH_URL}/profiles/me/`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    localStorage.removeItem('token');
-    localStorage.removeItem('refresh');
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to fetch user');
-  }
-
-  const data = await response.json();
-  return data.data;
-}
-
-// to display /profile
-export async function getCurrentUserProfile() {
-  const currentUser = await getCurrentUser();
-  const username = currentUser.data.username;
-  const token = localStorage.getItem('token');
-
-  const response = await fetch(`${AUTH_URL}/profiles/${username}/`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to get current user profile');
-  }
-
-  const data = await response.json();
-  return data.data;
-}
-
-export async function getUserProfile(username: string) {
-  const response = await fetch(`${AUTH_URL}/profiles/${username}/`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to fetch user');
-  }
-
-  const data = await response.json();
-  return data.data;
-}
-
-export async function updateCurrentUserProfile(updateData: UpdateUserData) {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    throw new Error('No authentication token found');
-  }
-
-  const response = await fetch(`${AUTH_URL}/profiles/me/`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(updateData),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw error;
-  }
-
-  const data = await response.json();
-  return data.data;
-}
-
-export async function updateUserAvatar(avatarFile: File) {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    throw new Error('No authentication token found');
-  }
-
-  const formData = new FormData();
-  formData.append('avatar', avatarFile);
-
-  const response = await fetch(`${AUTH_URL}/profiles/avatar/`, {
-    method: 'PATCH',
-    headers: {
-      // Don't set Content-Type header - let browser set it with boundary for FormData
-      Authorization: `Bearer ${token}`,
-    },
-    body: formData,
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw error; // Throw the whole error object for validation errors
   }
 
   const data = await response.json();
@@ -378,7 +262,6 @@ export async function initiateGoogleLogin() {
 export async function fetchTokens(state: string, fullUrl: string) {
   if (!state) throw new Error('Missing state');
 
-  
   console.log('Full url for backend: ', fullUrl);
   const apiUrl = new URL(`${AUTH_URL}/google/callback/signup`);
   apiUrl.searchParams.append('state', state);
@@ -392,7 +275,7 @@ export async function fetchTokens(state: string, fullUrl: string) {
   }
 
   const jsonData = await response.json();
-  return jsonData.data;  // Return the data with tokens
+  return jsonData.data; // Return the data with tokens
 }
 
 // TODO: HANDLING GOOGLE CALLBACK FOR FRONTEND NOT TO SEE UGLY DRF SREEN

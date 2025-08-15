@@ -218,3 +218,7 @@ export interface TagInputProps {
   onInputKeyDown?: (e: KeyboardEvent) => void;
   maxTags?: number;
 }
+
+export interface ProtectedRouteProps {
+  children: React.ReactNode;
+}

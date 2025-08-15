@@ -39,6 +39,7 @@ import CampusKart from './pages/CampusKart';
 import ArticleList from './features/articles/ArticleList';
 import ArticleDetail from './features/articles/ArticleDetail';
 import VerifyEmail from './features/auth/pages/VerifyEmail';
+import ProtectedRoute from './components/common/ProtectedRoute';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -81,23 +82,32 @@ function App() {
             <Route path="about" element={<About />} />
             <Route path="contact" element={<Contact />} />
 
-            <Route path="new" element={<Liveblock />} />
-            <Route path="profile" element={<ProfileDetail />} />
-
-            <Route path="account" element={<AccountDetail />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
+            <Route path="profile" element={<ProfileDetail />} />
             <Route path="verify-email" element={<VerifyEmail />} />
             <Route path="auth/google/callback" element={<Register />} />
-            <Route path="change-password" element={<ChangePassword />} />
+
             <Route path="reset-password" element={<ResetPassword />} />
             <Route
               path="reset-password-success"
               element={<ResetPasswordSuccess />}
             />
 
-            <Route path="admin" element={<AdminDashboard />} />
             <Route path="docs" element={<Docs />} />
+          </Route>
+
+          <Route
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="new" element={<Liveblock />} />
+            <Route path="account" element={<AccountDetail />} />
+            <Route path="change-password" element={<ChangePassword />} />
+            <Route path="admin" element={<AdminDashboard />} />
           </Route>
 
           {/* Catch-all route for 404 errors */}
