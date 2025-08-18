@@ -1,12 +1,18 @@
-import { useForm, FieldValues, Path } from 'react-hook-form';
+import {
+  useForm,
+  FieldValues,
+  Path,
+  UseFormSetError,
+  RegisterOptions,
+} from 'react-hook-form';
 
 import Button from './Button';
 
-interface Inputs<T> {
+interface Inputs<T extends FieldValues> {
   name: Path<T>;
   placeholder?: string;
   type?: string;
-  rules: Record<string, T>;
+  rules: RegisterOptions<T, Path<T>>;
   id?: string;
   onIconClick?: () => void;
   iconAriaLabel?: string;
@@ -14,9 +20,9 @@ interface Inputs<T> {
   ariaLabel?: string;
 }
 
-interface FormProps<T> {
+interface FormProps<T extends FieldValues> {
   inputs: Inputs<T>[];
-  onSubmit: (data: T, reset: () => void) => void;
+  onSubmit: (data: T, setError: UseFormSetError<T>, reset?: () => void) => void;
   children: React.ReactNode;
   onClick?: () => void;
   className?: string;
@@ -34,6 +40,7 @@ function Form<T extends FieldValues>({
   const {
     register,
     handleSubmit,
+    setError,
     reset,
     formState: { errors },
   } = useForm<T>();
@@ -41,7 +48,7 @@ function Form<T extends FieldValues>({
   // Handle form submission
   function submitForm(data: T) {
     if (onSubmit) {
-      onSubmit(data, reset); // Call the parent's onSubmit function
+      onSubmit(data, setError, reset); // Call the parent's onSubmit function
     }
   }
 
@@ -58,7 +65,9 @@ function Form<T extends FieldValues>({
             placeholder={input.placeholder || ''}
             type={input.type || 'text'}
             aria-label={input.ariaLabel}
-            className="appearance-none block w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-800 focus-visible:border-gray-800"
+            className={`appearance-none block w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-800 focus-visible:border-gray-800 ${
+              input.icon ? 'pr-12' : ''
+            }`}
           />
 
           {input.icon && (
@@ -66,7 +75,8 @@ function Form<T extends FieldValues>({
               type="button"
               onClick={input.onIconClick}
               aria-label={input.iconAriaLabel || 'Toggle field options'}
-              className="absolute right-3 top-1/2 -translate-y-1/2"
+              // className="absolute right-3 top-1/2 -translate-y-1/2"
+              className="absolute right-3 top-2 flex items-center justify-center w-6 h-6"
             >
               {input.icon}
             </button>
@@ -82,7 +92,12 @@ function Form<T extends FieldValues>({
       ))}
 
       {/* Submit button */}
-      <Button type="submit" disabled={isLoading} onClick={onClick} className={className}>
+      <Button
+        type="submit"
+        disabled={isLoading}
+        onClick={onClick}
+        className={className}
+      >
         {children}
       </Button>
     </form>

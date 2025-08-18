@@ -8,21 +8,19 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { LoginUserData } from '../../../types/auth';
 
 export function useRegister() {
-  const navigate = useNavigate();
-
-  const { mutate: register, isPending, error } = useMutation({
+  const {
+    mutate: register,
+    isPending,
+    isError,
+    error,
+  } = useMutation({
     mutationFn: registerApi,
-    onSuccess: (data) => {
-      console.log(data); // TODO: REMOVE later
-      toast.success(data?.message);
-      // Navigate to page to input OTP
-      navigate('/verify-email');
-    },
+    onSuccess: () => {},
     onError: (error) => {
       console.error('Registration error:', error);
     },
   });
-  return { register, isPending, error };
+  return { register, isPending, isError, error };
 }
 
 export function useLogin() {
@@ -59,7 +57,7 @@ export function useGoogleCallback(fetchTokens: () => Promise<any>) {
     // cacheTime: 0,
     refetchOnMount: false,
     // refetchOnWindowsFocus: false,
-    retry: false,  // default=3
+    retry: false, // default=3
   });
 
   if (data) {

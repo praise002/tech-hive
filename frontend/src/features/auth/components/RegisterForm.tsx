@@ -2,12 +2,14 @@ import { IoEye, IoEyeOff } from 'react-icons/io5';
 
 import { FcGoogle } from 'react-icons/fc';
 import { FaApple } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { useState } from 'react';
 import Form from '../../../components/common/Form';
 import Button from '../../../components/common/Button';
 import { useRegister } from '../hooks/useAuth';
+import toast from 'react-hot-toast';
+import { RegisterOptions, UseFormSetError } from 'react-hook-form';
 
 interface RegisterFormData {
   firstName: string;
@@ -15,11 +17,11 @@ interface RegisterFormData {
   email: string;
   password: string;
 }
+
 function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const { register, isPending, error } = useRegister();
-  console.log(isPending, error);
-  // TODO: FINISH IT
+  const { register, isPending } = useRegister();
+  const navigate = useNavigate();
 
   function togglePasswordVisibility() {
     setShowPassword(!showPassword);
@@ -29,7 +31,7 @@ function RegisterForm() {
     name: keyof RegisterFormData;
     placeholder: string;
     type?: string;
-    rules: any;
+    rules: RegisterOptions<RegisterFormData>;
     icon?: React.ReactNode;
     onIconClick?: () => void;
     iconAriaLabel?: string;
@@ -76,16 +78,45 @@ function RegisterForm() {
       },
     },
   ];
-  const handleFormSubmit = (data: RegisterFormData) => {
-    console.log('Form Data:', data);
+  const handleFormSubmit = (
+    data: RegisterFormData,
+    setError: UseFormSetError<RegisterFormData>
+  ) => {
+    // console.log('Form Data:', data);
     const registerData = {
       first_name: data.firstName,
       last_name: data.lastName,
       email: data.email,
       password: data.password,
     };
-    register(registerData);
+    register(registerData, {
+      onSuccess: (response) => {
+        toast.success(response?.message);
+        // Navigate to page to input OTP
+        navigate('/verify-email'); // Only if still on this page
+      },
+      onError: (error: any) => {
+        // Handle field-specific errors
+        if (error?.data) {
+          const fieldMapping: Record<string, keyof RegisterFormData> = {
+            first_name: 'firstName',
+            last_name: 'lastName',
+            email: 'email',
+            password: 'password',
+          };
+
+          Object.entries(error.data).forEach(([field, message]) => {
+            const formField = fieldMapping[field] || field;
+            setError(formField as keyof RegisterFormData, {
+              type: 'server',
+              message: Array.isArray(message) ? message[0] : String(message),
+            });
+          });
+        }
+      },
+    });
   };
+
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-20 flex flex-col md:flex-row">
       <div className="md:flex-1">
