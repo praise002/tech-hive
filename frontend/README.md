@@ -131,6 +131,8 @@ A modern, collaborative platform for the tech community featuring article writin
 - [TipTap Node Selection Issue](https://stackoverflow.com/questions/78161917/updating-attributes-on-the-image-caused-the-node-to-be-deselected-in-tiptap)
 - [How to add editing image alt tiptap](https://angelika.me/2023/02/26/how-to-add-editing-image-alt-text-tiptap/)
 - [Tiptap Drag Drop Image](https://www.codemzy.com/blog/tiptap-drag-drop-image)
+- [Render server error with React hook form](https://react-hook-form.com/get-started)
+- [Mutations in React Query](https://tkdodo.eu/blog/mastering-mutations-in-react-query)
 
 ## 🚀 Getting Started
 

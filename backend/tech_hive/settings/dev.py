@@ -5,9 +5,10 @@ from datetime import timedelta
 from decouple import config
 from django.utils.log import DEFAULT_LOGGING
 
+from .base import *
+
 # http://127.0.0.1:4040/inspect/http - inspect ngrok
 
-from .base import *
 
 DEBUG = True
 
@@ -18,7 +19,7 @@ CSRF_TRUSTED_ORIGINS = ["https://*.ngrok.io", "https://*.ngrok-free.app"]
 
 CORS_ALLOWED_ORIGINS = [
     config("FRONTEND_URL_DEV"),
-    "https://tech-hive-react.vercel.app"  # TODO: REMOVE LATER
+    "https://tech-hive-react.vercel.app",  # TODO: REMOVE LATER
 ]
 
 FRONTEND_URL = config("FRONTEND_URL_DEV")
@@ -74,12 +75,38 @@ logging.config.dictConfig(
                 "maxBytes": 10485760,  # 10 MB
                 "backupCount": 5,  # Keep up to 5 backup files
             },
+            "security_file": {
+                "level": "INFO",
+                "class": "logging.handlers.RotatingFileHandler",
+                "formatter": "file",
+                "filename": "logs/security.log",
+                "maxBytes": 10485760,  # 10 MB
+                "backupCount": 5,  # Keep up to 5 backup files
+            },
+            "auth_file": {
+                "level": "INFO",
+                "class": "logging.handlers.RotatingFileHandler",
+                "formatter": "file",
+                "filename": "logs/auth.log",
+                "maxBytes": 10485760,  # 10 MB
+                "backupCount": 5,  # Keep up to 5 backup files
+            },
             "django.server": DEFAULT_LOGGING["handlers"]["django.server"],
         },
         "loggers": {
             "": {
                 "level": "DEBUG",
                 "handlers": ["console", "file"],
+                "propagate": False,
+            },
+            "security": {
+                "handlers": ["security_file"],
+                "level": "INFO",
+                "propagate": False,
+            },
+            "auth": {
+                "handlers": ["auth_file"],
+                "level": "INFO",
                 "propagate": False,
             },
             "apps": {

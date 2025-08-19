@@ -1,12 +1,15 @@
-from django.core.validators import MaxValueValidator, MinValueValidator
-from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.tokens import BlacklistedToken, OutstandingToken
-from drf_spectacular.utils import extend_schema_field
-
 from apps.accounts.utils import validate_password_strength
 from apps.common.schema_examples import ACCESS_TOKEN, REFRESH_TOKEN
 from apps.common.serializers import SuccessResponseSerializer
+from django.core.validators import MaxValueValidator, MinValueValidator
+from drf_spectacular.utils import extend_schema_field
+from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import (
+    BlacklistedToken,
+    OutstandingToken,
+    RefreshToken,
+)
 
 from .models import User
 
@@ -91,6 +94,13 @@ class PasswordChangeSerializer(serializers.Serializer):
         for token in OutstandingToken.objects.filter(user=user):
             BlacklistedToken.objects.get_or_create(token=token)
 
+        # Generate new tokens for the current session
+        refresh = RefreshToken.for_user(user)
+        return {
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+        }
+
 
 class RequestPasswordResetOtpSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -110,6 +120,7 @@ class SetNewPasswordSerializer(serializers.Serializer):
 
     def validate_new_password(self, value):
         return validate_password_strength(value)
+
 
 class UserSerializer(serializers.ModelSerializer):
     avatar_url = serializers.SerializerMethodField(read_only=True)
@@ -141,6 +152,7 @@ class AvatarSerializer(serializers.ModelSerializer):
         fields = [
             "avatar",
         ]
+
 
 # RESPONSES
 class RegisterResponseSerializer(SuccessResponseSerializer):
