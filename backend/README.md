@@ -275,3 +275,8 @@ API documentation will be available at:
 - Cloud storage (AWS S3/Cloudinary)
 - Real-time collaboration (Liveblocks webhooks)
 - Payment processing (future feature)
+
+## Resources
+- [Django permissions Test Driven](https://testdriven.io/blog/django-permissions/)
+- [Django permissions Medium](hhttps://prithoo11335.medium.com/custom-permission-classes-in-django-restframework-6dc1d26bba33)
+- [Django permissions Test Driven 2](https://testdriven.io/blog/custom-permission-classes-drf/)

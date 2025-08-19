@@ -1,13 +1,21 @@
-from requests_oauthlib import OAuth2Session
 from apps.accounts.models import Otp
+from decouple import config
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
-from rest_framework_simplejwt.tokens import BlacklistedToken, OutstandingToken
+from requests_oauthlib import OAuth2Session
 from rest_framework import serializers
-from decouple import config
+from rest_framework_simplejwt.tokens import BlacklistedToken, OutstandingToken
 
 from backend.apps.common.errors import ErrorCode
 from backend.apps.common.responses import CustomResponse
+
+
+class UserRoles:
+    CONTRIBUTOR = "contributor"
+    REVIEWER = "reviewer"
+    EDITOR = "editor"
+    MANAGER = "manager"
+
 
 def validate_password_strength(value):
     try:
@@ -19,7 +27,8 @@ def validate_password_strength(value):
 
 def invalidate_previous_otps(user):
     Otp.objects.filter(user=user).delete()
-    
+
+
 def get_otp_record(user, otp):
     """ "Checks for the validity and existence of otp associated with a user"""
     try:
@@ -65,6 +74,7 @@ scope = [
     "https://www.googleapis.com/auth/userinfo.profile",
 ]
 
+
 def google_setup(redirect_uri: str):
     # handles the OAuth 2.0 flow
     google = OAuth2Session(
@@ -98,4 +108,3 @@ def google_callback(redirect_uri: str, auth_uri: str, state: str):
 
     user_data = google.get("https://www.googleapis.com/oauth2/v1/userinfo").json()
     return user_data
-

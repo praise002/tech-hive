@@ -27,7 +27,8 @@ class ArticleStatusChoices(models.TextChoices):
     REVIEW_COMPLETED = "review_completed", "Review Completed"
     READY = "ready_for_publishing", "Ready for Publishing"
     PUBLISHED = "published", "Published"
-    ARCHIVED = "archived", "Archived"
+    REJECTED = "rejected", "Rejected"
+    # ARCHIVED = "archived", "Archived"
 
 
 class Category(BaseModel):
@@ -155,7 +156,7 @@ class SavedArticle(BaseModel):
         Article, on_delete=models.CASCADE, related_name="saved_by_user"
     )
     saved_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         unique_together = ("article", "user")
 
