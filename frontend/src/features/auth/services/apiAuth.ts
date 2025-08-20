@@ -7,6 +7,7 @@ import {
   VerifyOtpData,
 } from '../../../types/auth';
 import { API_URL } from '../../../utils/constants';
+import { safeLocalStorage } from '../../../utils/utils';
 
 export const AUTH_URL = `${API_URL}/auth`;
 
@@ -27,7 +28,12 @@ export async function register(
   }
 
   const data = await response.json();
-  localStorage.setItem('email', data.data.email);
+
+  // Safely store email
+  const storage = safeLocalStorage();
+  if (storage.isAvailable) {
+    storage.setItem('email', data.data.email);
+  }
   return data;
 }
 
@@ -46,7 +52,13 @@ export async function verifyRegistrationOtp(otpData: VerifyOtpData) {
   }
 
   const data = await response.json();
-  localStorage.removeItem('email');
+
+  // Safely remove email from storage
+  const storage = safeLocalStorage();
+  if (storage.isAvailable) {
+    storage.removeItem('email');
+  }
+  
   return data;
 }
 

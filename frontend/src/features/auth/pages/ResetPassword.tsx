@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Form from '../../../components/common/Form';
 import Text from '../../../components/common/Text';
+import { UseFormSetError } from 'react-hook-form';
 
 interface EmailFormData {
   email: string;
@@ -104,9 +105,10 @@ function ResetPassword() {
 
   const handleFormSubmit = (
     data: EmailFormData | OtpFormData | SetNewPasswordFormData,
-    reset: () => void
+    reset: () => void,
+    _setError: UseFormSetError<EmailFormData | OtpFormData | SetNewPasswordFormData>
   ) => {
-    console.log('Form Data:', data);
+    console.log('Form Data:', data, _setError);
     alert('Form Submitted successfully!');
     reset();
   };

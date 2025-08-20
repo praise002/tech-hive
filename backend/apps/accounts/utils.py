@@ -6,8 +6,8 @@ from requests_oauthlib import OAuth2Session
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import BlacklistedToken, OutstandingToken
 
-from backend.apps.common.errors import ErrorCode
-from backend.apps.common.responses import CustomResponse
+from apps.common.errors import ErrorCode
+from apps.common.responses import CustomResponse
 
 
 class UserRoles:

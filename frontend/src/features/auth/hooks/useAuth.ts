@@ -2,6 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import {
   register as registerApi,
+  verifyRegistrationOtp as verifyRegisterOtpApi,
   login as loginApi,
 } from '../services/apiAuth';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -21,6 +22,22 @@ export function useRegister() {
     },
   });
   return { register, isPending, isError, error };
+}
+
+export function useRegisterOtp() {
+  const {
+    mutate: verifyRegistrationOtp,
+    isPending,
+    isError,
+    error,
+  } = useMutation({
+    mutationFn: verifyRegisterOtpApi,
+    onSuccess: () => {},
+    onError: (error) => {
+      console.error('OTP Verification error:', error);
+    },
+  });
+  return { verifyRegistrationOtp, isPending, isError, error };
 }
 
 export function useLogin() {

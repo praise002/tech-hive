@@ -96,8 +96,10 @@ function RegisterForm() {
         navigate('/verify-email'); // Only if still on this page
       },
       onError: (error: any) => {
-        // Handle field-specific errors
-        if (error?.data) {
+        // Handle field-specific errors from the server
+        if (error.data) {
+          // Record<K, V>
+          // keyof RegisterFormData - Values must be one of the property names from RegisterFormData
           const fieldMapping: Record<string, keyof RegisterFormData> = {
             first_name: 'firstName',
             last_name: 'lastName',
@@ -106,8 +108,8 @@ function RegisterForm() {
           };
 
           Object.entries(error.data).forEach(([field, message]) => {
-            const formField = fieldMapping[field] || field;
-            setError(formField as keyof RegisterFormData, {
+            const formField = fieldMapping[field] || field as keyof RegisterFormData;
+            setError(formField, {
               type: 'server',
               message: Array.isArray(message) ? message[0] : String(message),
             });
