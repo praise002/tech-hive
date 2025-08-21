@@ -6,7 +6,16 @@ from .models import Article, ArticleReview, ArticleStatusChoices, Category
 
 
 class CustomBasePermission(BasePermission):
-    """"""
+    """
+    Base permission class for Tech Hive role-based access control.
+
+    - Allows read access to everyone
+    - Restricts write operations to authenticated users with platform roles
+    - Should be inherited by specific role permission classes
+
+    Returns:
+        bool: Permission granted/denied
+    """
 
     def has_permission(self, request, view):
         # Allow read access to everyone for published articles

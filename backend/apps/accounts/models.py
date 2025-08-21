@@ -91,3 +91,9 @@ class UserProfile(models.Model):
     subscription = models.ForeignKey(
         SubscriptionPlan, on_delete=models.SET_NULL, null=True
     )
+
+
+class ContributorOnboarding(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    terms_accepted = models.BooleanField(default=False)
+    accepted_at = models.DateTimeField(auto_now_add=True)

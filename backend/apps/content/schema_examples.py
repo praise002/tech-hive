@@ -1,3 +1,4 @@
+from apps.accounts.schema_examples import UNAUTHORIZED_USER_RESPONSE
 from apps.common.schema_examples import SUCCESS_RESPONSE_STATUS, UUID_EXAMPLE
 from apps.content.serializers import CategorySerializer, TagSerializer
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse
@@ -19,6 +20,34 @@ TAG_LIST_EXAMPLE = [
         "name": "python",
     },
 ]
+
+CONTRIBUTOR_GUIDELINES_EXAMPLE = {
+    "guidelines": "Welcome to Tech Hive contributor program...",
+    "requirements": [
+        "Verified email address",
+        "Active account",
+        "Accept terms and conditions",
+    ],
+    "user_status": {
+        "is_contributor": False,
+        "email_verified": True,
+        "can_accept": True,
+    },
+}
+
+CONTRIBUTOR_GUIDELINES_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Guidelines retrieved successfully",
+        examples={
+            "application/json": {
+                "status": "success",
+                "message": "Contributor guidelines retrieved successfully",
+                "data": CONTRIBUTOR_GUIDELINES_EXAMPLE,
+            },
+        },
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+}
 
 CATEGORY_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(

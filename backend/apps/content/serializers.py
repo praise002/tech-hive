@@ -2,6 +2,12 @@ from apps.content import models
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from apps.accounts.models import ContributorOnboarding
+
+class ContributorOnboardingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContributorOnboarding
+        fields = ["user", "terms_accepted", "accepted_at"]
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:

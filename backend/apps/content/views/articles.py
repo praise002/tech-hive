@@ -1,16 +1,100 @@
+import logging
+
+from apps.accounts.utils import UserRoles
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
 from apps.content.models import Article, Tag
-from apps.content.schema_examples import TAG_RESPONSE_EXAMPLE
-from apps.content.serializers import ArticleSerializer, TagSerializer
+from apps.content.schema_examples import (
+    CONTRIBUTOR_GUIDELINES_RESPONSE_EXAMPLE,
+    TAG_RESPONSE_EXAMPLE,
+)
+from apps.content.serializers import (
+    ArticleSerializer,
+    ContributorOnboardingSerializer,
+    TagSerializer,
+)
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
 from rest_framework import status
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView, ListCreateAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 article_tags = ["Articles"]
+onboarding_tags = ["Onboarding"]
+
+logger = logging.getLogger(__name__)
+security_logger = logging.getLogger("security")
+
+
+class ContributorGuidelinesView(APIView):
+    """
+    Accept contributor guidelines and become a contributor.
+
+    Processes guideline acceptance and assigns contributor role to the user.
+    """
+
+    permission_class = (IsAuthenticated,)
+    serializer_class = None
+
+    @extend_schema(
+        summary="Get contributor guidelines",
+        description="Retrieve contributor guidelines, requirements, and user eligibility status. "
+        "Returns guidelines content if user is eligible, or contributor status if already enrolled.",
+        tags=onboarding_tags,
+        responses=CONTRIBUTOR_GUIDELINES_RESPONSE_EXAMPLE,
+    )
+    def get(self, request):
+        if request.user.groups.filter(name=UserRoles.CONTRIBUTOR).exists():
+            return CustomResponse.success(message="Already a contributor")
+
+        return CustomResponse.success(
+            message="Contributor guidelines retrieved successfully",
+            data={
+                "guidelines": "Welcome to Tech Hive contributor program...",
+                "requirements": ["Accept terms and conditions"],
+                "user_status": {
+                    "is_contributor": request.user.groups.filter(
+                        name="Contributor"
+                    ).exists(),
+                    "can_accept": True,  # Based on checks
+                },
+            },
+        )
+
+
+class AcceptGuidelinesView(APIView):
+    """
+    Accept contributor guidelines and become a contributor.
+
+    Processes guideline acceptance and assigns contributor role to the user.
+    """
+
+    permission_class = (IsAuthenticated,)
+    serializer_class = ContributorOnboardingSerializer
+    #     1. Validate Request:
+    #    - Check authentication
+    #    - Validate serializer data
+    #    - Ensure terms_accepted = True
+
+    # 2. Check Prerequisites:
+    #    - User email verified
+    #    - User account active
+    #    - User not already contributor
+
+    # 3. Role Assignment:
+    #    - Get Contributor group
+    #    - Add user to group
+    #    - Create acceptance record
+
+    # 4. Response:
+    #    - Success message
+    #    - New permissions summary
+    #    - Redirect to contributor dashboard
+    #    - Log the event for analytics
+    # security - Idempotency - multiple accepts should be safe
+    pass
 
 
 class TagGenericView(ListAPIView):
