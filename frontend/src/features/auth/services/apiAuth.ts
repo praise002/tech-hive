@@ -53,11 +53,7 @@ export async function verifyRegistrationOtp(otpData: VerifyOtpData) {
 
   const data = await response.json();
 
-  // Safely remove email from storage
-  const storage = safeLocalStorage();
-  if (storage.isAvailable) {
-    storage.removeItem('email');
-  }
+  
   
   return data;
 }
@@ -77,7 +73,7 @@ export async function resendRegistrationOtp(email: string) {
   }
 
   const data = await response.json();
-  localStorage.removeItem('email');
+  
   return data;
 }
 

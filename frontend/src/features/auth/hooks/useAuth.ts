@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import {
   register as registerApi,
   verifyRegistrationOtp as verifyRegisterOtpApi,
+  resendRegistrationOtp as resendRegistrationOtpApi,
   login as loginApi,
 } from '../services/apiAuth';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -38,6 +39,22 @@ export function useRegisterOtp() {
     },
   });
   return { verifyRegistrationOtp, isPending, isError, error };
+}
+
+export function useRegisterResendOtp() {
+  const {
+    mutate: resendRegistrationOtp,
+    isPending,
+    isError,
+    error,
+  } = useMutation({
+    mutationFn: resendRegistrationOtpApi,
+    onSuccess: () => {},
+    onError: (error) => {
+      console.error('OTP Verification error:', error);
+    },
+  });
+  return { resendRegistrationOtp, isPending, isError, error };
 }
 
 export function useLogin() {

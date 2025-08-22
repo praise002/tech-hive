@@ -1,7 +1,7 @@
 from apps.content import models
 from django.contrib import admin
 
-from backend.apps.accounts.models import ContributorOnboarding
+from apps.accounts.models import ContributorOnboarding
 
 @admin.register(ContributorOnboarding)
 class ContributorOnboardingAdmin(admin.ModelAdmin):

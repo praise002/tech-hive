@@ -1,7 +1,7 @@
 import { RegisterOptions, UseFormSetError } from 'react-hook-form';
 import Form from '../../../components/common/Form';
 import Text from '../../../components/common/Text';
-import { useRegisterOtp } from '../hooks/useAuth';
+import { useRegisterOtp, useRegisterResendOtp } from '../hooks/useAuth';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
@@ -14,6 +14,8 @@ interface FormData {
 
 function VerifyEmail() {
   const { verifyRegistrationOtp, isPending } = useRegisterOtp();
+  const { resendRegistrationOtp, isPending: isResending } =
+    useRegisterResendOtp();
   const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState('');
   const [showEmailInput, setShowEmailInput] = useState(false);
@@ -77,10 +79,10 @@ function VerifyEmail() {
     },
   ];
 
-  const handleFormSubmit = (
+  function handleFormSubmit(
     data: FormData,
     setError: UseFormSetError<FormData>
-  ) => {
+  ) {
     console.log('Form Data:', data);
 
     // Use email from form if available, otherwise use saved email
@@ -127,7 +129,18 @@ function VerifyEmail() {
         }
       },
     });
-  };
+  }
+
+  function handleResendOtp() {
+    resendRegistrationOtp(userEmail, {
+      onSuccess: (response) => {
+        toast.success(response?.message);
+      },
+      onError: (error: any) => {
+        toast.error(error.message);
+      },
+    });
+  }
 
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-22 dark:text-white">
@@ -148,7 +161,17 @@ function VerifyEmail() {
         Verify OTP
       </Form>
       <p className="text-secondary text-sm mt-2">
-        To receive a new otp <a href="#">Click Here!</a>
+        To receive a new otp {' '}
+        <button
+          type="button"
+          onClick={handleResendOtp}
+          disabled={isResending}
+          className={`underline ${
+            isResending ? 'cursor-not-allowed' : 'cursor-pointer'
+          }`}
+        >
+          {isResending ? 'Sending...' : 'Click Here!'}
+        </button>
       </p>
     </div>
   );
