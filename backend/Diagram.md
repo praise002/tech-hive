@@ -10,7 +10,6 @@
 - `GET /feedback/{id}/` → View feedback on draft
 
 **Onboarding:**
-- `GET /contribute/` → View guidelines + Contribute button
 - `POST /contribute/accept/` → Accept guidelines → become Contributor
 
 ---

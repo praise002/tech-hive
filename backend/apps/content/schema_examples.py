@@ -1,7 +1,13 @@
 from apps.accounts.schema_examples import UNAUTHORIZED_USER_RESPONSE
 from apps.common.schema_examples import SUCCESS_RESPONSE_STATUS, UUID_EXAMPLE
-from apps.content.serializers import CategorySerializer, TagSerializer
+from apps.content.serializers import (
+    CategorySerializer,
+    ContributorOnboardingSerializer,
+    TagSerializer,
+)
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse
+
+from apps.common.serializers import ErrorDataResponseSerializer
 
 CATEGORY_LIST_EXAMPLE = {
     "id": UUID_EXAMPLE,
@@ -21,32 +27,39 @@ TAG_LIST_EXAMPLE = [
     },
 ]
 
-CONTRIBUTOR_GUIDELINES_EXAMPLE = {
-    "guidelines": "Welcome to Tech Hive contributor program...",
-    "requirements": [
-        "Verified email address",
-        "Active account",
-        "Accept terms and conditions",
-    ],
-    "user_status": {
-        "is_contributor": False,
-        "email_verified": True,
-        "can_accept": True,
-    },
-}
 
-CONTRIBUTOR_GUIDELINES_RESPONSE_EXAMPLE = {
+ACCEPT_GUIDELINES_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(
+        response=ContributorOnboardingSerializer,
         description="Guidelines retrieved successfully",
-        examples={
-            "application/json": {
-                "status": "success",
-                "message": "Contributor guidelines retrieved successfully",
-                "data": CONTRIBUTOR_GUIDELINES_EXAMPLE,
-            },
-        },
+        examples=[
+            OpenApiExample(
+                name="Already a contributor",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Already a contributor",
+                },
+            ),
+        ],
+    ),
+    201: OpenApiResponse(
+        response=ContributorOnboardingSerializer,
+        description="Guidelines retrieved successfully",
+        examples=[
+            OpenApiExample(
+                name="Onboarding successful",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Congratulations! You are now a Tech Hive contributor!",
+                },
+            ),
+        ],
     ),
     401: UNAUTHORIZED_USER_RESPONSE,
+    422: OpenApiResponse(
+        response=ErrorDataResponseSerializer,
+        description="Validation Error",
+    ),
 }
 
 CATEGORY_RESPONSE_EXAMPLE = {

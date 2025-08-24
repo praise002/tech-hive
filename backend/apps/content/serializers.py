@@ -1,13 +1,29 @@
+from apps.accounts.models import ContributorOnboarding
 from apps.content import models
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from apps.accounts.models import ContributorOnboarding
 
 class ContributorOnboardingSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContributorOnboarding
-        fields = ["user", "terms_accepted", "accepted_at"]
+        fields = ["terms_accepted"]
+
+    def validate_terms_accepted(self, value):
+        if not value:
+            raise serializers.ValidationError(
+                "You must accept the terms and conditions."
+            )
+        return value
+
+    def create(self, validated_data):
+        # Get the authenticated user's
+        user = self.context["request"].user
+
+        contributor = ContributorOnboarding.objects.create(user=user, **validated_data)
+
+        return contributor
+
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
