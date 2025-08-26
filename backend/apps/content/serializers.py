@@ -76,22 +76,71 @@ class ArticleSerializer(serializers.ModelSerializer):
         return obj.reaction_counts
 
 
-class ArticleCreateDraftSerializer(serializers.ModelSerializer):
+class ArticleCreateSerializer(serializers.ModelSerializer):
+    tags = serializers.ListField(
+        child=serializers.CharField(max_length=20),
+        required=False,
+        help_text="List of tag names",
+    )
+    # Ques: What if the db already have 5 tags and now i am limiting this one
+    # without knowing
+
+    class Meta:
+        model = models.Article
+        fields = [
+            "title",
+            "content",
+            "tags",
+        ]
+        # TODO: Editor will add it to the right category
+
+    def validate_tags(self, value): # TODO: TEST IT, might remove if not needed
+        """Ensure total number of tags does not exceed 5"""
+        existing_tag_count = self.instance.tags.count() if self.instance else 0
+        
+        if existing_tag_count + len(value) > 5:
+            raise serializers.ValidationError(
+                f"Total number of tags cannot exceed 5. Article already has {existing_tag_count} tags."
+            )
+        # TODO: CHECK CURRENT TAG IN TAG
+        for tag_name in value:
+            if not tag_name.strip():
+                raise serializers.ValidationError("Tag names cannot be empty")
+
+        return value
+    
+    def _process_tags(self, tag_names):
+        """Convert tag names to Tag instances using get_or_create"""
+        tag_instances = []
+        for tag_name in tag_names:
+            cleaned_name = tag_name.strip().lower()
+            if cleaned_name:  # Skip empty strings
+                tag, _ = models.Tag.objects.get_or_create(name=cleaned_name)
+                tag_instances.append(tag)
+        return tag_instances
+
+    def create(self, validated_data):
+        # Get the authenticated user's profile
+        user = self.context["request"].user
+        tag_names = validated_data.pop('tags', [])
+
+        # Create the author and associate it with the user
+        article = models.Article.objects.create(author=user, **validated_data)
+        
+        if tag_names:
+            tag_instances = self._process_tags(tag_names)
+            article.tags.add(*tag_instances)
+            
+        return article
+
+
+class ArticleUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Article
         fields = [
             "title",
             "content",
         ]
-        # TODO: Editor will add it to the right category
-
-    def create(self, validated_data):
-        # Get the authenticated user's profile
-        user = self.context["request"].user
-
-        # Create the author and associate it with the user
-        article = models.Article.objects.create(author=user, **validated_data)
-        return article
 
 
 class ArticleAvatarSerializer(serializers.ModelSerializer):

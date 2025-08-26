@@ -40,9 +40,9 @@ class TestContents(APITestCase):
         #     with self.subTest(data=invalid_data):
         #         response = self.client.post(self.onboarding_url, invalid_data)
         #         print(response.json())
-                # self.assertEqual(
-                #     response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY
-                # )
+        #         self.assertEqual(
+        #             response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY
+        #         )
 
         # 422
         response = self.client.post(self.onboarding_url, {})

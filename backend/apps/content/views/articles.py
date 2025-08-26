@@ -19,7 +19,11 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
 from rest_framework import status
 from rest_framework.filters import SearchFilter
-from rest_framework.generics import ListAPIView, ListCreateAPIView
+from rest_framework.generics import (
+    ListAPIView,
+    ListCreateAPIView,
+    RetrieveUpdateAPIView,
+)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
@@ -68,6 +72,73 @@ class AcceptGuidelinesView(APIView):
         return CustomResponse.success(
             message="Congratulations! You are now a Tech Hive contributor!",
             status_code=status.HTTP_201_CREATED,
+        )
+
+
+# Drafts - never submitted, just in draft
+# submitted for review, under review, changes requested, rejected - submitted articles - users can edit it
+# if it is marked as changes requested
+# published - under published article section - paginate
+# GET /articles/ → public published articles (all authors)
+# GET /articles/?status=draft → authenticated user's drafts
+# GET /users/{username}/articles/ → specific user's published articles (profile view)
+
+
+class ArticleListCreateView(ListCreateAPIView):
+    # all published article + draft creation
+    pass
+
+
+class ArticleRetrieveUpdateView(RetrieveUpdateAPIView):  # USE APIView
+    pass
+
+
+# Article Management Endpoints
+class PublicArticleListView(ListCreateAPIView):
+    # List published article for a user
+    queryset = Article.published.select_related("category", "author").all()
+    serializer_class = ArticleSerializer
+    filter_backends = (DjangoFilterBackend, SearchFilter)
+    search_fields = ["title", "content"]
+    pagination_class = DefaultPagination
+
+    @extend_schema(
+        summary="Retrieve a list of articles",
+        description="This endpoint allows.",
+        parameters=[
+            OpenApiParameter(
+                name="search",
+                description="Search across title, and description.",
+            ),
+        ],
+        tags=article_tags,
+        auth=[],
+        # responses=ARTICLE_LIST_RESPONSE_EXAMPLE,
+    )
+    def get(self, request, *args, **kwargs):
+        """
+        Handle GET requests to retrieve profiles with pagination, search, and filtering.
+        """
+        return super().get(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            paginated_data = self.get_paginated_response(serializer.data)
+            return CustomResponse.success(
+                message="Articles retrieved successfully.",
+                data=paginated_data.data,
+                status_code=status.HTTP_200_OK,
+            )
+
+        serializer = self.get_serializer(queryset, many=True)
+        return CustomResponse.success(
+            message="Articles retrieved successfully.",
+            data=serializer.data,
+            status_code=status.HTTP_200_OK,
         )
 
 
@@ -125,66 +196,8 @@ class TagGenericView(ListAPIView):
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
-
-# TODO: RETURN ARTICLE WITH IT'S TAGS,
-# TODO: FOR POST, IT CONVERTS THE TAGS TO LOWERCASE THEN POST IT
-
-
-# Article Management Endpoints
-class ArticleGenericView(ListCreateAPIView):
-    # List published article
-    queryset = Article.published.select_related("category", "author").all()
-    serializer_class = ArticleSerializer
-    filter_backends = (DjangoFilterBackend, SearchFilter)
-    search_fields = ["title", "content"]
-    pagination_class = DefaultPagination
-
-    @extend_schema(
-        summary="Retrieve a list of articles",
-        description="This endpoint allows.",
-        parameters=[
-            OpenApiParameter(
-                name="search",
-                description="Search across title, and description.",
-            ),
-        ],
-        tags=article_tags,
-        auth=[],
-        # responses=ARTICLE_LIST_RESPONSE_EXAMPLE,
-    )
-    def get(self, request, *args, **kwargs):
-        """
-        Handle GET requests to retrieve profiles with pagination, search, and filtering.
-        """
-        return super().get(request, *args, **kwargs)
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            paginated_data = self.get_paginated_response(serializer.data)
-            return CustomResponse.success(
-                message="Articles retrieved successfully.",
-                data=paginated_data.data,
-                status_code=status.HTTP_200_OK,
-            )
-
-        serializer = self.get_serializer(queryset, many=True)
-        return CustomResponse.success(
-            message="Articles retrieved successfully.",
-            data=serializer.data,
-            status_code=status.HTTP_200_OK,
-        )
-
-
-class ArticleRetrieveView(APIView):
-    # Published article, owner/staff - unpublished(draft)
-    # /api/articles/{id}/
-    def get(self, request):
-        pass
-
+class TagRemoveView(APIView):
+    pass
 
 # Do for every content
 class RSSFeedInfoView(APIView):

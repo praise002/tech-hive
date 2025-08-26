@@ -27,7 +27,6 @@ class UserAdmin(BaseUserAdmin):
                     "id",
                     "google_id",
                     "avatar",
-                    "role",
                 )
             },
         ),
@@ -78,7 +77,6 @@ class UserAdmin(BaseUserAdmin):
                     "is_active",
                     "user_active",
                     "avatar",
-                    "role",
                 ),
             },
         ),

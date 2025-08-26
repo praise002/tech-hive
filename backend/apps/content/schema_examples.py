@@ -56,6 +56,7 @@ ACCEPT_GUIDELINES_RESPONSE_EXAMPLE = {
         ],
     ),
     401: UNAUTHORIZED_USER_RESPONSE,
+    400: ErrorDataResponseSerializer,
     422: OpenApiResponse(
         response=ErrorDataResponseSerializer,
         description="Validation Error",

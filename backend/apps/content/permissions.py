@@ -26,7 +26,6 @@ class CustomBasePermission(BasePermission):
         if not request.user.is_authenticated:
             return False
 
-        # Check if user has contributor role
         return request.user.groups.filter(
             name__in=[
                 UserRoles.CONTRIBUTOR,
