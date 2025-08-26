@@ -1,5 +1,5 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
 import {
   register as registerApi,
   verifyRegistrationOtp as verifyRegisterOtpApi,
@@ -9,7 +9,15 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import { LoginUserData } from '../../../types/auth';
 
+export function useEmail() {
+  const queryClient = useQueryClient();
+  const getEmail = () => queryClient.getQueryData(['email']);
+
+  return { getEmail };
+}
+
 export function useRegister() {
+  const queryClient = useQueryClient();
   const {
     mutate: register,
     isPending,
@@ -17,7 +25,10 @@ export function useRegister() {
     error,
   } = useMutation({
     mutationFn: registerApi,
-    onSuccess: () => {},
+    onSuccess: (data) => {
+      queryClient.setQueryData(['email'], data.data.email);
+    },
+
     onError: (error) => {
       console.error('Registration error:', error);
     },
@@ -26,6 +37,7 @@ export function useRegister() {
 }
 
 export function useRegisterOtp() {
+  const queryClient = useQueryClient();
   const {
     mutate: verifyRegistrationOtp,
     isPending,
@@ -33,7 +45,9 @@ export function useRegisterOtp() {
     error,
   } = useMutation({
     mutationFn: verifyRegisterOtpApi,
-    onSuccess: () => {},
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: ['email'] });
+    },
     onError: (error) => {
       console.error('OTP Verification error:', error);
     },
@@ -58,21 +72,20 @@ export function useRegisterResendOtp() {
 }
 
 export function useLogin() {
-  const navigate = useNavigate();
-
-  const { mutate: login, isPending } = useMutation({
+  const {
+    mutate: login,
+    isPending,
+    isError,
+    error,
+  } = useMutation({
     mutationFn: (credentials: LoginUserData) => loginApi(credentials),
-    onSuccess: async () => {
-      // Let components that need user data fetch it themselves using useUser()
-      navigate('/');
-    },
-    onError: (err) => {
-      console.error('ERROR', err);
-      toast.error(''); // TODO;
+    onSuccess: async () => {},
+    onError: (error) => {
+      console.error('Login error:', error);
     },
   });
 
-  return { login, isPending };
+  return { login, isPending, isError, error };
 }
 
 // TODO: FIX LATER

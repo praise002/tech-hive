@@ -7,7 +7,6 @@ import {
   VerifyOtpData,
 } from '../../../types/auth';
 import { API_URL } from '../../../utils/constants';
-import { safeLocalStorage } from '../../../utils/utils';
 
 export const AUTH_URL = `${API_URL}/auth`;
 
@@ -29,11 +28,6 @@ export async function register(
 
   const data = await response.json();
 
-  // Safely store email
-  const storage = safeLocalStorage();
-  if (storage.isAvailable) {
-    storage.setItem('email', data.data.email);
-  }
   return data;
 }
 
@@ -53,8 +47,6 @@ export async function verifyRegistrationOtp(otpData: VerifyOtpData) {
 
   const data = await response.json();
 
-  
-  
   return data;
 }
 
@@ -73,7 +65,7 @@ export async function resendRegistrationOtp(email: string) {
   }
 
   const data = await response.json();
-  
+
   return data;
 }
 
@@ -93,7 +85,7 @@ export async function login(credentials: LoginUserData) {
 
   const data = await response.json();
   localStorage.setItem('token', data.data.access); // USE HTTP-ONLY LATER
-  localStorage.setItem('refresh', data.data.refresh);
+  // localStorage.setItem('refresh', data.data.refresh);
   return data;
 }
 

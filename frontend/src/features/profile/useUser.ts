@@ -9,7 +9,6 @@ export function useUser() {
   } = useQuery({
     queryKey: ['user'],
     queryFn: getCurrentUser,
-    retry: false, // TODO: Learn about it Don't retry on auth failures
   });
 
   const isAuthenticated = user && user.id;

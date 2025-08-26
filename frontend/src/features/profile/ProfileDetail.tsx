@@ -5,31 +5,31 @@ import { FaRegBookmark } from 'react-icons/fa6';
 import Text from '../../components/common/Text';
 import { useState } from 'react';
 import Articles from '../../components/sections/Articles';
-import { useProfile } from './useProfile';
-import Spinner from '../../components/common/Spinner';
+// import { useProfile } from './useProfile';
+// import Spinner from '../../components/common/Spinner';
 // import { BsFillArchiveFill } from 'react-icons/bs';
 
 function ProfileDetail() {
   const [isActiveTab, setIsActiveTab] = useState('saved');
-  const { isPending, isError, profile, error } = useProfile();
+  // const { isPending, isError, profile, error } = useProfile();
 
-  const {
-    first_name: firstName,
-    last_name: lastName,
-    avatar_url: avatarUrl,
-  } = profile;
+  // const {
+  //   first_name: firstName,
+  //   last_name: lastName,
+  //   avatar_url: avatarUrl,
+  // } = profile;
 
-  if (isPending)
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Spinner />
-      </div>
-    );
+  // if (isPending)
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center">
+  //       <Spinner />
+  //     </div>
+  //   );
 
-  if (isError) {
-    // TODO: STYLE LETER
-    return <span>Error: {error?.message}</span>;
-  }
+  // if (isError) {
+  //   // TODO: STYLE LETER
+  //   return <span>Error: {error?.message}</span>;
+  // }
 
   const profileTabs = [
     {
@@ -404,8 +404,10 @@ function ProfileDetail() {
             <div className="relative">
               <img
                 className="w-20 h-20 md:w-40 md:h-40"
-                src={avatarUrl || "/assets/icons/Avatars.png"}
-                alt={`${firstName} ${lastName}'s profile picture` || "Elizabeth Stone's profile picture"}
+                // src={avatarUrl || "/assets/icons/Avatars.png"}
+                src="/assets/icons/Avatars.png"
+                // alt={`${firstName} ${lastName}'s profile picture` || "Elizabeth Stone's profile picture"}
+                alt=''
               />
             </div>
           </div>
@@ -417,7 +419,8 @@ function ProfileDetail() {
               bold={false}
               className="font-semibold mb-1 text-gray-900 dark:text-custom-white"
             >
-              {`${firstName} ${lastName}` || 'Elizabeth Stone'}
+              {/* {`${firstName} ${lastName}` || 'Elizabeth Stone'} */}
+              Elizabeth Stone
             </Text>
             <p className="text-secondary text-sm">Joined 27th January 2025</p>
           </div>

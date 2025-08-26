@@ -1,11 +1,14 @@
 import { IoEye, IoEyeOff } from 'react-icons/io5';
 import { FcGoogle } from 'react-icons/fc';
 import { FaApple } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { useState } from 'react';
 import Form from '../../../components/common/Form';
 import Button from '../../../components/common/Button';
+import { useLogin } from '../hooks/useAuth';
+import { UseFormSetError } from 'react-hook-form';
+import toast from 'react-hot-toast';
 
 interface LoginFormData {
   email: string;
@@ -14,6 +17,8 @@ interface LoginFormData {
 
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const { login, isPending, isError, error } = useLogin();
+  const navigate = useNavigate();
 
   function togglePasswordVisibility() {
     setShowPassword(!showPassword);
@@ -60,11 +65,50 @@ function LoginForm() {
       },
     },
   ];
-  const handleFormSubmit = (data: LoginFormData, reset: () => void) => {
+
+  function handleFormSubmit(
+    data: LoginFormData,
+    setError: UseFormSetError<LoginFormData>
+  ) {
     console.log('Form Data:', data);
-    alert('Form Submitted successfully!');
-    reset();
-  };
+
+    const loginData: LoginFormData = {
+      email: data.email,
+      password: data.password,
+    };
+
+    login(loginData, {
+      onSuccess: (response) => {
+        toast.success(response?.message);
+        navigate('/'); // Only if still on this page
+      },
+      onError: (error: any) => {
+        // Handle field-specific errors from the server
+        if (error.data) {
+          const fieldMapping: Record<string, keyof LoginFormData> = {
+            email: 'email',
+            password: 'password',
+          };
+
+          Object.entries(error.data).forEach(([field, message]) => {
+            const formField =
+              fieldMapping[field] || (field as keyof LoginFormData);
+            setError(formField, {
+              type: 'server',
+              message: Array.isArray(message) ? message[0] : String(message),
+            });
+          });
+        } else {
+          // Handle general errors (no specific field)
+          toast.error(
+            error.message || 'Something went wrong. Please try again.'
+          );
+          // TODO: Handle disabled by showing an help page
+        }
+      },
+    });
+  }
+
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-20 flex flex-col md:flex-row">
       <div className="md:flex-1">
@@ -89,8 +133,13 @@ function LoginForm() {
           </div>
         </div>
 
-        <Form inputs={inputs} onSubmit={handleFormSubmit} className="w-full">
-          Register
+        <Form
+          inputs={inputs}
+          onSubmit={handleFormSubmit}
+          isLoading={isPending}
+          className="w-full"
+        >
+          Login
         </Form>
 
         <div className="my-4 flex items-center gap-2">
@@ -134,3 +183,8 @@ function LoginForm() {
 }
 
 export default LoginForm;
+
+// TODO: IF EMAIL NOT VERIFIED, SINCE THIS IS A MULTI-STEP PROCESS, AND THE POSSIBILITY IS LOW
+// 1. Redirect to verify-email page if email not verified
+// 2. API should return the email if email not verified which can be used to send verification
+// email

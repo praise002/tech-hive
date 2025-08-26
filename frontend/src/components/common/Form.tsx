@@ -18,7 +18,6 @@ interface Inputs<T extends FieldValues> {
   iconAriaLabel?: string;
   icon?: React.ReactNode;
   ariaLabel?: string;
-  // onChange?: (value: string) => void;
 }
 
 interface FormProps<T extends FieldValues> {
@@ -61,7 +60,6 @@ function Form<T extends FieldValues>({
           {/* Render the input field */}
           <input
             {...register(input.name, input.rules)} // Apply validation rules
-            // onChange={onChange}
             disabled={isLoading}
             id={input.id || input.name}
             placeholder={input.placeholder || ''}

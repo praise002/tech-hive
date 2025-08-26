@@ -1,11 +1,14 @@
 import { RegisterOptions, UseFormSetError } from 'react-hook-form';
 import Form from '../../../components/common/Form';
 import Text from '../../../components/common/Text';
-import { useRegisterOtp, useRegisterResendOtp } from '../hooks/useAuth';
+import {
+  useEmail,
+  useRegisterOtp,
+  useRegisterResendOtp,
+} from '../hooks/useAuth';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { safeLocalStorage } from '../../../utils/utils';
 
 interface FormData {
   email: string;
@@ -13,26 +16,22 @@ interface FormData {
 }
 
 function VerifyEmail() {
+  const [resendCooldown, setResendCooldown] = useState(0);
   const { verifyRegistrationOtp, isPending } = useRegisterOtp();
   const { resendRegistrationOtp, isPending: isResending } =
     useRegisterResendOtp();
+  const { getEmail } = useEmail();
   const navigate = useNavigate();
-  const [userEmail, setUserEmail] = useState('');
-  const [showEmailInput, setShowEmailInput] = useState(false);
+  const email = getEmail() as string;
 
   useEffect(() => {
-    // Get email from localStorage right when we need it
-    const storage = safeLocalStorage();
-    const savedEmail = storage.getItem('email');
-
-    if (savedEmail) {
-      setUserEmail(savedEmail);
-      setShowEmailInput(false);
-    } else {
-      // No email found - show email input
-      setShowEmailInput(true);
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => {
+        setResendCooldown(resendCooldown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
     }
-  }, []);
+  }, [resendCooldown]);
 
   const inputs: Array<{
     name: keyof FormData;
@@ -41,22 +40,7 @@ function VerifyEmail() {
     rules: RegisterOptions<FormData>;
   }> = [
     // Show email input if we don't have it
-    ...(showEmailInput
-      ? [
-          {
-            name: 'email' as keyof FormData,
-            placeholder: 'Enter your email address',
-            type: 'email',
-            rules: {
-              required: 'Email is required',
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: 'Invalid email address',
-              },
-            },
-          },
-        ]
-      : []),
+
     {
       name: 'otp',
       placeholder: 'Enter OTP',
@@ -85,18 +69,15 @@ function VerifyEmail() {
   ) {
     console.log('Form Data:', data);
 
-    // Use email from form if available, otherwise use saved email
-    const emailToUse = showEmailInput ? data.email : userEmail;
-
     // Additional safety check
-    if (!emailToUse) {
-      toast.error('Email is required. Please refresh the page and try again.');
+    if (!email) {
+      toast.error('Email not found. Please try registering again.');
       return;
     }
 
-    // Combine localStorage email with form OTP
+    // Combine cache email with form OTP
     const verificationData: FormData = {
-      email: emailToUse,
+      email: email,
       otp: data.otp,
     };
 
@@ -132,9 +113,14 @@ function VerifyEmail() {
   }
 
   function handleResendOtp() {
-    resendRegistrationOtp(userEmail, {
+    if (!email) {
+      toast.error('Email not found. Please try registering again.');
+      return;
+    }
+    resendRegistrationOtp(email, {
       onSuccess: (response) => {
         toast.success(response?.message);
+        setResendCooldown(60);
       },
       onError: (error: any) => {
         toast.error(error.message);
@@ -148,9 +134,7 @@ function VerifyEmail() {
         Verify Email
       </Text>
       <p className="text-secondary text-sm mb-4">
-        {showEmailInput
-          ? 'Enter your email address and the verification code sent to your email.'
-          : `Check your email for a verification code and enter it below.`}
+        Check your email for a verification code and enter it below.
       </p>
       <Form
         inputs={inputs}
@@ -160,19 +144,25 @@ function VerifyEmail() {
       >
         Verify OTP
       </Form>
-      <p className="text-secondary text-sm mt-2">
-        To receive a new otp {' '}
-        <button
-          type="button"
-          onClick={handleResendOtp}
-          disabled={isResending}
-          className={`underline ${
-            isResending ? 'cursor-not-allowed' : 'cursor-pointer'
-          }`}
-        >
-          {isResending ? 'Sending...' : 'Click Here!'}
-        </button>
-      </p>
+      <div className="text-secondary text-sm mt-2">
+        {resendCooldown > 0 ? (
+          <span>Resend OTP in {resendCooldown} seconds</span>
+        ) : (
+          <span>
+            Didn't receive OTP?{' '}
+            <button
+              type="button"
+              onClick={handleResendOtp}
+              disabled={isResending || resendCooldown > 0}
+              className={`underline ${
+                isResending ? 'cursor-not-allowed' : 'cursor-pointer'
+              }`}
+            >
+              {isResending ? 'Sending...' : 'Click Here to Resend'}
+            </button>
+          </span>
+        )}
+      </div>
     </div>
   );
 }
