@@ -7,9 +7,9 @@ urlpatterns = [
     path("categories/", views.CategoryGenericView.as_view()),
     path("tags/", views.TagGenericView.as_view()),
     path("contribute/", views.AcceptGuidelinesView.as_view()),
-    path("articles/", views.ArticleListCreateView.as_view()),
+    path("articles/", views.ArticleListView.as_view()),
     path("articles/feed/", LatestArticlesFeed()),
     # path("articles/rss/", views.RSSFeedInfoView.as_view()),
-    path("articles/<uuid:pk>/", views.ArticleRetrieveUpdateView.as_view()),
-    path("users/<str:username>/articles/", views.PublicArticleListView.as_view()),
+    path("articles/<str:username>/<slug:slug>/", views.ArticleRetrieveUpdateView.as_view()),
+    
 ]

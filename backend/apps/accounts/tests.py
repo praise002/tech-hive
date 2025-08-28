@@ -99,28 +99,17 @@ class TestAccounts(APITestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        if settings.DEBUG:
-            self.assertEqual(
-                response.json(),
-                {
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Login successful.",
-                    "data": {"access": response.json()["data"]["access"]},
+        self.assertEqual(
+            response.json(),
+            {
+                "status": SUCCESS_RESPONSE_STATUS,
+                "message": "Login successful.",
+                "data": {
+                    "access": response.json()["data"]["access"],
+                    "refresh": response.json()["data"]["refresh"],
                 },
-            )
-            self.assertIn("refresh", response.cookies)
-        else:
-            self.assertEqual(
-                response.json(),
-                {
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Login successful.",
-                    "data": {
-                        "access": response.json()["data"]["access"],
-                        "refresh": response.json()["data"]["refresh"],
-                    },
-                },
-            )
+            },
+        )
 
         # Invalid Login - Incorrect Password
         response = self.client.post(
@@ -373,15 +362,6 @@ class TestAccounts(APITestCase):
             },
         )
 
-        # if settings.DEBUG:
-        #     # Verify tokens are blacklisted by trying to use them
-        #     refresh_token = login_response.json()["data"]["refresh"]
-        #     refresh_response = self.client.post(
-        #         self.token_refresh_url, {"refresh": refresh_token}
-        #     )
-
-        #     self.assertEqual(refresh_response.status_code, 401)
-
     def test_password_change(self):
         verified_user = self.verified_user
 
@@ -414,28 +394,17 @@ class TestAccounts(APITestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        if settings.DEBUG:
-            self.assertEqual(
-                response.json(),
-                {
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Password changed successfully.",
-                    "data": {"access": response.json()["data"]["access"]},
+        self.assertEqual(
+            response.json(),
+            {
+                "status": SUCCESS_RESPONSE_STATUS,
+                "message": "Password changed successfully.",
+                "data": {
+                    "access": response.json()["data"]["access"],
+                    "refresh": response.json()["data"]["refresh"],
                 },
-            )
-            self.assertIn("refresh", response.cookies)
-        else:
-            self.assertEqual(
-                response.json(),
-                {
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Password changed successfully.",
-                    "data": {
-                        "access": response.json()["data"]["access"],
-                        "refresh": response.json()["data"]["refresh"],
-                    },
-                },
-            )
+            },
+        )
 
         # Test that the new access token works
         new_access_token = response.json()["data"]["access"]

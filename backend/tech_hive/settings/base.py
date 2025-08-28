@@ -62,6 +62,7 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "apps.accounts",
+    "apps.profiles",
     "apps.common",
     "apps.general",
     "apps.content",

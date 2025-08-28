@@ -2,7 +2,6 @@ from apps.accounts.utils import validate_password_strength
 from apps.common.schema_examples import ACCESS_TOKEN, REFRESH_TOKEN
 from apps.common.serializers import SuccessResponseSerializer
 from django.core.validators import MaxValueValidator, MinValueValidator
-from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import (
@@ -120,38 +119,6 @@ class SetNewPasswordSerializer(serializers.Serializer):
 
     def validate_new_password(self, value):
         return validate_password_strength(value)
-
-
-class UserSerializer(serializers.ModelSerializer):
-    avatar_url = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = User
-        fields = [
-            "id",
-            "first_name",
-            "last_name",
-            "username",
-            "email",
-            "avatar_url",
-        ]
-        extra_kwargs = {
-            "id": {"read_only": True},
-            "email": {"read_only": True},
-        }
-
-    @extend_schema_field(serializers.URLField)
-    def get_avatar_url(self, obj):
-        return obj.avatar_url
-
-
-class AvatarSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = User
-        fields = [
-            "avatar",
-        ]
 
 
 # RESPONSES

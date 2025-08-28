@@ -84,18 +84,12 @@ class AcceptGuidelinesView(APIView):
 # GET /users/{username}/articles/ → specific user's published articles (profile view)
 
 
-class ArticleListCreateView(ListCreateAPIView):
-    # all published article + draft creation
-    pass
-
-
 class ArticleRetrieveUpdateView(RetrieveUpdateAPIView):  # USE APIView
     pass
 
 
-# Article Management Endpoints
-class PublicArticleListView(ListCreateAPIView):
-    # List published article for a user
+class ArticleListView(ListCreateAPIView):
+    # List all published article
     queryset = Article.published.select_related("category", "author").all()
     serializer_class = ArticleSerializer
     filter_backends = (DjangoFilterBackend, SearchFilter)
@@ -103,7 +97,7 @@ class PublicArticleListView(ListCreateAPIView):
     pagination_class = DefaultPagination
 
     @extend_schema(
-        summary="Retrieve a list of articles",
+        summary="Retrieve a list of all published articles",
         description="This endpoint allows.",
         parameters=[
             OpenApiParameter(
@@ -196,8 +190,10 @@ class TagGenericView(ListAPIView):
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
+
 class TagRemoveView(APIView):
     pass
+
 
 # Do for every content
 class RSSFeedInfoView(APIView):
