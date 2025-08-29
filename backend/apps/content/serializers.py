@@ -103,23 +103,12 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
         ]
         # TODO: Editor will add it to the right category
 
-    def validate_tags(self, value):  # TODO: TEST IT
-        # TODO: CHECK CURRENT TAG IN TAG
-        for tag_name in value:
-            if not tag_name.strip():
-                raise serializers.ValidationError("Tag names cannot be empty")
-
-        return value
-
     def create(self, validated_data):
         # Get the authenticated user's profile
         user = self.context["request"].user
-        tag_names = validated_data.pop("tags", [])
 
         # Create the author and associate it with the user
         article = models.Article.objects.create(author=user, **validated_data)
-
-        self.tag_names = tag_names
 
         return article
 
@@ -139,22 +128,9 @@ class ArticleUpdateSerializer(serializers.ModelSerializer):
             "tags",
         ]
 
-    def validate_tags(self, value):  # TODO: TEST IT
-        # TODO: CHECK CURRENT TAG IN TAG
-        for tag_name in value:
-            if not tag_name.strip():
-                raise serializers.ValidationError("Tag names cannot be empty")
-
-        return value
-
     def update(self, instance, validated_data):
-        tag_names = validated_data.pop("tags", None)
-
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-
-        if tag_names is not None:
-            self.tag_names = tag_names
 
         instance.save()
         return instance

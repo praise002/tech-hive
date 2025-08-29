@@ -199,6 +199,11 @@ class AvatarUpdateView(APIView):
             status_code=status.HTTP_200_OK,
         )
 
+class UserArticleListView(APIView):
+    # user published article + draft creation
+    pass
+
+
 
 class UserArticleListCreateView(APIView):
     # user published article + draft creation
