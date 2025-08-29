@@ -1,5 +1,5 @@
-import Text from '../../components/common/Text';
-import Button from '../../components/common/Button';
+import Text from '../../../components/common/Text';
+import Button from '../../../components/common/Button';
 
 import toast from 'react-hot-toast';
 import ReactCrop, { centerCrop, Crop, makeAspectCrop } from 'react-image-crop';
@@ -15,13 +15,13 @@ import {
 import { FaRegBookmark } from 'react-icons/fa6';
 import { RiDraftFill } from 'react-icons/ri';
 
-import SavedContent from './componenets/SavedContent';
-import DraftsContent from './componenets/DraftsContent';
-import SubmittedContent from './componenets/SubmittedContent';
-import AccountContent from './componenets/AccountContent';
-import PublishedContent from './componenets/PublishedContent';
+import SavedContent from '../componenets/SavedContent';
+import DraftsContent from '../componenets/DraftsContent';
+import SubmittedContent from '../componenets/SubmittedContent';
+import AccountContent from '../componenets/AccountContent';
+import PublishedContent from '../componenets/PublishedContent';
 import { BiMessageRounded } from 'react-icons/bi';
-import CommentsContent from './componenets/CommentsContent';
+import CommentsContent from '../componenets/CommentsContent';
 
 const defaultProfilePicture = '/assets/icons/Avatars.png';
 

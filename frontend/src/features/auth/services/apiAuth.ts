@@ -7,6 +7,7 @@ import {
   VerifyOtpData,
 } from '../../../types/auth';
 import { API_URL } from '../../../utils/constants';
+import { removeToken, setToken } from '../../../utils/utils';
 
 export const AUTH_URL = `${API_URL}/auth`;
 
@@ -84,8 +85,28 @@ export async function login(credentials: LoginUserData) {
   }
 
   const data = await response.json();
-  localStorage.setItem('token', data.data.access); // USE HTTP-ONLY LATER
-  // localStorage.setItem('refresh', data.data.refresh);
+  setToken(data.data.access, data.data.refresh);
+
+  return data;
+}
+
+export async function refreshToken() {
+  const response = await fetch(`${AUTH_URL}/token/refresh/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({}),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+
+  const data = await response.json();
+  setToken(data.data.access, data.data.refresh);
+
   return data;
 }
 
@@ -99,8 +120,7 @@ export async function logout() {
     body: JSON.stringify({ refresh }),
   });
 
-  localStorage.removeItem('token');
-  localStorage.removeItem('refresh');
+  removeToken();
 
   if (!response.ok) {
     const error = await response.json();
@@ -120,8 +140,7 @@ export async function logoutAll() {
     },
   });
 
-  localStorage.removeItem('token');
-  localStorage.removeItem('refresh');
+  removeToken();
 
   if (!response.ok) {
     const error = await response.json();

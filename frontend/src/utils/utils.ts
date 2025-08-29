@@ -1,3 +1,5 @@
+import toast from 'react-hot-toast';
+
 export function safeLocalStorage() {
   try {
     // Test if localStorage is available and working
@@ -13,6 +15,9 @@ export function safeLocalStorage() {
   } catch (e) {
     // localStorage is not available (private browsing, disabled, etc.)
     console.error('Error:', e);
+    toast.error(
+      'Your browser settings are blocking storage. Some features may not work properly. Try enabling cookies or using a different browser.'
+    );
     return {
       setItem: () => {},
       getItem: () => null,
@@ -22,10 +27,19 @@ export function safeLocalStorage() {
   }
 }
 
-export function removeEmailLocalStorage() {
-  // Safely remove email from storage
+export function removeToken() {
   const storage = safeLocalStorage();
-  if (storage.isAvailable) {
-    storage.removeItem('email');
-  }
+  storage.removeItem('token');
+}
+
+export function setToken(token: string, refresh: string) {
+  const storage = safeLocalStorage();
+  storage.setItem('token', token);
+  storage.setItem('refresh', refresh);
+}
+
+export function getToken() {
+  const storage = safeLocalStorage();
+  const userToken = storage.getItem('token');
+  return userToken;
 }

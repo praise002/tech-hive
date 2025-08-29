@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import About from './pages/About';
-import AccountDetail from './features/profile/AccountDetail';
+import AccountDetail from './features/profile/pages/AccountDetail';
 import AppLayout from './components/Layouts/AppLayout';
 
 import CategoryDetail from './features/category/CategoryDetail';
@@ -13,7 +13,7 @@ import Contact from './pages/Contact';
 import Home from './pages/Home';
 import Login from './features/auth/pages/Login';
 import PageNotFound from './pages/PageNotFound';
-import ProfileDetail from './features/profile/ProfileDetail';
+
 import Register from './features/auth/pages/Register';
 import TechEventList from './features/events/TechEventList';
 import TechEventDetail from './features/events/TechEventDetail';
@@ -40,6 +40,7 @@ import ArticleList from './features/articles/ArticleList';
 import ArticleDetail from './features/articles/ArticleDetail';
 import VerifyEmail from './features/auth/pages/VerifyEmail';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import ProfileDetail from './features/profile/pages/ProfileDetail';
 
 const queryClient = new QueryClient({
   defaultOptions: {

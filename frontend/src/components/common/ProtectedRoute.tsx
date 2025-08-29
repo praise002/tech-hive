@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 import Spinner from './Spinner';
 
-import { useUser } from '../../features/profile/useUser';
+import { useUser } from '../../features/profile/hooks/useUser';
 import { ProtectedRouteProps } from '../../types/types';
 
 // replace: true - Prevents the login page from being added to

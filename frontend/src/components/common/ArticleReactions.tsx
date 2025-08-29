@@ -52,7 +52,7 @@ function ArticleReactions({
             {readTime} read
           </div>
 
-          <Bookmark className="w-5 h-5 dark:invert" />
+          <Bookmark className="w-5 h-5 dark:text-white" />
         </div>
       </div>
 
