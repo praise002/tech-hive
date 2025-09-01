@@ -114,10 +114,11 @@ class IsReviewerOrReadOnly(CustomBasePermission):
         return False
 
 
-class IsEditorOrReadOnly(CustomBasePermission):
+class IsEditorOrReadOnly(CustomBasePermission):  # Access to admin interface
     """
     Permission for Editors:
     - Can publish articles
+    - Can add tags to articles
     - Can assign reviewers to articles
     - Can view articles ready for publishing
     - Can add published articles to categories
@@ -139,7 +140,11 @@ class IsEditorOrReadOnly(CustomBasePermission):
         if isinstance(obj, Article):
 
             # Can publish articles that are ready
-            if obj.status == ArticleStatusChoices.READY:
+            # Can add tags to articles ready for publishing or published
+            if obj.status in [
+                ArticleStatusChoices.READY,
+                ArticleStatusChoices.PUBLISHED  
+            ]:
                 return True
 
             # Can assign reviewers and manage editorial workflow

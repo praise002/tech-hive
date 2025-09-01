@@ -1,6 +1,7 @@
 from apps.common.models import BaseModel
 from autoslug import AutoSlugField
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.db import models
 from django.db.models import Count
@@ -14,7 +15,7 @@ class PublishedManager(models.Manager):
 
 class Tag(BaseModel):
     name = models.CharField(max_length=20, unique=True)
-    
+
     class Meta:
         ordering = ["name"]
         indexes = [
@@ -94,6 +95,10 @@ class Article(BaseModel):
     def __str__(self):
         return self.title
 
+    def clean(self):
+        if self.tags.count() > 5:
+            raise ValidationError("Maximum 5 tags allowed per article")
+
     # TODO:
     def calculate_read_time(content):
         """
@@ -129,6 +134,9 @@ class Article(BaseModel):
         ordering = ["-created_at"]
         indexes = [
             models.Index(fields=["-title"]),
+        ]
+        permissions = [
+            ("publish_article", "Can publish article"),
         ]
 
 

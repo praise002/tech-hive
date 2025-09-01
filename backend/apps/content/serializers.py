@@ -42,6 +42,19 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ["id", "name"]
 
 
+class TagCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Tag
+        fields = ["name"]
+        extra_kwargs = {"name": {"validators": []}}  # Remove default unique validator
+
+    def create(self, validated_data):
+        tag, created = models.Tag.objects.get_or_create(
+            name=validated_data["name"].lower()
+        )
+        return tag, created
+
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Category
@@ -77,29 +90,30 @@ class ArticleSerializer(serializers.ModelSerializer):
     def get_cover_image_url(self, obj):
         return obj.cover_image_url
 
+    @extend_schema_field(serializers.CharField)
     def get_author(self, obj):
         return obj.author.full_name
 
+    @extend_schema_field(serializers.IntegerField)
     def get_total_reaction_counts(self, obj):
         return obj.total_reaction_counts
 
+    @extend_schema_field(serializers.IntegerField)
     def get_reaction_counts(self, obj):
         return obj.reaction_counts
 
 
 class ArticleCreateSerializer(serializers.ModelSerializer):
-    tags = serializers.ListField(
-        child=serializers.CharField(max_length=20),
-        required=False,
-        help_text="List of tag names",
+    url = serializers.HyperlinkedIdentityField(
+        view_name="article_detail", lookup_field="slug"
     )
-
+    
     class Meta:
         model = models.Article
         fields = [
             "title",
             "content",
-            "tags",
+            "url",
         ]
         # TODO: Editor will add it to the right category
 
@@ -114,11 +128,6 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
 
 
 class ArticleUpdateSerializer(serializers.ModelSerializer):
-    tags = serializers.ListField(
-        child=serializers.CharField(max_length=20),
-        required=False,
-        help_text="List of tag names",
-    )
 
     class Meta:
         model = models.Article

@@ -2,8 +2,13 @@ import logging
 
 from apps.accounts.models import User
 from apps.common.exceptions import NotFoundError
+from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
+from apps.content.models import Article
+from apps.content.permissions import IsContributorOrReadOnly
+from apps.content.serializers import ArticleCreateSerializer, ArticleSerializer
 from apps.profiles.schema_examples import (
+    ARTICLE_LIST_EXAMPLE,
     AVATAR_UPDATE_RESPONSE_EXAMPLE,
     PROFILE_DETAIL_RESPONSE_EXAMPLE,
     PROFILE_RETRIEVE_RESPONSE_EXAMPLE,
@@ -11,7 +16,8 @@ from apps.profiles.schema_examples import (
     build_avatar_request_schema,
 )
 from apps.profiles.serializers import AvatarSerializer, UserSerializer
-from drf_spectacular.utils import extend_schema
+from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.generics import (
     ListAPIView,
@@ -21,6 +27,8 @@ from rest_framework.generics import (
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+
+from apps.content.views.filters import UserArticleFilter
 
 tags = ["Profiles"]
 
@@ -34,7 +42,9 @@ class ProfileView(APIView):
     """
 
     serializer_class = UserSerializer
-    permission_classes = (IsAuthenticated,)  #Only the user should be able to view their own profile
+    permission_classes = (
+        IsAuthenticated,
+    )  # Only the user should be able to view their own profile
 
     @extend_schema(
         summary="View a user profile",
@@ -199,13 +209,97 @@ class AvatarUpdateView(APIView):
             status_code=status.HTTP_200_OK,
         )
 
+
+class UserArticleListCreateView(ListCreateAPIView):
+    # user articles + draft creation
+    queryset = Article.objects.select_related("author").prefetch_related("tags")
+
+    filter_backends = (DjangoFilterBackend,)
+    # filterset_class = UserArticleFilter
+    filter_fields = ("status",)  # FIX: NOT WORKING
+
+    search_fields = ["title", "content"]
+    pagination_class = DefaultPagination
+    permission_classes = (IsContributorOrReadOnly,)
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return ArticleCreateSerializer
+        return ArticleSerializer
+
+    @extend_schema(
+        summary="Retrieve a list of user articles",
+        description="This endpoint allows authenticated users to retrieve a paginated list of their own articles. It allows filtering articles",
+        parameters=[
+            OpenApiParameter(
+                name="status",
+                description="Filter articles by status.",
+                # enum=["draft", "submitted", "published"],
+            ),
+            #  OpenApiParameter(
+            #     name="status",
+            #     description="Filter articles by status group.",
+            #     # enum=["draft", "submitted", "published"],
+            # ),
+            OpenApiParameter(
+                name="search",
+                description="Search across title, and content.",
+            ),
+        ],
+        tags=tags,
+        responses=ARTICLE_LIST_EXAMPLE,
+    )
+    def get(self, request, *args, **kwargs):
+        """
+        Handle GET requests to retrieve articles with pagination, and search.
+        """
+        return super().get(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            paginated_data = self.get_paginated_response(serializer.data)
+            return CustomResponse.success(
+                message="Articles retrieved successfully.",
+                data=paginated_data.data,
+                status_code=status.HTTP_200_OK,
+            )
+
+        serializer = self.get_serializer(queryset, many=True)
+        return CustomResponse.success(
+            message="Articles retrieved successfully.",
+            data=serializer.data,
+            status_code=status.HTTP_200_OK,
+        )
+
+    @extend_schema(
+        summary="Create a new article",
+        description="This endpoint allows authenticated contributors to create a new article draft. ",
+        tags=tags,
+        # responses=ARTICLE_CREATE_RESPONSE_EXAMPLE,
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        headers = self.get_success_headers(serializer.data)
+
+        return CustomResponse.success(
+            message="Article created successfully.",
+            data=serializer.data,
+            status_code=status.HTTP_201_CREATED,
+            headers=headers,
+        )
+
+
 class UserArticleListView(APIView):
-    # user published article + draft creation
-    pass
-
-
-
-class UserArticleListCreateView(APIView):
     # user published article + draft creation
     pass
 

@@ -10,6 +10,9 @@ urlpatterns = [
     path("articles/", views.ArticleListView.as_view()),
     path("articles/feed/", LatestArticlesFeed()),
     # path("articles/rss/", views.RSSFeedInfoView.as_view()),
-    path("articles/<str:username>/<slug:slug>/", views.ArticleRetrieveUpdateView.as_view()),
-    
+    path(
+        "articles/<str:username>/<slug:slug>/",
+        views.ArticleRetrieveUpdateView.as_view(),
+        name="project_detail",
+    ),
 ]

@@ -14,7 +14,14 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(models.Article)
 class ArticleAdmin(admin.ModelAdmin):
-    pass
+    filter_horizontal = ('tags',)  
+    list_filter = ('status', 'category')
+    list_display = ('title', 'status', 'author', 'get_tags')
+    
+    def get_tags(self, obj):
+        return ", ".join([tag.name for tag in obj.tags.all()])
+    
+    get_tags.short_description = 'Tags'
 
 
 @admin.register(models.Tag)

@@ -141,7 +141,7 @@ class TagGenericView(ListAPIView):
     filter_backends = (DjangoFilterBackend, SearchFilter)
     search_fields = ["name"]
     queryset = Tag.objects.all()
-    default_limit = 10
+    default_limit = 10  # TODO: TEST THIS TO MAKE SURE IT DOESN'T QUERY THE WHOLE DB
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -189,10 +189,6 @@ class TagGenericView(ListAPIView):
     )
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
-
-
-class TagRemoveView(APIView):
-    pass
 
 
 # Do for every content
