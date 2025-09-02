@@ -107,7 +107,7 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(
         view_name="article_detail", lookup_field="slug"
     )
-    
+
     class Meta:
         model = models.Article
         fields = [
@@ -128,21 +128,12 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
 
 
 class ArticleUpdateSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = models.Article
         fields = [
             "title",
             "content",
-            "tags",
         ]
-
-    def update(self, instance, validated_data):
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-
-        instance.save()
-        return instance
 
 
 class ArticleAvatarSerializer(serializers.ModelSerializer):

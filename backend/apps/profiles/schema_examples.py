@@ -159,6 +159,14 @@ SUBMITTED_ARTICLES = [
     },
 ]
 
+ARTICLE_CREATE_EXAMPLE = [
+    {
+        "title": "Test title",
+        "content": "Test content",
+        "url": "",  # TODO: UPDATE LATER
+    }
+]
+
 PROFILE_UPDATE_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(
         response=UserSerializer,
@@ -300,7 +308,35 @@ ARTICLE_LIST_EXAMPLE = {
             ),
         ],
     ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        response=ErrorResponseSerializer,
+        description="Permission Denied",
+    ),
 }
+
+ARTICLE_CREATE_RESPONSE_EXAMPLE = {
+    201: OpenApiResponse(
+        description="Article Creation Successful",
+        response=UserSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Article created successfully.",
+                    "data": ARTICLE_CREATE_EXAMPLE,
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        response=ErrorResponseSerializer,
+        description="Permission Denied",
+    ),
+}
+
 
 
 def build_avatar_request_schema():

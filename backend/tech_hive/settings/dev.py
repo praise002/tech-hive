@@ -17,9 +17,11 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS").split(" ")
 
 CSRF_TRUSTED_ORIGINS = ["https://*.ngrok.io", "https://*.ngrok-free.app"]
 
+
 CORS_ALLOWED_ORIGINS = [
     config("FRONTEND_URL_DEV"),
     "https://tech-hive-react.vercel.app",  # TODO: REMOVE LATER
+    "http://127.0.0.1:5501",
 ]
 
 FRONTEND_URL = config("FRONTEND_URL_DEV")

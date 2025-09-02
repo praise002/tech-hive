@@ -5,9 +5,11 @@ from apps.common.exceptions import NotFoundError
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
 from apps.content.models import Article
-from apps.content.permissions import IsContributorOrReadOnly
+from apps.content.permissions import IsContributor
 from apps.content.serializers import ArticleCreateSerializer, ArticleSerializer
+from apps.content.views.filters import UserArticleFilter
 from apps.profiles.schema_examples import (
+    ARTICLE_CREATE_RESPONSE_EXAMPLE,
     ARTICLE_LIST_EXAMPLE,
     AVATAR_UPDATE_RESPONSE_EXAMPLE,
     PROFILE_DETAIL_RESPONSE_EXAMPLE,
@@ -27,8 +29,6 @@ from rest_framework.generics import (
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-
-from apps.content.views.filters import UserArticleFilter
 
 tags = ["Profiles"]
 
@@ -215,17 +215,22 @@ class UserArticleListCreateView(ListCreateAPIView):
     queryset = Article.objects.select_related("author").prefetch_related("tags")
 
     filter_backends = (DjangoFilterBackend,)
-    # filterset_class = UserArticleFilter
-    filter_fields = ("status",)  # FIX: NOT WORKING
+    filterset_class = UserArticleFilter
 
     search_fields = ["title", "content"]
     pagination_class = DefaultPagination
-    permission_classes = (IsContributorOrReadOnly,)
+    permission_classes = (IsContributor,)
 
     def get_serializer_class(self):
         if self.request.method == "POST":
             return ArticleCreateSerializer
         return ArticleSerializer
+    
+    def get_queryset(self):
+        """
+        Filter articles to only return those belonging to the authenticated user.
+        """
+        return self.queryset.filter(author=self.request.user)
 
     @extend_schema(
         summary="Retrieve a list of user articles",
@@ -234,13 +239,18 @@ class UserArticleListCreateView(ListCreateAPIView):
             OpenApiParameter(
                 name="status",
                 description="Filter articles by status.",
-                # enum=["draft", "submitted", "published"],
+                enum=[  # it has to be specified for it to wrok
+                    "draft",
+                    "submitted",
+                    "submitted_for_review",
+                    "under_review",
+                    "changes_requested",
+                    "review_completed",
+                    "ready_for_publishing",
+                    "published",
+                    "rejected",
+                ],
             ),
-            #  OpenApiParameter(
-            #     name="status",
-            #     description="Filter articles by status group.",
-            #     # enum=["draft", "submitted", "published"],
-            # ),
             OpenApiParameter(
                 name="search",
                 description="Search across title, and content.",
@@ -279,7 +289,7 @@ class UserArticleListCreateView(ListCreateAPIView):
         summary="Create a new article",
         description="This endpoint allows authenticated contributors to create a new article draft. ",
         tags=tags,
-        # responses=ARTICLE_CREATE_RESPONSE_EXAMPLE,
+        responses=ARTICLE_CREATE_RESPONSE_EXAMPLE,
     )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)

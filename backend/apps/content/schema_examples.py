@@ -1,13 +1,13 @@
 from apps.accounts.schema_examples import UNAUTHORIZED_USER_RESPONSE
 from apps.common.schema_examples import SUCCESS_RESPONSE_STATUS, UUID_EXAMPLE
+from apps.common.serializers import ErrorDataResponseSerializer
 from apps.content.serializers import (
+    ArticleSerializer,
     CategorySerializer,
     ContributorOnboardingSerializer,
     TagSerializer,
 )
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse
-
-from apps.common.serializers import ErrorDataResponseSerializer
 
 CATEGORY_LIST_EXAMPLE = {
     "id": UUID_EXAMPLE,
@@ -27,6 +27,21 @@ TAG_LIST_EXAMPLE = [
     },
 ]
 
+ARTICLE_DETAIL_EXAMPLE = {
+    "id": "26b0dee3-54a8-46eb-8c9d-00ca481d201f",
+    "title": "Test title",
+    "slug": "test-title",
+    "content": "Test content",
+    "cover_image_url": "",
+    "read_time": 5,
+    "status": "published",
+    "created_at": "2025-08-07T18:48:26.389204Z",
+    "is_featured": False,
+    "author": "Praise Idowu",
+    "total_reaction_counts": 4,
+    "reaction_counts": {"❤️": 1, "👍": 1, "🔥": 1, "😍": 1},
+    "tags": [{"id": "d5afcd69-4c7d-4ea5-94bd-e1a2549a3f72", "name": "python"}],
+}
 
 ACCEPT_GUIDELINES_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(
@@ -98,3 +113,20 @@ TAG_RESPONSE_EXAMPLE = {
 }
 
 ARTICLE_LIST_RESPONSE_EXAMPLE = {}
+
+ARTICLE_DETAIL_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Article Retrieval Successful",
+        response=ArticleSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Article detail retrieved successfully.",
+                    "data": ARTICLE_DETAIL_EXAMPLE,
+                },
+            ),
+        ],
+    ),
+}

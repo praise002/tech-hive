@@ -36,25 +36,20 @@ class CustomBasePermission(BasePermission):
         ).exists()
 
 
-class IsContributorOrReadOnly(CustomBasePermission):
+class IsContributor(BasePermission):
     """
     Permission for Contributors:
-    - Can view all published articles (read-only)
     - Can create, edit, and view their own drafts
     - Can view feedback on their own articles
     """
 
-    def has_object_permission(self, request, view, obj):
-        # Read permissions for published articles
-        if request.method in permissions.SAFE_METHODS:
-            if isinstance(obj, Article):
-                # Anyone can read published articles
-                if obj.status == ArticleStatusChoices.PUBLISHED:
-                    return True
-                # Only author can read their own drafts
-                return obj.author == request.user
-            return True
+    def has_permission(self, request, view):
+        if not request.user.is_authenticated:
+            return False
 
+        return request.user.groups.filter(name=UserRoles.CONTRIBUTOR).exists()
+
+    def has_object_permission(self, request, view, obj):
         # Write permissions only for article owners
         if isinstance(obj, Article):
             # Contributors can only edit their own drafts
@@ -143,7 +138,7 @@ class IsEditorOrReadOnly(CustomBasePermission):  # Access to admin interface
             # Can add tags to articles ready for publishing or published
             if obj.status in [
                 ArticleStatusChoices.READY,
-                ArticleStatusChoices.PUBLISHED  
+                ArticleStatusChoices.PUBLISHED,
             ]:
                 return True
 
