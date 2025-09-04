@@ -27,6 +27,39 @@ TAG_LIST_EXAMPLE = [
     },
 ]
 
+ARTICLES = [
+    {
+        "id": "146541be-1b9b-48a2-8117-2b5fd4bd301b",
+        "title": "Test title 2",
+        "slug": "test-title-2",
+        "content": "Test content",
+        "cover_image_url": "",
+        "read_time": 0,
+        "status": "published",
+        "created_at": "2025-08-12T10:00:54.576519Z",
+        "is_featured": False,
+        "author": "Praise Idowu",
+        "total_reaction_counts": 2,
+        "reaction_counts": {"❤️": 2},
+        "tags": [{"id": "d5afcd69-4c7d-4ea5-94bd-e1a2549a3f72", "name": "python"}],
+    },
+    {
+        "id": "26b0dee3-54a8-46eb-8c9d-00ca481d201f",
+        "title": "Test title",
+        "slug": "test-title",
+        "content": "Test content",
+        "cover_image_url": "",
+        "read_time": 5,
+        "status": "published",
+        "created_at": "2025-08-07T18:48:26.389204Z",
+        "is_featured": False,
+        "author": "Praise Idowu",
+        "total_reaction_counts": 4,
+        "reaction_counts": {"❤️": 1, "👍": 1, "🔥": 1, "😍": 1},
+        "tags": [{"id": "d5afcd69-4c7d-4ea5-94bd-e1a2549a3f72", "name": "python"}],
+    },
+]
+
 ARTICLE_DETAIL_EXAMPLE = {
     "id": "26b0dee3-54a8-46eb-8c9d-00ca481d201f",
     "title": "Test title",
@@ -112,7 +145,22 @@ TAG_RESPONSE_EXAMPLE = {
     ),
 }
 
-ARTICLE_LIST_RESPONSE_EXAMPLE = {}
+ARTICLE_LIST_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Articles Fetched",
+        response=ArticleSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Articles retrieved successfully.",
+                    "data": ARTICLES,
+                },
+            ),
+        ],
+    ),
+}
 
 ARTICLE_DETAIL_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(

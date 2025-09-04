@@ -12,7 +12,7 @@ urlpatterns = [
     # path("articles/rss/", views.RSSFeedInfoView.as_view()),
     path(
         "articles/<str:username>/<slug:slug>/",
-        views.ArticleRetrieveUpdateView.as_view(),
+        views.ArticleRetrieveView.as_view(),
         name="project_detail",
     ),
 ]

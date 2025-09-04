@@ -5,9 +5,11 @@ from apps.common.exceptions import NotFoundError
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
 from apps.content.models import Article, Tag
+from apps.content.permissions import IsContributor
 from apps.content.schema_examples import (
     ACCEPT_GUIDELINES_RESPONSE_EXAMPLE,
     ARTICLE_DETAIL_RESPONSE_EXAMPLE,
+    ARTICLE_LIST_RESPONSE_EXAMPLE,
     TAG_RESPONSE_EXAMPLE,
 )
 from apps.content.serializers import (
@@ -27,10 +29,12 @@ from rest_framework.generics import (
     ListCreateAPIView,
     RetrieveUpdateAPIView,
 )
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.views import APIView
-
-from apps.content.permissions import IsContributor
 
 article_tags = ["Articles"]
 onboarding_tags = ["Onboarding"]
@@ -89,87 +93,6 @@ class AcceptGuidelinesView(APIView):
 # GET /users/{username}/articles/ → specific user's published articles (profile view)
 
 
-class ArticleRetrieveUpdateView(APIView):  # Retrieve, update, delete, username, slug
-    def get_permissions(self):
-        if self.request.method == "GET":
-            return [AllowAny()]
-        return [IsContributor()]
-    
-    
-    def get_object(self, username, slug):
-        try:
-            obj = Article.objects.select_related("author").get(
-                author__username=username, slug=slug
-            )
-            # TODO: MIGHT CHANGE LATER IF IT AFFECTS QUERY PERFORMANCE
-            if self.request.method in ["PATCH", "PUT", "DELETE"]:
-                self.check_object_permissions(
-                    self.request, obj
-                )  # This triggers has_object_permission
-            return obj
-        except Article.DoesNotExist:
-            raise NotFoundError(err_msg="Article not found.")
-
-    def get_serializer_class(self, request=None):
-        """
-        Helper method to select serializer class based on request method.
-        """
-        if request and request.method != "GET":
-            return ArticleUpdateSerializer
-        return ArticleSerializer
-
-    def get_serializer(self, *args, **kwargs):
-        """
-        Helper to get an instance of the correct serializer.
-        """
-        serializer_class = self.get_serializer_class(
-            kwargs.get("request") or self.request
-        )
-        return serializer_class(*args, **kwargs)
-
-    @extend_schema(
-        summary="Retrieve article details",
-        description="Retrieve detailed information about a specific article using the author's username and article slug.",
-        tags=article_tags,
-        responses=ARTICLE_DETAIL_RESPONSE_EXAMPLE,
-    )
-    def get(self, *args, **kwargs):
-        try:
-            article = Article.published.select_related("author").get(
-                author__username=kwargs["username"], slug=kwargs["slug"]
-            )  # NOTE: CONFUSION, ARTICLE OWNER SHOULD BE ABLE TO VIEW THEIR DRAFT OR SHOULD EDIT SOLVE THAT PROBLEM
-
-            serializer = self.get_serializer(article)
-            return CustomResponse.success(
-                message="Article detail retrieved successfully.",
-                data=serializer.data,
-                status_code=status.HTTP_200_OK,
-            )
-
-        except Article.DoesNotExist:
-            raise NotFoundError(err_msg="Article not found.")
-
-    @extend_schema(
-        summary="Update article",
-        description="Update an existing article using partial data. Only the article author can modify articles.",
-        tags=article_tags,
-        # responses=ARTICLE_UPDATE_RESPONSE_EXAMPLE,
-    )
-    def patch(self, request, *args, **kwargs):
-        article = self.get_object(username=kwargs["username"], slug=kwargs["slug"])
-        serializer = self.get_serializer(article, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-
-        serializer.save()
-
-        return CustomResponse.success(
-            message="Article updated successfully.",
-            data=serializer.data,
-            status_code=status.HTTP_200_OK,
-        )
-        # TODO: TEST IT
-
-
 class ArticleListView(ListCreateAPIView):
     # List all published article
     queryset = Article.published.select_related("category", "author").all()
@@ -189,7 +112,7 @@ class ArticleListView(ListCreateAPIView):
         ],
         tags=article_tags,
         auth=[],
-        # responses=ARTICLE_LIST_RESPONSE_EXAMPLE,
+        responses=ARTICLE_LIST_RESPONSE_EXAMPLE,
     )
     def get(self, request, *args, **kwargs):
         """
@@ -216,6 +139,32 @@ class ArticleListView(ListCreateAPIView):
             data=serializer.data,
             status_code=status.HTTP_200_OK,
         )
+
+
+class ArticleRetrieveView(APIView):
+    serializer_class = ArticleSerializer
+
+    @extend_schema(
+        summary="Retrieve article details",
+        description="Retrieve detailed information about a specific article using the author's username and article slug.",
+        tags=article_tags,
+        responses=ARTICLE_DETAIL_RESPONSE_EXAMPLE,
+    )
+    def get(self, *args, **kwargs):
+        try:
+            article = Article.published.select_related("author").get(
+                author__username=kwargs["username"], slug=kwargs["slug"]
+            )
+
+            serializer = self.serializer_class(article)
+            return CustomResponse.success(
+                message="Article detail retrieved successfully.",
+                data=serializer.data,
+                status_code=status.HTTP_200_OK,
+            )
+
+        except Article.DoesNotExist:
+            raise NotFoundError(err_msg="Article not found.")
 
 
 class TagGenericView(ListAPIView):

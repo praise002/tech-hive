@@ -6,7 +6,7 @@ from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
 from apps.content.models import Article
 from apps.content.permissions import IsContributor
-from apps.content.serializers import ArticleCreateSerializer, ArticleSerializer
+from apps.content.serializers import ArticleCreateSerializer, ArticleSerializer, ArticleUpdateSerializer
 from apps.content.views.filters import UserArticleFilter
 from apps.profiles.schema_examples import (
     ARTICLE_CREATE_RESPONSE_EXAMPLE,
@@ -225,7 +225,7 @@ class UserArticleListCreateView(ListCreateAPIView):
         if self.request.method == "POST":
             return ArticleCreateSerializer
         return ArticleSerializer
-    
+
     def get_queryset(self):
         """
         Filter articles to only return those belonging to the authenticated user.
@@ -307,6 +307,83 @@ class UserArticleListCreateView(ListCreateAPIView):
             status_code=status.HTTP_201_CREATED,
             headers=headers,
         )
+
+
+class ArticleRetrieveUpdateView(APIView):
+    permission_classes = (IsContributor,)
+
+    def get_object(self, slug):
+        try:
+            obj = Article.objects.select_related("author").get(
+                author=self.request.user, slug=slug
+            )
+            # TODO: MIGHT CHANGE LATER IF IT AFFECTS QUERY PERFORMANCE
+            if self.request.method in ["PATCH", "PUT", "DELETE"]:
+                self.check_object_permissions(
+                    self.request, obj
+                )  # This triggers has_object_permission
+            return obj
+        except Article.DoesNotExist:
+            raise NotFoundError(err_msg="Article not found.")
+
+    def get_serializer_class(self, request=None):
+        """
+        Helper method to select serializer class based on request method.
+        """
+        if request and request.method != "GET":
+            return ArticleUpdateSerializer
+        return ArticleSerializer
+
+    def get_serializer(self, *args, **kwargs):
+        """
+        Helper to get an instance of the correct serializer.
+        """
+        serializer_class = self.get_serializer_class(
+            kwargs.get("request") or self.request
+        )
+        return serializer_class(*args, **kwargs)
+
+    @extend_schema(
+        summary="Retrieve article details",
+        description="Retrieve detailed information about a specific article using the author's username and article slug.",
+        tags=tags,
+        # responses=ARTICLE_DETAIL_RESPONSE_EXAMPLE,
+    )
+    def get(self, *args, **kwargs):
+        try:
+            article = Article.published.select_related("author").get(
+                author__username=kwargs["username"], slug=kwargs["slug"]
+            )  # NOTE: CONFUSION, ARTICLE OWNER SHOULD BE ABLE TO VIEW THEIR DRAFT OR SHOULD EDIT SOLVE THAT PROBLEM
+
+            serializer = self.get_serializer(article)
+            return CustomResponse.success(
+                message="Article detail retrieved successfully.",
+                data=serializer.data,
+                status_code=status.HTTP_200_OK,
+            )
+
+        except Article.DoesNotExist:
+            raise NotFoundError(err_msg="Article not found.")
+
+    @extend_schema(
+        summary="Update article",
+        description="Update an existing article using partial data. Only the article author can modify articles.",
+        tags=tags,
+        # responses=ARTICLE_UPDATE_RESPONSE_EXAMPLE,
+    )
+    def patch(self, request, *args, **kwargs):
+        article = self.get_object(username=kwargs["username"], slug=kwargs["slug"])
+        serializer = self.get_serializer(article, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        serializer.save()
+
+        return CustomResponse.success(
+            message="Article updated successfully.",
+            data=serializer.data,
+            status_code=status.HTTP_200_OK,
+        )
+        # TODO: TEST IT
 
 
 class UserArticleListView(APIView):
