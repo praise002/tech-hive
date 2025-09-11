@@ -13,6 +13,27 @@ from apps.content.serializers import ArticleSerializer
 from apps.profiles.serializers import UserSerializer
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse
 
+TAGS = [
+    {"id": "a4abfe0b-5466-46ab-8dbe-b469133aaede", "name": "django"},
+    {"id": "d5afcd69-4c7d-4ea5-94bd-e1a2549a3f72", "name": "python"},
+]
+
+ARTICLE_1 = {
+    "id": "54a05aa7-a299-48c5-8076-ec6e8134b888",
+    "title": "Test 1",
+    "slug": "test-1",
+    "content": "Test content",
+    "cover_image_url": "",
+    "read_time": 5,
+    "status": "draft",
+    "created_at": "2025-08-31T22:11:49.564213Z",
+    "is_featured": False,
+    "author": "Eki Benson",
+    "total_reaction_counts": 0,
+    "reaction_counts": {},
+    "tags": TAGS,
+}
+
 PROFILE_EXAMPLE = {
     "id": UUID_EXAMPLE,
     "first_name": "Bob",
@@ -23,10 +44,6 @@ PROFILE_EXAMPLE = {
     "avatar_url": AVATAR_URL,
 }
 
-TAGS = [
-    {"id": "a4abfe0b-5466-46ab-8dbe-b469133aaede", "name": "django"},
-    {"id": "d5afcd69-4c7d-4ea5-94bd-e1a2549a3f72", "name": "python"},
-]
 
 ARTICLES = [
     {
@@ -166,6 +183,7 @@ ARTICLE_CREATE_EXAMPLE = [
         "url": "",  # TODO: UPDATE LATER
     }
 ]
+
 
 PROFILE_UPDATE_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(
@@ -337,6 +355,31 @@ ARTICLE_CREATE_RESPONSE_EXAMPLE = {
     ),
 }
 
+ARTICLE_DETAIL_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Article Retrieval Successful",
+        response=UserSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Article detail retrieved successfull.",
+                    "data": ARTICLE_1,
+                },
+            ),
+            OpenApiExample(
+                name="Redirect Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "This article is published and available at the public endpoint.",
+                    "data": {"redirect_url": "/articles/test-user/test-article/"},
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+}
 
 
 def build_avatar_request_schema():

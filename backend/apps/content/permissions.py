@@ -50,7 +50,6 @@ class IsContributor(BasePermission):
         return request.user.groups.filter(name=UserRoles.CONTRIBUTOR).exists()
 
     def has_object_permission(self, request, view, obj):
-        # Write permissions only for article owners
         if isinstance(obj, Article):
             # Contributors can only edit their own drafts
             return obj.author == request.user and obj.status in [

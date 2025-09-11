@@ -4,12 +4,17 @@ from apps.accounts.models import User
 from apps.common.exceptions import NotFoundError
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
-from apps.content.models import Article
+from apps.content.models import Article, ArticleStatusChoices
 from apps.content.permissions import IsContributor
-from apps.content.serializers import ArticleCreateSerializer, ArticleSerializer, ArticleUpdateSerializer
+from apps.content.serializers import (
+    ArticleCreateSerializer,
+    ArticleSerializer,
+    ArticleUpdateSerializer,
+)
 from apps.content.views.filters import UserArticleFilter
 from apps.profiles.schema_examples import (
     ARTICLE_CREATE_RESPONSE_EXAMPLE,
+    ARTICLE_DETAIL_RESPONSE_EXAMPLE,
     ARTICLE_LIST_EXAMPLE,
     AVATAR_UPDATE_RESPONSE_EXAMPLE,
     PROFILE_DETAIL_RESPONSE_EXAMPLE,
@@ -315,8 +320,17 @@ class ArticleRetrieveUpdateView(APIView):
     def get_object(self, slug):
         try:
             obj = Article.objects.select_related("author").get(
-                author=self.request.user, slug=slug
-            )
+                author=self.request.user, slug=slug, status__in=[
+                    ArticleStatusChoices.DRAFT,
+                    ArticleStatusChoices.CHANGES_REQUESTED,
+                    ArticleStatusChoices.SUBMITTED_FOR_REVIEW,
+                    ArticleStatusChoices.UNDER_REVIEW,
+                    ArticleStatusChoices.REVIEW_COMPLETED,
+                    ArticleStatusChoices.READY,
+                    ArticleStatusChoices.REJECTED,
+                ]
+            )  # TODO: OR THIS - FOR GET, REMOVE FOR POST
+
             # TODO: MIGHT CHANGE LATER IF IT AFFECTS QUERY PERFORMANCE
             if self.request.method in ["PATCH", "PUT", "DELETE"]:
                 self.check_object_permissions(
@@ -347,13 +361,21 @@ class ArticleRetrieveUpdateView(APIView):
         summary="Retrieve article details",
         description="Retrieve detailed information about a specific article using the author's username and article slug.",
         tags=tags,
-        # responses=ARTICLE_DETAIL_RESPONSE_EXAMPLE,
+        responses=ARTICLE_DETAIL_RESPONSE_EXAMPLE,
     )
     def get(self, *args, **kwargs):
         try:
-            article = Article.published.select_related("author").get(
-                author__username=kwargs["username"], slug=kwargs["slug"]
-            )  # NOTE: CONFUSION, ARTICLE OWNER SHOULD BE ABLE TO VIEW THEIR DRAFT OR SHOULD EDIT SOLVE THAT PROBLEM
+            article = self.get_object(slug=kwargs["slug"])
+
+            # if article.status == ArticleStatusChoices.PUBLISHED:
+            #     public_url = f"/articles/{article.author.username}/{article.slug}/"
+            #     return CustomResponse.success(
+            #         message="This article is published and available at the public endpoint.",
+            #         data={
+            #             "redirect_url": public_url,
+            #         },
+            #         status_code=status.HTTP_200_OK,
+            #     )  # TODO: THIS 
 
             serializer = self.get_serializer(article)
             return CustomResponse.success(
@@ -372,7 +394,7 @@ class ArticleRetrieveUpdateView(APIView):
         # responses=ARTICLE_UPDATE_RESPONSE_EXAMPLE,
     )
     def patch(self, request, *args, **kwargs):
-        article = self.get_object(username=kwargs["username"], slug=kwargs["slug"])
+        article = self.get_object(slug=kwargs["slug"])
         serializer = self.get_serializer(article, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
