@@ -27,19 +27,23 @@ export function safeLocalStorage() {
   }
 }
 
-export function removeToken() {
+export function clearTokens() {
   const storage = safeLocalStorage();
-  storage.removeItem('token');
+  storage.removeItem('authTokens');
 }
 
-export function setToken(token: string, refresh: string) {
+export function setToken(data: object) {
   const storage = safeLocalStorage();
-  storage.setItem('token', token);
-  storage.setItem('refresh', refresh);
+  storage.setItem('authTokens', JSON.stringify(data));
+  
 }
 
 export function getToken() {
   const storage = safeLocalStorage();
-  const userToken = storage.getItem('token');
+  const authToken = storage.getItem('authTokens');
+
+  if (!authToken) return null;
+
+  const userToken = JSON.parse(authToken);
   return userToken;
 }

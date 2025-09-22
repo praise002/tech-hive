@@ -103,6 +103,7 @@ function LoginForm() {
           toast.error(
             error.message || 'Something went wrong. Please try again.'
           );
+          // TODO: Handle email not verified
           // TODO: Handle disabled by showing an help page
         }
       },

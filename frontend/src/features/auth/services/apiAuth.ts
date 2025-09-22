@@ -7,7 +7,7 @@ import {
   VerifyOtpData,
 } from '../../../types/auth';
 import { API_URL } from '../../../utils/constants';
-import { removeToken, setToken } from '../../../utils/utils';
+import { getToken, clearTokens, setToken } from '../../../utils/utils';
 
 export const AUTH_URL = `${API_URL}/auth`;
 
@@ -85,7 +85,7 @@ export async function login(credentials: LoginUserData) {
   }
 
   const data = await response.json();
-  setToken(data.data.access, data.data.refresh);
+  setToken(data.data);
 
   return data;
 }
@@ -105,13 +105,13 @@ export async function refreshToken() {
   }
 
   const data = await response.json();
-  setToken(data.data.access, data.data.refresh);
+  setToken(data.data);
 
   return data;
 }
 
 export async function logout() {
-  const refresh = localStorage.getItem('refresh');
+  const refresh = getToken().refresh;
   const response = await fetch(`${AUTH_URL}/sessions/`, {
     method: 'POST',
     headers: {
@@ -120,7 +120,7 @@ export async function logout() {
     body: JSON.stringify({ refresh }),
   });
 
-  removeToken();
+  clearTokens();
 
   if (!response.ok) {
     const error = await response.json();
@@ -131,16 +131,16 @@ export async function logout() {
 }
 
 export async function logoutAll() {
-  const token = localStorage.getItem('token');
+  const token = getToken();
   const response = await fetch(`${AUTH_URL}/sessions/all/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token.access}`,
     },
   });
 
-  removeToken();
+  clearTokens();
 
   if (!response.ok) {
     const error = await response.json();
@@ -152,7 +152,7 @@ export async function logoutAll() {
 }
 
 export async function changePassword(passwordData: ChangePasswordData) {
-  const token = localStorage.getItem('token');
+  const token = getToken();
   if (!token) {
     throw new Error('No authentication token found');
   }
@@ -161,7 +161,7 @@ export async function changePassword(passwordData: ChangePasswordData) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token.access}`,
     },
     body: JSON.stringify(passwordData),
   });

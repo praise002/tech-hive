@@ -1,8 +1,6 @@
 import { UpdateUserData } from '../../../types/auth';
 import { API_URL } from '../../../utils/constants';
-import { getToken, removeToken } from '../../../utils/utils';
-
-// import axios from 'axios';
+import { getToken, clearTokens } from '../../../utils/utils';
 
 export const PROFILE_URL = `${API_URL}/profiles`;
 
@@ -22,7 +20,7 @@ export async function getCurrentUser() {
   });
 
   if (!response.ok) {
-    removeToken();
+    clearTokens();
     const error = await response.json();
     // throw new Error(error.message || 'Failed to fetch user');
     throw error;
@@ -31,15 +29,6 @@ export async function getCurrentUser() {
   const data = await response.json();
   return data.data;
 }
-
-// export async function getCurrentUserAxios() {
-//   try {
-//     const response = await axios.get(`${PROFILE_URL}/me/`);
-//     return response.data;
-//   } catch (error) {
-//     console.error(error);
-//   }
-// }
 
 // to display /profile
 export async function getCurrentUserProfile() {
@@ -65,8 +54,6 @@ export async function getCurrentUserProfile() {
   const data = await response.json();
   return data.data;
 }
-
-
 
 export async function getUserProfile(username: string) {
   const response = await fetch(`${PROFILE_URL}/${username}/`, {

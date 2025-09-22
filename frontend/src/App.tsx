@@ -41,6 +41,7 @@ import ArticleDetail from './features/articles/ArticleDetail';
 import VerifyEmail from './features/auth/pages/VerifyEmail';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import ProfileDetail from './features/profile/pages/ProfileDetail';
+import AccountDisabled from './features/auth/pages/AccountDisabled';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -96,6 +97,7 @@ function App() {
             />
 
             <Route path="docs" element={<Docs />} />
+            <Route path="account-disabled" element={<AccountDisabled />} />
           </Route>
 
           <Route
@@ -111,9 +113,9 @@ function App() {
             <Route path="admin" element={<AdminDashboard />} />
           </Route>
 
-          {/* Catch-all route for 404 errors */}
           <Route path="coming-soon" element={<ComingSoon />} />
           <Route path="campuskart" element={<CampusKart />} />
+          {/* Catch-all route for 404 errors */}
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </BrowserRouter>

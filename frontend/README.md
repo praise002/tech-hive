@@ -133,6 +133,8 @@ A modern, collaborative platform for the tech community featuring article writin
 - [Tiptap Drag Drop Image](https://www.codemzy.com/blog/tiptap-drag-drop-image)
 - [Render server error with React hook form](https://react-hook-form.com/get-started)
 - [Mutations in React Query](https://tkdodo.eu/blog/mastering-mutations-in-react-query)
+- [How integrate refresh token in React Reddit](https://www.reddit.com/r/reactjs/comments/1ejtu9h/how_to_integrate_refresh_tokens_in_react/)
+- [How integrate refresh token in React](https://rabbitbyte.club/how-to-integrate-refresh-tokens-in-react-app/)
 
 ## 🚀 Getting Started
 
