@@ -34,6 +34,11 @@ ARTICLE_1 = {
     "tags": TAGS,
 }
 
+ARTICLE_UPDATED = {
+    "title": "Test post",
+    "content": "Test content updated"
+}
+
 PROFILE_EXAMPLE = {
     "id": UUID_EXAMPLE,
     "first_name": "Bob",
@@ -368,12 +373,36 @@ ARTICLE_DETAIL_RESPONSE_EXAMPLE = {
                     "data": ARTICLE_1,
                 },
             ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    404: OpenApiResponse(
+        response=ErrorResponseSerializer,
+        description="Article not found",
+        examples=[
             OpenApiExample(
-                name="Redirect Response",
+                name="Article not found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Article not found.",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+}
+
+ARTICLE_UPDATE_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Article Retrieval Successful",
+        response=UserSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
                 value={
                     "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "This article is published and available at the public endpoint.",
-                    "data": {"redirect_url": "/articles/test-user/test-article/"},
+                    "message": "Article updated successfully.",
+                    "data": ARTICLE_UPDATED,
                 },
             ),
         ],

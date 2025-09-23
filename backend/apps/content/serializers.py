@@ -3,6 +3,8 @@ from apps.content import models
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from apps.content.CustomRelations import CustomHyperlinkedIdentityField
+
 
 def process_tags(tag_names):
     """Convert tag names to Tag instances using get_or_create"""
@@ -104,8 +106,11 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 
 class ArticleCreateSerializer(serializers.ModelSerializer):
-    url = serializers.HyperlinkedIdentityField(
-        view_name="article_detail", lookup_field="slug"
+    url = CustomHyperlinkedIdentityField(
+        view_name="article_detail", lookup_fields=[
+            ('author.username', 'username'),  # Get username from article.author.username
+            ('slug', 'slug')                  # Get slug from article.slug
+        ]
     )
 
     class Meta:

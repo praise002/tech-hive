@@ -280,3 +280,7 @@ API documentation will be available at:
 - [Django permissions Test Driven](https://testdriven.io/blog/django-permissions/)
 - [Django permissions Medium](hhttps://prithoo11335.medium.com/custom-permission-classes-in-django-restframework-6dc1d26bba33)
 - [Django permissions Test Driven 2](https://testdriven.io/blog/custom-permission-classes-drf/)
+- [Inspect ngrok](http://127.0.0.1:4040/inspect/http)
+- [OWASP Cheatsheet](https://cheatsheetseries.owasp.org/)
+- [API Architecture Best Practices](https://blog.wahab2.com/api-architecture-best-practices-for-designing-rest-apis-bf907025f5f)
+- [Hyperlinkedidentityfield with multiple loojkup rgs stackoverflow solution](https://stackoverflow.com/questions/29362142/django-rest-framework-hyperlinkedidentityfield-with-multiple-lookup-args)

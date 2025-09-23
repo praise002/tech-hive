@@ -16,6 +16,7 @@ from apps.profiles.schema_examples import (
     ARTICLE_CREATE_RESPONSE_EXAMPLE,
     ARTICLE_DETAIL_RESPONSE_EXAMPLE,
     ARTICLE_LIST_EXAMPLE,
+    ARTICLE_UPDATE_RESPONSE_EXAMPLE,
     AVATAR_UPDATE_RESPONSE_EXAMPLE,
     PROFILE_DETAIL_RESPONSE_EXAMPLE,
     PROFILE_RETRIEVE_RESPONSE_EXAMPLE,
@@ -34,6 +35,8 @@ from rest_framework.generics import (
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+
+from apps.content.mixins import HeaderMixin
 
 tags = ["Profiles"]
 
@@ -216,7 +219,6 @@ class AvatarUpdateView(APIView):
 
 
 class UserArticleListCreateView(ListCreateAPIView):
-    # user articles + draft creation
     queryset = Article.objects.select_related("author").prefetch_related("tags")
 
     filter_backends = (DjangoFilterBackend,)
@@ -314,13 +316,16 @@ class UserArticleListCreateView(ListCreateAPIView):
         )
 
 
-class ArticleRetrieveUpdateView(APIView):
+class ArticleRetrieveUpdateView(HeaderMixin, APIView):
     permission_classes = (IsContributor,)
 
-    def get_object(self, slug):
+    def get_object_for_read(self, slug):
+        """Get object for GET requests - filtering logic"""
         try:
+            # permission takes care of getting the specific user
             obj = Article.objects.select_related("author").get(
-                author=self.request.user, slug=slug, status__in=[
+                slug=slug,
+                status__in=[
                     ArticleStatusChoices.DRAFT,
                     ArticleStatusChoices.CHANGES_REQUESTED,
                     ArticleStatusChoices.SUBMITTED_FOR_REVIEW,
@@ -328,17 +333,41 @@ class ArticleRetrieveUpdateView(APIView):
                     ArticleStatusChoices.REVIEW_COMPLETED,
                     ArticleStatusChoices.READY,
                     ArticleStatusChoices.REJECTED,
-                ]
-            )  # TODO: OR THIS - FOR GET, REMOVE FOR POST
+                ],
+            )
 
-            # TODO: MIGHT CHANGE LATER IF IT AFFECTS QUERY PERFORMANCE
-            if self.request.method in ["PATCH", "PUT", "DELETE"]:
-                self.check_object_permissions(
-                    self.request, obj
-                )  # This triggers has_object_permission
+            self.check_object_permissions(self.request, obj)
             return obj
         except Article.DoesNotExist:
             raise NotFoundError(err_msg="Article not found.")
+
+    # def get_object_for_write(self, slug):
+    #     """Get object for PATCH requests - permissions will handle edit restrictions"""
+    #     try:
+    #         obj = Article.objects.select_related("author").get(
+    #             slug=slug,
+    #         )
+    #         self.check_object_permissions(self.request, obj)
+    #         return obj
+    #     except Article.DoesNotExist:
+    #         raise NotFoundError(err_msg="Article not found.")
+    
+    def get_object_for_write(self, slug):
+        """Get object for PATCH requests - permissions will handle edit restrictions"""
+        try:
+            print(f"Looking for article with slug: {slug}")  # DEBUG
+            obj = Article.objects.select_related("author").get(slug=slug, author=self.request.user)
+            print(f"Found article: {obj.title}, author: {obj.author}, status: {obj.status}")  # DEBUG
+            print(f"Request user: {self.request.user}")  # DEBUG
+            
+            self.check_object_permissions(self.request, obj)
+            return obj
+        except Article.DoesNotExist:
+            print("Article.DoesNotExist raised")  # DEBUG
+            raise NotFoundError(err_msg="Article not found.")
+        except Exception as e:
+            print(f"Other exception: {e}")  # DEBUG
+            raise
 
     def get_serializer_class(self, request=None):
         """
@@ -365,17 +394,7 @@ class ArticleRetrieveUpdateView(APIView):
     )
     def get(self, *args, **kwargs):
         try:
-            article = self.get_object(slug=kwargs["slug"])
-
-            # if article.status == ArticleStatusChoices.PUBLISHED:
-            #     public_url = f"/articles/{article.author.username}/{article.slug}/"
-            #     return CustomResponse.success(
-            #         message="This article is published and available at the public endpoint.",
-            #         data={
-            #             "redirect_url": public_url,
-            #         },
-            #         status_code=status.HTTP_200_OK,
-            #     )  # TODO: THIS 
+            article = self.get_object_for_read(slug=kwargs["slug"])
 
             serializer = self.get_serializer(article)
             return CustomResponse.success(
@@ -391,26 +410,23 @@ class ArticleRetrieveUpdateView(APIView):
         summary="Update article",
         description="Update an existing article using partial data. Only the article author can modify articles.",
         tags=tags,
-        # responses=ARTICLE_UPDATE_RESPONSE_EXAMPLE,
+        responses=ARTICLE_UPDATE_RESPONSE_EXAMPLE,
     )
     def patch(self, request, *args, **kwargs):
-        article = self.get_object(slug=kwargs["slug"])
+        article = self.get_object_for_write(slug=kwargs["slug"])
         serializer = self.get_serializer(article, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
         serializer.save()
 
+        headers = self.get_success_headers(serializer.data)
+
         return CustomResponse.success(
             message="Article updated successfully.",
             data=serializer.data,
             status_code=status.HTTP_200_OK,
+            headers=headers,
         )
-        # TODO: TEST IT
-
-
-class UserArticleListView(APIView):
-    # user published article + draft creation
-    pass
 
 
 class SavedArticlesView(APIView):

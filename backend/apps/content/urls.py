@@ -13,6 +13,6 @@ urlpatterns = [
     path(
         "articles/<str:username>/<slug:slug>/",
         views.ArticleRetrieveView.as_view(),
-        name="project_detail",
+        name="article_detail",
     ),
 ]
