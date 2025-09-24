@@ -9,7 +9,6 @@ import { ProtectedRouteProps } from '../../types/types';
 
 // replace: true - Prevents the login page from being added to
 // browser history, so users can't go back to protected routes after logout
-// TODO: render for error
 
 // children: as prop (protected content)
 function ProtectedRoute({ children }: ProtectedRouteProps) {

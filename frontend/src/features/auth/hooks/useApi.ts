@@ -1,15 +1,16 @@
-import { ApiMethod } from '../../../types/types';
+import { ApiMethod } from '../../../types/auth';
 import { API_URL } from '../../../utils/constants';
 import { getToken } from '../../../utils/utils';
 
-const sendRequest = (
+// Public APIs
+const sendRequest = async (
   method: ApiMethod,
   path: string,
   body?: any,
   authToken?: string | null,
   init?: RequestInit
 ) => {
-  return fetch(API_URL + path, {
+  const response = await fetch(API_URL + path, {
     method,
     ...(body && { body: JSON.stringify(body) }),
     ...init,
@@ -18,15 +19,23 @@ const sendRequest = (
       ...(authToken && { Authorization: `Bearer ${authToken}` }),
       ...init?.headers,
     },
-  }).then((response) => {
-    if (response.status >= 400) {
-      throw response;
-    }
-    return response.json();
   });
+
+  if (!response.ok) {
+    const error = await response.json();
+
+    if (error.data) {
+      throw error;
+    } else {
+      throw new Error(error.message || 'Request failed');
+    }
+  }
+
+  return await response.json();
 };
 
-const sendProtectedRequest = (
+// Private APIs(login required)
+const sendProtectedRequest = async (
   method: ApiMethod,
   path: string,
   body?: any,
@@ -37,7 +46,7 @@ const sendProtectedRequest = (
 
   if (!authToken) throw new Error('No auth token found');
 
-  return sendRequest(method, path, body, authToken, init);
+  return await sendRequest(method, path, body, authToken, init);
 };
 
 export const useApi = () => {

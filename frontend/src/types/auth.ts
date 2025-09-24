@@ -39,3 +39,11 @@ export interface PasswordResetCompleteData {
   new_password: string;
   confirm_password: string;
 }
+
+export enum ApiMethod {
+  GET = "GET",
+  PUT = "PUT",
+  POST = "POST",
+  PATCH = "PATCH",
+  DELETE = "DELETE",
+}

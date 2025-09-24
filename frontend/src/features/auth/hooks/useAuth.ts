@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import {
   register as registerApi,
@@ -6,7 +6,7 @@ import {
   resendRegistrationOtp as resendRegistrationOtpApi,
   login as loginApi,
 } from '../services/apiAuth';
-import { useLocation, useNavigate } from 'react-router-dom';
+// import { useLocation, useNavigate } from 'react-router-dom';
 import { LoginUserData } from '../../../types/auth';
 
 export function useEmail() {
@@ -89,34 +89,34 @@ export function useLogin() {
 }
 
 // TODO: FIX LATER
-export function useGoogleCallback(fetchTokens: () => Promise<any>) {
-  const navigate = useNavigate();
-  const location = useLocation();
+// export function useGoogleCallback(fetchTokens: () => Promise<any>) {
+//   const navigate = useNavigate();
+//   const location = useLocation();
 
-  const params = new URLSearchParams(location.search);
-  const state = params.get('state');
+//   const params = new URLSearchParams(location.search);
+//   const state = params.get('state');
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['googleCallback', state],
-    queryFn: fetchTokens,
-    enabled: !!state,
-    staleTime: Infinity,
-    // cacheTime: 0,
-    refetchOnMount: false,
-    // refetchOnWindowsFocus: false,
-    retry: false, // default=3
-  });
+//   const { data, isLoading, isError } = useQuery({
+//     queryKey: ['googleCallback', state],
+//     queryFn: fetchTokens,
+//     enabled: !!state,
+//     staleTime: Infinity,
+//     // cacheTime: 0,
+//     refetchOnMount: false,
+//     // refetchOnWindowsFocus: false,
+//     retry: false, // default=3
+//   });
 
-  if (data) {
-    const { refresh, access } = data;
-    localStorage.setItem('refreshToken', refresh);
-    localStorage.setItem('accessToken', access);
-    navigate('/');
-  }
+//   if (data) {
+//     const { refresh, access } = data;
+//     localStorage.setItem('refreshToken', refresh);
+//     localStorage.setItem('accessToken', access);
+//     navigate('/');
+//   }
 
-  if (isError) {
-    navigate(''); // TODO: LATER
-  }
+//   if (isError) {
+//     navigate(''); // TODO: LATER
+//   }
 
-  return { isLoading };
-}
+//   return { isLoading };
+// }

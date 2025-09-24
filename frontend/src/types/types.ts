@@ -223,4 +223,3 @@ export interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
-export type ApiMethod = 'GET' | 'POST' | 'PUT' | 'PATCH';

@@ -6,10 +6,8 @@ import {
   RegisterUserData,
   VerifyOtpData,
 } from '../../../types/auth';
-import { API_URL } from '../../../utils/constants';
+import { AUTH_URL } from '../../../utils/constants';
 import { getToken, clearTokens, setToken } from '../../../utils/utils';
-
-export const AUTH_URL = `${API_URL}/auth`;
 
 export async function register(
   userData: RegisterUserData
@@ -298,3 +296,6 @@ export async function fetchTokens(state: string, fullUrl: string) {
 }
 
 // TODO: HANDLING GOOGLE CALLBACK FOR FRONTEND NOT TO SEE UGLY DRF SREEN
+// NOTE: 
+// I returned data for anything that has a status, message
+// I returned data.data for anything that has status, message, and data dict
