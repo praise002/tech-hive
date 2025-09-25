@@ -5,12 +5,13 @@ from apps.common.exceptions import NotFoundError
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
 from apps.content.mixins import HeaderMixin
-from apps.content.models import Article, ArticleStatusChoices
+from apps.content.models import Article, ArticleStatusChoices, SavedArticle
 from apps.content.permissions import IsContributor
 from apps.content.serializers import (
     ArticleCreateSerializer,
     ArticleSerializer,
     ArticleUpdateSerializer,
+    SavedArticleSerializer,
 )
 from apps.content.views.filters import UserArticleFilter
 from apps.profiles.schema_examples import (
@@ -413,8 +414,33 @@ class ArticleRetrieveUpdateView(HeaderMixin, APIView):
 
 
 class SavedArticlesView(APIView):
-    # user saved articles
-    pass
+    permission_classes = (IsAuthenticated,)
+    serializer_class = SavedArticleSerializer
+
+    def get_queryset(self):
+        """Filter saved articles to only return those belonging to the authenticated user."""
+        return SavedArticle.published.filter(user=self.request.user).select_related(
+            "article", "user"
+        )
+
+    @extend_schema(
+        summary="Retrieve user's saved articles",
+        description="This endpoint allows authenticated users to retrieve a list of articles they have saved. Only the user's own saved articles are returned.",
+        tags=tags,
+        # responses=SAVED_ARTICLES_RESPONSE_EXAMPLE,
+    )
+    def get(self, *args, **kwargs):
+        saved_articles = self.get_queryset()
+        serializer = self.serializer_class(saved_articles, many=True)
+
+        return CustomResponse.success(
+            message="Saved Articles retrieved successfully.",
+            data=serializer.data,
+            status_code=status.HTTP_200_OK,
+        )
+    
+    def post(self, request):
+        pass
 
 
 class UserCommentsView(APIView):

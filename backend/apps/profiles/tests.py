@@ -1,7 +1,7 @@
 from apps.accounts.models import User
 from apps.accounts.utils import UserRoles
 from apps.common.utils import TestUtil
-from apps.content.models import Article, ArticleStatusChoices
+from apps.content.models import Article, ArticleStatusChoices, SavedArticle
 from django.contrib.auth.models import Group
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APITestCase
@@ -13,6 +13,7 @@ class TestProfiles(APITestCase):
     avatar_update_url = "/api/v1/profiles/avatar/"
     article_list_url = "/api/v1/profiles/me/articles/"
     article_detail_url = "/api/v1/profiles/me/articles/<slug:slug>/"
+    saved_articles_url = "/api/v1/profiles/me/saved/" 
 
     def setUp(self):
         self.user1 = TestUtil.verified_user()
@@ -479,12 +480,81 @@ class TestProfiles(APITestCase):
         self.user2.groups.add(contributor_group)
         self.client.force_authenticate(user=self.user2)
         response = self.client.patch(
-            self.article_detail_url.replace("<slug:slug>", draft_article.slug),
+            self.article_detail_url.replace("<slug:slug>", draft_article2.slug),
             update_data,
         )
         print(response.data)
         self.assertEqual(response.status_code, 403)
         
-
+    def test_saved_articles(self):
+        # Create some articles by different users
+        article1 = Article.objects.create(
+            title="Article 1",
+            content="Content 1",
+            author=self.user1,
+            status=ArticleStatusChoices.PUBLISHED,
+            slug="article-1"
+        )
+        
+        article2 = Article.objects.create(
+            title="Article 2", 
+            content="Content 2",
+            author=self.user2,
+            status=ArticleStatusChoices.PUBLISHED,
+            slug="article-2"
+        )
+        
+        article3 = Article.objects.create(
+            title="Article 3",
+            content="Content 3", 
+            author=self.user1,
+            status=ArticleStatusChoices.PUBLISHED,
+            slug="article-3"
+        )
+        
+        # Create saved articles for user1
+        SavedArticle.objects.create(user=self.user1, article=article1)
+        SavedArticle.objects.create(user=self.user1, article=article2)  
+        
+        # Create saved article for user2 (should not appear in user1's results)
+        SavedArticle.objects.create(user=self.user2, article=article3)
+        
+        # Test: Authenticated user can get their own saved articles - 200
+        self.client.force_authenticate(user=self.user1)
+        response = self.client.get(self.saved_articles_url)
+        print(response.data)
+        self.assertEqual(response.status_code, 200)
+        
+        # Should only return user1's saved articles (2 articles)
+        saved_articles = response.data["data"]
+        self.assertEqual(len(saved_articles), 2)
+        
+        # Verify the correct articles are returned
+        # saved_article_titles = [item["article"]["title"] for item in saved_articles]
+        # self.assertIn("Article 1", saved_article_titles)
+        # self.assertIn("Article 2", saved_article_titles)
+        # self.assertNotIn("Article 3", saved_article_titles)  # user2's saved article
+        
+        # Test: Different user gets their own saved articles
+        self.client.force_authenticate(user=self.user2)
+        response = self.client.get(self.saved_articles_url)
+        self.assertEqual(response.status_code, 200)
+        
+        # Should only return user2's saved articles (1 article)
+        # saved_articles = response.data["data"]
+        # self.assertEqual(len(saved_articles), 1)
+        # self.assertEqual(saved_articles[0]["article"]["title"], "Article 3")
+        
+        # Test: 401 for unauthenticated users
+        self.client.force_authenticate(user=None)
+        response = self.client.get(self.saved_articles_url)
+        self.assertEqual(response.status_code, 401)
+        
+        # Test: Empty result for user with no saved articles
+        # user3 = TestUtil.new_user()
+        # self.client.force_authenticate(user=user3)
+        # response = self.client.get(self.saved_articles_url)
+        # self.assertEqual(response.status_code, 200)
+        # self.assertEqual(len(response.data["data"]), 0)
 
 # python manage.py test apps.profiles.tests.TestProfiles

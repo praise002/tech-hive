@@ -13,6 +13,17 @@ class PublishedManager(models.Manager):
         return super().get_queryset().filter(status=ArticleStatusChoices.PUBLISHED)
 
 
+class SavedPublishedArticlesManager(models.Manager):
+    """Manager that returns only saved articles where the article is published."""
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .filter(article__status=ArticleStatusChoices.PUBLISHED)
+        )
+
+
 class Tag(BaseModel):
     name = models.CharField(max_length=20, unique=True)
 
@@ -174,6 +185,9 @@ class SavedArticle(BaseModel):
         Article, on_delete=models.CASCADE, related_name="saved_by_user"
     )
     saved_at = models.DateTimeField(auto_now_add=True)
+
+    objects = models.Manager()
+    published = SavedPublishedArticlesManager()
 
     class Meta:
         unique_together = ("article", "user")

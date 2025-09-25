@@ -149,7 +149,7 @@ class ArticleAvatarSerializer(serializers.ModelSerializer):
         ]
 
 
-class ArticleReaction(serializers.ModelSerializer):
+class ArticleReactionSerializer(serializers.ModelSerializer):
     # For POST/PUT/PATCH
     # user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     # article = serializers.PrimaryKeyRelatedField(queryset=Article.objects.all())
@@ -159,10 +159,19 @@ class ArticleReaction(serializers.ModelSerializer):
         fields = ["id", "user", "article", "reaction_type"]
 
 
-class SavedArticle(serializers.ModelSerializer):
+class SavedArticleSerializer(serializers.ModelSerializer):
+    article_id = serializers.SerializerMethodField()
+    user_id = serializers.SerializerMethodField()
+    
     class Meta:
         model = models.SavedArticle
-        fields = ["id", "user", "article"]
+        fields = ["id", "user_id", "article_id"]
+        
+    def get_article_id(self, obj):
+        return str(obj.article.id)
+    
+    def get_user_id(self, obj):
+        return str(obj.user.id)
 
 
 class CommentSerializer(serializers.ModelSerializer):
