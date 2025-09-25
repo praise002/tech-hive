@@ -331,6 +331,14 @@ class TestProfiles(APITestCase):
             status=ArticleStatusChoices.DRAFT,
             slug="draft-article",
         )
+        
+        draft_article2 = Article.objects.create(
+            title="Draft Article",
+            content="Draft content",
+            author=self.user1,
+            status=ArticleStatusChoices.DRAFT,
+            slug="draft-article",
+        )
 
         published_article = Article.objects.create(
             title="Published Article",
@@ -467,26 +475,16 @@ class TestProfiles(APITestCase):
         self.assertEqual(response.status_code, 401)
 
         # Test: 403 for user trying to update another user's article
-        # print(contributor_group)
-        # self.user2.groups.add(contributor_group)
-        # self.client.force_authenticate(user=self.user2)
-        # # response = self.client.patch(
-        # #     self.article_detail_url.replace("<slug:slug>", draft_article.slug),
-        # #     update_data,
-        # # )
-        # # print(response.data)
-        # # self.assertEqual(response.status_code, 403)
-        # print(f"User1: {self.user1.id}, User2: {self.user2.id}")  # DEBUG
-        # print(f"Article author: {draft_article.author.id}")  # DEBUG
-        # print(f"Article slug: {draft_article.slug}")  # DEBUG
-
-        # url = self.article_detail_url.replace("<slug:slug>", draft_article.slug)
-
-        # print(f"Request URL: {url}")  # DEBUG
-
-        # response = self.client.patch(url, update_data)
-        # print(f"Response status: {response.status_code}")  # DEBUG
-        # print(f"Response data: {response.data}")  # DEBUG
+        print(contributor_group)
+        self.user2.groups.add(contributor_group)
+        self.client.force_authenticate(user=self.user2)
+        response = self.client.patch(
+            self.article_detail_url.replace("<slug:slug>", draft_article.slug),
+            update_data,
+        )
+        print(response.data)
+        self.assertEqual(response.status_code, 403)
+        
 
 
 # python manage.py test apps.profiles.tests.TestProfiles

@@ -49,39 +49,18 @@ class IsContributor(BasePermission):
 
         return request.user.groups.filter(name=UserRoles.CONTRIBUTOR).exists()
 
-    # def has_object_permission(self, request, view, obj):
-    #     if isinstance(obj, Article):
-    #         # Read permissions - contributors can view their own articles
-    #         if request.method in permissions.SAFE_METHODS:
-    #             return obj.author == request.user
-            
-    #         # Contributors can only edit their own drafts
-    #         return obj.author == request.user and obj.status in [
-    #             ArticleStatusChoices.DRAFT,
-    #             ArticleStatusChoices.CHANGES_REQUESTED,
-    #             ArticleStatusChoices.REJECTED,
-    #         ]
-
-    #     return False
-    
     def has_object_permission(self, request, view, obj):
         if isinstance(obj, Article):
-            print(f"Permission check - Method: {request.method}, User: {request.user}, Author: {obj.author}")  # DEBUG
-            
             # Read permissions - contributors can view their own articles
             if request.method in permissions.SAFE_METHODS:
-                result = obj.author == request.user
-                print(f"SAFE METHOD result: {result}")  # DEBUG
-                return result
-            
+                return obj.author == request.user
+
             # Contributors can only edit their own drafts
-            result = obj.author == request.user and obj.status in [
+            return obj.author == request.user and obj.status in [
                 ArticleStatusChoices.DRAFT,
                 ArticleStatusChoices.CHANGES_REQUESTED,
                 ArticleStatusChoices.REJECTED,
             ]
-            print(f"WRITE METHOD result: {result}")  # DEBUG
-            return result
 
         return False
 

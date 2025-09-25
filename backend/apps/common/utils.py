@@ -31,10 +31,10 @@ class TestUtil:
     def other_verified_user():
         user_dict = {
             "first_name": "Test",
-            "last_name": "Otherisgood*5%",
+            "last_name": "Other",
             "email": "testotheruser@example.com",
             "is_email_verified": True,
-            "password": "testpassword",
+            "password": "Testpassword2008@",
         }
         user = User.objects.create_user(**user_dict)
         return user

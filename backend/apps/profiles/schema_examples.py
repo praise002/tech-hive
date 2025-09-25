@@ -376,6 +376,10 @@ ARTICLE_DETAIL_RESPONSE_EXAMPLE = {
         ],
     ),
     401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        response=ErrorResponseSerializer,
+        description="Permission Denied",
+    ),
     404: OpenApiResponse(
         response=ErrorResponseSerializer,
         description="Article not found",
@@ -408,6 +412,10 @@ ARTICLE_UPDATE_RESPONSE_EXAMPLE = {
         ],
     ),
     401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        response=ErrorResponseSerializer,
+        description="Permission Denied",
+    ),
 }
 
 

@@ -4,6 +4,7 @@ from apps.accounts.models import User
 from apps.common.exceptions import NotFoundError
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
+from apps.content.mixins import HeaderMixin
 from apps.content.models import Article, ArticleStatusChoices
 from apps.content.permissions import IsContributor
 from apps.content.serializers import (
@@ -35,8 +36,6 @@ from rest_framework.generics import (
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-
-from apps.content.mixins import HeaderMixin
 
 tags = ["Profiles"]
 
@@ -341,33 +340,17 @@ class ArticleRetrieveUpdateView(HeaderMixin, APIView):
         except Article.DoesNotExist:
             raise NotFoundError(err_msg="Article not found.")
 
-    # def get_object_for_write(self, slug):
-    #     """Get object for PATCH requests - permissions will handle edit restrictions"""
-    #     try:
-    #         obj = Article.objects.select_related("author").get(
-    #             slug=slug,
-    #         )
-    #         self.check_object_permissions(self.request, obj)
-    #         return obj
-    #     except Article.DoesNotExist:
-    #         raise NotFoundError(err_msg="Article not found.")
-    
     def get_object_for_write(self, slug):
         """Get object for PATCH requests - permissions will handle edit restrictions"""
         try:
-            print(f"Looking for article with slug: {slug}")  # DEBUG
-            obj = Article.objects.select_related("author").get(slug=slug, author=self.request.user)
-            print(f"Found article: {obj.title}, author: {obj.author}, status: {obj.status}")  # DEBUG
-            print(f"Request user: {self.request.user}")  # DEBUG
-            
+            obj = Article.objects.select_related("author").get(
+                slug=slug,
+            )
             self.check_object_permissions(self.request, obj)
+
             return obj
         except Article.DoesNotExist:
-            print("Article.DoesNotExist raised")  # DEBUG
             raise NotFoundError(err_msg="Article not found.")
-        except Exception as e:
-            print(f"Other exception: {e}")  # DEBUG
-            raise
 
     def get_serializer_class(self, request=None):
         """
