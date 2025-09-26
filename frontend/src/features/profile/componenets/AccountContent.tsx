@@ -3,7 +3,11 @@ import Button from '../../../components/common/Button';
 import Text from '../../../components/common/Text';
 import SubscriptionStatus from '../../subscription/SubscriptionStatus';
 
+import LogoutAll from '../../auth/components/LogoutAll';
+
 function AccountContent() {
+  
+
   return (
     <div className="w-full max-w-none space-y-8 min-h-[70vh] lg:grid lg:grid-cols-2 lg:gap-12 lg:space-y-0">
       {/* Profile Management */}
@@ -66,6 +70,17 @@ function AccountContent() {
             >
               Update Password
             </Button>
+          </div>
+          <div className="border border-gray-200 rounded-lg p-8 min-h-[200px] hover:shadow-lg transition-shadow">
+            <div className="mb-6">
+              <p className="font-semibold mb-3 text-gray-900 dark:text-custom-white text-lg">
+                Log out of all devices
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+                Logout across all your device
+              </p>
+            </div>
+            <LogoutAll />
           </div>
         </div>
       </div>

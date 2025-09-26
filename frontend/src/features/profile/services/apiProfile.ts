@@ -18,7 +18,6 @@ export async function getCurrentUser() {
   });
 
   if (!response.ok) {
-    clearTokens();
     const error = await response.json();
     // throw new Error(error.message || 'Failed to fetch user');
     throw error;

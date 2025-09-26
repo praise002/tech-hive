@@ -8,12 +8,14 @@ import {
   VerifyOtpData,
 } from '../../../types/auth';
 import { routes } from '../../../utils/constants';
-import { clearTokens, getToken, setToken } from '../../../utils/utils';
+import {
+  clearTokens,
+  getToken,
+  safeLocalStorage,
+  setToken,
+} from '../../../utils/utils';
 
-let debouncedPromise: Promise<unknown> | null;
-let debouncedResolve: (...args: unknown[]) => void;
-let debouncedReject: (...args: unknown[]) => void;
-let timeout: ReturnType<typeof setTimeout>;
+const storage = safeLocalStorage();
 
 export const useAuthApi = () => {
   const { sendRequest, sendProtectedRequest } = useApi();
@@ -77,64 +79,14 @@ export const useAuthApi = () => {
     return response;
   };
 
-  const refreshToken = async () => {
-    clearTimeout(timeout);
-
-    if (!debouncedPromise) {
-      debouncedPromise = new Promise((resolve, reject) => {
-        debouncedResolve = resolve;
-        debouncedReject = reject;
-      });
-    }
-
-    timeout = setTimeout(() => {
-      const executeLogic = async () => {
-        const response = await sendProtectedRequest(
-          ApiMethod.POST,
-          routes.auth.refreshTokens,
-          {},
-          true
-        );
-        setToken(response.data);
-      };
-      executeLogic().then(debouncedResolve).catch(debouncedReject);
-      debouncedPromise = null;
-    }, 200);
-
-    return debouncedPromise;
-  };
-
-  const sendAuthGuardedRequest = async (
-    userIsNotAuthenticatedCallback: () => void,
-    method: ApiMethod,
-    path: string,
-    body?: any,
-    init?: RequestInit
-  ) => {
-    try {
-      return await sendProtectedRequest(method, path, body, undefined, init);
-    } catch (e) {
-      const error = e as { status?: number };
-      if (error?.status === 401) {
-        try {
-          await refreshToken();
-        } catch (e) {
-          userIsNotAuthenticatedCallback();
-          throw e;
-        }
-        return await sendProtectedRequest(method, path, body, undefined, init);
-      }
-
-      throw e;
-    }
-  };
-
   const changePassword = async (passwordData: ChangePasswordData) => {
     const response = await sendRequest(
       ApiMethod.POST,
       routes.auth.changePassword,
       passwordData
     );
+
+    setToken(response.data);
 
     return response;
   };
@@ -146,6 +98,8 @@ export const useAuthApi = () => {
       { email }
     );
 
+    storage.setItem('email', email);
+
     return response;
   };
 
@@ -155,6 +109,8 @@ export const useAuthApi = () => {
       routes.auth.verifyPasswordResetOtp,
       otpData
     );
+
+    storage.removeItem('email');
 
     return response;
   };
@@ -171,14 +127,6 @@ export const useAuthApi = () => {
     return response;
   };
 
-  const me = (userIsNotAuthenticatedCallback: () => void) => {
-    return sendAuthGuardedRequest(
-      userIsNotAuthenticatedCallback,
-      ApiMethod.GET,
-      routes.auth.me
-    );
-  };
-
   return {
     register,
     verifyRegistrationOtp,
@@ -190,7 +138,5 @@ export const useAuthApi = () => {
     requestPasswordReset,
     verifyPasswordResetOtp,
     completePasswordReset,
-    me,
-    sendAuthGuardedRequest,
   };
 };

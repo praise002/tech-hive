@@ -42,6 +42,7 @@ import VerifyEmail from './features/auth/pages/VerifyEmail';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import ProfileDetail from './features/profile/pages/ProfileDetail';
 import AccountDisabled from './features/auth/pages/AccountDisabled';
+import Logout from './features/auth/components/Logout';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -85,6 +86,7 @@ function App() {
             <Route path="contact" element={<Contact />} />
 
             <Route path="login" element={<Login />} />
+            <Route path="logout" element={<Logout />} />
             <Route path="register" element={<Register />} />
             <Route path="profile" element={<ProfileDetail />} />
             <Route path="verify-email" element={<VerifyEmail />} />

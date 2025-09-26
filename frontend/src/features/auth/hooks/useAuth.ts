@@ -1,13 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import {
-  register as registerApi,
-  verifyRegistrationOtp as verifyRegisterOtpApi,
-  resendRegistrationOtp as resendRegistrationOtpApi,
-  login as loginApi,
-} from '../services/apiAuth';
+// import {
+//   register as registerApi,
+//   verifyRegistrationOtp as verifyRegisterOtpApi,
+//   resendRegistrationOtp as resendRegistrationOtpApi,
+//   login as loginApi,
+// } from '../services/apiAuth';
 // import { useLocation, useNavigate } from 'react-router-dom';
 import { LoginUserData } from '../../../types/auth';
+import { useAuthApi } from './useAuthApi';
 
 export function useEmail() {
   const queryClient = useQueryClient();
@@ -18,6 +19,8 @@ export function useEmail() {
 
 export function useRegister() {
   const queryClient = useQueryClient();
+  const { register: registerApi } = useAuthApi();
+
   const {
     mutate: register,
     isPending,
@@ -38,6 +41,8 @@ export function useRegister() {
 
 export function useRegisterOtp() {
   const queryClient = useQueryClient();
+  const { verifyRegistrationOtp: verifyRegisterOtpApi } = useAuthApi();
+
   const {
     mutate: verifyRegistrationOtp,
     isPending,
@@ -56,6 +61,8 @@ export function useRegisterOtp() {
 }
 
 export function useRegisterResendOtp() {
+  const { resendRegistrationOtp: resendRegistrationOtpApi } = useAuthApi();
+
   const {
     mutate: resendRegistrationOtp,
     isPending,
@@ -72,6 +79,8 @@ export function useRegisterResendOtp() {
 }
 
 export function useLogin() {
+  const { login: loginApi } = useAuthApi();
+
   const {
     mutate: login,
     isPending,
@@ -86,6 +95,100 @@ export function useLogin() {
   });
 
   return { login, isPending, isError, error };
+}
+
+export function useLogout() {
+  const { logout: logoutApi } = useAuthApi();
+
+  const queryClient = useQueryClient();
+
+  const { mutate: logout, isPending } = useMutation({
+    mutationFn: logoutApi,
+    onSuccess: () => {
+      // Clears all user's cached data
+      queryClient.removeQueries();
+    },
+    onError: (error) => {
+      console.error('Logout error:', error);
+    },
+  });
+
+  return { logout, isPending };
+}
+
+export function useLogoutAll() {
+  const { logoutAll: logoutAllApi } = useAuthApi();
+
+  const queryClient = useQueryClient();
+
+  const { mutate: logoutAll, isPending } = useMutation({
+    mutationFn: logoutAllApi,
+    onSuccess: () => {
+      // Clears all user's cached data
+      queryClient.removeQueries();
+    },
+    onError: (error) => {
+      console.error('Logout all devices error:', error);
+    },
+  });
+
+  return { logoutAll, isPending };
+}
+
+export function useChangePassword() {
+  const { changePassword: changePasswordApi } = useAuthApi();
+
+  const { mutate: changePassword, isPending } = useMutation({
+    mutationFn: changePasswordApi,
+    onSuccess: () => {},
+    onError: (error) => {
+      console.error('Change Password error:', error);
+    },
+  });
+
+  return { changePassword, isPending };
+}
+
+export function useRequestPasswordReset() {
+  const { requestPasswordReset: requestPasswordResetApi } = useAuthApi();
+
+  const { mutate: requestPasswordReset, isPending } = useMutation({
+    mutationFn: requestPasswordResetApi,
+    onSuccess: () => {},
+    onError: (error) => {
+      console.error('Request Password Reset error:', error);
+    },
+  });
+
+  return { requestPasswordReset, isPending };
+}
+
+export function useVerifyPasswordResetOtp() {
+  const { verifyPasswordResetOtp: verifyPasswordResetOtpApi } = useAuthApi();
+
+  const { mutate: verifyPasswordResetOtp, isPending } = useMutation({
+    mutationFn: verifyPasswordResetOtpApi,
+    onSuccess: () => {},
+    onError: (error) => {
+      console.error('Verify Password Reset Otp error:', error);
+    },
+  });
+
+  return { verifyPasswordResetOtp, isPending };
+}
+
+export function useCompletePasswordReset() {
+  const { completePasswordReset: completePasswordResetApi } = useAuthApi();
+
+  const { mutate: completePasswordReset, isPending } = useMutation({
+    mutationFn: completePasswordResetApi,
+    onSuccess: () => {},
+    onError: (error) => {
+      console.error('Complete Password Reset error:', error);
+    },
+  });
+
+  return { completePasswordReset, isPending };
 }
 
 // TODO: FIX LATER

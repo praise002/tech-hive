@@ -17,7 +17,7 @@ interface LoginFormData {
 
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const { login, isPending, isError, error } = useLogin();
+  const { login, isPending } = useLogin();
   const navigate = useNavigate();
 
   function togglePasswordVisibility() {
@@ -99,12 +99,26 @@ function LoginForm() {
             });
           });
         } else {
-          // Handle general errors (no specific field)
+          if (
+            error.message &&
+            error.message.toLowerCase().includes('disabled') &&
+            error.status === 403
+          ) {
+            navigate('/account-disabled');
+            return;
+          } else if (
+            error.message &&
+            error.message.toLowerCase().includes('not verified') &&
+            error.status === 403
+          ) {
+            toast.error('Account not verified.');
+            navigate('/verify-email');
+            return;
+          }
+
           toast.error(
             error.message || 'Something went wrong. Please try again.'
           );
-          // TODO: Handle email not verified
-          // TODO: Handle disabled by showing an help page
         }
       },
     });
@@ -188,4 +202,4 @@ export default LoginForm;
 // TODO: IF EMAIL NOT VERIFIED, SINCE THIS IS A MULTI-STEP PROCESS, AND THE POSSIBILITY IS LOW
 // 1. Redirect to verify-email page if email not verified
 // 2. API should return the email if email not verified which can be used to send verification
-// email
+// email - not done yet

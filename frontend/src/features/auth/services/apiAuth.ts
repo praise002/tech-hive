@@ -221,7 +221,7 @@ export async function completePasswordReset(
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(resetData),
+  body: JSON.stringify(resetData)
   });
 
   if (!response.ok) {

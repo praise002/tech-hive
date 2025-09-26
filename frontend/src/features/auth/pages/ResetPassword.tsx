@@ -2,6 +2,15 @@ import { useState } from 'react';
 import Form from '../../../components/common/Form';
 import Text from '../../../components/common/Text';
 import { UseFormSetError } from 'react-hook-form';
+import {
+  useCompletePasswordReset,
+  useRequestPasswordReset,
+  useVerifyPasswordResetOtp,
+} from '../hooks/useAuth';
+import toast from 'react-hot-toast';
+
+import { safeLocalStorage } from '../../../utils/utils';
+import { useNavigate } from 'react-router-dom';
 
 interface EmailFormData {
   email: string;
@@ -13,11 +22,21 @@ interface OtpFormData {
 
 interface SetNewPasswordFormData {
   newPassword: string;
-  password: string;
+  confirmPassword: string;
 }
 
 function ResetPassword() {
+  const { requestPasswordReset, isPending: isRequestPending } =
+    useRequestPasswordReset();
+  const { verifyPasswordResetOtp, isPending: isVerifyPending } =
+    useVerifyPasswordResetOtp();
+  const { completePasswordReset, isPending: isCompletePending } =
+    useCompletePasswordReset();
+
   const [step, setStep] = useState(3); // Step 1: Email input, Step 2: OTP, Step 3: Set new password 4: Password reset complete
+
+  const navigate = useNavigate();
+  const storage = safeLocalStorage();
 
   function handleNextStep() {
     if (step < 4) setStep((s) => s + 1);
@@ -90,7 +109,7 @@ function ResetPassword() {
       },
     },
     {
-      name: 'password',
+      name: 'confirmPassword',
       placeholder: 'Confirm New Password',
       type: 'password',
       rules: {
@@ -105,12 +124,80 @@ function ResetPassword() {
 
   const handleFormSubmit = (
     data: EmailFormData | OtpFormData | SetNewPasswordFormData,
-    reset: () => void,
-    _setError: UseFormSetError<EmailFormData | OtpFormData | SetNewPasswordFormData>
+    setError: UseFormSetError<
+      EmailFormData | OtpFormData | SetNewPasswordFormData
+    >
   ) => {
-    console.log('Form Data:', data, _setError);
-    alert('Form Submitted successfully!');
-    reset();
+    console.log('Form Data:', data);
+
+    if (step === 1 && 'email' in data) {
+      requestPasswordReset(data.email, {
+        onSuccess: (response) => {
+          toast.success(response?.message || 'OTP sent to your email');
+          handleNextStep();
+        },
+        onError: (error: any) => {
+          const fieldMapping: Record<string, keyof EmailFormData> = {
+            email: 'email',
+          };
+
+          Object.entries(error.data).forEach(([field, message]) => {
+            const formField =
+              fieldMapping[field] || (field as keyof EmailFormData);
+            setError(formField, {
+              type: 'server',
+              message: Array.isArray(message) ? message[0] : String(message),
+            });
+          });
+        },
+      });
+    } else if (step === 2 && 'otp' in data) {
+      const email = storage.getItem('email');
+      if (!email) {
+        toast.error('Email not found. Please start over.');
+        setStep(1);
+        return;
+      }
+
+      const otpData = {
+        email,
+        otp: data.otp,
+      };
+      verifyPasswordResetOtp(otpData, {
+        onSuccess: (response) => {
+          toast.success(response?.message || 'OTP verified successfully');
+          handleNextStep();
+        },
+        onError: (error: any) => {
+          toast.error(error?.message);
+        },
+      });
+    } else if (
+      step === 3 &&
+      'newPassword' in data &&
+      'confirmPassword' in data
+    ) {
+      const email = storage.getItem('email');
+      if (!email) {
+        toast.error('Email not found. Please start over.');
+        setStep(1);
+        return;
+      }
+      const resetData = {
+        email,
+        new_password: data.newPassword,
+        confirm_password: data.confirmPassword,
+      };
+      completePasswordReset(resetData, {
+        onSuccess: (response) => {
+          toast.success(response?.message || 'Password reset successfully');
+          navigate('/login');
+        },
+        onError: (error: any) => {
+          toast.error(error?.message);
+        },
+      });
+    }
   };
 
   if (step === 1) {
@@ -121,8 +208,8 @@ function ResetPassword() {
         </Text>
         <Form
           inputs={emailInput}
-          onClick={handleNextStep}
           onSubmit={handleFormSubmit}
+          isLoading={isRequestPending}
           className="w-full"
         >
           Send OTP
@@ -142,8 +229,8 @@ function ResetPassword() {
         </p>
         <Form
           inputs={otpInput}
-          onClick={handleNextStep}
           onSubmit={handleFormSubmit}
+          isLoading={isVerifyPending}
           className="w-full"
         >
           Verify OTP
@@ -166,8 +253,8 @@ function ResetPassword() {
         </p>
         <Form
           inputs={setNewPasswordInput}
-          onClick={handleNextStep}
           onSubmit={handleFormSubmit}
+          isLoading={isCompletePending}
           className="w-full"
         >
           Set New Password
@@ -175,6 +262,8 @@ function ResetPassword() {
       </div>
     );
   }
+
+  return;
 }
 
 export default ResetPassword;
