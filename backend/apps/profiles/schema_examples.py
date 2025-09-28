@@ -418,7 +418,13 @@ ARTICLE_UPDATE_RESPONSE_EXAMPLE = {
     ),
 }
 
+# 200, 401
+SAVED_ARTICLES_RESPONSE_EXAMPLE = {}
 
+# 200, 201, 404, 401, 403
+SAVED_ARTICLES_CREATE_RESPONSE_EXAMPLE = {}
+
+COMMENTS_ARTICLES_RESPONSE_EXAMPLE = []
 def build_avatar_request_schema():
     return {
         "multipart/form-data": {

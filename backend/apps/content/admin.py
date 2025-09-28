@@ -46,7 +46,9 @@ class SavedArticleAdmin(admin.ModelAdmin):
 
 @admin.register(models.Comment)
 class CommentAdmin(admin.ModelAdmin):
-    pass
+    list_display=('user', 'article', 'body', 'active')
+    list_filter = ('active', 'created_at', 'updated_at')
+    search_fields = ('body',)
 
 
 @admin.register(models.Job)

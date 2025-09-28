@@ -36,6 +36,22 @@ class CustomBasePermission(BasePermission):
         ).exists()
 
 
+class IsPublished(BasePermission):
+    def has_permission(self, request, view):
+        if not request.user.is_authenticated:
+            return False
+        
+        return True
+
+    def has_object_permission(self, request, view, obj):
+        if isinstance(obj, Article):
+            return obj.status in [
+                ArticleStatusChoices.PUBLISHED,
+            ]
+
+        return False
+
+
 class IsContributor(BasePermission):
     """
     Permission for Contributors:

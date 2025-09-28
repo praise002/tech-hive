@@ -5,12 +5,14 @@ from apps.common.exceptions import NotFoundError
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
 from apps.content.mixins import HeaderMixin
-from apps.content.models import Article, ArticleStatusChoices, SavedArticle
-from apps.content.permissions import IsContributor
+from apps.content.models import Article, ArticleStatusChoices, Comment, SavedArticle
+from apps.content.permissions import IsContributor, IsPublished
 from apps.content.serializers import (
     ArticleCreateSerializer,
     ArticleSerializer,
     ArticleUpdateSerializer,
+    CommentSerializer,
+    SaveArticleCreateSerializer,
     SavedArticleSerializer,
 )
 from apps.content.views.filters import UserArticleFilter
@@ -20,9 +22,12 @@ from apps.profiles.schema_examples import (
     ARTICLE_LIST_EXAMPLE,
     ARTICLE_UPDATE_RESPONSE_EXAMPLE,
     AVATAR_UPDATE_RESPONSE_EXAMPLE,
+    COMMENTS_ARTICLES_RESPONSE_EXAMPLE,
     PROFILE_DETAIL_RESPONSE_EXAMPLE,
     PROFILE_RETRIEVE_RESPONSE_EXAMPLE,
     PROFILE_UPDATE_RESPONSE_EXAMPLE,
+    SAVED_ARTICLES_CREATE_RESPONSE_EXAMPLE,
+    SAVED_ARTICLES_RESPONSE_EXAMPLE,
     build_avatar_request_schema,
 )
 from apps.profiles.serializers import AvatarSerializer, UserSerializer
@@ -414,8 +419,22 @@ class ArticleRetrieveUpdateView(HeaderMixin, APIView):
 
 
 class SavedArticlesView(APIView):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = SavedArticleSerializer
+    def get_permissions(self):
+        if self.request.method == "POST":
+            return (IsPublished(),)
+        return (IsAuthenticated(),)
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return SaveArticleCreateSerializer
+        return SavedArticleSerializer
+
+    def get_serializer(self, *args, **kwargs):
+        """
+        Helper to get an instance of the correct serializer.
+        """
+        serializer_class = self.get_serializer_class()
+        return serializer_class(*args, **kwargs)
 
     def get_queryset(self):
         """Filter saved articles to only return those belonging to the authenticated user."""
@@ -427,22 +446,72 @@ class SavedArticlesView(APIView):
         summary="Retrieve user's saved articles",
         description="This endpoint allows authenticated users to retrieve a list of articles they have saved. Only the user's own saved articles are returned.",
         tags=tags,
-        # responses=SAVED_ARTICLES_RESPONSE_EXAMPLE,
+        responses=SAVED_ARTICLES_RESPONSE_EXAMPLE,
     )
     def get(self, *args, **kwargs):
         saved_articles = self.get_queryset()
-        serializer = self.serializer_class(saved_articles, many=True)
+        serializer = self.get_serializer(saved_articles, many=True)
 
         return CustomResponse.success(
             message="Saved Articles retrieved successfully.",
             data=serializer.data,
             status_code=status.HTTP_200_OK,
         )
-    
+
+    @extend_schema(
+        summary="Save or unsave an article",
+        description="Toggle save status for an article. If article is not saved, it will be saved. If already saved, it will be unsaved.",
+        tags=tags,
+        responses=SAVED_ARTICLES_CREATE_RESPONSE_EXAMPLE,
+    )
     def post(self, request):
-        pass
+        """Save or unsave an article for the authenticated user."""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        article = serializer.article
+        # Toggle save status
+        saved_article, created = SavedArticle.objects.get_or_create(
+            user=request.user, article=article
+        )
+
+        if created:
+            return CustomResponse.success(
+                message="Article saved successfully",
+                status_code=status.HTTP_201_CREATED,
+            )
+        else:
+            saved_article.delete()
+            return CustomResponse.success(
+                message="Article unsaved successfully", status_code=status.HTTP_200_OK
+            )
 
 
 class UserCommentsView(APIView):
-    # user comments
-    pass
+    permission_classes = (IsAuthenticated,)
+    serializer_class = CommentSerializer
+    
+    def get_queryset(self):
+        """Filter saved articles to only return those belonging to the authenticated user."""
+        return Comment.objects.filter(user=self.request.user).select_related(
+            "article", "user"
+        )
+
+    @extend_schema(
+        summary="Retrieve user's comments",
+        description="",
+        tags=tags,
+        responses=COMMENTS_ARTICLES_RESPONSE_EXAMPLE,
+    )
+    def get(self, *args, **kwargs):
+        comments = self.get_queryset()
+        serializer = self.get_serializer(comments, many=True)
+
+        return CustomResponse.success(
+            message="Comments retrieved successfully.",
+            data=serializer.data,
+            status_code=status.HTTP_200_OK,
+        )
+# TODO: CONTINUE FROM WHERE API RESPONSE STOPPED FOR COMMENTS
+
+

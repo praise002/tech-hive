@@ -2,6 +2,8 @@
 
 ---
 
+- `POST /articles/like/` → Like/unlike an article - any authenticated user
+- 
 ## 🎯 Contributor Role
 **Article Management:**
 - `GET /articles/drafts/` → View own drafts

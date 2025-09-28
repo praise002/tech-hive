@@ -16,3 +16,7 @@ urlpatterns = [
         name="article_detail",
     ),
 ]
+
+
+# path("me/<uuid:comment_id>/", views.UserCommentsRetrieveUpdateDestroyView.as_view()),
+# path("me/<uuid:post_id>/comments/", views.UserCommentsView.as_view()),

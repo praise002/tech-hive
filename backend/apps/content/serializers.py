@@ -1,9 +1,8 @@
 from apps.accounts.models import ContributorOnboarding
 from apps.content import models
+from apps.content.CustomRelations import CustomHyperlinkedIdentityField
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
-
-from apps.content.CustomRelations import CustomHyperlinkedIdentityField
 
 
 def process_tags(tag_names):
@@ -107,10 +106,14 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 class ArticleCreateSerializer(serializers.ModelSerializer):
     url = CustomHyperlinkedIdentityField(
-        view_name="article_detail", lookup_fields=[
-            ('author.username', 'username'),  # Get username from article.author.username
-            ('slug', 'slug')                  # Get slug from article.slug
-        ]
+        view_name="article_detail",
+        lookup_fields=[
+            (
+                "author.username",
+                "username",
+            ),  # Get username from article.author.username
+            ("slug", "slug"),  # Get slug from article.slug
+        ],
     )
 
     class Meta:
@@ -162,22 +165,49 @@ class ArticleReactionSerializer(serializers.ModelSerializer):
 class SavedArticleSerializer(serializers.ModelSerializer):
     article_id = serializers.SerializerMethodField()
     user_id = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = models.SavedArticle
         fields = ["id", "user_id", "article_id"]
-        
+
     def get_article_id(self, obj):
         return str(obj.article.id)
-    
+
     def get_user_id(self, obj):
         return str(obj.user.id)
 
 
+class SaveArticleCreateSerializer(serializers.Serializer):
+    """Serializer for saving/unsaving articles"""
+
+    article_id = serializers.UUIDField()
+
+    def validate_article_id(self, article_id):
+        """Validate that the article exists and is published"""
+        try:
+            article = models.Article.objects.get(
+                id=article_id
+            )
+        except models.Article.DoesNotExist:
+            raise serializers.ValidationError("Article not found")
+
+        self.article = article 
+        
+        return article_id
+
+
 class CommentSerializer(serializers.ModelSerializer):
+    article_id = serializers.SerializerMethodField()
+    user_id = serializers.SerializerMethodField()
     class Meta:
         model = models.Comment
-        fields = ["id", "user", "article", "text"]
+        fields = ["id", "user_id", "article_id", "body"]
+        
+    def get_article_id(self, obj):
+        return str(obj.article.id)
+
+    def get_user_id(self, obj):
+        return str(obj.user.id)
 
 
 class JobSerializer(serializers.ModelSerializer):

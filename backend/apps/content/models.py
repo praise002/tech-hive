@@ -215,7 +215,6 @@ class ArticleReview(BaseModel):
 
 
 class Comment(BaseModel):
-    # TODO: Threaded comments
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -224,10 +223,21 @@ class Comment(BaseModel):
     article = models.ForeignKey(
         Article, on_delete=models.CASCADE, related_name="comments"
     )
-    text = models.CharField(max_length=250)
+    body = models.CharField(max_length=250)
+    active = models.BooleanField(default=True)  # for moderation purposes
+    parent = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="replies"
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ('created_at',)
 
     def __str__(self):
-        return f"{self.user.full_name} comments on {self.article}"
+        return f"Comment by {self.user.full_name} on {self.article}"
+
+    def get_comments(self):
+        return Comment.objects.filter(parent=self).filter(active=True)
 
 
 class Job(BaseModel):
