@@ -112,7 +112,9 @@ function LoginForm() {
             error.status === 403
           ) {
             toast.error('Account not verified.');
-            navigate('/verify-email');
+            navigate('/verify-email', {
+              state: { email: data.email },
+            });
             return;
           }
 
@@ -199,7 +201,6 @@ function LoginForm() {
 
 export default LoginForm;
 
-// TODO: IF EMAIL NOT VERIFIED, SINCE THIS IS A MULTI-STEP PROCESS, AND THE POSSIBILITY IS LOW
+// IF EMAIL NOT VERIFIED, SINCE THIS IS A MULTI-STEP PROCESS, AND THE POSSIBILITY IS LOW
 // 1. Redirect to verify-email page if email not verified
 // 2. API should return the email if email not verified which can be used to send verification
-// email - not done yet

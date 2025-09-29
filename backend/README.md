@@ -284,3 +284,5 @@ API documentation will be available at:
 - [OWASP Cheatsheet](https://cheatsheetseries.owasp.org/)
 - [API Architecture Best Practices](https://blog.wahab2.com/api-architecture-best-practices-for-designing-rest-apis-bf907025f5f)
 - [Hyperlinkedidentityfield with multiple loojkup rgs stackoverflow solution](https://stackoverflow.com/questions/29362142/django-rest-framework-hyperlinkedidentityfield-with-multiple-lookup-args)
+- [Building a complete professional comment system for your blog in Django](https://python.plainenglish.io/building-a-complete-professional-comment-system-for-your-blog-in-django-32a62775fb8e)
+- [Adding Django Threaded comments in blog](https://www.codesnail.com/adding-django-threaded-comments-in-blog-django-blog-6/#google_vignette)

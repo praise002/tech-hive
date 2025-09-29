@@ -7,12 +7,16 @@ import {
   useRegisterResendOtp,
 } from '../hooks/useAuth';
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
 interface FormData {
   email: string;
   otp: string;
+}
+
+interface LocationState {
+  email?: string;
 }
 
 function VerifyEmail() {
@@ -22,7 +26,10 @@ function VerifyEmail() {
     useRegisterResendOtp();
   const { getEmail } = useEmail();
   const navigate = useNavigate();
-  const email = getEmail() as string;
+  const location = useLocation();
+
+  const state = location.state as LocationState;
+  const email = (getEmail() as string) || state?.email;
 
   useEffect(() => {
     if (resendCooldown > 0) {

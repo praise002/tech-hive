@@ -1,6 +1,10 @@
 import { UpdateUserData } from '../../../types/auth';
-import { PROFILE_URL } from '../../../utils/constants';
-import { getToken, clearTokens } from '../../../utils/utils';
+import { API_URL } from '../../../utils/constants';
+
+import { getToken } from '../../../utils/utils';
+
+export const AUTH_URL = `${API_URL}/auth`;
+export const PROFILE_URL = `${API_URL}/profiles`;
 
 // to display /account
 export async function getCurrentUser() {
@@ -30,6 +34,7 @@ export async function getCurrentUser() {
 // to display /profile
 export async function getCurrentUserProfile() {
   const currentUser = await getCurrentUser();
+
   const username = currentUser.data.username;
   const token = getToken();
 
