@@ -154,8 +154,10 @@ class LoginView(TokenObtainPairView):
                     },
                 )
                 # If email is not verified, prompt them to request an OTP
+                # The email is returned for the frontend to use it
                 return CustomResponse.error(
                     message="Email not verified. Please verify your email before logging in.",
+                    data={"email": email},
                     status_code=status.HTTP_403_FORBIDDEN,
                     err_code=ErrorCode.FORBIDDEN,
                 )

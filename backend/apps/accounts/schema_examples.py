@@ -11,6 +11,7 @@ from apps.accounts.serializers import (
 from apps.common.errors import ErrorCode
 from apps.common.schema_examples import (
     ACCESS_TOKEN,
+    EMAIL_EXAMPLE,
     ERR_RESPONSE_STATUS,
     REFRESH_TOKEN,
     SUCCESS_RESPONSE_STATUS,
@@ -22,7 +23,7 @@ from apps.common.serializers import (
 )
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse
 
-REGISTER_EXAMPLE = {"email": "bob123@example.com"}
+REGISTER_EXAMPLE = {"email": EMAIL_EXAMPLE}
 
 
 LOGIN_EXAMPLE = {
@@ -127,6 +128,9 @@ LOGIN_RESPONSE_EXAMPLE = {
                 value={
                     "status": ERR_RESPONSE_STATUS,
                     "message": "No active account found with the given credentials.",
+                    "data": {
+                        "email": EMAIL_EXAMPLE,
+                    },
                     "code": ErrorCode.UNAUTHORIZED,
                 },
             ),

@@ -513,5 +513,6 @@ class UserCommentsView(APIView):
             status_code=status.HTTP_200_OK,
         )
 # TODO: CONTINUE FROM WHERE API RESPONSE STOPPED FOR COMMENTS
+# CHANGE TO LISTAPIVIEW COS I NEED PAGINATION
 
 
