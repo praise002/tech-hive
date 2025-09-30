@@ -163,18 +163,11 @@ class ArticleReactionSerializer(serializers.ModelSerializer):
 
 
 class SavedArticleSerializer(serializers.ModelSerializer):
-    article_id = serializers.SerializerMethodField()
-    user_id = serializers.SerializerMethodField()
+    article = ArticleSerializer()
 
     class Meta:
         model = models.SavedArticle
-        fields = ["id", "user_id", "article_id"]
-
-    def get_article_id(self, obj):
-        return str(obj.article.id)
-
-    def get_user_id(self, obj):
-        return str(obj.user.id)
+        fields = ["id", "article"]
 
 
 class SaveArticleCreateSerializer(serializers.Serializer):
@@ -185,32 +178,54 @@ class SaveArticleCreateSerializer(serializers.Serializer):
     def validate_article_id(self, article_id):
         """Validate that the article exists and is published"""
         try:
-            article = models.Article.objects.get(
-                id=article_id
-            )
+            article = models.Article.objects.get(id=article_id)
         except models.Article.DoesNotExist:
             raise serializers.ValidationError("Article not found")
 
-        self.article = article 
-        
+        self.article = article
+
         return article_id
 
 
 class CommentSerializer(serializers.ModelSerializer):
     article_id = serializers.SerializerMethodField()
+    article_title = serializers.CharField(source="article.title", read_only=True)
+    article_created_at = serializers.DateTimeField(
+        source="article.created_at", read_only=True
+    )
     user_id = serializers.SerializerMethodField()
+    is_reply = serializers.SerializerMethodField()
+    reply_count = serializers.SerializerMethodField()
+
     class Meta:
         model = models.Comment
-        fields = ["id", "user_id", "article_id", "body"]
-        
+        fields = [
+            "id",
+            "user_id",
+            "article_id",
+            "article_title",
+            "article_created_at",
+            "is_reply",
+            "reply_count",
+            "body",
+        ]
+
     def get_article_id(self, obj):
         return str(obj.article.id)
 
     def get_user_id(self, obj):
         return str(obj.user.id)
 
+    def get_is_reply(self, obj):
+        return obj.parent is not None
+
+    def get_reply_count(self, obj):
+        return obj.replies.filter(active=True).count()
+
 
 class JobSerializer(serializers.ModelSerializer):
+    category = serializers.CharField(source="category.name", read_only=True)
+    
     class Meta:
         model = models.Job
         fields = [
@@ -225,10 +240,13 @@ class JobSerializer(serializers.ModelSerializer):
             "location",
             "job_type",
             "work_mode",
+            "category",
         ]
 
 
 class EventSerializer(serializers.ModelSerializer):
+    category = serializers.CharField(source="category.name", read_only=True)
+    
     class Meta:
         model = models.Event
         fields = [
@@ -240,13 +258,16 @@ class EventSerializer(serializers.ModelSerializer):
             "location",
             "agenda",
             "ticket_url",
+            "category",
         ]
 
 
 class ResourceSerializer(serializers.ModelSerializer):
+    category = serializers.CharField(source="category.name", read_only=True)
+    
     class Meta:
         model = models.Resource
-        fields = ["id", "name", "image_url", "body", "url"]
+        fields = ["id", "name", "image_url", "body", "url", "category"]
 
 
 class ToolTagSerializer(serializers.ModelSerializer):
@@ -257,10 +278,11 @@ class ToolTagSerializer(serializers.ModelSerializer):
 
 class ToolSerializer(serializers.ModelSerializer):
     tags = ToolTagSerializer(many=True, read_only=True)
+    category = serializers.CharField(source="category.name", read_only=True)
 
     class Meta:
         model = models.Tool
-        fields = ["id", "name", "desc", "url", "image_url", "call_to_action", "tags"]
+        fields = ["id", "name", "desc", "url", "image_url", "call_to_action", "tags", "category"]
 
 
 # TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH

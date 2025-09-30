@@ -1,7 +1,7 @@
 from apps.accounts.models import User
 from apps.accounts.utils import UserRoles
 from apps.common.utils import TestUtil
-from apps.content.models import Article, ArticleStatusChoices, SavedArticle
+from apps.content.models import Article, ArticleStatusChoices, Comment, SavedArticle
 from django.contrib.auth.models import Group
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APITestCase
@@ -14,6 +14,7 @@ class TestProfiles(APITestCase):
     article_list_url = "/api/v1/profiles/me/articles/"
     article_detail_url = "/api/v1/profiles/me/articles/<slug:slug>/"
     saved_articles_url = "/api/v1/profiles/me/saved/"
+    user_comments_url = "/api/v1/profiles/me/comments/"
 
     def setUp(self):
         self.user1 = TestUtil.verified_user()
@@ -476,14 +477,14 @@ class TestProfiles(APITestCase):
         self.assertEqual(response.status_code, 401)
 
         # Test: 403 for user trying to update another user's article
-        print(contributor_group)
+
         self.user2.groups.add(contributor_group)
         self.client.force_authenticate(user=self.user2)
         response = self.client.patch(
             self.article_detail_url.replace("<slug:slug>", draft_article2.slug),
             update_data,
         )
-        print(response.data)
+
         self.assertEqual(response.status_code, 403)
 
     def test_saved_article_get(self):
@@ -529,7 +530,7 @@ class TestProfiles(APITestCase):
         self.assertEqual(len(saved_articles), 2)
 
         # Verify the correct articles are returned
-        saved_article_ids = [item["article_id"] for item in saved_articles]
+        saved_article_ids = [item["article"]["id"] for item in saved_articles]
         self.assertIn(str(article1.id), saved_article_ids)
         self.assertIn(str(article2.id), saved_article_ids)
         self.assertNotIn(str(article3.id), saved_article_ids)  # user2's saved article
@@ -542,7 +543,7 @@ class TestProfiles(APITestCase):
         # Should only return user2's saved articles (1 article)
         saved_articles = response.data["data"]
         self.assertEqual(len(saved_articles), 1)
-        self.assertEqual(saved_articles[0]["article_id"], str(article3.id))
+        self.assertEqual(saved_articles[0]["article"]["id"], str(article3.id))
 
         # Test: 401 for unauthenticated users
         self.client.force_authenticate(user=None)
@@ -551,52 +552,103 @@ class TestProfiles(APITestCase):
 
     def test_saved_article_post(self):
         """Test saving and unsaving articles"""
-        
+
         # Create a published article
         article = Article.objects.create(
             title="Test Article",
             content="Test Content",
             author=self.user2,
             status=ArticleStatusChoices.PUBLISHED,
-            slug="test-article"
+            slug="test-article",
         )
-        
+
         # Test: Save article (201 - Created)
         self.client.force_authenticate(user=self.user1)
-        response = self.client.post(self.saved_articles_url, {
-            'article_id': str(article.id)
-        })
-        print(response.data)
+        response = self.client.post(
+            self.saved_articles_url, {"article_id": str(article.id)}
+        )
+
         self.assertEqual(response.status_code, 201)
-        
+
         # Verify article is saved
-        self.assertTrue(SavedArticle.objects.filter(
-            user=self.user1, 
-            article=article
-        ).exists())
-        
+        self.assertTrue(
+            SavedArticle.objects.filter(user=self.user1, article=article).exists()
+        )
+
         # Test: Unsave article (200 - OK)
-        response = self.client.post(self.saved_articles_url, {
-            'article_id': str(article.id)
-        })
-        print(response.data)
+        response = self.client.post(
+            self.saved_articles_url, {"article_id": str(article.id)}
+        )
+
         self.assertEqual(response.status_code, 200)
-        
-        
+
         # Verify article is unsaved
-        self.assertFalse(SavedArticle.objects.filter(
-            user=self.user1, 
-            article=article
-        ).exists())
-        
+        self.assertFalse(
+            SavedArticle.objects.filter(user=self.user1, article=article).exists()
+        )
+
         # Test: 422 for non-existent article
-        response = self.client.post(self.saved_articles_url, {
-            'article_id': 'f921da0d-5b59-444d-a26f-53a15ea1b463'
-        })
+        response = self.client.post(
+            self.saved_articles_url,
+            {"article_id": "f921da0d-5b59-444d-a26f-53a15ea1b463"},
+        )
         self.assertEqual(response.status_code, 422)
-        
+
         # Test: 422 for missing article_id
         response = self.client.post(self.saved_articles_url, {})
         self.assertEqual(response.status_code, 422)
+
+    def test_comments_get(self):
+        article1 = Article.objects.create(
+            title="Article 1",
+            content="Content 1",
+            author=self.user2,
+            status=ArticleStatusChoices.PUBLISHED,
+            slug="article-1",
+        )
+        article2 = Article.objects.create(
+            title="Article 2",
+            content="Content 2",
+            author=self.user2,
+            status=ArticleStatusChoices.PUBLISHED,
+            slug="article-2",
+        )
+
+        Comment.objects.create(
+            user=self.user1, article=article1, body="Comment 1 on Article 1"
+        )
+        Comment.objects.create(
+            user=self.user1, article=article2, body="Comment 2 on Article 2"
+        )
+
+        # Create a comment by user2 (should not appear in user1's results)
+        Comment.objects.create(
+            user=self.user2, article=article1, body="Comment by User 2"
+        )
+
+        # Test: Authenticated user can get their own comments - 200
+        self.client.force_authenticate(user=self.user1)
+        response = self.client.get(self.user_comments_url)
+        self.assertEqual(response.status_code, 200)
+
+        # Should only return user1's comments (2 comments)
+        comments = response.data["data"]["results"]
+        self.assertEqual(len(comments), 2)
+
+        # Verify the correct comments are returned
+        comment_bodies = [comment["body"] for comment in comments]
+        self.assertIn("Comment 1 on Article 1", comment_bodies)
+        self.assertIn("Comment 2 on Article 2", comment_bodies)
+
+        # Test: Different user gets their own comments
+        self.client.force_authenticate(user=self.user2)
+        response = self.client.get(self.user_comments_url)
+        self.assertEqual(response.status_code, 200)
+
+        # Should only return user2's comments (1 comment)
+        comments = response.data["data"]["results"]
+        self.assertEqual(len(comments), 1)
+        self.assertEqual(comments[0]["body"], "Comment by User 2")
+
 
 # python manage.py test apps.profiles.tests.TestProfiles

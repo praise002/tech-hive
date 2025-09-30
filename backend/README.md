@@ -286,3 +286,7 @@ API documentation will be available at:
 - [Hyperlinkedidentityfield with multiple loojkup rgs stackoverflow solution](https://stackoverflow.com/questions/29362142/django-rest-framework-hyperlinkedidentityfield-with-multiple-lookup-args)
 - [Building a complete professional comment system for your blog in Django](https://python.plainenglish.io/building-a-complete-professional-comment-system-for-your-blog-in-django-32a62775fb8e)
 - [Adding Django Threaded comments in blog](https://www.codesnail.com/adding-django-threaded-comments-in-blog-django-blog-6/#google_vignette)
+- [An algorithm to calculate read length](https://dpericich.medium.com/writing-an-algorithm-to-calculate-article-read-length-b45181f16a79)
+- [The Flesch reading score](https://yoast.com/flesch-reading-ease-score/)
+- [Word complexity assessment](https://yoast.com/word-complexity-assessment/)
+- [Average Reading Speed](https://scholarwithin.com/average-reading-speed#)

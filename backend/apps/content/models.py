@@ -229,9 +229,9 @@ class Comment(BaseModel):
         "self", null=True, blank=True, on_delete=models.CASCADE, related_name="replies"
     )
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
-        ordering = ('created_at',)
+        ordering = ("created_at",)
 
     def __str__(self):
         return f"Comment by {self.user.full_name} on {self.article}"
@@ -260,7 +260,7 @@ class Job(BaseModel):
     requirements = models.TextField()
     responsibilities = models.TextField()
     url = models.CharField(max_length=250, validators=[URLValidator()])
-    salary = models.CharField(max_length=100, blank=True)
+    salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     location = models.CharField(max_length=100, blank=True)
     job_type = models.CharField(
         max_length=20, choices=JOB_TYPE_CHOICES, default="FULL_TIME"

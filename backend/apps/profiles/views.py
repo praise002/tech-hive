@@ -490,29 +490,69 @@ class SavedArticlesView(APIView):
 class UserCommentsView(APIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = CommentSerializer
-    
+
     def get_queryset(self):
         """Filter saved articles to only return those belonging to the authenticated user."""
-        return Comment.objects.filter(user=self.request.user).select_related(
+        return Comment.objects.filter(user=self.request.user, active=True).select_related(
             "article", "user"
         )
 
     @extend_schema(
         summary="Retrieve user's comments",
-        description="",
+        description="This endpoint allows authenticated users to retrieve a list of all comments they have made across different articles.",
         tags=tags,
         responses=COMMENTS_ARTICLES_RESPONSE_EXAMPLE,
     )
     def get(self, *args, **kwargs):
         comments = self.get_queryset()
-        serializer = self.get_serializer(comments, many=True)
+        serializer = self.serializer_class(comments, many=True)
 
         return CustomResponse.success(
             message="Comments retrieved successfully.",
             data=serializer.data,
             status_code=status.HTTP_200_OK,
         )
-# TODO: CONTINUE FROM WHERE API RESPONSE STOPPED FOR COMMENTS
-# CHANGE TO LISTAPIVIEW COS I NEED PAGINATION
+
+
+class UserCommentsGenericView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = CommentSerializer
+    pagination_class = DefaultPagination
+
+    def get_queryset(self):
+        """Filter saved articles to only return those belonging to the authenticated user."""
+        return Comment.objects.filter(
+            user=self.request.user, active=True
+        ).select_related("article", "user")
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            paginated_data = self.get_paginated_response(serializer.data)
+            return CustomResponse.success(
+                message="Comments retrieved successfully.",
+                data=paginated_data.data,
+                status_code=status.HTTP_200_OK,
+            )
+
+        serializer = self.get_serializer(queryset, many=True)
+        return CustomResponse.success(
+            message="Comments retrieved successfully.",
+            data=serializer.data,
+            status_code=status.HTTP_200_OK,
+        )
+
+    @extend_schema(
+        summary="Retrieve user's comments",
+        description="This endpoint allows authenticated users to retrieve a list of all comments they have made across different articles.",
+        tags=tags,
+        responses=COMMENTS_ARTICLES_RESPONSE_EXAMPLE,
+    )
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
 
 

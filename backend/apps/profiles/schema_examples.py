@@ -9,7 +9,11 @@ from apps.common.schema_examples import (
     UUID_EXAMPLE,
 )
 from apps.common.serializers import ErrorDataResponseSerializer, ErrorResponseSerializer
-from apps.content.serializers import ArticleSerializer
+from apps.content.serializers import (
+    ArticleSerializer,
+    CommentSerializer,
+    SavedArticleSerializer,
+)
 from apps.profiles.serializers import UserSerializer
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse
 
@@ -34,10 +38,7 @@ ARTICLE_1 = {
     "tags": TAGS,
 }
 
-ARTICLE_UPDATED = {
-    "title": "Test post",
-    "content": "Test content updated"
-}
+ARTICLE_UPDATED = {"title": "Test post", "content": "Test content updated"}
 
 PROFILE_EXAMPLE = {
     "id": UUID_EXAMPLE,
@@ -178,6 +179,83 @@ SUBMITTED_ARTICLES = [
                 "name": "python",
             }
         ],
+    },
+]
+
+COMMENTS_DATA_EXAMPLE = {
+    "count": 3,
+    "next": None,
+    "previous": None,
+    "results": [
+        {
+            "id": "9217d492-ec33-4e05-af2c-62aa220b4c51",
+            "user_id": "63edac98-9f67-4afb-a944-aa3cb69c580b",
+            "article_id": "146541be-1b9b-48a2-8117-2b5fd4bd301b",
+            "article_title": "Test title 2",
+            "article_created_at": "2025-08-12T10:00:54.576519Z",
+            "is_reply": False,
+            "reply_count": 1,
+            "body": "portfolio",
+        },
+        {
+            "id": "1e3c03a8-9535-40d7-98e4-30db724a0abb",
+            "user_id": "63edac98-9f67-4afb-a944-aa3cb69c580b",
+            "article_id": "146541be-1b9b-48a2-8117-2b5fd4bd301b",
+            "article_title": "Test title 2",
+            "article_created_at": "2025-08-12T10:00:54.576519Z",
+            "is_reply": False,
+            "reply_count": 0,
+            "body": "Lorem",
+        },
+        {
+            "id": "353949d0-2738-4eb7-a411-e70d8026915d",
+            "user_id": "63edac98-9f67-4afb-a944-aa3cb69c580b",
+            "article_id": "146541be-1b9b-48a2-8117-2b5fd4bd301b",
+            "article_title": "Test title 2",
+            "article_created_at": "2025-08-12T10:00:54.576519Z",
+            "is_reply": True,
+            "reply_count": 0,
+            "body": "Ikr",
+        },
+    ],
+}
+
+SAVED_ARTICLE_EXAMPLE = [
+    {
+        "id": "8650da13-0443-468f-916e-f0387f98429f",
+        "article": {
+            "id": "26b0dee3-54a8-46eb-8c9d-00ca481d201f",
+            "title": "Test title",
+            "slug": "test-title",
+            "content": "Test content",
+            "cover_image_url": "",
+            "read_time": 5,
+            "status": "published",
+            "created_at": "2025-08-07T18:48:26.389204Z",
+            "is_featured": False,
+            "author": "Praise Idowu",
+            "total_reaction_counts": 4,
+            "reaction_counts": {"❤️": 1, "👍": 1, "🔥": 1, "😍": 1},
+            "tags": [{"id": "d5afcd69-4c7d-4ea5-94bd-e1a2549a3f72", "name": "python"}],
+        },
+    },
+    {
+        "id": "12850bd5-04a8-41f8-87df-68fd34f61b24",
+        "article": {
+            "id": "146541be-1b9b-48a2-8117-2b5fd4bd301b",
+            "title": "Test title 2",
+            "slug": "test-title-2",
+            "content": "Test content",
+            "cover_image_url": "",
+            "read_time": 0,
+            "status": "published",
+            "created_at": "2025-08-12T10:00:54.576519Z",
+            "is_featured": False,
+            "author": "Praise Idowu",
+            "total_reaction_counts": 2,
+            "reaction_counts": {"❤️": 2},
+            "tags": [{"id": "d5afcd69-4c7d-4ea5-94bd-e1a2549a3f72", "name": "python"}],
+        },
     },
 ]
 
@@ -418,13 +496,80 @@ ARTICLE_UPDATE_RESPONSE_EXAMPLE = {
     ),
 }
 
-# 200, 401
-SAVED_ARTICLES_RESPONSE_EXAMPLE = {}
 
-# 200, 201, 404, 401, 403
-SAVED_ARTICLES_CREATE_RESPONSE_EXAMPLE = {}
+SAVED_ARTICLES_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Saved articles retrieved successfully",
+        response=SavedArticleSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Saved Articles retrieved successfully",
+                    "data": SAVED_ARTICLE_EXAMPLE,
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+}
 
-COMMENTS_ARTICLES_RESPONSE_EXAMPLE = []
+
+SAVED_ARTICLES_CREATE_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Toggle save status for an article",
+        response=SavedArticleSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Article unsaved successfully",
+                },
+            ),
+        ],
+    ),
+    201: OpenApiResponse(
+        description="Toggle save status for an article",
+        response=SavedArticleSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Article saved successfully",
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        response=ErrorResponseSerializer,
+        description="Permission Denied",
+    ),
+    422: ErrorDataResponseSerializer,
+}
+
+COMMENTS_ARTICLES_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Comments retrieved successfully",
+        response=CommentSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Comments retrieved successfully.",
+                    "data": COMMENTS_DATA_EXAMPLE,
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+}
+
+
 def build_avatar_request_schema():
     return {
         "multipart/form-data": {

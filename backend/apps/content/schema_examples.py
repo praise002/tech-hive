@@ -5,7 +5,11 @@ from apps.content.serializers import (
     ArticleSerializer,
     CategorySerializer,
     ContributorOnboardingSerializer,
+    EventSerializer,
+    JobSerializer,
+    ResourceSerializer,
     TagSerializer,
+    ToolSerializer,
 )
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse
 
@@ -74,6 +78,83 @@ ARTICLE_DETAIL_EXAMPLE = {
     "total_reaction_counts": 4,
     "reaction_counts": {"❤️": 1, "👍": 1, "🔥": 1, "😍": 1},
     "tags": [{"id": "d5afcd69-4c7d-4ea5-94bd-e1a2549a3f72", "name": "python"}],
+}
+
+EVENT_EXAMPLE = {
+    "id": "d9c34a1a-9b2b-4a0a-8b1a-1b9b4a0a8b1a",
+    "title": "Tech Conference 2025",
+    "desc": "Join us for the premier tech conference of the year!",
+    "start_date": "2025-11-15T09:00:00Z",
+    "end_date": "2025-11-17T17:00:00Z",
+    "location": "San Francisco, CA",
+    "agenda": "Keynotes, workshops, and networking events",
+    "ticket_url": "https://example.com/tech-conference-2025",
+    "category": "Conference",
+}
+
+EVENTS_DATA_EXAMPLE = {
+    "count": 1,
+    "next": None,
+    "previous": None,
+    "results": [EVENT_EXAMPLE],
+}
+
+RESOURCE_EXAMPLE = {
+    "id": "f8e7c6b5-4a3f-4c2e-9b8f-7a6d5e4c3b2a",
+    "name": "Awesome Django Tutorial",
+    "image_url": "https://example.com/django-tutorial.png",
+    "body": "A comprehensive guide to building web apps with Django",
+    "url": "https://example.com/django-tutorial",
+    "category": "Tutorial",
+}
+
+RESOURCES_DATA_EXAMPLE = {
+    "count": 1,
+    "next": None,
+    "previous": None,
+    "results": [RESOURCE_EXAMPLE],
+}
+
+TOOL_TAG_EXAMPLE = {"id": "b1d6e859-df99-4842-b1d6-e859df99bc93", "name": "AI"}
+
+TOOL_EXAMPLE = {
+    "id": "a7b8c9d0-1a2b-4c5d-8e9f-0a1b2c3d4e5f",
+    "name": "AI Tool",
+    "desc": "An AI-powered tool for content creation",
+    "url": "https://example.com/ai-tool",
+    "image_url": "https://example.com/ai-tool.png",
+    "call_to_action": "Try it now!",
+    "tags": [TOOL_TAG_EXAMPLE],
+    "category": "AI",
+}
+
+TOOLS_DATA_EXAMPLE = {
+    "count": 1,
+    "next": None,
+    "previous": None,
+    "results": [TOOL_EXAMPLE],
+}
+
+JOB_EXAMPLE = {
+    "id": "2c9e2a3b-f7a8-4a9b-b3a1-d7c8e9f0a1b2",
+    "title": "Software Engineer",
+    "company": "TechHive Inc.",
+    "desc": "We are looking for a talented software engineer to join our team.",
+    "requirements": "Bachelor's degree in Computer Science, 3+ years of experience",
+    "responsibilities": "Develop and maintain web applications",
+    "url": "https://example.com/jobs/software-engineer",
+    "salary": "80000-120000",
+    "location": "San Francisco, CA",
+    "job_type": "Full-time",
+    "work_mode": "Remote",
+    "category": "Engineering",
+}
+
+JOBS_DATA_EXAMPLE = {
+    "count": 1,
+    "next": None,
+    "previous": None,
+    "results": [JOB_EXAMPLE],
 }
 
 ACCEPT_GUIDELINES_RESPONSE_EXAMPLE = {
@@ -173,6 +254,74 @@ ARTICLE_DETAIL_RESPONSE_EXAMPLE = {
                     "status": SUCCESS_RESPONSE_STATUS,
                     "message": "Article detail retrieved successfully.",
                     "data": ARTICLE_DETAIL_EXAMPLE,
+                },
+            ),
+        ],
+    ),
+}
+
+EVENTS_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Events retrieved successfully",
+        response=EventSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Events retrieved successfully.",
+                    "data": EVENTS_DATA_EXAMPLE,
+                },
+            ),
+        ],
+    ),
+}
+
+RESOURCES_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Resources retrieved successfully",
+        response=ResourceSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Resources retrieved successfully.",
+                    "data": RESOURCES_DATA_EXAMPLE,
+                },
+            ),
+        ],
+    ),
+}
+
+TOOLS_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Tools retrieved successfully",
+        response=ToolSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Tools retrieved successfully.",
+                    "data": TOOLS_DATA_EXAMPLE,
+                },
+            ),
+        ],
+    ),
+}
+
+JOB_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Jobs retrieved successfully",
+        response=JobSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Jobs retrieved successfully.",
+                    "data": JOBS_DATA_EXAMPLE,
                 },
             ),
         ],

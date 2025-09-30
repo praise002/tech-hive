@@ -1,10 +1,25 @@
-from .articles import ArticleListView, TagGenericView, AcceptGuidelinesView,  ArticleRetrieveView
-from .contents import CategoryGenericView
+from .articles import (
+    AcceptGuidelinesView,
+    ArticleListView,
+    ArticleRetrieveView,
+    TagGenericView,
+)
+from .contents import (
+    CategoryGenericView,
+    EventListView,
+    JobListView,
+    ResourceListView,
+    ToolListView,
+)
 
 __all__ = [
     "ArticleListView",
     "ArticleRetrieveView",
     "TagGenericView",
     "CategoryGenericView",
-    "AcceptGuidelinesView"
+    "AcceptGuidelinesView",
+    "JobListView",
+    "EventListView",
+    "ResourceListView",
+    "ToolListView",
 ]
