@@ -3,10 +3,10 @@ import { Link as ScrollLink } from 'react-scroll';
 import Button from '../common/Button';
 import Text from '../common/Text';
 import Logout from '../../features/auth/components/Logout';
-import { useUser } from '../../features/profile/hooks/useUser';
+import { useCurrentUser } from '../../features/profile/hooks/useProfile';
 
 function HeroSection() {
-  const { isAuthenticated } = useUser();
+  const { isAuthenticated } = useCurrentUser();
 
   return (
     <section className="relative mt-12 dark:bg-light bg-gradient-to-r from-coral/50 to-peach py-10 px-7 sm:py-20 sm:px-14 overflow-hidden">

@@ -4,8 +4,8 @@ import { useEffect } from 'react';
 
 import Spinner from './Spinner';
 
-import { useUser } from '../../features/profile/hooks/useUser';
 import { ProtectedRouteProps } from '../../types/types';
+import { useCurrentUser } from '../../features/profile/hooks/useProfile';
 
 // replace: true - Prevents the login page from being added to
 // browser history, so users can't go back to protected routes after logout
@@ -15,7 +15,7 @@ function ProtectedRoute({ children }: ProtectedRouteProps) {
   const navigate = useNavigate();
 
   // 1. Load the authenticated user
-  const { isPending, isAuthenticated } = useUser();
+  const { isPending, isAuthenticated } = useCurrentUser();
 
   // 2. If there is NO authenticated user, redirect to the /login
   useEffect(
