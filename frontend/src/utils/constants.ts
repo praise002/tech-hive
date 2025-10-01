@@ -16,6 +16,10 @@ export const routes = {
     requestPasswordReset: `${AUTH_URL}/passwords/reset/`,
     verifyPasswordResetOtp: `${AUTH_URL}/passwords/reset/verify/`,
     completePasswordReset: `${AUTH_URL}/passwords/reset/complete/`,
+    googleRegister: `${AUTH_URL}/login/google/`,
+    googleLogin: `${AUTH_URL}/signup/google/`,
+    googleRegsiterCallback: `${AUTH_URL}/google/callback/register/`,
+    googleLoginCallback: `${AUTH_URL}/google/callback/login/`,
   },
 
   profile: {

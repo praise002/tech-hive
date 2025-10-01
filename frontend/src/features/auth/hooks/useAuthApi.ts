@@ -127,6 +127,21 @@ export const useAuthApi = () => {
     return response;
   };
 
+  const fetchAuthUrl = async (url: string) => {
+    const response = await sendRequest(ApiMethod.GET, url);
+
+    console.log(response.data.authorization_url);
+    return response.data.authorization_url;
+  };
+
+  const fetchAuthRegisterUrl = async () => {
+    return fetchAuthUrl(routes.auth.googleRegister);
+  };
+
+  const fetchAuthLoginUrl = async () => {
+    return fetchAuthUrl(routes.auth.googleLogin);
+  };
+
   return {
     register,
     verifyRegistrationOtp,
@@ -138,5 +153,7 @@ export const useAuthApi = () => {
     requestPasswordReset,
     verifyPasswordResetOtp,
     completePasswordReset,
+    fetchAuthRegisterUrl,
+    fetchAuthLoginUrl,
   };
 };

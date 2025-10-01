@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 // import { useLocation, useNavigate } from 'react-router-dom';
 import { LoginUserData } from '../../../types/auth';
 import { useAuthApi } from './useAuthApi';
+import toast from 'react-hot-toast';
 
 export function useEmail() {
   const queryClient = useQueryClient();
@@ -191,35 +192,20 @@ export function useCompletePasswordReset() {
   return { completePasswordReset, isPending };
 }
 
-// TODO: FIX LATER
-// export function useGoogleCallback(fetchTokens: () => Promise<any>) {
-//   const navigate = useNavigate();
-//   const location = useLocation();
+export const useGoogleSignup = () => {
+  const { fetchAuthRegisterUrl: fetchAuthRegisterUrlApi } = useAuthApi();
 
-//   const params = new URLSearchParams(location.search);
-//   const state = params.get('state');
+  const { mutate: fetchAuthRegisterUrl, isPending } = useMutation({
+    mutationFn: fetchAuthRegisterUrlApi,
+    onSuccess: (authorizationUrl) => {
+      window.location.href = authorizationUrl;
+    },
+    onError: (error) => {
+      console.error('Error fetching auth URL:', error);
+      // TODO: MOVE TO MUTATE CALLBACK
+      toast.error('Failed to start Google signup. Please try again.');
+    },
+  });
 
-//   const { data, isLoading, isError } = useQuery({
-//     queryKey: ['googleCallback', state],
-//     queryFn: fetchTokens,
-//     enabled: !!state,
-//     staleTime: Infinity,
-//     // cacheTime: 0,
-//     refetchOnMount: false,
-//     // refetchOnWindowsFocus: false,
-//     retry: false, // default=3
-//   });
-
-//   if (data) {
-//     const { refresh, access } = data;
-//     localStorage.setItem('refreshToken', refresh);
-//     localStorage.setItem('accessToken', access);
-//     navigate('/');
-//   }
-
-//   if (isError) {
-//     navigate(''); // TODO: LATER
-//   }
-
-//   return { isLoading };
-// }
+  return { fetchAuthRegisterUrl, isPending };
+};
