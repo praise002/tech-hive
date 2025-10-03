@@ -1,0 +1,19 @@
+from django.db import models
+
+from backend.apps.content.models import ArticleStatusChoices
+
+
+class PublishedManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(status=ArticleStatusChoices.PUBLISHED)
+
+
+class SavedPublishedArticlesManager(models.Manager):
+    """Manager that returns only saved articles where the article is published."""
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .filter(article__status=ArticleStatusChoices.PUBLISHED)
+        )

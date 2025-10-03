@@ -7,21 +7,7 @@ from django.db import models
 from django.db.models import Count
 from django.utils import timezone
 
-
-class PublishedManager(models.Manager):
-    def get_queryset(self):
-        return super().get_queryset().filter(status=ArticleStatusChoices.PUBLISHED)
-
-
-class SavedPublishedArticlesManager(models.Manager):
-    """Manager that returns only saved articles where the article is published."""
-
-    def get_queryset(self):
-        return (
-            super()
-            .get_queryset()
-            .filter(article__status=ArticleStatusChoices.PUBLISHED)
-        )
+from backend.apps.content.manager import PublishedManager, SavedPublishedArticlesManager
 
 
 class Tag(BaseModel):
@@ -191,6 +177,7 @@ class SavedArticle(BaseModel):
 
     class Meta:
         unique_together = ("article", "user")
+        ordering = ["-created_at"]
 
     def __str__(self):
         return self.article.title
@@ -269,6 +256,9 @@ class Job(BaseModel):
         max_length=20, choices=WORK_MODE_CHOICES, default="ONSITE"
     )
 
+    class Meta:
+        ordering = ["-created_at"]
+
     def __str__(self):
         return self.title
 
@@ -285,6 +275,9 @@ class Event(BaseModel):
     agenda = models.TextField()
     ticket_url = models.CharField(max_length=250, validators=[URLValidator()])
 
+    class Meta:
+        ordering = ["-created_at"]
+
     def __str__(self):
         return self.title
 
@@ -297,6 +290,9 @@ class Resource(BaseModel):
     image = models.ImageField(upload_to="resources/", null=True, blank=True)
     body = models.TextField()
     url = models.CharField(max_length=250, validators=[URLValidator()])
+
+    class Meta:
+        ordering = ["-created_at"]
 
     @property
     def image_url(self):
@@ -331,6 +327,9 @@ class Tool(BaseModel):
         default="Explore",
         help_text="Dynamic button text (e.g., 'Sign Up to GitHub', 'Try Figma for Free')",
     )
+
+    class Meta:
+        ordering = ["-created_at"]
 
     def __str__(self):
         return self.name

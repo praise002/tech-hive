@@ -6,7 +6,6 @@ from apps.accounts.tasks import download_and_upload_avatar
 from apps.accounts.utils import google_callback
 from apps.common.errors import ErrorCode
 from apps.common.responses import CustomResponse
-from decouple import config
 from django.urls import reverse
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -20,8 +19,8 @@ logger = logging.getLogger(__name__)
 class GoogleOAuth2SignUpCallbackView(APIView):
 
     def get(self, request):
-        # redirect_uri = request.build_absolute_uri(reverse("google_signup_callback"))
-        redirect_uri = "http://localhost:5173/auth/google/callback"
+        redirect_uri = request.build_absolute_uri(reverse("google_signup_callback"))
+        # redirect_uri = "http://localhost:5173/auth/google/callback"
         auth_uri = request.build_absolute_uri()
         state = request.query_params.get("state")
 
@@ -78,5 +77,3 @@ class GoogleOAuth2SignUpCallbackView(APIView):
             },
             status_code=status.HTTP_201_CREATED,
         )
-
-

@@ -13,7 +13,8 @@ import { useGoogleSignup } from '../features/auth/hooks/useAuth';
 
 function Home() {
   // const { login, fetchAuthRegisterUrl } = useAuthApi();
-  
+  // const email = 'ifeoluwapraise002@gmail.com';
+  // const password = 'Esiveneta1964@';
   const { fetchAuthRegisterUrl, isPending } = useGoogleSignup();
 
   function handleClick(e) {

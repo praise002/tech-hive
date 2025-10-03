@@ -23,6 +23,7 @@
 - `PUT /articles/review/{id}/status/under_review` → Mark as under review
 - `PUT /articles/review/{id}/status/changes_requested` → Request changes
 - `PUT /articles/review/{id}/status/review_completed` → Complete review
+- 
 - `PUT /articles/review/{id}/status/ready_for_publishing` → Mark ready to publish
 - `POST /articles/review/{id}/reject` → Reject article
 
@@ -80,3 +81,5 @@ Contributor
   ↓
 User (lowest - read-only)
 ```
+
+TODO: USING HTTP-ONLY-COOKIE
