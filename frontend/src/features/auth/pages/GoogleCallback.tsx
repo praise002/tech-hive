@@ -1,25 +1,24 @@
-// import { useLocation } from 'react-router-dom';
-// import { fetchTokens } from '../services/apiAuth';
-// import { useGoogleCallback } from '../hooks/useAuth';
+import { useSearchParams } from 'react-router-dom';
+import { useGoogleCallback } from '../hooks/useAuth';
+import { useEffect } from 'react';
+import Spinner from '../../../components/common/Spinner';
 
-// TODO: FIX LATER
-function GoogleCallback() {
-  // const location = useLocation();
+export const GoogleCallback = () => {
+  const [searchParams] = useSearchParams();
+  const { processCallback } = useGoogleCallback();
 
-  // const params = new URLSearchParams(location.search);
-  // const state = params.get('state');
-  // const fullUrl = window.location.href; // full url for backend
-  // if (!state) return;
+  useEffect(() => {
+    const access = searchParams.get('access');
+    const refresh = searchParams.get('refresh');
 
-  // const wrappedFetchTokens = async () => fetchTokens(state, fullUrl);
+    if (access && refresh) {
+      processCallback({ access, refresh });
+    }
+  }, [searchParams, processCallback]);
 
-  // const {isLoading} = useGoogleCallback(wrappedFetchTokens);
-  
-  // if (isLoading) {
-  //   return <div>Loading... Please wait.</div>;
-  // }
-
-  return <div>Processing authentication</div>;
-}
-
-export default GoogleCallback;
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <Spinner />
+    </div>
+  );
+};

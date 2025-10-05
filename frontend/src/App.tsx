@@ -43,6 +43,8 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 import ProfileDetail from './features/profile/pages/ProfileDetail';
 import AccountDisabled from './features/auth/pages/AccountDisabled';
 import Logout from './features/auth/components/Logout';
+import { GoogleCallback } from './features/auth/pages/GoogleCallback';
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -90,7 +92,7 @@ function App() {
             <Route path="register" element={<Register />} />
             <Route path="profile" element={<ProfileDetail />} />
             <Route path="verify-email" element={<VerifyEmail />} />
-            <Route path="auth/google/callback" element={<Register />} />
+            <Route path="auth/google/callback" element={<GoogleCallback />} />
 
             <Route path="reset-password" element={<ResetPassword />} />
             <Route

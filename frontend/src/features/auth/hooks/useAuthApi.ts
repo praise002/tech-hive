@@ -130,7 +130,6 @@ export const useAuthApi = () => {
   const fetchAuthUrl = async (url: string) => {
     const response = await sendRequest(ApiMethod.GET, url);
 
-    console.log(response.data.authorization_url);
     return response.data.authorization_url;
   };
 
@@ -140,6 +139,10 @@ export const useAuthApi = () => {
 
   const fetchAuthLoginUrl = async () => {
     return fetchAuthUrl(routes.auth.googleLogin);
+  };
+
+  const handleGoogleCallback = async (access: string, refresh: string) => {
+    return { access, refresh };
   };
 
   return {
@@ -155,5 +158,6 @@ export const useAuthApi = () => {
     completePasswordReset,
     fetchAuthRegisterUrl,
     fetchAuthLoginUrl,
+    handleGoogleCallback,
   };
 };

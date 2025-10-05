@@ -10,6 +10,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { LoginUserData } from '../../../types/auth';
 import { useAuthApi } from './useAuthApi';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import { setToken } from '../../../utils/utils';
 
 export function useEmail() {
   const queryClient = useQueryClient();
@@ -209,3 +211,26 @@ export const useGoogleSignup = () => {
 
   return { fetchAuthRegisterUrl, isPending };
 };
+
+export function useGoogleCallback() {
+  // TODO: MOVE NAVIGATE OPERATION TO MUTATE FN LATER
+  const navigate = useNavigate();
+  const { handleGoogleCallback: handleGoogleCallbackApi } = useAuthApi();
+
+  const { mutate: processCallback, isPending } = useMutation({
+    mutationFn: ({ access, refresh }: { access: string; refresh: string }) =>
+      handleGoogleCallbackApi(access, refresh),
+    onSuccess: (data) => {
+      setToken(data);
+      toast.success('Successfully signed in with Google!');
+      navigate('/', { replace: true });
+    },
+    onError: (error) => {
+      console.error('Google callback error:', error);
+      toast.error('Authentication failed. Please try again.');
+      navigate('/login', { replace: true });
+    },
+  });
+
+  return { processCallback, isPending };
+}
