@@ -1,0 +1,173 @@
+[
+  {
+    "model": "content.category",
+    "pk": "1",
+    "fields": {
+      "created_at": "2025-10-27T10:00:00Z",
+      "updated_at": "2025-10-27T10:00:00Z",
+      "name": "Technology",
+      "slug": "technology",
+      "desc": "Articles and resources related to technology."
+    }
+  },
+  {
+    "model": "content.category",
+    "pk": "2",
+    "fields": {
+      "created_at": "2025-10-27T10:00:00Z",
+      "updated_at": "2025-10-27T10:00:00Z",
+      "name": "Web Development",
+      "slug": "web-development",
+      "desc": "Articles and resources for web developers."
+    }
+  },
+  {
+    "model": "content.job",
+    "pk": "1",
+    "fields": {
+      "created_at": "2025-10-27T10:00:00Z",
+      "updated_at": "2025-10-27T10:00:00Z",
+      "category": 1,
+      "title": "Frontend Developer",
+      "company": "Acme Corp",
+      "desc": "Looking for a skilled frontend developer to join our team.",
+      "requirements": "3+ years of experience with React, JavaScript, and HTML/CSS.",
+      "responsibilities": "Developing and maintaining user interfaces.",
+      "url": "https://example.com/jobs/1",
+      "salary": "100000.00",
+      "location": "San Francisco",
+      "job_type": "FULL_TIME",
+      "work_mode": "HYBRID"
+    }
+  },
+  {
+    "model": "content.job",
+    "pk": "2",
+    "fields": {
+      "created_at": "2025-10-27T10:00:00Z",
+      "updated_at": "2025-10-27T10:00:00Z",
+      "category": 2,
+      "title": "Backend Engineer",
+      "company": "Beta Inc",
+      "desc": "Seeking a backend engineer with experience in Python and Django.",
+      "requirements": "2+ years of experience with Python, Django, and REST APIs.",
+      "responsibilities": "Building and maintaining server-side logic.",
+      "url": "https://example.com/jobs/2",
+      "salary": "120000.00",
+      "location": "New York",
+      "job_type": "FULL_TIME",
+      "work_mode": "REMOTE"
+    }
+  },
+   {
+    "model": "content.event",
+    "pk": "1",
+    "fields": {
+      "created_at": "2025-10-27T10:00:00Z",
+      "updated_at": "2025-10-27T10:00:00Z",
+      "category": 1,
+      "title": "Tech Conference 2026",
+      "desc": "The premier technology conference of the year.",
+      "start_date": "2026-03-15T09:00:00Z",
+      "end_date": "2026-03-17T17:00:00Z",
+      "location": "Las Vegas",
+      "agenda": "Keynotes, workshops, and networking events.",
+      "ticket_url": "https://example.com/events/1"
+    }
+  },
+  {
+    "model": "content.event",
+    "pk": "2",
+    "fields": {
+      "created_at": "2025-10-27T10:00:00Z",
+      "updated_at": "2025-10-27T10:00:00Z",
+      "category": 2,
+      "title": "Web Dev Summit 2026",
+      "desc": "A conference for web developers of all skill levels.",
+      "start_date": "2026-05-20T09:00:00Z",
+      "end_date": "2026-05-22T17:00:00Z",
+      "location": "Online",
+      "agenda": "Talks, workshops, and Q&A sessions.",
+      "ticket_url": "https://example.com/events/2"
+    }
+  },
+  {
+    "model": "content.resource",
+    "pk": "1",
+    "fields": {
+      "created_at": "2025-10-27T10:00:00Z",
+      "updated_at": "2025-10-27T10:00:00Z",
+      "category": 1,
+      "name": "Awesome Python Guide",
+      "image": null,
+      "body": "A comprehensive guide to Python programming.",
+      "url": "https://example.com/resources/1"
+    }
+  },
+  {
+    "model": "content.resource",
+    "pk": "2",
+    "fields": {
+      "created_at": "2025-10-27T10:00:00Z",
+      "updated_at": "2025-10-27T10:00:00Z",
+      "category": 2,
+      "name": "React Best Practices",
+      "image": null,
+      "body": "Best practices for building React applications.",
+      "url": "https://example.com/resources/2"
+    }
+  },
+  {
+    "model": "content.tooltag",
+    "pk": "1",
+    "fields": {
+      "created_at": "2025-10-27T10:00:00Z",
+      "updated_at": "2025-10-27T10:00:00Z",
+      "name": "IDE"
+    }
+  },
+  {
+    "model": "content.tooltag",
+    "pk": "2",
+    "fields": {
+      "created_at": "2025-10-27T10:00:00Z",
+      "updated_at": "2025-10-27T10:00:00Z",
+      "name": "Framework"
+    }
+  },
+  {
+    "model": "content.tool",
+    "pk": "1",
+    "fields": {
+      "created_at": "2025-10-27T10:00:00Z",
+      "updated_at": "2025-10-27T10:00:00Z",
+      "category": 2,
+      "name": "VS Code",
+      "desc": "A popular code editor.",
+      "url": "https://example.com/tools/1",
+      "image_url": "https://example.com/images/vscode.png",
+      "call_to_action": "Download",
+      "tags": [1]
+    }
+  },
+  {
+    "model": "content.tool",
+    "pk": "2",
+    "fields": {
+      "created_at": "2025-10-27T10:00:00Z",
+      "updated_at": "2025-10-27T10:00:00Z",
+      "category": 2,
+      "name": "Django",
+      "desc": "A powerful Python web framework.",
+      "url": "https://example.com/tools/2",
+      "image_url": "https://example.com/images/django.png",
+      "call_to_action": "Learn More",
+      "tags": [2]
+    }
+  }
+]
+
+
+
+
+

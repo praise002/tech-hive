@@ -12,9 +12,9 @@ from .accounts import (
     VerifyOtpView,
 )
 from .google_oauth_login import GoogleOAuth2LoginView
+from .google_oauth_login_callback import GoogleOAuth2LoginCallbackView
 from .google_oauth_signup import GoogleOAuth2SignUpView
 from .google_oauth_signup_callback import GoogleOAuth2SignUpCallbackView
-from .google_oauth_login_callback import GoogleOAuth2LoginCallbackView
 
 __all__ = [
     # Account views
@@ -32,6 +32,7 @@ __all__ = [
     # OAuth views
     "GoogleOAuth2SignUpView",
     "GoogleOAuth2SignUpCallbackView",
+    "GoogleOAuthSignUpCallbackView",
     "GoogleOAuth2LoginView",
     "GoogleOAuth2LoginCallbackView",
 ]

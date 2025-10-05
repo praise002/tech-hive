@@ -1,6 +1,5 @@
+from apps.content.utils import ArticleStatusChoices
 from django.db import models
-
-from backend.apps.content.models import ArticleStatusChoices
 
 
 class PublishedManager(models.Manager):

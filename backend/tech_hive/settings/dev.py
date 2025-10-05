@@ -26,6 +26,8 @@ CORS_ALLOWED_ORIGINS = [
 
 FRONTEND_URL = config("FRONTEND_URL_DEV")
 
+FRONTEND_CALLBACK_URL = config("FRONTEND_DEV_CALLBACK_URL")
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),  # Longer access token for development
     "REFRESH_TOKEN_LIFETIME": timedelta(days=90),

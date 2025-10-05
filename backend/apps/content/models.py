@@ -1,4 +1,6 @@
 from apps.common.models import BaseModel
+from apps.content.manager import PublishedManager, SavedPublishedArticlesManager
+from apps.content.utils import ArticleStatusChoices
 from autoslug import AutoSlugField
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -6,8 +8,6 @@ from django.core.validators import URLValidator
 from django.db import models
 from django.db.models import Count
 from django.utils import timezone
-
-from backend.apps.content.manager import PublishedManager, SavedPublishedArticlesManager
 
 
 class Tag(BaseModel):
@@ -25,18 +25,6 @@ class Tag(BaseModel):
 
     def __str__(self):
         return self.name
-
-
-class ArticleStatusChoices(models.TextChoices):
-    DRAFT = "draft", "Draft"
-    SUBMITTED_FOR_REVIEW = "submitted_for_review", "Submitted for Review"
-    UNDER_REVIEW = "under_review", "Under Review"
-    CHANGES_REQUESTED = "changes_requested", "Changes Requested"
-    REVIEW_COMPLETED = "review_completed", "Review Completed"
-    READY = "ready_for_publishing", "Ready for Publishing"
-    PUBLISHED = "published", "Published"
-    REJECTED = "rejected", "Rejected"
-    # ARCHIVED = "archived", "Archived"
 
 
 class Category(BaseModel):

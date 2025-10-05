@@ -6,9 +6,11 @@ from apps.accounts.tasks import download_and_upload_avatar
 from apps.accounts.utils import google_callback
 from apps.common.errors import ErrorCode
 from apps.common.responses import CustomResponse
+from django.conf import settings
+from django.http import HttpResponseRedirect
 from django.urls import reverse
 from drf_spectacular.utils import extend_schema
-from rest_framework import status
+# from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -20,7 +22,6 @@ class GoogleOAuth2SignUpCallbackView(APIView):
 
     def get(self, request):
         redirect_uri = request.build_absolute_uri(reverse("google_signup_callback"))
-        # redirect_uri = "http://localhost:5173/auth/google/callback"
         auth_uri = request.build_absolute_uri()
         state = request.query_params.get("state")
 
@@ -58,22 +59,34 @@ class GoogleOAuth2SignUpCallbackView(APIView):
         if created:
             SendEmail.welcome(request, user)
 
-        # if new or existing user, log in the user
-        if not created:
-            return CustomResponse.success(
-                message="Login successful.",
-                data={
-                    "refresh": str(refresh),
-                    "access": str(refresh.access_token),
-                },
-                status_code=status.HTTP_200_OK,
-            )
+        access = str(refresh.access_token)
+        refresh = str(refresh)
 
-        return CustomResponse.success(
-            message="User created successfully.",
-            data={
-                "refresh": str(refresh),
-                "access": str(refresh.access_token),
-            },
-            status_code=status.HTTP_201_CREATED,
+        frontend_callback_url = settings.FRONTEND_CALLBACK_URL
+        redirect_url = (
+            f"{frontend_callback_url}" f"?access={access}" f"&refresh={refresh}"
         )
+        if created:
+            refirect_url += f"&is_new=true"
+
+        return HttpResponseRedirect(redirect_url)
+
+        # if new or existing user, log in the user
+        # if not created:
+        #     return CustomResponse.success(
+        #         message="Login successful.",
+        #         data={
+        #             "refresh": str(refresh),
+        #             "access": str(refresh.access_token),
+        #         },
+        #         status_code=status.HTTP_200_OK,
+        #     )
+
+        # return CustomResponse.success(
+        #     message="User created successfully.",
+        #     data={
+        #         "refresh": str(refresh),
+        #         "access": str(refresh.access_token),
+        #     },
+        #     status_code=status.HTTP_201_CREATED,
+        # )
