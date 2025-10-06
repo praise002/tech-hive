@@ -11,5 +11,4 @@ urlpatterns = [
     # path("me/comments/", views.UserCommentsView.as_view()),
     path("me/comments/", views.UserCommentsGenericView.as_view()),
     path("<str:username>/", views.PublicProfileView.as_view()),
-    path("<str:username>/comments/", views.UserCommentsView.as_view()),
 ]

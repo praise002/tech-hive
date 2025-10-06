@@ -1,10 +1,9 @@
 [
   {
     "model": "content.category",
-    "pk": "1",
+    "pk": "998cdd96-af69-4cee-b5b4-003ce7ab8680",
     "fields": {
       "created_at": "2025-10-27T10:00:00Z",
-      "updated_at": "2025-10-27T10:00:00Z",
       "name": "Technology",
       "slug": "technology",
       "desc": "Articles and resources related to technology."
@@ -12,10 +11,9 @@
   },
   {
     "model": "content.category",
-    "pk": "2",
+    "pk": "a52c96ab-adbd-4780-a9ff-79a2b0937d08",
     "fields": {
       "created_at": "2025-10-27T10:00:00Z",
-      "updated_at": "2025-10-27T10:00:00Z",
       "name": "Web Development",
       "slug": "web-development",
       "desc": "Articles and resources for web developers."
@@ -23,11 +21,10 @@
   },
   {
     "model": "content.job",
-    "pk": "1",
+    "pk": "cc6d4af7-3465-4548-9f52-52572730d3cd",
     "fields": {
       "created_at": "2025-10-27T10:00:00Z",
-      "updated_at": "2025-10-27T10:00:00Z",
-      "category": 1,
+      "category": "998cdd96-af69-4cee-b5b4-003ce7ab8680",
       "title": "Frontend Developer",
       "company": "Acme Corp",
       "desc": "Looking for a skilled frontend developer to join our team.",
@@ -42,11 +39,10 @@
   },
   {
     "model": "content.job",
-    "pk": "2",
+    "pk": "c96cff12-6f7d-4f65-880d-6c426dab47bb",
     "fields": {
       "created_at": "2025-10-27T10:00:00Z",
-      "updated_at": "2025-10-27T10:00:00Z",
-      "category": 2,
+      "category": "a52c96ab-adbd-4780-a9ff-79a2b0937d08",
       "title": "Backend Engineer",
       "company": "Beta Inc",
       "desc": "Seeking a backend engineer with experience in Python and Django.",
@@ -61,11 +57,10 @@
   },
    {
     "model": "content.event",
-    "pk": "1",
+    "pk": "b9757225-37f7-44fa-97ab-b859de08d16d",
     "fields": {
       "created_at": "2025-10-27T10:00:00Z",
-      "updated_at": "2025-10-27T10:00:00Z",
-      "category": 1,
+      "category": "a52c96ab-adbd-4780-a9ff-79a2b0937d08",
       "title": "Tech Conference 2026",
       "desc": "The premier technology conference of the year.",
       "start_date": "2026-03-15T09:00:00Z",
@@ -77,11 +72,10 @@
   },
   {
     "model": "content.event",
-    "pk": "2",
+    "pk": "e05bb72c-ed70-498f-b168-0e8965468c52",
     "fields": {
       "created_at": "2025-10-27T10:00:00Z",
-      "updated_at": "2025-10-27T10:00:00Z",
-      "category": 2,
+      "category": "998cdd96-af69-4cee-b5b4-003ce7ab8680",
       "title": "Web Dev Summit 2026",
       "desc": "A conference for web developers of all skill levels.",
       "start_date": "2026-05-20T09:00:00Z",
@@ -93,11 +87,10 @@
   },
   {
     "model": "content.resource",
-    "pk": "1",
+    "pk": "928c39d7-28a6-4d3a-b5c2-a2a1f9766ff2",
     "fields": {
       "created_at": "2025-10-27T10:00:00Z",
-      "updated_at": "2025-10-27T10:00:00Z",
-      "category": 1,
+      "category": "998cdd96-af69-4cee-b5b4-003ce7ab8680",
       "name": "Awesome Python Guide",
       "image": null,
       "body": "A comprehensive guide to Python programming.",
@@ -106,11 +99,10 @@
   },
   {
     "model": "content.resource",
-    "pk": "2",
+    "pk": "8b9cf2e7-a0e7-472b-9697-c36c58c860e4",
     "fields": {
       "created_at": "2025-10-27T10:00:00Z",
-      "updated_at": "2025-10-27T10:00:00Z",
-      "category": 2,
+      "category": "a52c96ab-adbd-4780-a9ff-79a2b0937d08",
       "name": "React Best Practices",
       "image": null,
       "body": "Best practices for building React applications.",
@@ -119,50 +111,46 @@
   },
   {
     "model": "content.tooltag",
-    "pk": "1",
+    "pk": "6e89f09f-5ae5-44c3-b218-670b85b4711e",
     "fields": {
       "created_at": "2025-10-27T10:00:00Z",
-      "updated_at": "2025-10-27T10:00:00Z",
       "name": "IDE"
     }
   },
   {
     "model": "content.tooltag",
-    "pk": "2",
+    "pk": "10057c3b-4dbf-48ec-86c3-93de32ae0464",
     "fields": {
       "created_at": "2025-10-27T10:00:00Z",
-      "updated_at": "2025-10-27T10:00:00Z",
       "name": "Framework"
     }
   },
   {
     "model": "content.tool",
-    "pk": "1",
+    "pk": "f50cf91d-2dbf-4415-9bc8-e7aed6443fd4",
     "fields": {
       "created_at": "2025-10-27T10:00:00Z",
-      "updated_at": "2025-10-27T10:00:00Z",
-      "category": 2,
+      "category": "a52c96ab-adbd-4780-a9ff-79a2b0937d08",
       "name": "VS Code",
       "desc": "A popular code editor.",
       "url": "https://example.com/tools/1",
       "image_url": "https://example.com/images/vscode.png",
       "call_to_action": "Download",
-      "tags": [1]
+      "tags": ["6e89f09f-5ae5-44c3-b218-670b85b4711e"]
     }
   },
   {
     "model": "content.tool",
-    "pk": "2",
+    "pk": "62e12862-f261-42c9-b8bb-4535b8211c79",
     "fields": {
       "created_at": "2025-10-27T10:00:00Z",
-      "updated_at": "2025-10-27T10:00:00Z",
-      "category": 2,
+      "category": "a52c96ab-adbd-4780-a9ff-79a2b0937d08",
       "name": "Django",
       "desc": "A powerful Python web framework.",
       "url": "https://example.com/tools/2",
       "image_url": "https://example.com/images/django.png",
       "call_to_action": "Learn More",
-      "tags": [2]
+      "tags": ["10057c3b-4dbf-48ec-86c3-93de32ae0464"]
     }
   }
 ]

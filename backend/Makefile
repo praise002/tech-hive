@@ -71,3 +71,5 @@ celery:
 
 ngrok:
 	ngrok http 9000
+
+# python manage.py loaddata fixtures/content.json -v 2
