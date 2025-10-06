@@ -9,18 +9,18 @@ import TechTool from '../components/sections/TechTool';
 import TrendingArticles from '../components/sections/TrendingArticles';
 // import { useAuthApi } from '../features/auth/hooks/useAuthApi';
 // import { useEffect } from 'react';
-import { useGoogleSignup } from '../features/auth/hooks/useAuth';
+// import { useGoogleSignup } from '../features/auth/hooks/useAuth';
 
 function Home() {
   // const { login, fetchAuthRegisterUrl } = useAuthApi();
   // const email = 'ifeoluwapraise002@gmail.com';
   // const password = 'Esiveneta1964@';
-  const { fetchAuthRegisterUrl, isPending } = useGoogleSignup();
+  // const { fetchAuthRegisterUrl, isPending } = useGoogleSignup();
 
-  function handleClick(e) {
-    e.preventDefault();
-    fetchAuthRegisterUrl();
-  }
+  // function handleClick(e) {
+  //   e.preventDefault();
+  //   fetchAuthRegisterUrl();
+  // }
 
   // useEffect(() => {
   //   const testAuth = async () => {
@@ -42,9 +42,9 @@ function Home() {
   return (
     <div>
       <HeroSection />
-      <button onClick={handleClick} disabled={isPending}>
+      {/* <button onClick={handleClick} disabled={isPending}>
         {isPending ? 'Loading...' : 'Sign Up with Google'}
-      </button>
+      </button> */}
       <TrendingArticles />
       <Articles />
       <TechJobs />

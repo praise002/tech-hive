@@ -10,8 +10,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { LoginUserData } from '../../../types/auth';
 import { useAuthApi } from './useAuthApi';
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
-import { setToken } from '../../../utils/utils';
+import { clearTokens, setToken } from '../../../utils/utils';
 
 export function useEmail() {
   const queryClient = useQueryClient();
@@ -91,7 +90,9 @@ export function useLogin() {
     error,
   } = useMutation({
     mutationFn: (credentials: LoginUserData) => loginApi(credentials),
-    onSuccess: async () => {},
+    onSuccess: async (response) => {
+      setToken(response.data);
+    },
     onError: (error) => {
       console.error('Login error:', error);
     },
@@ -108,6 +109,7 @@ export function useLogout() {
   const { mutate: logout, isPending } = useMutation({
     mutationFn: logoutApi,
     onSuccess: () => {
+      clearTokens();
       // Clears all user's cached data
       queryClient.removeQueries();
     },
@@ -127,6 +129,7 @@ export function useLogoutAll() {
   const { mutate: logoutAll, isPending } = useMutation({
     mutationFn: logoutAllApi,
     onSuccess: () => {
+      clearTokens();
       // Clears all user's cached data
       queryClient.removeQueries();
     },
@@ -143,7 +146,9 @@ export function useChangePassword() {
 
   const { mutate: changePassword, isPending } = useMutation({
     mutationFn: changePasswordApi,
-    onSuccess: () => {},
+    onSuccess: (response) => {
+      setToken(response.data);
+    },
     onError: (error) => {
       console.error('Change Password error:', error);
     },
@@ -199,22 +204,30 @@ export const useGoogleSignup = () => {
 
   const { mutate: fetchAuthRegisterUrl, isPending } = useMutation({
     mutationFn: fetchAuthRegisterUrlApi,
-    onSuccess: (authorizationUrl) => {
-      window.location.href = authorizationUrl;
-    },
+    onSuccess: () => {},
     onError: (error) => {
       console.error('Error fetching auth URL:', error);
-      // TODO: MOVE TO MUTATE CALLBACK
-      toast.error('Failed to start Google signup. Please try again.');
     },
   });
 
   return { fetchAuthRegisterUrl, isPending };
 };
 
+export const useGoogleLogin = () => {
+  const { fetchAuthLoginUrl: fetchAuthLoginUrlApi } = useAuthApi();
+
+  const { mutate: fetchAuthLoginUrl, isPending } = useMutation({
+    mutationFn: fetchAuthLoginUrlApi,
+    onSuccess: () => {},
+    onError: (error) => {
+      console.error('Error fetching auth URL:', error);
+    },
+  });
+
+  return { fetchAuthLoginUrl, isPending };
+};
+
 export function useGoogleCallback() {
-  // TODO: MOVE NAVIGATE OPERATION TO MUTATE FN LATER
-  const navigate = useNavigate();
   const { handleGoogleCallback: handleGoogleCallbackApi } = useAuthApi();
 
   const { mutate: processCallback, isPending } = useMutation({
@@ -222,13 +235,9 @@ export function useGoogleCallback() {
       handleGoogleCallbackApi(access, refresh),
     onSuccess: (data) => {
       setToken(data);
-      toast.success('Successfully signed in with Google!');
-      navigate('/', { replace: true });
     },
     onError: (error) => {
       console.error('Google callback error:', error);
-      toast.error('Authentication failed. Please try again.');
-      navigate('/login', { replace: true });
     },
   });
 

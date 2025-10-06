@@ -7,7 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import Form from '../../../components/common/Form';
 import Button from '../../../components/common/Button';
-import { useRegister } from '../hooks/useAuth';
+import { useGoogleSignup, useRegister } from '../hooks/useAuth';
 import toast from 'react-hot-toast';
 import { RegisterOptions, UseFormSetError } from 'react-hook-form';
 
@@ -21,7 +21,20 @@ interface RegisterFormData {
 function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const { register, isPending } = useRegister();
+  const { fetchAuthRegisterUrl, isPending: isGooglePending } =
+    useGoogleSignup();
   const navigate = useNavigate();
+
+  function handleGoogleRegister() {
+    fetchAuthRegisterUrl(undefined, {
+      onSuccess: (authorizationUrl) => {
+        window.location.href = authorizationUrl;
+      },
+      onError: () => {
+        toast.error('Failed to start Google signup. Please try again.');
+      },
+    });
+  }
 
   function togglePasswordVisibility() {
     setShowPassword(!showPassword);
@@ -108,7 +121,8 @@ function RegisterForm() {
           };
 
           Object.entries(error.data).forEach(([field, message]) => {
-            const formField = fieldMapping[field] || field as keyof RegisterFormData;
+            const formField =
+              fieldMapping[field] || (field as keyof RegisterFormData);
             setError(formField, {
               type: 'server',
               message: Array.isArray(message) ? message[0] : String(message),
@@ -166,6 +180,8 @@ function RegisterForm() {
           <Button
             className="w-full flex items-center justify-center gap-2"
             variant="outline"
+            onClick={handleGoogleRegister}
+            disabled={isGooglePending}
           >
             <FcGoogle className="text-xl" />
             <span>Register with Google</span>
@@ -176,6 +192,8 @@ function RegisterForm() {
           <Button
             className="w-full flex items-center justify-center gap-2"
             variant="outline"
+            onClick={handleGoogleRegister}
+            disabled={isGooglePending}
           >
             <FaApple className="text-xl text-black" />
             <span>Register with Apple</span>

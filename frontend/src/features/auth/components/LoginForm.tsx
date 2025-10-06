@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import Form from '../../../components/common/Form';
 import Button from '../../../components/common/Button';
-import { useLogin } from '../hooks/useAuth';
+import { useGoogleLogin, useLogin } from '../hooks/useAuth';
 import { UseFormSetError } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -18,7 +18,19 @@ interface LoginFormData {
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const { login, isPending } = useLogin();
+  const { fetchAuthLoginUrl, isPending: isGooglePending } = useGoogleLogin();
   const navigate = useNavigate();
+
+  function handleGoogleLogin() {
+    fetchAuthLoginUrl(undefined, {
+      onSuccess: (authorizationUrl) => {
+        window.location.href = authorizationUrl;
+      },
+      onError: () => {
+        toast.error('Failed to start Google login. Please try again.');
+      },
+    });
+  }
 
   function togglePasswordVisibility() {
     setShowPassword(!showPassword);
@@ -173,9 +185,11 @@ function LoginForm() {
           <Button
             className="w-full flex items-center justify-center gap-2"
             variant="outline"
+            onClick={handleGoogleLogin}
+            disabled={isGooglePending}
           >
             <FcGoogle className="text-xl" />
-            <span>Register with Google</span>
+            <span>Login with Google</span>
           </Button>
         </div>
 
@@ -183,9 +197,11 @@ function LoginForm() {
           <Button
             className="w-full flex items-center justify-center gap-2"
             variant="outline"
+            onClick={handleGoogleLogin}
+            disabled={isGooglePending}
           >
             <FaApple className="text-xl text-black" />
-            <span>Register with Apple</span>
+            <span>Login with Apple</span>
           </Button>
         </div>
 

@@ -8,12 +8,7 @@ import {
   VerifyOtpData,
 } from '../../../types/auth';
 import { routes } from '../../../utils/constants';
-import {
-  clearTokens,
-  getToken,
-  safeLocalStorage,
-  setToken,
-} from '../../../utils/utils';
+import { getToken, safeLocalStorage } from '../../../utils/utils';
 
 const storage = safeLocalStorage();
 
@@ -56,7 +51,7 @@ export const useAuthApi = () => {
       routes.auth.login,
       credentials
     );
-    setToken(response.data);
+
     return response;
   };
 
@@ -69,13 +64,13 @@ export const useAuthApi = () => {
         refresh,
       }
     );
-    clearTokens();
+
     return response;
   };
 
   const logoutAll = async () => {
     const response = await sendRequest(ApiMethod.POST, routes.auth.logoutAll);
-    clearTokens();
+
     return response;
   };
 
@@ -85,8 +80,6 @@ export const useAuthApi = () => {
       routes.auth.changePassword,
       passwordData
     );
-
-    setToken(response.data);
 
     return response;
   };
