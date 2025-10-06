@@ -6,6 +6,7 @@ from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from drf_spectacular.utils import extend_schema
+
 # from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -37,7 +38,7 @@ class GoogleOAuth2LoginCallbackView(APIView):
         access = str(refresh.access_token)
         refresh = str(refresh)
 
-        frontend_callback_url = settings.FRONTEND_CALLBACK_URL
+        frontend_callback_url = settings.FRONTEND_LOGIN_CALLBACK_URL
         redirect_url = (
             f"{frontend_callback_url}" f"?access={access}" f"&refresh={refresh}"
         )

@@ -290,3 +290,6 @@ API documentation will be available at:
 - [The Flesch reading score](https://yoast.com/flesch-reading-ease-score/)
 - [Word complexity assessment](https://yoast.com/word-complexity-assessment/)
 - [Average Reading Speed](https://scholarwithin.com/average-reading-speed#)
+- [Okta Oauth OpenID](https://developer.okta.com/docs/concepts/oauth-openid/)
+- [OpenID Connect vs OAuth2](https://supertokens.com/blog/openid-connect-vs-oauth2)
+- [Authorization code flow with PKCE](https://supertokens.com/blog/authorization-code-flow-with-pkce)
