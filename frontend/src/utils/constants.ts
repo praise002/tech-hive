@@ -26,5 +26,17 @@ export const routes = {
     me: `${PROFILE_URL}/me/`,
     avatar: `${PROFILE_URL}/avatar/`,
     byUsername: (username: string) => `${PROFILE_URL}/${username}/`,
+    articles: `${PROFILE_URL}/articles/`,
+    byArticle: (slug: string) => `${PROFILE_URL}/me/${slug}/`,
+    saved: `${PROFILE_URL}/me/saved/`,
+    comments: `${PROFILE_URL}/me/comments/`,
   },
+
+  content: {
+    categories: 'categories/',
+    events: 'events/',
+    jobs: 'jobs/',
+    resources: 'resources/',
+    tools: 'tools/',
+  }
 };

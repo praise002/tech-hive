@@ -1,4 +1,9 @@
-import { ApiMethod, UpdateUserData } from '../../../types/auth';
+import {
+  ApiMethod,
+  SaveArticleData,
+  UpdateArticleData,
+  UpdateUserData,
+} from '../../../types/auth';
 import { routes } from '../../../utils/constants';
 import { useApi } from '../../auth/hooks/useApi';
 
@@ -65,11 +70,97 @@ export const useProfileApi = () => {
     return response.data;
   };
 
+  const getUserArticles = async (
+    userIsNotAuthenticatedCallback: () => void
+  ) => {
+    const response = await sendAuthGuardedRequest(
+      userIsNotAuthenticatedCallback,
+      ApiMethod.GET,
+      routes.profile.articles
+    );
+
+    return response.data;
+  };
+
+  const getUserArticleBySlug = async (
+    userIsNotAuthenticatedCallback: () => void,
+    slug: string
+  ) => {
+    const articleSlug = routes.profile.byArticle(slug);
+    const response = await sendAuthGuardedRequest(
+      userIsNotAuthenticatedCallback,
+      ApiMethod.GET,
+      articleSlug
+    );
+
+    return response.data;
+  };
+
+  const updateUserArticleBySlug = async (
+    userIsNotAuthenticatedCallback: () => void,
+    slug: string,
+    updateData: UpdateArticleData
+  ) => {
+    const articleSlug = routes.profile.byArticle(slug);
+    const response = await sendAuthGuardedRequest(
+      userIsNotAuthenticatedCallback,
+      ApiMethod.PATCH,
+      articleSlug,
+      updateData
+    );
+
+    return response.data;
+  };
+
+  const getUserSavedArticles = async (
+    userIsNotAuthenticatedCallback: () => void
+  ) => {
+    const response = await sendAuthGuardedRequest(
+      userIsNotAuthenticatedCallback,
+      ApiMethod.GET,
+      routes.profile.saved
+    );
+
+    return response.data;
+  };
+
+  const updateSavedArticle = async (
+    userIsNotAuthenticatedCallback: () => void,
+    updateData: SaveArticleData
+  ) => {
+    const response = await sendAuthGuardedRequest(
+      userIsNotAuthenticatedCallback,
+      ApiMethod.POST,
+      routes.profile.saved,
+      updateData
+    );
+
+    return response.data;
+  };
+
+  const getUserComments = async (
+    userIsNotAuthenticatedCallback: () => void
+  ) => {
+    const response = await sendAuthGuardedRequest(
+      userIsNotAuthenticatedCallback,
+      ApiMethod.GET,
+      routes.profile.comments
+    );
+
+    return response.data;
+  };
+
   return {
     getCurrentUser,
     getCurrentUserProfile,
     getUserProfileByUsername,
+    getUserArticleBySlug,
+    getUserSavedArticles,
+    getUserComments,
+    getUserArticles,
     updateCurrentUserProfile,
     updateCurrentUserAvatar,
+    updateUserArticleBySlug,
+    updateSavedArticle,
   };
 };

@@ -47,3 +47,12 @@ export enum ApiMethod {
   PATCH = "PATCH",
   DELETE = "DELETE",
 }
+
+export interface UpdateArticleData {
+  title: string;
+  content: string;
+}
+
+export interface SaveArticleData {
+  articleId: string;
+}

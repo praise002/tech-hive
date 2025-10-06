@@ -208,7 +208,7 @@ export const useGoogleSignup = () => {
     onError: (error) => {
       console.error('Error fetching auth URL:', error);
     },
-  });
+  }); 
 
   return { fetchAuthRegisterUrl, isPending };
 };
