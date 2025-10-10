@@ -33,7 +33,6 @@ from apps.accounts.utils import (
 )
 from apps.common.errors import ErrorCode
 from apps.common.responses import CustomResponse
-from django.conf import settings
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import status

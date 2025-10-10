@@ -46,7 +46,7 @@ PROFILE_EXAMPLE = {
     "last_name": "Joe",
     "username": "bob-joe",
     "email": EMAIL_EXAMPLE,
-    "updated_at": DATETIME_EXAMPLE,
+    "created_at": DATETIME_EXAMPLE,
     "avatar_url": AVATAR_URL,
 }
 
