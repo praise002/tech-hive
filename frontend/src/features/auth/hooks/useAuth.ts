@@ -1,15 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-// import {
-//   register as registerApi,
-//   verifyRegistrationOtp as verifyRegisterOtpApi,
-//   resendRegistrationOtp as resendRegistrationOtpApi,
-//   login as loginApi,
-// } from '../services/apiAuth';
-// import { useLocation, useNavigate } from 'react-router-dom';
 import { LoginUserData } from '../../../types/auth';
 import { useAuthApi } from './useAuthApi';
-import toast from 'react-hot-toast';
+
 import { clearTokens, setToken } from '../../../utils/utils';
 
 export function useEmail() {
@@ -208,7 +201,7 @@ export const useGoogleSignup = () => {
     onError: (error) => {
       console.error('Error fetching auth URL:', error);
     },
-  }); 
+  });
 
   return { fetchAuthRegisterUrl, isPending };
 };

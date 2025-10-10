@@ -22,6 +22,8 @@ import AccountContent from '../componenets/AccountContent';
 import PublishedContent from '../componenets/PublishedContent';
 import { BiMessageRounded } from 'react-icons/bi';
 import CommentsContent from '../componenets/CommentsContent';
+import { useCurrentUser } from '../hooks/useProfile';
+import Spinner from '../../../components/common/Spinner';
 
 const defaultProfilePicture = '/assets/icons/Avatars.png';
 
@@ -73,9 +75,17 @@ function AccountDetail() {
 
   const [tempImage, setTempImage] = useState<string | null>(null);
 
+  const { isPending, user, isAuthenticated, error } = useCurrentUser();
+
+  const {
+    first_name: firstName,
+    last_name: lastName,
+    avatar_url: avatarUrl,
+  } = user;
+
   const [profile, setProfile] = useState({
-    name: 'Elizabeth Stone',
-    profilePicture: defaultProfilePicture,
+    name: `${firstName} ${lastName}`,
+    profilePicture: avatarUrl || defaultProfilePicture,
   });
 
   const [crop, setCrop] = useState<Crop>({
@@ -225,6 +235,13 @@ function AccountDetail() {
       document.removeEventListener('keydown', handleCloseModal);
     };
   }, [showCropModal]);
+
+  if (isPending)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Spinner />
+      </div>
+    );
 
   function handleProfilePicChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
