@@ -1,5 +1,14 @@
 import toast from 'react-hot-toast';
 
+export function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
 export function safeLocalStorage() {
   try {
     // Test if localStorage is available and working

@@ -22,8 +22,13 @@ import AccountContent from '../componenets/AccountContent';
 import PublishedContent from '../componenets/PublishedContent';
 import { BiMessageRounded } from 'react-icons/bi';
 import CommentsContent from '../componenets/CommentsContent';
-import { useCurrentUser } from '../hooks/useProfile';
+import {
+  useCurrentUser,
+  useUpdateUserAvatar,
+  useUpdateUserProfile,
+} from '../hooks/useProfile';
 import Spinner from '../../../components/common/Spinner';
+import { formatDate } from '../../../utils/utils';
 
 const defaultProfilePicture = '/assets/icons/Avatars.png';
 
@@ -75,18 +80,31 @@ function AccountDetail() {
 
   const [tempImage, setTempImage] = useState<string | null>(null);
 
-  const { isPending, user, isAuthenticated, error } = useCurrentUser();
+  const { isPending: isUserLoading, user, error } = useCurrentUser();
+  const { updateCurrentUserProfile, isPending: isUpdating } =
+    useUpdateUserProfile();
+
+  // const {
+  //   updateCurrentUserAvatar,
+  //   isPending: isAvatarUpdating,
+  //   isError: isAvatarError,
+  //   error: avatarError,
+  // } = useUpdateUserAvatar();
 
   const {
     first_name: firstName,
     last_name: lastName,
+    created_at: createdAt,
     avatar_url: avatarUrl,
   } = user;
 
   const [profile, setProfile] = useState({
-    name: `${firstName} ${lastName}`,
+    firstName,
+    lastName,
     profilePicture: avatarUrl || defaultProfilePicture,
   });
+
+  const displayName = `${profile.firstName} ${profile.lastName}`.trim();
 
   const [crop, setCrop] = useState<Crop>({
     x: 0,
@@ -154,6 +172,7 @@ function AccountDetail() {
       // Step 3: Convert canvas to blob and update profile
       canvas.toBlob((blob) => {
         if (!blob) return;
+
         const croppedImageUrl = URL.createObjectURL(blob);
         setProfile((prev) => ({
           ...prev,
@@ -236,12 +255,20 @@ function AccountDetail() {
     };
   }, [showCropModal]);
 
-  if (isPending)
+  if (isUserLoading)
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Spinner />
       </div>
     );
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Text>Failed to load profile</Text>
+      </div>
+    );
+  }
 
   function handleProfilePicChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -409,14 +436,26 @@ function AccountDetail() {
 
           <div className="flex flex-col justify-center items-center">
             {isEditingName ? (
-              <input
-                type="text"
-                className="appearance-none dark:text-custom-white mt-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
-                value={profile.name}
-                onChange={(e) =>
-                  setProfile({ ...profile, name: e.target.value })
-                }
-              />
+              <div className="flex flex-col gap-2">
+                <input
+                  type="text"
+                  placeholder="First Name"
+                  className="appearance-none dark:text-custom-white mt-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
+                  value={profile.firstName}
+                  onChange={(e) =>
+                    setProfile({ ...profile, firstName: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Last Name"
+                  className="appearance-none dark:text-custom-white mt-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
+                  value={profile.lastName}
+                  onChange={(e) =>
+                    setProfile({ ...profile, lastName: e.target.value })
+                  }
+                />
+              </div>
             ) : (
               <Text
                 variant="h3"
@@ -424,11 +463,11 @@ function AccountDetail() {
                 bold={false}
                 className="font-semibold text-gray-900 dark:text-custom-white"
               >
-                {profile.name}
+                {displayName}
               </Text>
             )}
             <p className="text-secondary text-sm my-1">
-              Joined 27th January 2025
+              Joined {formatDate(createdAt)}
             </p>
             {!isEditingName && (
               <Button variant="outline" onClick={() => setIsEditingName(true)}>
@@ -439,12 +478,28 @@ function AccountDetail() {
               <div className="flex space-x-2 mt-2">
                 <Button
                   variant="gradient"
+                  disabled={isUpdating}
                   onClick={() => {
-                    toast.success('Profile updated successfully!');
-                    setIsEditingName(false);
+                    updateCurrentUserProfile(
+                      {
+                        first_name: profile.firstName,
+                        last_name: profile.lastName,
+                      },
+                      {
+                        onSuccess: () => {
+                          toast.success('Profile updated successfully!');
+                          setIsEditingName(false);
+                        },
+                        onError: () => {
+                          toast.error(
+                            'Profile update failed. Please try again.'
+                          );
+                        },
+                      }
+                    );
                   }}
                 >
-                  Save
+                  {isUpdating ? 'Saving' : 'Save'}
                 </Button>
                 <Button
                   variant="outline"
@@ -504,7 +559,10 @@ function AccountDetail() {
       <div className="flex flex-col px-10 md:px-20 md:mt-10 mt-15">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <nav
-            className="flex flex-col gap-4 mt-30 md:mt-50"
+            // className="flex flex-col gap-4 mt-30 md:mt-50"
+            className={`flex flex-col gap-4 ${
+              isEditingName ? 'mt-40 md:mt-60' : 'mt-30 md:mt-50'
+            }`}
             aria-label="Profile tabs"
           >
             <div className="flex place-self-center bg-light gap-2 p-2 rounded-md">
