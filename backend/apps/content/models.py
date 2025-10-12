@@ -85,7 +85,7 @@ class Article(BaseModel):
             raise ValidationError("Maximum 5 tags allowed per article")
 
     def calculate_read_time(self):
-        ReadabilityMetrics.method_hybrid(self.content)
+        return ReadabilityMetrics.method_hybrid(self.content)
 
     @property
     def cover_image_url(self):
