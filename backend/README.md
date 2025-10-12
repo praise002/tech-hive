@@ -293,3 +293,4 @@ API documentation will be available at:
 - [Okta Oauth OpenID](https://developer.okta.com/docs/concepts/oauth-openid/)
 - [OpenID Connect vs OAuth2](https://supertokens.com/blog/openid-connect-vs-oauth2)
 - [Authorization code flow with PKCE](https://supertokens.com/blog/authorization-code-flow-with-pkce)
+- [OIDC vs OAuth2](https://frontegg.com/guides/oidc-vs-oauth2)

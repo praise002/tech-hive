@@ -1,5 +1,6 @@
 import math
-import string
+import re
+from typing import Dict
 
 from django.db import models
 
@@ -16,60 +17,130 @@ class ArticleStatusChoices(models.TextChoices):
     # ARCHIVED = "archived", "Archived"
 
 
-# Constants for assumptions in our read length algorithm
-AVERAGE_WORDS_PER_MINUTE = 238
-SYLLABLE_LETTER_COUNT = 3
-BASE_SENTENCE_WORD_COUNT = 21
-BASE_SYLLABLE_COUNT = 1.5
+class ReadabilityMetrics:
 
+    @staticmethod
+    def count_syllables(word: str) -> int:
+        syllable_count = 0
+        vowels = "aeiouy"
+        if word[0] in vowels:
+            syllable_count += 1
+        for i in range(1, len(word)):
+            if word[i] in vowels and word[i - 1] not in vowels:
+                syllable_count += 1
 
-class ReadLength:
-    def calculate_difficulty_multiplier(average_syllable, average_sentence_length):
-        difficulty_multiplier = 1
-        syllable_length_multiplier = ReadLength.calculate_syllable_multiplier(
-            average_syllable
-        )
-        sentence_length_multiplier = ReadLength.calculate_sentence_length_multiplier(
-            average_sentence_length
-        )
+        if word.endswith("e"):
+            syllable_count -= 1
+        if word.endswith("le") and len(word) > 2 and word[-3] not in vowels:
+            syllable_count += 1
+        if syllable_count == 0:
+            syllable_count += 1
+        return syllable_count
 
-        return difficulty_multiplier + (
-            syllable_length_multiplier + sentence_length_multiplier
-        )
+    @staticmethod
+    def analyze_text(text: str) -> Dict[str, float]:
+        """Extract basic text metrics."""
+        # Clean text
+        text_clean = re.sub(r"```[\s\S]*?```", "", text)
+        text_clean = re.sub(r"!\[.*?\]\(.*?\)", "", text_clean)
 
-    def calculate_syllable_multiplier(average_syllable):
-        if average_syllable > BASE_SYLLABLE_COUNT:
-            return ((average_syllable - BASE_SYLLABLE_COUNT) % 0.3) * 0.05
-        return 0
+        # Count sentences
+        sentence_pattern = r"[.!?]+(?:\s+|$)"
+        sentences = [
+            s.strip() for s in re.split(sentence_pattern, text_clean) if s.strip()
+        ]
+        sentence_count = max(1, len(sentences))
 
-    def calculate_sentence_length_multiplier(average_sentence_length):
-        if average_sentence_length > BASE_SENTENCE_WORD_COUNT:
-            return ((average_sentence_length - BASE_SENTENCE_WORD_COUNT) % 0.5) * 0.05
-        return 0
+        # Count words
+        words = text_clean.split()
+        word_count = len(words)
 
-    def calculate_read_time(text: str) -> int:
-        text_without_division_punctuation = (
-            text.replace(".", "|").replace("!", "|").replace("?", "|")
-        )
-        word_count = len(text_without_division_punctuation.split(" "))
+        if word_count == 0:
+            return {"words": 0, "sentences": 0, "syllables": 0}
 
-        text_sentences = text_without_division_punctuation.split("|")
-        sentence_count = len(text_sentences)
-        average_sentence_length = word_count / sentence_count
+        # Count syllables
+        text_no_punct = re.sub(r"[^\w\s]", "", text_clean)
+        clean_words = text_no_punct.split()
+        syllable_count = sum(ReadabilityMetrics.count_syllables(w) for w in clean_words)
 
-        text_without_punctuation = text.translate(
-            str.maketrans("", "", string.punctuation)
-        )
-        text_words = text_without_punctuation.split()
-        syllable_count = sum(len(word) % 3 for word in text_words)
+        return {
+            "words": word_count,
+            "sentences": sentence_count,
+            "syllables": syllable_count,
+            "avg_syllables_per_word": syllable_count / word_count,
+            "avg_words_per_sentence": word_count / sentence_count,
+        }
 
-        average_syllable_count = word_count / syllable_count
+    @staticmethod
+    def method_hybrid(text: str, base_wpm: int = 265) -> Dict[str, any]:
+        """
+        FLESCH READING EASE METHOD
+        Formula: 206.835 - 1.015(words/sentences) - 84.6(syllables/words)
+        Score:
+        - 90-100(very easy)
+        - 80-89(easy)
+        - 70-79(fairly easy)
+        - 60-69(standard)
+        - 50-59(fairly difficult)
+        - 30-49(difficult)
+        - 0-29(very confusing)
 
-        difficulty_multiplier = ReadLength.calculate_difficulty_multiplier(
-            average_syllable_count, average_sentence_length
-        )
-        reading_speed = math.ceil(
-            word_count / (AVERAGE_WORDS_PER_MINUTE / difficulty_multiplier)
-        )
+        - 70-100(fairly easy - very easy)
+        - 60-69(standard)
+        - 30-59(difficult - fairly difficult)
+        - 0-29(very confusing)
+        """
 
-        return reading_speed
+        metrics = ReadabilityMetrics.analyze_text(text)
+
+        if metrics["words"] == 0:
+            return {"method": "Hybrid", "minutes": 0, "seconds": 0}
+
+        # 1. Calculate Flesch Reading Ease
+        asl = metrics["avg_words_per_sentence"]
+        asw = metrics["avg_syllables_per_word"]
+        flesch_score = 206.835 - (1.015 * asl) - (84.6 * asw)
+        flesch_score = max(0, min(100, flesch_score))
+
+        # 2. Base speed adjustment from Flesch
+        if flesch_score >= 70:
+            base_multiplier = 1.1
+        elif flesch_score >= 60:
+            base_multiplier = 1.0
+        elif flesch_score >= 30:
+            base_multiplier = 0.85
+        else:
+            base_multiplier = 0.7
+
+        # 3. Fine-tune with custom thresholds
+        fine_tune = 1.0
+
+        # Very long sentences slow reading
+        if asl > 30:
+            fine_tune *= 0.95
+        elif asl > 25:
+            fine_tune *= 0.9
+
+        # Very complex words slow reading
+        if asw > 2.5:
+            fine_tune *= 0.95
+        elif asw > 2.0:
+            fine_tune *= 0.9
+
+        # 4. Content type adjustments
+        image_count = len(re.findall(r"!\[.*?\]\(.*?\)", text))
+        code_block_count = len(re.findall(r"```[\s\S]*?```", text))
+
+        image_time = 0
+        for i in range(image_count):
+            time_for_image = max(3, 12 - i)  # Start at 12, decrease by 1, minimum 3
+            image_time += time_for_image
+
+        code_time = code_block_count * 20  # 20 seconds per code block
+
+        # 5. Calculate final reading time
+        adjusted_wpm = base_wpm * base_multiplier * fine_tune
+        text_time = (metrics["words"] / adjusted_wpm) * 60
+        total_seconds = text_time + image_time + code_time
+
+        return math.ceil(total_seconds)

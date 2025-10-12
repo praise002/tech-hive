@@ -73,3 +73,5 @@ ngrok:
 	ngrok http 9000
 
 # python manage.py loaddata fixtures/content.json -v 2
+# ngrok http https://127.0.0.1:8000
+# base64 .env > .env.base64

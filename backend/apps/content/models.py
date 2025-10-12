@@ -1,6 +1,6 @@
 from apps.common.models import BaseModel
 from apps.content.manager import PublishedManager, SavedPublishedArticlesManager
-from apps.content.utils import ArticleStatusChoices
+from apps.content.utils import ArticleStatusChoices, ReadabilityMetrics
 from autoslug import AutoSlugField
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -84,15 +84,8 @@ class Article(BaseModel):
         if self.tags.count() > 5:
             raise ValidationError("Maximum 5 tags allowed per article")
 
-    # TODO:
-    def calculate_read_time(content):
-        """
-        Calculate read time with consideration for:
-        - Code blocks (read slower)
-        - Images (add time)
-        - Lists (read faster)
-        """
-        pass
+    def calculate_read_time(self):
+        ReadabilityMetrics.method_hybrid(self.content)
 
     @property
     def cover_image_url(self):
