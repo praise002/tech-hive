@@ -1,5 +1,5 @@
 // export const API_URL = 'https://127.0.0.1:8000/api/v1';
-export const API_URL = 'https://c5f245e3fa9f.ngrok-free.app/api/v1';
+export const API_URL = 'https://tech-hive-production.up.railway.app/api/v1';
 export const AUTH_URL = '/auth';
 export const PROFILE_URL = '/profiles';
 
