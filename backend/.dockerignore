@@ -9,6 +9,7 @@ __pycache__
 **/.env
 **/.aws
 **/.ssh
+Dockerfile
 Dockerfile.dev
 README.md
 Note.md

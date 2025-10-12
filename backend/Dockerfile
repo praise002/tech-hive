@@ -22,7 +22,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy the requirements file to the app dir app/requirements.txt
-COPY requirements.txt . 
+COPY backend/requirements.txt . 
 
 # Build wheels in a temp dir
 RUN pip install --upgrade pip  && \
@@ -52,7 +52,7 @@ RUN pip install --no-cache-dir /wheels/* && \
     rm -rf /wheels
 
 # Copy source code
-COPY . . 
+COPY backend/ . 
 
 # Make scripts executable
 RUN chmod +x ./deployment/docker-run && \
