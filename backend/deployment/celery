@@ -4,7 +4,7 @@
 celery -A tech_hive worker --loglevel=info --pool=solo &
 
 # Start Celery Beat (scheduler)
-celery -A tech_hive beat --loglevel=info &
+# celery -A tech_hive beat --loglevel=info &
 
 # Keep the script running
 wait

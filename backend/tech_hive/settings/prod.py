@@ -33,7 +33,8 @@ if DATABASE_URL:
             conn_health_checks=True,
         )
 
-CELERY_BROKER_URL = "redis://redis:6379/1"
+# CELERY_BROKER_URL = "redis://redis:6379/1"
+CELERY_BROKER_URL = config("REDIS_URL")
 
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
