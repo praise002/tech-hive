@@ -336,7 +336,7 @@ customColorPalette = [
     {"color": "hsl(207, 90%, 54%)", "label": "Blue"},
 ]
 
-CKEDITOR_5_CUSTOM_CSS = 'css/ckeditor5/admin_dark_mode_fix.css'
+CKEDITOR_5_CUSTOM_CSS = "css/ckeditor5/admin_dark_mode_fix.css"
 
 CKEDITOR_5_CONFIGS = {
     "default": {
@@ -413,7 +413,6 @@ CKEDITOR_5_CONFIGS = {
                 "imageStyle:side",
                 "|",
             ],
-            
             "styles": [
                 "full",
                 "side",
@@ -476,6 +475,7 @@ CKEDITOR_5_CONFIGS = {
     },
 }
 
+CKEDITOR_5_FILE_STORAGE = "tech_hive.storage.CustomCloudinaryStorage"
 
 # Define a constant in settings.py to specify file upload permissions
 CKEDITOR_5_FILE_UPLOAD_PERMISSION = "staff"
