@@ -1,6 +1,10 @@
+from apps.common.responses import CustomResponse
+from apps.common.serializers import SuccessResponseSerializer
+from apps.content.sitemaps import ArticleSitemap
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.sitemaps.views import sitemap
 from django.http import JsonResponse
 from django.urls import include, path
 from drf_spectacular.utils import extend_schema
@@ -11,10 +15,6 @@ from drf_spectacular.views import (
 )
 from rest_framework import status
 from rest_framework.views import APIView
-from django.contrib.sitemaps.views import sitemap
-from apps.common.responses import CustomResponse
-from apps.common.serializers import SuccessResponseSerializer
-from apps.content.sitemaps import ArticleSitemap
 
 
 class HealthCheckView(APIView):
@@ -60,8 +60,8 @@ handler404 = handler404
 handler500 = handler500
 
 sitemaps = {
-    'articles': ArticleSitemap,
- }
+    "articles": ArticleSitemap,
+}
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -70,8 +70,12 @@ urlpatterns = [
     path("api/v1/auth/", include("apps.accounts.urls")),
     path("api/v1/profiles/", include("apps.profiles.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path('sitemap.xml', sitemap, {'sitemaps': sitemaps},
-         name='django.contrib.sitemaps.views.sitemap'),
+    path(
+        "sitemap.xml",
+        sitemap,
+        {"sitemaps": sitemaps},
+        name="django.contrib.sitemaps.views.sitemap",
+    ),
     path(
         "",
         SpectacularSwaggerView.as_view(url_name="schema"),
@@ -88,3 +92,6 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns.append(path("__debug__/", include("debug_toolbar.urls")))
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += [
+        path("ckeditor5/", include("django_ckeditor_5.urls")),
+    ]

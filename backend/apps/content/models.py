@@ -1,5 +1,10 @@
 from apps.common.models import BaseModel
-from apps.content.manager import PublishedManager, SavedPublishedArticlesManager
+from apps.common.validators import validate_file_size
+from apps.content.manager import (
+    ActiveManager,
+    PublishedManager,
+    SavedPublishedArticlesManager,
+)
 from apps.content.utils import ArticleStatusChoices, ReadabilityMetrics
 from autoslug import AutoSlugField
 from django.conf import settings
@@ -8,6 +13,7 @@ from django.core.validators import URLValidator
 from django.db import models
 from django.db.models import Count
 from django.utils import timezone
+from django_ckeditor_5.fields import CKEditor5Field
 
 
 class Tag(BaseModel):
@@ -54,10 +60,8 @@ class Article(BaseModel):
 
     title = models.CharField(max_length=250)
     slug = AutoSlugField(populate_from="title", unique=True, always_update=True)
-    content = (
-        models.TextField()
-    )  # TODO: WOULD USE A TEXTEDITOR WHICH WILL CONTAIN IMAGES
-    cover_image = models.ImageField(upload_to="articles/", null=True, blank=True)
+    content = CKEditor5Field('Article Content', config_name='extends')
+    cover_image = models.ImageField(upload_to="articles/", null=True, blank=True, validators=[validate_file_size])
     read_time = models.PositiveIntegerField(help_text="Read time in minutes", default=0)
     tags = models.ManyToManyField(Tag, blank=True)
     status = models.CharField(
@@ -67,7 +71,7 @@ class Article(BaseModel):
     )
     is_featured = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True)
-    published_at = models.DateTimeField(default=timezone.now)
+    published_at = models.DateTimeField(null=True, blank=True)
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -83,8 +87,14 @@ class Article(BaseModel):
     def clean(self):
         if self.tags.count() > 5:
             raise ValidationError("Maximum 5 tags allowed per article")
-
-    def calculate_read_time(self):
+        
+        if self.published_at and self.status != ArticleStatusChoices.PUBLISHED:
+            raise ValidationError("Published date can only be set when article status is 'Published'")
+        
+        if self.status != ArticleStatusChoices.PUBLISHED and self.is_featured:
+            raise ValidationError("'Is featured' can only be set when article status is 'Published'")
+        
+    def read_time(self):
         return ReadabilityMetrics.method_hybrid(self.content)
 
     @property
@@ -236,6 +246,10 @@ class Job(BaseModel):
     work_mode = models.CharField(
         max_length=20, choices=WORK_MODE_CHOICES, default="ONSITE"
     )
+    is_active = models.BooleanField(default=True)
+    
+    objects = models.Manager()
+    active = ActiveManager()
 
     class Meta:
         ordering = ["-created_at"]
@@ -268,9 +282,10 @@ class Resource(BaseModel):
         Category, related_name="resources", on_delete=models.SET_NULL, null=True
     )
     name = models.CharField(max_length=250)
-    image = models.ImageField(upload_to="resources/", null=True, blank=True)
+    image = models.ImageField(upload_to="resources/", null=True, blank=True, validators=[validate_file_size])
     body = models.TextField()
     url = models.CharField(max_length=250, validators=[URLValidator()])
+    is_featured = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-created_at"]
@@ -308,6 +323,7 @@ class Tool(BaseModel):
         default="Explore",
         help_text="Dynamic button text (e.g., 'Sign Up to GitHub', 'Try Figma for Free')",
     )
+    is_featured = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-created_at"]

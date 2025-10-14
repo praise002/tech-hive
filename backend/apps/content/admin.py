@@ -63,7 +63,7 @@ class EventAdmin(admin.ModelAdmin):
 
 @admin.register(models.Resource)
 class ResourceAdmin(admin.ModelAdmin):
-    pass
+    list_filter = ('is_featured',)
 
 
 @admin.register(models.ToolTag)
@@ -73,4 +73,4 @@ class ToolTagAdmin(admin.ModelAdmin):
 
 @admin.register(models.Tool)
 class ToolAdmin(admin.ModelAdmin):
-    pass
+    list_filter = ('is_featured',)

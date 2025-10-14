@@ -32,61 +32,53 @@ A scalable Django REST framework backend providing APIs for:
 
 ### Phase 1: Foundation & Core APIs (Priority: High)
 
-- [ ] **Project Setup & Configuration**
+- ✅ **Project Setup & Configuration**
   - ✅ Initialize Django project with proper structure
   - ✅ Configure Django settings for development/production
   - ✅ Set up PostgreSQL database
-  - [ ] Configure Redis for caching
+  - ✅ Configure Redis as a message broker
   - ✅ Set up environment variables management
   - ✅ Create requirements.txt and pip dependencies
 
-- [ ] **Authentication & User Management**
+- ✅ **Authentication & User Management**
   - ✅ Custom User model implementation
   - ✅ JWT authentication setup
   - ✅ User registration and login endpoints
   - ✅ Password reset functionality
   - ✅ Email verification system
   - ✅ User profile management APIs
-  - [ ] Role-based permissions (Admin, Author, User)
+  - ✅ Role-based permissions (Admin, Author, User)
 
-- [ ] **Articles API**
-  - [ ] Article model with rich content support
-  - [ ] CRUD operations for articles
-  - [ ] Draft and published states
-  - [ ] Article categories and tags
-  - [ ] Article search and filtering
-  - [ ] Author attribution and permissions
+- ✅ **Articles API**
+  - ✅ Article model with rich content support
+  - ✅ CRUD operations for articles
+  - ✅ Draft and published states
+  - ✅ Article categories and tags
+  - ✅ Article search and filtering
 
-- [ ] **Jobs API**
-  - [ ] Job listing model and endpoints
-  - [ ] Company profiles integration
-  - [ ] Job application tracking
-  - [ ] Job categories and filters
-  - [ ] Location-based job search
-  - [ ] Job expiration and status management
+- ✅ **Jobs API**
+  - ✅ Job listing model and endpoints
+  - ✅ Job categories and filters
+  - ✅ Location-based job search
+  - ✅ Job expiration and status management
 
 ### Phase 2: Advanced Features (Priority: High)
 
-- [ ] **Resource Management API**
-  - [ ] Resource model and CRUD operations
-  - [ ] Resource categories and curation
-  - [ ] Resource rating and reviews
-  - [ ] Link validation and metadata extraction
-  - [ ] Resource bookmarking system
+- ✅ **Resource Management API**
+  - ✅ Resource model and CRUD operations
+  - ✅ Resource categories and curation
+  - ✅ Featured resources management
 
-- [ ] **Tech Tools API**
-  - [ ] Tech tool database and endpoints
-  - [ ] Tool categories and features
-  - [ ] Tool reviews and ratings
-  - [ ] Featured tools management
-  - [ ] Tool comparison functionality
+- ✅ **Tech Tools API**
+  - ✅ Tech tool database and endpoints
+  - ✅ Tool categories and features
+  - ✅ Featured tools management
+  
 
 - [ ] **File Upload & Media Management**
-  - [ ] Image upload for articles
-  - [ ] File size and type validation
-  - [ ] Image optimization and resizing
-  - [ ] Cloud storage integration (AWS S3/Cloudinary)
-  - [ ] CDN setup for media delivery
+  - ✅ Image upload for articles
+  - ✅ File size and type validation
+  - ✅ Cloud storage integration (AWS S3/Cloudinary)
   - [ ] Temporary image cleanup system
 
 - [ ] **Search & Discovery**
@@ -294,3 +286,8 @@ API documentation will be available at:
 - [OpenID Connect vs OAuth2](https://supertokens.com/blog/openid-connect-vs-oauth2)
 - [Authorization code flow with PKCE](https://supertokens.com/blog/authorization-code-flow-with-pkce)
 - [OIDC vs OAuth2](https://frontegg.com/guides/oidc-vs-oauth2)
+- [Flesch Reading ease Flesch Kincaid grade level](https://readable.com/readability/flesch-reading-ease-flesch-kincaid-grade-level/)
+- [How to more accurately estimate read time for medium articles](https://www.freecodecamp.org/news/how-to-more-accurately-estimate-read-time-for-medium-articles-in-javascript-fb563ff0282a/)
+- [Programmatically counting syllables](https://medium.com/@mholtzscher/programmatically-counting-syllables-ca760435fab4)
+- [Dark mode fix in ckeditor on Django admin panel](https://stackoverflow.com/questions/72408854/django-ckeditor5field-field-default-font-color)
+- [Django CKEditor 5 docs](https://github.com/hvlads/django-ckeditor-5?tab=readme-ov-file)

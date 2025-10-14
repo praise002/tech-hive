@@ -76,7 +76,7 @@ class JobListView(CustomListView):
     filterset_class = JobFilter
     search_fields = ["title"]
 
-    queryset = Job.objects.all()
+    queryset = Job.active.all()
 
     @extend_schema(
         summary="List all jobs",
@@ -117,6 +117,8 @@ class ResourceListView(CustomListView):
         DjangoFilterBackend,
         SearchFilter,
     )
+
+    filterset_fields = ("is_featured",)
     filterset_fields = ["category"]
     search_fields = ["name"]
 
@@ -139,6 +141,7 @@ class ToolListView(CustomListView):
         DjangoFilterBackend,
         SearchFilter,
     )
+    filterset_fields = ("is_featured",)
     filterset_fields = ["category"]
     search_fields = ["name"]
 

@@ -56,6 +56,26 @@
 
 ---
 
+## 💳 Premium Subscription
+
+**Subscription Management:**
+- `POST /subscriptions/premium/` → Subscribe to premium plan
+- `GET /subscriptions/` → Get current subscription details
+- `DELETE /subscriptions/premium/` → Cancel premium subscription
+- `PATCH /subscriptions/premium/reactivate/` → Reactivate cancelled subscription
+- `PATCH /subscriptions/premium/` → Update subscription plan
+- `GET /subscriptions/history/` → View subscription and billing history
+
+**Permissions:** Any authenticated user can manage their own subscription
+
+No Subscription → Subscribe → Active → Cancel → Cancelled
+      ↑                                    ↓
+      └─────────── Reactivate ←────────────┘
+                        ↓
+                   Expired (if not reactivated)
+
+---
+
 ## 🔄 Article Workflow
 
 ```

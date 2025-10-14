@@ -65,6 +65,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class ArticleSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     cover_image_url = serializers.SerializerMethodField(read_only=True)
+    read_time = serializers.SerializerMethodField(read_only=True)
     author = serializers.SerializerMethodField(read_only=True)
     total_reaction_counts = serializers.SerializerMethodField(read_only=True)
     reaction_counts = serializers.SerializerMethodField(read_only=True)
@@ -90,6 +91,10 @@ class ArticleSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.URLField)
     def get_cover_image_url(self, obj):
         return obj.cover_image_url
+    
+    @extend_schema_field(serializers.CharField)
+    def get_read_time(self, obj):
+        return obj.read_time
 
     @extend_schema_field(serializers.CharField)
     def get_author(self, obj):
@@ -210,15 +215,19 @@ class CommentSerializer(serializers.ModelSerializer):
             "body",
         ]
 
+    @extend_schema_field(serializers.UUIDField)
     def get_article_id(self, obj):
         return str(obj.article.id)
 
+    @extend_schema_field(serializers.UUIDField)
     def get_user_id(self, obj):
         return str(obj.user.id)
 
+    @extend_schema_field(serializers.BooleanField)
     def get_is_reply(self, obj):
         return obj.parent is not None
 
+    @extend_schema_field(serializers.IntegerField)
     def get_reply_count(self, obj):
         return obj.replies.filter(active=True).count()
 
@@ -264,11 +273,15 @@ class EventSerializer(serializers.ModelSerializer):
 
 class ResourceSerializer(serializers.ModelSerializer):
     category = serializers.CharField(source="category.name", read_only=True)
+    image_url = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = models.Resource
-        fields = ["id", "name", "image_url", "body", "url", "category"]
+        fields = ["id", "name", "image_url", "body", "url", "category", "is_featured"]
 
+    @extend_schema_field(serializers.CharField)
+    def get_image_url(self, obj):
+        return obj.image_url
 
 class ToolTagSerializer(serializers.ModelSerializer):
     class Meta:
@@ -282,7 +295,7 @@ class ToolSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Tool
-        fields = ["id", "name", "desc", "url", "image_url", "call_to_action", "tags", "category"]
+        fields = ["id", "name", "desc", "url", "image_url", "call_to_action", "tags", "category", "is_featured"]
 
 
 # TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH

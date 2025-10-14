@@ -5,7 +5,6 @@ from apps.common.exceptions import NotFoundError
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
 from apps.content.models import Article, Tag
-from apps.content.permissions import IsContributor
 from apps.content.schema_examples import (
     ACCEPT_GUIDELINES_RESPONSE_EXAMPLE,
     ARTICLE_DETAIL_RESPONSE_EXAMPLE,
@@ -14,7 +13,6 @@ from apps.content.schema_examples import (
 )
 from apps.content.serializers import (
     ArticleSerializer,
-    ArticleUpdateSerializer,
     ContributorOnboardingSerializer,
     TagSerializer,
 )
@@ -24,16 +22,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
 from rest_framework import status
 from rest_framework.filters import SearchFilter
-from rest_framework.generics import (
-    ListAPIView,
-    ListCreateAPIView,
-    RetrieveUpdateAPIView,
-)
-from rest_framework.permissions import (
-    AllowAny,
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly,
-)
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 article_tags = ["Articles"]
@@ -84,20 +74,12 @@ class AcceptGuidelinesView(APIView):
         )
 
 
-# Drafts - never submitted, just in draft
-# submitted for review, under review, changes requested, rejected - submitted articles - users can edit it
-# if it is marked as changes requested
-# published - under published article section - paginate
-# GET /articles/ → public published articles (all authors)
-# GET /articles/?status=draft → authenticated user's drafts
-# GET /users/{username}/articles/ → specific user's published articles (profile view)
-
-
-class ArticleListView(ListCreateAPIView):
+class ArticleListView(ListAPIView):
     # List all published article
     queryset = Article.published.select_related("category", "author").all()
     serializer_class = ArticleSerializer
     filter_backends = (DjangoFilterBackend, SearchFilter)
+    filterset_fields = ("is_featured",)
     search_fields = ["title", "content"]
     pagination_class = DefaultPagination
 
