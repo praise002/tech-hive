@@ -22,11 +22,7 @@ import AccountContent from '../componenets/AccountContent';
 import PublishedContent from '../componenets/PublishedContent';
 import { BiMessageRounded } from 'react-icons/bi';
 import CommentsContent from '../componenets/CommentsContent';
-import {
-  useCurrentUser,
-  useUpdateUserAvatar,
-  useUpdateUserProfile,
-} from '../hooks/useProfile';
+import { useCurrentUser, useUpdateUserProfile } from '../hooks/useProfile';
 import Spinner from '../../../components/common/Spinner';
 import { formatDate } from '../../../utils/utils';
 

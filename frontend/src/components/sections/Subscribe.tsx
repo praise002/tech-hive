@@ -1,8 +1,12 @@
 import toast from 'react-hot-toast';
 import Form from '../common/Form';
 import Text from '../common/Text';
+import { UseFormSetError } from 'react-hook-form';
+import { useSubscribeNewsletter } from '../../hooks/useGeneral';
 
 function Subscribe() {
+  const { subscribeNewsletter, isPending } = useSubscribeNewsletter();
+
   const inputs: Array<{
     name: keyof FormData;
     placeholder: string;
@@ -29,14 +33,34 @@ function Subscribe() {
     email: string;
   }
 
-  interface ResetFunction {
-    (): void;
-  }
+  const handleFormSubmit = (
+    data: FormData,
+    setError: UseFormSetError<FormData>,
+    reset?: () => void
+  ): void => {
+    reset?.();
 
-  const handleFormSubmit = (data: FormData, reset: ResetFunction): void => {
-    console.log('Form Data:', data);
-    toast.success("You're all set! Thanks for subscribing to our newsletter.");
-    reset();
+    subscribeNewsletter(data.email, {
+      onSuccess: (response) => {
+        toast.success(response?.message);
+      },
+      onError: (error: any) => {
+        // Handle field-specific errors from the server
+        if (error.data) {
+          const fieldMapping: Record<string, keyof FormData> = {
+            email: 'email',
+          };
+
+          Object.entries(error.data).forEach(([field, message]) => {
+            const formField = fieldMapping[field] || (field as keyof FormData);
+            setError(formField, {
+              type: 'server',
+              message: Array.isArray(message) ? message[0] : String(message),
+            });
+          });
+        }
+      },
+    });
   };
 
   return (
@@ -47,7 +71,12 @@ function Subscribe() {
             Subscribe to Our <br />
             Newsletter
           </Text>
-          <Form inputs={inputs} onSubmit={handleFormSubmit} className="w-full">
+          <Form
+            inputs={inputs}
+            onSubmit={handleFormSubmit}
+            isLoading={isPending}
+            className="w-full"
+          >
             Subscribe
           </Form>
         </div>

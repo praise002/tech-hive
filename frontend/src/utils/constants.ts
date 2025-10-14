@@ -33,10 +33,14 @@ export const routes = {
   },
 
   content: {
-    categories: 'categories/',
-    events: 'events/',
-    jobs: 'jobs/',
-    resources: 'resources/',
-    tools: 'tools/',
-  }
+    categories: '/categories/',
+    events: '/events/',
+    jobs: '/jobs/',
+    resources: '/resources/',
+    tools: '/tools/',
+  },
+
+  general: {
+    nesletter: '/newsletter/',
+  },
 };
