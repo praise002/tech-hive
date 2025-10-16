@@ -78,7 +78,7 @@ INTERNAL_IPS = [
 ]
 
 MIDDLEWARE = [
-    'django_prometheus.middleware.PrometheusBeforeMiddleware',
+    "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "silk.middleware.SilkyMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -90,7 +90,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    'django_prometheus.middleware.PrometheusAfterMiddleware',
+    "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 
 ROOT_URLCONF = "tech_hive.urls"
@@ -484,3 +484,10 @@ CKEDITOR_5_FILE_STORAGE = "tech_hive.storage.CustomCloudinaryStorage"
 
 # Define a constant in settings.py to specify file upload permissions
 CKEDITOR_5_FILE_UPLOAD_PERMISSION = "staff"
+
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn="https://382d8ac9d3e4c8cd95f0942926fd98a4@o4510200278941696.ingest.de.sentry.io/4510200289427536",
+    send_default_pii=True,
+)

@@ -63,6 +63,8 @@ sitemaps = {
     "articles": ArticleSitemap,
 }
 
+from django.urls import path
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/", include("apps.general.urls")),
@@ -97,4 +99,4 @@ if settings.DEBUG:
     urlpatterns.append(path("__debug__/", include("debug_toolbar.urls")))
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]
-    urlpatterns += [path('prometheus/', include('django_prometheus.urls'))]
+    urlpatterns += [path("prometheus/", include("django_prometheus.urls"))]
