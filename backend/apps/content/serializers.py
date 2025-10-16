@@ -92,9 +92,9 @@ class ArticleSerializer(serializers.ModelSerializer):
     def get_cover_image_url(self, obj):
         return obj.cover_image_url
     
-    @extend_schema_field(serializers.CharField)
+    @extend_schema_field(serializers.IntegerField)
     def get_read_time(self, obj):
-        return obj.read_time
+        return obj.calculate_read_time()
 
     @extend_schema_field(serializers.CharField)
     def get_author(self, obj):

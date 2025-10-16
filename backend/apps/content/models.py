@@ -62,7 +62,6 @@ class Article(BaseModel):
     slug = AutoSlugField(populate_from="title", unique=True, always_update=True)
     content = CKEditor5Field('Article Content', config_name='extends')
     cover_image = models.ImageField(upload_to="articles/", null=True, blank=True, validators=[validate_file_size])
-    read_time = models.PositiveIntegerField(help_text="Read time in minutes", default=0)
     tags = models.ManyToManyField(Tag, blank=True)
     status = models.CharField(
         max_length=20,
@@ -94,7 +93,7 @@ class Article(BaseModel):
         if self.status != ArticleStatusChoices.PUBLISHED and self.is_featured:
             raise ValidationError("'Is featured' can only be set when article status is 'Published'")
         
-    def read_time(self):
+    def calculate_read_time(self):
         return ReadabilityMetrics.method_hybrid(self.content)
 
     @property

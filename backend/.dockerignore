@@ -15,6 +15,8 @@ README.md
 Note.md
 docker-compose.yml
 docker-compose.dev.yml
+docker-compose.monitoring.yml
+prometheus.yml
 **/.DS_Store
 **/venv
 **/env

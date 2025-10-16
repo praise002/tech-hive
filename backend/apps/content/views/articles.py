@@ -73,6 +73,7 @@ class AcceptGuidelinesView(APIView):
             status_code=status.HTTP_201_CREATED,
         )
 
+# TODO: COMMENT SYSTEM
 
 class ArticleListView(ListAPIView):
     # List all published article

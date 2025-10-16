@@ -3,7 +3,9 @@
 ---
 
 - `POST /articles/like/` → Like/unlike an article - any authenticated user
-- 
+- `POST /articles/summary/` → Summarize an article 
+- `GET /articles/notification/` → Get notified of events
+  
 ## 🎯 Contributor Role
 **Article Management:**
 - `GET /articles/drafts/` → View own drafts

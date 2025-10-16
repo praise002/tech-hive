@@ -59,6 +59,8 @@ THIRD_PARTY_APPS = [
     "corsheaders",
     "django_extensions",
     "django_ckeditor_5",
+    "silk",
+    "django_prometheus",
 ]
 
 LOCAL_APPS = [
@@ -76,6 +78,8 @@ INTERNAL_IPS = [
 ]
 
 MIDDLEWARE = [
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
+    "silk.middleware.SilkyMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -86,6 +90,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
 ROOT_URLCONF = "tech_hive.urls"

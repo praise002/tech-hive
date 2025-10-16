@@ -85,13 +85,12 @@ A scalable Django REST framework backend providing APIs for:
   - [ ] Full-text search implementation
   - [ ] Elasticsearch integration (optional)
   - [ ] Search indexing and optimization
-  - [ ] Advanced filtering capabilities
+  - ✅ Advanced filtering capabilities
   - [ ] Search analytics and trending
 
 ### Phase 3: Social & Collaboration Features (Priority: Medium)
 
 - [ ] **Social Features API**
-  - [ ] User following/followers system
   - [ ] Article likes and reactions
   - [ ] Comment system for articles
   - [ ] User activity feeds
@@ -100,7 +99,6 @@ A scalable Django REST framework backend providing APIs for:
 
 - [ ] **Collaboration Features**
   - [ ] Real-time collaboration support (Liveblocks integration)
-  - [ ] Article co-authoring permissions
   - [ ] Comment and suggestion system
   - [ ] Document sharing and access control
   - [ ] Collaboration analytics
@@ -236,6 +234,9 @@ docker-compose exec web python manage.py migrate
 
 # Create superuser
 docker-compose exec web python manage.py createsuperuser
+
+# Run prometheus and grafana
+docker-compose -f docker-compose.monitoring.yml up --build
 ```
 
 ## 📚 API Documentation
@@ -291,3 +292,10 @@ API documentation will be available at:
 - [Programmatically counting syllables](https://medium.com/@mholtzscher/programmatically-counting-syllables-ca760435fab4)
 - [Dark mode fix in ckeditor on Django admin panel](https://stackoverflow.com/questions/72408854/django-ckeditor5field-field-default-font-color)
 - [Django CKEditor 5 docs](https://github.com/hvlads/django-ckeditor-5?tab=readme-ov-file)
+- [Monitoring your Django app with prometheus](https://blog.devops.dev/monitoring-your-django-app-with-prometheus-and-grafana-5859b8815e84?gi=ba26564198c4)
+- [Django silk](https://github.com/jazzband/django-silk)
+- [Django prometheus](https://pypi.org/project/django-prometheus/)
+- [Enhancing software quality through comprehensive testing stress tests and penetration tests](https://medium.com/@fadhilahazzah04/enhancing-software-quality-through-comprehensive-testing-stress-tests-and-penetration-tests-356a8d59e54b)
+
+## FIXES
+- The order of silk middleware matters in development, put it first for it to work.

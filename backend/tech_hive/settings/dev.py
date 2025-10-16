@@ -53,6 +53,8 @@ REDIS_HOST = "localhost"
 REDIS_PORT = 6379
 REDIS_DB = 0
 
+SILKY_PYTHON_PROFILER = True
+# SILKY_PYTHON_PROFILER_BINARY = True
 
 logger = logging.getLogger(__name__)
 LOG_LEVEL = "DEBUG"

@@ -89,9 +89,12 @@ urlpatterns = [
     path("api/v1/healthcheck/", HealthCheckView.as_view()),
 ]
 
+urlpatterns += [
+    path("ckeditor5/", include("django_ckeditor_5.urls")),
+]
+
 if settings.DEBUG:
     urlpatterns.append(path("__debug__/", include("debug_toolbar.urls")))
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    urlpatterns += [
-        path("ckeditor5/", include("django_ckeditor_5.urls")),
-    ]
+    urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]
+    urlpatterns += [path('prometheus/', include('django_prometheus.urls'))]
