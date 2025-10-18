@@ -22,7 +22,11 @@ import AccountContent from '../componenets/AccountContent';
 import PublishedContent from '../componenets/PublishedContent';
 import { BiMessageRounded } from 'react-icons/bi';
 import CommentsContent from '../componenets/CommentsContent';
-import { useCurrentUser, useUpdateUserProfile } from '../hooks/useProfile';
+import {
+  useCurrentUser,
+  useUpdateUserAvatar,
+  useUpdateUserProfile,
+} from '../hooks/useProfile';
 import Spinner from '../../../components/common/Spinner';
 import { formatDate } from '../../../utils/utils';
 
@@ -80,12 +84,12 @@ function AccountDetail() {
   const { updateCurrentUserProfile, isPending: isUpdating } =
     useUpdateUserProfile();
 
-  // const {
-  //   updateCurrentUserAvatar,
-  //   isPending: isAvatarUpdating,
-  //   isError: isAvatarError,
-  //   error: avatarError,
-  // } = useUpdateUserAvatar();
+  const {
+    updateCurrentUserAvatar,
+    isPending: isAvatarUpdating,
+    isError: isAvatarError,
+    error: avatarError,
+  } = useUpdateUserAvatar();
 
   const {
     first_name: firstName,
@@ -109,6 +113,13 @@ function AccountDetail() {
     height: 80,
     unit: '%',
   });
+
+  const cleanupTempImage = () => {
+    if (tempImage) {
+      URL.revokeObjectURL(tempImage);
+      setTempImage(null);
+    }
+  };
 
   async function handleSetProfilePicture() {
     if (!tempImage) return;
@@ -169,14 +180,27 @@ function AccountDetail() {
       canvas.toBlob((blob) => {
         if (!blob) return;
 
-        const croppedImageUrl = URL.createObjectURL(blob);
-        setProfile((prev) => ({
-          ...prev,
-          profilePicture: croppedImageUrl,
-        }));
-        setShowCropModal(false);
-        setTempImage(null);
-        toast.success('Profile picture updated successfully!');
+        const formData = new FormData();
+        formData.append('avatar', blob, 'avatar.jpg'); // todo: dynamic filename creation
+        updateCurrentUserAvatar(formData, {
+          onSuccess: (responseData) => {
+            setProfile((prev) => ({
+              ...prev,
+              profilePicture: responseData.data.avatar_url,
+            }));
+            setShowCropModal(false);
+            cleanupTempImage();
+
+            toast.success('Profile picture updated successfully!');
+          },
+          onError: () => {
+            toast.error('Profile picture update failed. Please try again.');
+            if (tempImage) {
+              URL.revokeObjectURL(tempImage);
+              setTempImage(null);
+            }
+          },
+        });
       });
     } catch (error) {
       console.error('Error cropping image:', error);
@@ -269,6 +293,9 @@ function AccountDetail() {
   function handleProfilePicChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (file) {
+      // clear previous image from memory
+      cleanupTempImage();
+
       const imageUrl = URL.createObjectURL(file);
       // Store the image temporarily and show modal
       setTempImage(imageUrl);
@@ -294,10 +321,8 @@ function AccountDetail() {
   function handleCloseCropModal() {
     // Cancel the upload and clean up
     setShowCropModal(false);
-    if (tempImage) {
-      URL.revokeObjectURL(tempImage); // Cleanup memory
-      setTempImage(null);
-    }
+    // Safe to cleanup - upload uses copied blob
+    cleanupTempImage();
   }
 
   const profileTabs = [
@@ -543,8 +568,18 @@ function AccountDetail() {
                 )}
               </div>
               <div className="p-2">
-                <Button className="w-full" onClick={handleSetProfilePicture}>
-                  Set new profile picture
+                <Button
+                  className="w-full"
+                  onClick={handleSetProfilePicture}
+                  disabled={isAvatarUpdating}
+                >
+                  {isAvatarUpdating ? (
+                    <div className="flex items-center justify-center">
+                      <Spinner />
+                    </div>
+                  ) : (
+                    'Set new profile picture'
+                  )}
                 </Button>
               </div>
             </div>
