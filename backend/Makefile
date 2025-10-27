@@ -11,6 +11,7 @@ create_env:
 # act:  # doesn't work
 # 	source venv/bin/activate
 # realpath venv
+
 mmig: 
 	python manage.py makemigrations
 

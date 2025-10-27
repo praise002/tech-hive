@@ -123,6 +123,11 @@ class Article(BaseModel):
         counts = self.reactions.values("reaction_type").annotate(count=Count("id"))
         return {item["reaction_type"]: item["count"] for item in counts}
 
+    @property
+    def all_comments_count(self):
+        """Total active comments on this article"""
+        return self.comments.filter(active=True).count()
+
     class Meta:
         ordering = ["-created_at"]
         indexes = [
@@ -197,68 +202,78 @@ class ArticleReview(BaseModel):
         return f"Review of {self.article} by {self.reviewed_by}"
 
 
+class CommentThread(BaseModel):
+    """
+    Represents a conversation thread tied to an article.
+    Each root comment starts a new thread, all replies go to the same thread.
+    """
+
+    article = models.ForeignKey(
+        Article, on_delete=models.CASCADE, related_name="comment_threads"
+    )
+    # The very first comment that started this thread
+    root_comment = models.OneToOneField(
+        "Comment", on_delete=models.CASCADE, related_name="thread_root"
+    )
+    is_active = models.BooleanField(default=True)
+    reply_count = models.IntegerField(default=0)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["article", "is_active"]),
+        ]
+
+    def __str__(self):
+        return f"Thread for {self.article.title} - {self.reply_count} replies"
+
+
 class Comment(BaseModel):
+    thread = models.ForeignKey(
+        CommentThread,
+        on_delete=models.CASCADE,
+        related_name="comments",
+        null=True,
+        blank=True,
+    )
+    article = models.ForeignKey(
+        Article,
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )  # denormalization
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="comments_by_user",
     )
-    article = models.ForeignKey(
-        Article, on_delete=models.CASCADE, related_name="comments"
-    )
     body = models.CharField(max_length=250)
     active = models.BooleanField(default=True)  # for moderation purposes
-    parent = models.ForeignKey(
-        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="replies"
+
+    replying_to = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="replies_to_user",
+        help_text="The user being replied to (for mentions)",
     )
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ("-created_at",)
         indexes = [
-            models.Index(fields=["article", "parent"]),  # For filtering top-level
-            models.Index(fields=["article", "active"]),  # For counting active
+            models.Index(fields=["thread", "-created_at"]),
         ]
 
-    # def __str__(self):
-    #     if self.parent:
-    #         return f"↳ Reply by {self.user.full_name} to comment #{self.parent.id}"
-    #     return f"Comment by {self.user.full_name} {self.id} on {self.article.title}"
-
     def __str__(self):
-        if self.parent:
-            preview = self.body[:30] + "..." if len(self.body) > 30 else self.body
-            return f"↳ Reply by {self.user.full_name}: \"{preview}\""
-        
-        preview = self.body[:40] + "..." if len(self.body) > 40 else self.body
-        return f"{self.user.full_name}: \"{preview}\""
-    
-    @property
-    def is_reply(self):
-        """Helper property to check if this is a reply"""
-        return self.parent is not None
+        if self.replying_to:
+            return f"{self.user.full_name} → @{self.replying_to.username}: {self.body[:30]}..."
+        return f"{self.user.full_name}: {self.body[:40]}..."
 
-    # TODO: optimize later
     def get_all_replies_count(self):
-        """
-        Recursively count ALL replies (direct children + their descendants).
-        This handles nested comment threads of any depth.
-        """
-
-        def count_recursive(comment):
-            direct_replies = comment.replies.filter(active=True)
-            count = direct_replies.count()
-
-            for reply in direct_replies:
-                count += count_recursive(reply)
-            return count
-
-        return count_recursive(self)
-
-    def get_direct_replies(self):
-        # Available for future pagination/lazy-loading features
-        """Get only direct child replies (one level deep)"""
-        return self.replies.filter(active=True)
+        """Count ALL replies in this thread using denormalized field"""
+        if hasattr(self, "thread") and self.thread_id:
+            return self.thread.reply_count
+        return 0
 
 
 class Job(BaseModel):

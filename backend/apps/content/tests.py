@@ -197,6 +197,8 @@ class TestContents(APITestCase):
         self.assertEqual(data["author"], self.user2.full_name)
         self.assertEqual(data["status"], ArticleStatusChoices.PUBLISHED)
 
+        self.assertIn("comments", data)
+
         # Test 404 for non-existent article
         non_existent_url = f"/api/v1/articles/{self.user2.username}/non-existent-slug/"
         not_found_response = self.client.get(non_existent_url)

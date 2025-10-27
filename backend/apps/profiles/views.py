@@ -493,9 +493,9 @@ class UserCommentsView(APIView):
 
     def get_queryset(self):
         """Filter saved articles to only return those belonging to the authenticated user."""
-        return Comment.objects.filter(user=self.request.user, active=True).select_related(
-            "article", "user"
-        )
+        return Comment.objects.filter(
+            user=self.request.user, active=True
+        ).select_related("article", "user", "replying_to")
 
     @extend_schema(
         summary="Retrieve user's comments",
@@ -523,7 +523,7 @@ class UserCommentsGenericView(ListAPIView):
         """Filter saved articles to only return those belonging to the authenticated user."""
         return Comment.objects.filter(
             user=self.request.user, active=True
-        ).select_related("article", "user")
+        ).select_related("article", "user", "replying_to")
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -553,13 +553,3 @@ class UserCommentsGenericView(ListAPIView):
     )
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
-
-
-
-
-
-
-
-
-
-

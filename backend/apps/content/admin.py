@@ -43,10 +43,13 @@ class ArticleReview(admin.ModelAdmin):
 class SavedArticleAdmin(admin.ModelAdmin):
     pass
 
+@admin.register(models.CommentThread)
+class CommentThreadAdmin(admin.ModelAdmin):
+    pass
 
 @admin.register(models.Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display=('user', 'article', 'body', 'active')
+    list_display=('user', 'body', 'active')
     list_filter = ('active', 'created_at', 'updated_at')
     search_fields = ('body',)
 

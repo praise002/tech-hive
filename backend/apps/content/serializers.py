@@ -200,7 +200,10 @@ class CommentSerializer(serializers.ModelSerializer):
     )
     user_id = serializers.SerializerMethodField()
     is_reply = serializers.SerializerMethodField()
-    reply_count = serializers.SerializerMethodField()
+
+    replying_to_username = serializers.CharField(
+        source="replying_to.username", read_only=True
+    )
 
     class Meta:
         model = models.Comment
@@ -210,9 +213,8 @@ class CommentSerializer(serializers.ModelSerializer):
             "article_id",
             "article_title",
             "article_created_at",
-            "is_reply",
-            "reply_count",
             "body",
+            "replying_to_username",
         ]
 
     @extend_schema_field(serializers.UUIDField)
@@ -223,14 +225,40 @@ class CommentSerializer(serializers.ModelSerializer):
     def get_user_id(self, obj):
         return str(obj.user.id)
 
-    @extend_schema_field(serializers.BooleanField)
-    def get_is_reply(self, obj):
-        return obj.is_reply
 
-    @extend_schema_field(serializers.IntegerField)
-    def get_reply_count(self, obj):
-        # return obj.replies.filter(active=True).count()
-        return obj.get_all_replies_count()
+# TODO: Still try to understand it
+# class CommentCreateSerializer(serializers.ModelSerializer):
+#     replying_to = serializers.UUIDField(required=False, write_only=True)
+
+#     class Meta:
+#         model = models.Comment
+#         fields = ["article", "body", "parent", "replying_to"]
+
+#     def create(self, validated_data):
+#         user = self.context["request"].user
+#         replying_to_id = validated_data.pop("replying_to", None)
+#         # Get the parent comment to determine who we're replying to
+#         parent_comment = validated_data.get("parent")
+
+#         # AUTO-MENTION LOGIC: If replying_to not provided but we have a parent, use parent's author
+#         if not replying_to_id and parent_comment:
+#             replying_to_id = parent_comment.user_id
+
+#         comment = models.Comment.objects.create(user=user, **validated_data)
+
+#         # Set who we're replying to (either explicitly provided or auto-detected from parent)
+
+#         if replying_to_id:
+#             try:
+#                 from apps.accounts.models import User
+
+#                 replying_to_user = User.objects.get(id=replying_to_id)
+#                 comment.replying_to = replying_to_user
+#                 comment.save()
+#             except User.DoesNotExist:
+#                 pass  # Silently fail if user doesn't exist
+
+#         return comment
 
 
 class ArticleCommentSerializer(serializers.ModelSerializer):
@@ -240,11 +268,13 @@ class ArticleCommentSerializer(serializers.ModelSerializer):
     user_avatar = serializers.URLField(source="user.avatar_url", read_only=True)
     user_username = serializers.CharField(source="user.username", read_only=True)
     reply_count = serializers.SerializerMethodField(read_only=True)
+    thread_id = serializers.UUIDField(source="thread.id", read_only=True)
 
     class Meta:
         model = models.Comment
         fields = [
             "id",
+            "thread_id",
             "body",
             "created_at",
             "user_name",
@@ -268,25 +298,26 @@ class ArticleDetailSerializer(ArticleSerializer):
 
     @extend_schema_field(ArticleCommentSerializer(many=True))
     def get_comments(self, obj):
-        """Get top-level comments only (where parent=None)"""
-        # The queryset is already prefetched in the view, so this won't cause N+1
-        top_level_comments = [
-            comment for comment in obj.comments.all() if comment.parent is None
+        """Get root comments only (comments that start threads)"""
+        root_comments = [
+            comment
+            for comment in obj.comments.all()
+            if comment.thread is not None and comment.thread.root_comment_id == comment.id
         ]
 
-        # Sort by recency (newest first)
-        top_level_comments.sort(key=lambda x: x.created_at, reverse=True)
+        # Sort by recency (newest first) - TODO: CHECK IF IT SORTS BY DEFAULT
+        root_comments.sort(key=lambda x: x.created_at, reverse=True)
 
         serializer = ArticleCommentSerializer(
-            top_level_comments,
+            root_comments,
             many=True,
         )
         return serializer.data
 
     @extend_schema_field(serializers.IntegerField)
     def get_comments_count(self, obj):
-        """Get total count of all active comments (including nested)"""
-        return obj.comments.filter(active=True).count()
+        """Get total count of all active comments on article"""
+        return obj.all_comments_count
 
 
 class CommentWithRepliesSerializer(serializers.ModelSerializer):
@@ -296,7 +327,13 @@ class CommentWithRepliesSerializer(serializers.ModelSerializer):
     user_avatar = serializers.URLField(source="user.avatar_url", read_only=True)
     user_username = serializers.CharField(source="user.username", read_only=True)
     reply_count = serializers.SerializerMethodField(read_only=True)
-    parent_id = serializers.UUIDField(source="parent.id", read_only=True)
+
+    replying_to_name = serializers.CharField(
+        source="replying_to.full_name", read_only=True
+    )
+    replying_to_username = serializers.CharField(
+        source="replying_to.username", read_only=True
+    )
 
     class Meta:
         model = models.Comment
@@ -308,7 +345,8 @@ class CommentWithRepliesSerializer(serializers.ModelSerializer):
             "user_username",
             "user_avatar",
             "reply_count",
-            "parent_id",
+            "replying_to_name",
+            "replying_to_username",
         ]
 
     @extend_schema_field(serializers.IntegerField)

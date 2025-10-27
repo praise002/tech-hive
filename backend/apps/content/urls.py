@@ -19,8 +19,5 @@ urlpatterns = [
         views.ArticleRetrieveView.as_view(),
         name="article_detail",
     ),
+    # path("comments/<uuid:comment_id>/replies/", views.CommentRepliesView.as_view()),
 ]
-
-
-# path("me/<uuid:comment_id>/", views.UserCommentsRetrieveUpdateDestroyView.as_view()),
-# path("me/<uuid:post_id>/comments/", views.UserCommentsView.as_view()),

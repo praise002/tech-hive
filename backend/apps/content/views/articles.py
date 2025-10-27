@@ -14,6 +14,7 @@ from apps.content.schema_examples import (
 from apps.content.serializers import (
     ArticleDetailSerializer,
     ArticleSerializer,
+    CommentWithRepliesSerializer,
     ContributorOnboardingSerializer,
     TagSerializer,
 )
@@ -146,9 +147,7 @@ class ArticleRetrieveView(APIView):
                 Article.published.prefetch_related(
                     Prefetch(
                         "comments",
-                        queryset=Comment.objects.filter(
-                            active=True  
-                        ),
+                        queryset=Comment.objects.filter(active=True),
                     )
                 )
                 .select_related("author")
@@ -164,6 +163,30 @@ class ArticleRetrieveView(APIView):
 
         except Article.DoesNotExist:
             raise NotFoundError(err_msg="Article not found.")
+
+
+class CommentRepliesView(APIView):
+    """View for fetching replies of a specific comment"""
+
+    serializer_class = CommentWithRepliesSerializer
+
+    @extend_schema(
+        summary="Get replies for a comment",
+        description="Retrieve all direct replies for a specific comment. "
+        "This endpoint supports lazy-loading of nested comments - "
+        "it returns only the direct children of the specified comment, "
+        "sorted by recency (newest first).",
+        tags=article_tags,
+        # responses={},
+    )
+    def get(self, request, comment_id):
+        """
+        Get direct replies for a specific comment.
+
+        Args:
+            comment_id: UUID of the parent comment
+        """
+        pass
 
 
 class TagGenericView(ListAPIView):

@@ -1,5 +1,10 @@
 from apps.accounts.schema_examples import UNAUTHORIZED_USER_RESPONSE
-from apps.common.schema_examples import SUCCESS_RESPONSE_STATUS, UUID_EXAMPLE
+from apps.common.schema_examples import (
+    AVATAR_URL,
+    COVER_IMAGE_URL,
+    SUCCESS_RESPONSE_STATUS,
+    UUID_EXAMPLE,
+)
 from apps.common.serializers import ErrorDataResponseSerializer
 from apps.content.serializers import (
     ArticleSerializer,
@@ -65,19 +70,32 @@ ARTICLES = [
 ]
 
 ARTICLE_DETAIL_EXAMPLE = {
-    "id": "26b0dee3-54a8-46eb-8c9d-00ca481d201f",
-    "title": "Test title",
-    "slug": "test-title",
-    "content": "Test content",
-    "cover_image_url": "",
-    "read_time": 5,
+    "id": "09fc9e71-d071-4fb4-ba28-16a493e609d6",
+    "title": "Test Article",
+    "slug": "test-article",
+    "content": "<p>Test purposes</p>",
+    "cover_image_url": COVER_IMAGE_URL,
+    "read_time": 1,
     "status": "published",
-    "created_at": "2025-08-07T18:48:26.389204Z",
+    "created_at": "2025-10-27T00:48:44.637026Z",
     "is_featured": False,
-    "author": "Praise Idowu",
-    "total_reaction_counts": 4,
-    "reaction_counts": {"❤️": 1, "👍": 1, "🔥": 1, "😍": 1},
-    "tags": [{"id": "d5afcd69-4c7d-4ea5-94bd-e1a2549a3f72", "name": "python"}],
+    "author": "Praise ID",
+    "total_reaction_counts": 0,
+    "reaction_counts": {},
+    "tags": [],
+    "comments": [
+        {
+            "id": "8485b084-2257-48a1-82bf-cffa90373a80",
+            "thread_id": "6dd9d3f8-bdd3-43e8-83f9-a5533349f776",
+            "body": "This is cool",
+            "created_at": "2025-10-27T18:03:01.913900Z",
+            "user_name": "Praise ID",
+            "user_username": "praise-id",
+            "user_avatar": AVATAR_URL,
+            "reply_count": 0,
+        }
+    ],
+    "comments_count": 1,
 }
 
 EVENT_EXAMPLE = {
