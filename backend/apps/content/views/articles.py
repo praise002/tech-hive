@@ -4,7 +4,7 @@ from apps.accounts.utils import UserRoles
 from apps.common.exceptions import NotFoundError
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
-from apps.content.models import Article, Tag
+from apps.content.models import Article, Comment, Tag
 from apps.content.schema_examples import (
     ACCEPT_GUIDELINES_RESPONSE_EXAMPLE,
     ARTICLE_DETAIL_RESPONSE_EXAMPLE,
@@ -12,12 +12,14 @@ from apps.content.schema_examples import (
     TAG_RESPONSE_EXAMPLE,
 )
 from apps.content.serializers import (
+    ArticleDetailSerializer,
     ArticleSerializer,
     ContributorOnboardingSerializer,
     TagSerializer,
 )
 from django.contrib.auth.models import Group
 from django.db import transaction
+from django.db.models import Prefetch
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
 from rest_framework import status
@@ -73,7 +75,12 @@ class AcceptGuidelinesView(APIView):
             status_code=status.HTTP_201_CREATED,
         )
 
-# TODO: COMMENT SYSTEM
+
+# In your view
+# comment.replies.filter(
+#     active=True
+# ).select_related('user').order_by('-created_at')
+
 
 class ArticleListView(ListAPIView):
     # List all published article
@@ -125,7 +132,7 @@ class ArticleListView(ListAPIView):
 
 
 class ArticleRetrieveView(APIView):
-    serializer_class = ArticleSerializer
+    serializer_class = ArticleDetailSerializer
 
     @extend_schema(
         summary="Retrieve article details",
@@ -135,8 +142,17 @@ class ArticleRetrieveView(APIView):
     )
     def get(self, *args, **kwargs):
         try:
-            article = Article.published.select_related("author").get(
-                author__username=kwargs["username"], slug=kwargs["slug"]
+            article = (
+                Article.published.prefetch_related(
+                    Prefetch(
+                        "comments",
+                        queryset=Comment.objects.filter(
+                            active=True  
+                        ),
+                    )
+                )
+                .select_related("author")
+                .get(author__username=kwargs["username"], slug=kwargs["slug"])
             )
 
             serializer = self.serializer_class(article)

@@ -60,8 +60,10 @@ class Article(BaseModel):
 
     title = models.CharField(max_length=250)
     slug = AutoSlugField(populate_from="title", unique=True, always_update=True)
-    content = CKEditor5Field('Article Content', config_name='extends')
-    cover_image = models.ImageField(upload_to="articles/", null=True, blank=True, validators=[validate_file_size])
+    content = CKEditor5Field("Article Content", config_name="extends")
+    cover_image = models.ImageField(
+        upload_to="articles/", null=True, blank=True, validators=[validate_file_size]
+    )
     tags = models.ManyToManyField(Tag, blank=True)
     status = models.CharField(
         max_length=20,
@@ -86,13 +88,17 @@ class Article(BaseModel):
     def clean(self):
         if self.tags.count() > 5:
             raise ValidationError("Maximum 5 tags allowed per article")
-        
+
         if self.published_at and self.status != ArticleStatusChoices.PUBLISHED:
-            raise ValidationError("Published date can only be set when article status is 'Published'")
-        
+            raise ValidationError(
+                "Published date can only be set when article status is 'Published'"
+            )
+
         if self.status != ArticleStatusChoices.PUBLISHED and self.is_featured:
-            raise ValidationError("'Is featured' can only be set when article status is 'Published'")
-        
+            raise ValidationError(
+                "'Is featured' can only be set when article status is 'Published'"
+            )
+
     def calculate_read_time(self):
         return ReadabilityMetrics.method_hybrid(self.content)
 
@@ -208,13 +214,51 @@ class Comment(BaseModel):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ("created_at",)
+        ordering = ("-created_at",)
+        indexes = [
+            models.Index(fields=["article", "parent"]),  # For filtering top-level
+            models.Index(fields=["article", "active"]),  # For counting active
+        ]
+
+    # def __str__(self):
+    #     if self.parent:
+    #         return f"↳ Reply by {self.user.full_name} to comment #{self.parent.id}"
+    #     return f"Comment by {self.user.full_name} {self.id} on {self.article.title}"
 
     def __str__(self):
-        return f"Comment by {self.user.full_name} on {self.article}"
+        if self.parent:
+            preview = self.body[:30] + "..." if len(self.body) > 30 else self.body
+            return f"↳ Reply by {self.user.full_name}: \"{preview}\""
+        
+        preview = self.body[:40] + "..." if len(self.body) > 40 else self.body
+        return f"{self.user.full_name}: \"{preview}\""
+    
+    @property
+    def is_reply(self):
+        """Helper property to check if this is a reply"""
+        return self.parent is not None
 
-    def get_comments(self):
-        return Comment.objects.filter(parent=self).filter(active=True)
+    # TODO: optimize later
+    def get_all_replies_count(self):
+        """
+        Recursively count ALL replies (direct children + their descendants).
+        This handles nested comment threads of any depth.
+        """
+
+        def count_recursive(comment):
+            direct_replies = comment.replies.filter(active=True)
+            count = direct_replies.count()
+
+            for reply in direct_replies:
+                count += count_recursive(reply)
+            return count
+
+        return count_recursive(self)
+
+    def get_direct_replies(self):
+        # Available for future pagination/lazy-loading features
+        """Get only direct child replies (one level deep)"""
+        return self.replies.filter(active=True)
 
 
 class Job(BaseModel):
@@ -246,7 +290,7 @@ class Job(BaseModel):
         max_length=20, choices=WORK_MODE_CHOICES, default="ONSITE"
     )
     is_active = models.BooleanField(default=True)
-    
+
     objects = models.Manager()
     active = ActiveManager()
 
@@ -281,7 +325,9 @@ class Resource(BaseModel):
         Category, related_name="resources", on_delete=models.SET_NULL, null=True
     )
     name = models.CharField(max_length=250)
-    image = models.ImageField(upload_to="resources/", null=True, blank=True, validators=[validate_file_size])
+    image = models.ImageField(
+        upload_to="resources/", null=True, blank=True, validators=[validate_file_size]
+    )
     body = models.TextField()
     url = models.CharField(max_length=250, validators=[URLValidator()])
     is_featured = models.BooleanField(default=False)

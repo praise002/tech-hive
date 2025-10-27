@@ -18,6 +18,15 @@
 
 ---
 
+GET /articles/{username}/{slug}/
+Response includes:
+- Article data
+- Top-level comments (where parent=None)
+- Each comment shows reply_count
+GET /comments/{comment_id}/replies/
+Response includes:
+- Direct child comments of that comment
+- Each reply shows its own reply_count
 ## 👀 Reviewer Role
 
 **Review Management:**

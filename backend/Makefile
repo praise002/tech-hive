@@ -6,11 +6,11 @@ ENV_FILE_PARAM = --env-file .env
 endif
 
 create_env:
-	py -m venv env
+	python3.12 -m venv venv
 
-act:
-	.\env\Scripts\activate
-
+# act:  # doesn't work
+# 	source venv/bin/activate
+# realpath venv
 mmig: 
 	python manage.py makemigrations
 

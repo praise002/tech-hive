@@ -91,7 +91,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.URLField)
     def get_cover_image_url(self, obj):
         return obj.cover_image_url
-    
+
     @extend_schema_field(serializers.IntegerField)
     def get_read_time(self, obj):
         return obj.calculate_read_time()
@@ -225,16 +225,101 @@ class CommentSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.BooleanField)
     def get_is_reply(self, obj):
-        return obj.parent is not None
+        return obj.is_reply
 
     @extend_schema_field(serializers.IntegerField)
     def get_reply_count(self, obj):
-        return obj.replies.filter(active=True).count()
+        # return obj.replies.filter(active=True).count()
+        return obj.get_all_replies_count()
+
+
+class ArticleCommentSerializer(serializers.ModelSerializer):
+    """Serializer for displaying comments on articles with lazy-loading support"""
+
+    user_name = serializers.CharField(source="user.full_name", read_only=True)
+    user_avatar = serializers.URLField(source="user.avatar_url", read_only=True)
+    user_username = serializers.CharField(source="user.username", read_only=True)
+    reply_count = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = models.Comment
+        fields = [
+            "id",
+            "body",
+            "created_at",
+            "user_name",
+            "user_username",
+            "user_avatar",
+            "reply_count",
+        ]
+
+    @extend_schema_field(serializers.IntegerField)
+    def get_reply_count(self, obj):
+        """Count active replies for this comment"""
+        return obj.get_all_replies_count()
+
+
+class ArticleDetailSerializer(ArticleSerializer):
+    comments = serializers.SerializerMethodField(read_only=True)
+    comments_count = serializers.SerializerMethodField(read_only=True)
+
+    class Meta(ArticleSerializer.Meta):
+        fields = ArticleSerializer.Meta.fields + ["comments", "comments_count"]
+
+    @extend_schema_field(ArticleCommentSerializer(many=True))
+    def get_comments(self, obj):
+        """Get top-level comments only (where parent=None)"""
+        # The queryset is already prefetched in the view, so this won't cause N+1
+        top_level_comments = [
+            comment for comment in obj.comments.all() if comment.parent is None
+        ]
+
+        # Sort by recency (newest first)
+        top_level_comments.sort(key=lambda x: x.created_at, reverse=True)
+
+        serializer = ArticleCommentSerializer(
+            top_level_comments,
+            many=True,
+        )
+        return serializer.data
+
+    @extend_schema_field(serializers.IntegerField)
+    def get_comments_count(self, obj):
+        """Get total count of all active comments (including nested)"""
+        return obj.comments.filter(active=True).count()
+
+
+class CommentWithRepliesSerializer(serializers.ModelSerializer):
+    """Serializer for fetching replies of a specific comment"""
+
+    user_name = serializers.CharField(source="user.full_name", read_only=True)
+    user_avatar = serializers.URLField(source="user.avatar_url", read_only=True)
+    user_username = serializers.CharField(source="user.username", read_only=True)
+    reply_count = serializers.SerializerMethodField(read_only=True)
+    parent_id = serializers.UUIDField(source="parent.id", read_only=True)
+
+    class Meta:
+        model = models.Comment
+        fields = [
+            "id",
+            "body",
+            "created_at",
+            "user_name",
+            "user_username",
+            "user_avatar",
+            "reply_count",
+            "parent_id",
+        ]
+
+    @extend_schema_field(serializers.IntegerField)
+    def get_reply_count(self, obj):
+        """Count active replies for this comment"""
+        return obj.get_all_replies_count()
 
 
 class JobSerializer(serializers.ModelSerializer):
     category = serializers.CharField(source="category.name", read_only=True)
-    
+
     class Meta:
         model = models.Job
         fields = [
@@ -255,7 +340,7 @@ class JobSerializer(serializers.ModelSerializer):
 
 class EventSerializer(serializers.ModelSerializer):
     category = serializers.CharField(source="category.name", read_only=True)
-    
+
     class Meta:
         model = models.Event
         fields = [
@@ -274,7 +359,7 @@ class EventSerializer(serializers.ModelSerializer):
 class ResourceSerializer(serializers.ModelSerializer):
     category = serializers.CharField(source="category.name", read_only=True)
     image_url = serializers.SerializerMethodField(read_only=True)
-    
+
     class Meta:
         model = models.Resource
         fields = ["id", "name", "image_url", "body", "url", "category", "is_featured"]
@@ -282,6 +367,7 @@ class ResourceSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.CharField)
     def get_image_url(self, obj):
         return obj.image_url
+
 
 class ToolTagSerializer(serializers.ModelSerializer):
     class Meta:
@@ -295,7 +381,17 @@ class ToolSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Tool
-        fields = ["id", "name", "desc", "url", "image_url", "call_to_action", "tags", "category", "is_featured"]
+        fields = [
+            "id",
+            "name",
+            "desc",
+            "url",
+            "image_url",
+            "call_to_action",
+            "tags",
+            "category",
+            "is_featured",
+        ]
 
 
 # TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH
