@@ -6,16 +6,20 @@ from apps.common.exceptions import NotFoundError
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
 from apps.content.models import Article, Comment, Tag
+from apps.content.permissions import IsPublished
 from apps.content.schema_examples import (
     ACCEPT_GUIDELINES_RESPONSE_EXAMPLE,
     ARTICLE_DETAIL_RESPONSE_EXAMPLE,
     ARTICLE_LIST_RESPONSE_EXAMPLE,
+    COMMENT_CREATE_RESPONSE_EXAMPLE,
     TAG_RESPONSE_EXAMPLE,
     THREAD_REPLIES_RESPONSE_EXAMPLE,
 )
 from apps.content.serializers import (
     ArticleDetailSerializer,
     ArticleSerializer,
+    CommentCreateSerializer,
+    CommentResponseSerializer,
     ContributorOnboardingSerializer,
     TagSerializer,
     ThreadReplySerializer,
@@ -212,6 +216,39 @@ class ThreadRepliesView(APIView):
             message="Replies retrieved successfully.",
             data=serializer.data,
             status_code=status.HTTP_200_OK,
+        )
+
+
+class CommentCreateView(APIView):
+    """Create a new comment (root) or reply to existing thread"""
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = CommentCreateSerializer
+
+    @extend_schema(
+        summary="Create a comment or reply",
+        description=(
+            "Create a new root comment on an article OR add a reply to an existing thread. "
+            "If thread_id is provided, creates a reply. Otherwise, creates a new root comment. "
+            "Threads are limited to 100 replies maximum."
+        ),
+        tags=article_tags,
+        responses=COMMENT_CREATE_RESPONSE_EXAMPLE,
+    )
+    def post(self, request):
+        serializer = self.serializer_class(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        comment = serializer.save()
+
+        response_serializer = CommentResponseSerializer(comment)
+
+        return CustomResponse.success(
+            message="Comment created successfully.",
+            data=response_serializer.data,
+            status_code=status.HTTP_201_CREATED,
         )
 
 

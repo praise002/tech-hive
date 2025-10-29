@@ -12,6 +12,7 @@ urlpatterns = [
     path("tags/", views.TagGenericView.as_view()),
     path("contribute/", views.AcceptGuidelinesView.as_view()),
     path("articles/", views.ArticleListView.as_view()),
+    path("comments/", views.CommentCreateView.as_view()),
     path("articles/feed/", LatestArticlesFeed()),
     # path("articles/rss/", views.RSSFeedInfoView.as_view()),
     path(
@@ -21,6 +22,3 @@ urlpatterns = [
     ),
     path("comments/<uuid:comment_id>/replies/", views.ThreadRepliesView.as_view()),
 ]
-
-# POST /comments/ - Create root comment or reply
-# GET /comments/{id}/replies/ - Fetch all replies in thread
