@@ -1,4 +1,5 @@
 from apps.accounts.schema_examples import UNAUTHORIZED_USER_RESPONSE
+from apps.common.errors import ErrorCode
 from apps.common.schema_examples import (
     AVATAR_URL,
     COVER_IMAGE_URL,
@@ -10,6 +11,7 @@ from apps.common.serializers import ErrorDataResponseSerializer, ErrorResponseSe
 from apps.content.serializers import (
     ArticleSerializer,
     CategorySerializer,
+    CommentResponseSerializer,
     ContributorOnboardingSerializer,
     EventSerializer,
     JobSerializer,
@@ -19,8 +21,6 @@ from apps.content.serializers import (
     ToolSerializer,
 )
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse
-
-from apps.common.errors import ErrorCode
 
 CATEGORY_LIST_EXAMPLE = {
     "id": UUID_EXAMPLE,
@@ -188,7 +188,7 @@ REPLIES_DATA_EXAMPLE = [
         "user_username": "john-doe",
         "user_avatar": AVATAR_URL,
         "replying_to_name": "Joseph Ayo",
-        "replying_to_username": "josedev"
+        "replying_to_username": "josedev",
     },
     {
         "id": UUID_EXAMPLE,
@@ -198,9 +198,20 @@ REPLIES_DATA_EXAMPLE = [
         "user_username": "jane-smith",
         "user_avatar": AVATAR_URL,
         "replying_to_name": "Joseph Ayo",
-        "replying_to_username": "josedev"
+        "replying_to_username": "josedev",
     },
 ]
+
+COMMENT_CREATE_EXAMPLE = {
+    "id": UUID_EXAMPLE,
+    "thread_id": "2c9e2a3b-f7a8-4a9b-b3a1-d7c8e9f0a1b2",
+    "body": "I agree with this point!",
+    "created_at": "2025-10-27T10:05:00Z",
+    "user_name": "Jane Smith",
+    "user_username": "jane-smith",
+    "user_avatar": AVATAR_URL,
+    "is_root": False,
+}
 
 ACCEPT_GUIDELINES_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(
@@ -303,6 +314,20 @@ ARTICLE_DETAIL_RESPONSE_EXAMPLE = {
             ),
         ],
     ),
+    404: OpenApiResponse(
+        description="Article not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Article Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Article not found.",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
 }
 
 EVENTS_RESPONSE_EXAMPLE = {
@@ -388,19 +413,52 @@ THREAD_REPLIES_RESPONSE_EXAMPLE = {
             ),
         ],
     ),
-    400: ErrorDataResponseSerializer,
     404: OpenApiResponse(
         description="Comment not found",
         response=ErrorResponseSerializer,
         examples=[
             OpenApiExample(
-                name="Success Response",
+                name="Comment Not Found",
                 value={
                     "status": ERR_RESPONSE_STATUS,
-                    "err_msg": "Comment not found",
-                    "err_code": ErrorCode.NON_EXISTENT,
+                    "message": "Comment not found",
+                    "code": ErrorCode.NON_EXISTENT,
                 },
             ),
         ],
     ),
+    422: ErrorDataResponseSerializer,
+}
+
+COMMENT_CREATE_RESPONSE_EXAMPLE = {
+    201: OpenApiResponse(
+        description="Comment created successfully",
+        response=CommentResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Comment created successfully.",
+                    "data": COMMENT_CREATE_EXAMPLE,
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    404: OpenApiResponse(
+        description="Article not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Article Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Article not found",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+    422: ErrorDataResponseSerializer,
 }

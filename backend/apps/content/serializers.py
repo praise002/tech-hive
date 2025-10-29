@@ -2,8 +2,11 @@ from apps.accounts.models import ContributorOnboarding
 from apps.content import models
 from apps.content.CustomRelations import CustomHyperlinkedIdentityField
 from apps.content.models import Article, Comment, CommentThread
+from apps.content.utils import ArticleStatusChoices
+from django.db.models import F
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 
 
 def process_tags(tag_names):
@@ -239,9 +242,12 @@ class CommentCreateSerializer(serializers.ModelSerializer):
 
         # Validate article exists and is published
         try:
-            article = Article.published.get(id=data["article_id"])
+            article = Article.objects.get(id=data["article_id"])
         except Article.DoesNotExist:
             raise serializers.ValidationError("Article not found")
+
+        if article.status != ArticleStatusChoices.PUBLISHED:
+            raise PermissionDenied("Cannot comment on unpublished articles")
 
         # If thread_id provided, validate it belongs to the article
         if data.get("thread_id"):
@@ -269,6 +275,7 @@ class CommentCreateSerializer(serializers.ModelSerializer):
 
         return data
 
+    # TODO: replying_to logic later
     def create(self, validated_data):
         """Create root comment or reply with proper thread handling"""
 
@@ -284,12 +291,15 @@ class CommentCreateSerializer(serializers.ModelSerializer):
                     thread=self.thread,
                     user=user,
                     body=validated_data["body"],
-                    replying_to=self.thread.root_comment.user,  # Auto-mention root author
                 )
 
                 # Increment thread reply count
                 self.thread.reply_count += 1
-                self.thread.save(update_fields=["reply_count"])
+                CommentThread.objects.filter(id=self.thread.id).update(
+                    reply_count=F("reply_count") + 1
+                )
+
+                self.thread.refresh_from_db()
 
             else:
                 # CASE: Creating root comment (new thread)
@@ -321,7 +331,6 @@ class CommentResponseSerializer(serializers.ModelSerializer):
     user_avatar = serializers.URLField(source="user.avatar_url", read_only=True)
     thread_id = serializers.UUIDField(source="thread.id", read_only=True)
     is_root = serializers.SerializerMethodField(read_only=True)
-    reply_count = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = models.Comment
@@ -334,16 +343,11 @@ class CommentResponseSerializer(serializers.ModelSerializer):
             "user_username",
             "user_avatar",
             "is_root",
-            "reply_count",
         ]
 
     @extend_schema_field(serializers.BooleanField)
     def get_is_root(self, obj):
         return obj.is_root_comment
-
-    @extend_schema_field(serializers.IntegerField)
-    def get_reply_count(self, obj):
-        return obj.get_all_replies_count()
 
 
 class ArticleCommentSerializer(serializers.ModelSerializer):
@@ -511,4 +515,6 @@ class ToolSerializer(serializers.ModelSerializer):
         ]
 
 
+# TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH
+# TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH
 # TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH

@@ -4,6 +4,7 @@ from .articles import (
     ArticleRetrieveView,
     TagGenericView,
     ThreadRepliesView,
+    CommentCreateView,
 )
 from .contents import (
     CategoryGenericView,
@@ -24,4 +25,5 @@ __all__ = [
     "ResourceListView",
     "ToolListView",
     "ThreadRepliesView",
+    "CommentCreateView",
 ]

@@ -17,6 +17,7 @@ from apps.content.models import (
     Tool,
 )
 from django.contrib.auth.models import Group
+from django.db.models import F
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -29,6 +30,7 @@ class TestContents(APITestCase):
     events_url = "/api/v1/events/"
     resources_url = "/api/v1/resources/"
     tools_url = "/api/v1/tools/"
+    create_comment_url = "/api/v1/comments/"
 
     def setUp(self):
         self.user1 = TestUtil.new_user()
@@ -125,24 +127,24 @@ class TestContents(APITestCase):
         self.root_comment.thread = self.thread
         self.root_comment.save()
 
-        Comment.objects.create(
-            article=self.published_article1,
-            user=self.user3,
-            body="First reply",
-            thread=self.thread,
-        )
-        Comment.objects.create(
-            article=self.published_article1,
-            user=self.user1,
-            body="Second reply",
-            thread=self.thread,
-        )
-        Comment.objects.create(
-            article=self.published_article1,
-            user=self.user2,
-            body="Third reply",
-            thread=self.thread,
-        )
+        reply_data = [
+            (self.user3, "First reply"),
+            (self.user1, "Second reply"),
+            (self.user2, "Third reply"),
+        ]
+
+        for user, body in reply_data:
+            Comment.objects.create(
+                article=self.published_article1,
+                user=user,
+                body=body,
+                thread=self.thread,
+            )
+            CommentThread.objects.filter(id=self.thread.id).update(
+                reply_count=F("reply_count") + 1
+            )
+
+        self.thread.refresh_from_db()
 
     def test_onboarding(self):
         self.valid_data = {"terms_accepted": True}
@@ -222,7 +224,6 @@ class TestContents(APITestCase):
             f"/api/v1/articles/{self.user2.username}/{self.published_article1.slug}/"
         )
         response = self.client.get(article_detail_url)
-        print(response.json())
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("data", response.json())
@@ -560,5 +561,273 @@ class TestContents(APITestCase):
         self.assertEqual(data[0]["body"], "Reply number 1")
         self.assertEqual(data[99]["body"], "Reply number 100")
 
+    def test_comment_create_unauthenticated(self):
+        data = {
+            "article_id": str(self.published_article1.id),
+            "body": "This should fail",
+        }
+
+        response = self.client.post(self.create_comment_url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_comment_create_root_comment_success(self):
+        self.client.force_authenticate(user=self.user1)
+
+        data = {
+            "article_id": str(self.published_article1.id),
+            "body": "This is a new root comment",
+        }
+
+        response = self.client.post(self.create_comment_url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        response_data = response.json()["data"]
+
+        # Verify response structure
+        self.assertIn("id", response_data)
+        self.assertIn("thread_id", response_data)
+        self.assertEqual(response_data["body"], "This is a new root comment")
+        self.assertEqual(response_data["user_username"], self.user1.username)
+        self.assertEqual(response_data["user_name"], self.user1.full_name)
+        self.assertTrue(response_data["is_root"])
+
+        # Verify database state
+        comment = Comment.objects.get(id=response_data["id"])
+        self.assertEqual(comment.article, self.published_article1)
+        self.assertEqual(comment.user, self.user1)
+        self.assertIsNotNone(comment.thread)
+        self.assertEqual(comment.thread.root_comment, comment)
+        self.assertEqual(comment.thread.reply_count, 0)
+        self.assertTrue(comment.is_root_comment)
+
+    def test_comment_create_reply_success(self):
+
+        self.client.force_authenticate(user=self.user1)
+
+        data = {
+            "article_id": str(self.published_article1.id),
+            "thread_id": str(self.thread.id),
+            "body": "This is a reply to the thread",
+        }
+
+        # Get initial reply count
+        initial_reply_count = self.thread.reply_count
+
+        response = self.client.post(self.create_comment_url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        response_data = response.json()["data"]
+
+        # Verify response structure
+        self.assertEqual(response_data["body"], "This is a reply to the thread")
+        self.assertEqual(response_data["user_username"], self.user1.username)
+        self.assertEqual(response_data["thread_id"], str(self.thread.id))
+        self.assertFalse(response_data["is_root"])
+
+        # Verify database state
+        comment = Comment.objects.get(id=response_data["id"])
+        self.assertEqual(comment.thread, self.thread)
+        self.assertFalse(comment.is_root_comment)
+
+        # Verify thread reply count incremented
+        self.thread.refresh_from_db()
+        self.assertEqual(self.thread.reply_count, initial_reply_count + 1)
+
+    def test_comment_create_missing_article_id(self):
+        self.client.force_authenticate(user=self.user1)
+
+        data = {
+            "body": "Comment without article_id",
+        }
+
+        response = self.client.post(self.create_comment_url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    def test_comment_create_missing_body(self):
+        self.client.force_authenticate(user=self.user1)
+
+        data = {
+            "article_id": str(self.published_article1.id),
+        }
+
+        response = self.client.post(self.create_comment_url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    def test_comment_create_article_not_found(self):
+
+        self.client.force_authenticate(user=self.user1)
+
+        non_existent_id = uuid.uuid4()
+        data = {
+            "article_id": str(non_existent_id),
+            "body": "Comment on non-existent article",
+        }
+
+        response = self.client.post(self.create_comment_url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+        self.assertEqual(response.data["code"], ErrorCode.VALIDATION_ERROR)
+
+    def test_comment_create_unpublished_article(self):
+
+        self.client.force_authenticate(user=self.user1)
+
+        data = {
+            "article_id": str(self.draft_article.id),
+            "body": "Comment on draft article",
+        }
+
+        response = self.client.post(self.create_comment_url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data["code"], ErrorCode.FORBIDDEN)
+
+    def test_comment_create_thread_not_found(self):
+
+        self.client.force_authenticate(user=self.user1)
+
+        non_existent_thread_id = uuid.uuid4()
+        data = {
+            "article_id": str(self.published_article1.id),
+            "thread_id": str(non_existent_thread_id),
+            "body": "Reply to non-existent thread",
+        }
+
+        response = self.client.post(self.create_comment_url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+        self.assertEqual(response.data["code"], ErrorCode.VALIDATION_ERROR)
+
+    def test_comment_create_thread_article_mismatch(self):
+        # Create a thread on different article
+        other_root = Comment.objects.create(
+            article=self.published_article2,
+            user=self.user2,
+            body="Root on different article",
+        )
+        other_thread = CommentThread.objects.create(
+            article=self.published_article2,
+            root_comment=other_root,
+        )
+        other_root.thread = other_thread
+        other_root.save()
+
+        self.client.force_authenticate(user=self.user1)
+
+        data = {
+            "article_id": str(self.published_article1.id),
+            "thread_id": str(other_thread.id),
+            "body": "Reply to wrong article's thread",
+        }
+
+        response = self.client.post(self.create_comment_url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+        self.assertEqual(response.data["code"], ErrorCode.VALIDATION_ERROR)
+
+    def test_comment_create_thread_max_replies_reached(self):
+        # Create a thread with 100 replies
+        root_comment = Comment.objects.create(
+            article=self.published_article1,
+            user=self.user2,
+            body="Root with max replies",
+        )
+        thread = CommentThread.objects.create(
+            article=self.published_article1,
+            root_comment=root_comment,
+            reply_count=100,
+        )
+        root_comment.thread = thread
+        root_comment.save()
+
+        self.client.force_authenticate(user=self.user1)
+
+        data = {
+            "article_id": str(self.published_article1.id),
+            "thread_id": str(thread.id),
+            "body": "This should fail - thread full",
+        }
+
+        response = self.client.post(self.create_comment_url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+        self.assertEqual(response.data["code"], ErrorCode.VALIDATION_ERROR)
+
+    def test_comment_create_inactive_thread(self):
+        # Create inactive thread
+        inactive_root = Comment.objects.create(
+            article=self.published_article1,
+            user=self.user2,
+            body="Inactive thread root",
+        )
+        inactive_thread = CommentThread.objects.create(
+            article=self.published_article1,
+            root_comment=inactive_root,
+            is_active=False,
+        )
+        inactive_root.thread = inactive_thread
+        inactive_root.save()
+
+        self.client.force_authenticate(user=self.user1)
+
+        data = {
+            "article_id": str(self.published_article1.id),
+            "thread_id": str(inactive_thread.id),
+            "body": "Reply to inactive thread",
+        }
+
+        response = self.client.post(self.create_comment_url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    def test_comment_create_empty_body(self):
+        """Test 422 error when body is empty string"""
+        self.client.force_authenticate(user=self.user1)
+
+        data = {
+            "article_id": str(self.published_article1.id),
+            "body": "",
+        }
+
+        response = self.client.post(self.create_comment_url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    def test_comment_create_multiple_replies_same_thread(self):
+
+        self.client.force_authenticate(user=self.user1)
+
+        # First reply
+        data1 = {
+            "article_id": str(self.published_article1.id),
+            "thread_id": str(self.thread.id),
+            "body": "First reply from user1",
+        }
+        response1 = self.client.post(self.create_comment_url, data1)
+
+        self.assertEqual(response1.status_code, status.HTTP_201_CREATED)
+
+        # Second reply
+        data2 = {
+            "article_id": str(self.published_article1.id),
+            "thread_id": str(self.thread.id),
+            "body": "Second reply from user1",
+        }
+        response2 = self.client.post(self.create_comment_url, data2)
+
+        self.assertEqual(response2.status_code, status.HTTP_201_CREATED)
+
+        # Verify thread reply count
+        self.thread.refresh_from_db()
+        # Initial setup had 3 replies + 2 new = 5
+        self.assertEqual(self.thread.reply_count, 5)
+
+
 # python manage.py test apps.content.tests.TestContents -k thread_replies
+# python manage.py test apps.content.tests.TestContents.test_article_list
 # python manage.py test apps.content.tests.TestContents.test_article_list
