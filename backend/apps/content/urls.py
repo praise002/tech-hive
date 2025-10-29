@@ -19,5 +19,8 @@ urlpatterns = [
         views.ArticleRetrieveView.as_view(),
         name="article_detail",
     ),
-    # path("comments/<uuid:comment_id>/replies/", views.CommentRepliesView.as_view()),
+    path("comments/<uuid:comment_id>/replies/", views.ThreadRepliesView.as_view()),
 ]
+
+# POST /comments/ - Create root comment or reply
+# GET /comments/{id}/replies/ - Fetch all replies in thread

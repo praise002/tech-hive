@@ -49,8 +49,8 @@ class CommentThreadAdmin(admin.ModelAdmin):
 
 @admin.register(models.Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display=('user', 'body', 'active')
-    list_filter = ('active', 'created_at', 'updated_at')
+    list_display=('user', 'body', 'is_active')
+    list_filter = ('is_active', 'created_at', 'updated_at')
     search_fields = ('body',)
 
 

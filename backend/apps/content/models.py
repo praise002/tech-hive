@@ -126,7 +126,7 @@ class Article(BaseModel):
     @property
     def all_comments_count(self):
         """Total active comments on this article"""
-        return self.comments.filter(active=True).count()
+        return self.comments.filter(is_active=True).count()
 
     class Meta:
         ordering = ["-created_at"]
@@ -218,6 +218,9 @@ class CommentThread(BaseModel):
     is_active = models.BooleanField(default=True)
     reply_count = models.IntegerField(default=0)
 
+    objects = models.Manager()
+    active = ActiveManager()
+
     class Meta:
         indexes = [
             models.Index(fields=["article", "is_active"]),
@@ -246,7 +249,7 @@ class Comment(BaseModel):
         related_name="comments_by_user",
     )
     body = models.CharField(max_length=250)
-    active = models.BooleanField(default=True)  # for moderation purposes
+    is_active = models.BooleanField(default=True)  # for moderation purposes
 
     replying_to = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -257,6 +260,9 @@ class Comment(BaseModel):
         help_text="The user being replied to (for mentions)",
     )
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = models.Manager()
+    active = ActiveManager()
 
     class Meta:
         ordering = ("-created_at",)
@@ -269,9 +275,17 @@ class Comment(BaseModel):
             return f"{self.user.full_name} → @{self.replying_to.username}: {self.body[:30]}..."
         return f"{self.user.full_name}: {self.body[:40]}..."
 
+    @property
+    def is_root_comment(self):
+        """Check if this comment is the root of its thread"""
+        return self.thread_id and self.thread.root_comment_id == self.id
+
     def get_all_replies_count(self):
-        """Count ALL replies in this thread using denormalized field"""
-        if hasattr(self, "thread") and self.thread_id:
+        """
+        Get reply count ONLY for root comments.
+        Non-root comments return 0.
+        """
+        if self.is_root_comment:
             return self.thread.reply_count
         return 0
 

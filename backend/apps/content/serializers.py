@@ -1,6 +1,7 @@
 from apps.accounts.models import ContributorOnboarding
 from apps.content import models
 from apps.content.CustomRelations import CustomHyperlinkedIdentityField
+from apps.content.models import Article, Comment, CommentThread
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
@@ -199,7 +200,6 @@ class CommentSerializer(serializers.ModelSerializer):
         source="article.created_at", read_only=True
     )
     user_id = serializers.SerializerMethodField()
-    is_reply = serializers.SerializerMethodField()
 
     replying_to_username = serializers.CharField(
         source="replying_to.username", read_only=True
@@ -226,39 +226,124 @@ class CommentSerializer(serializers.ModelSerializer):
         return str(obj.user.id)
 
 
-# TODO: Still try to understand it
-# class CommentCreateSerializer(serializers.ModelSerializer):
-#     replying_to = serializers.UUIDField(required=False, write_only=True)
+class CommentCreateSerializer(serializers.ModelSerializer):
+    article_id = serializers.UUIDField(required=True)
+    thread_id = serializers.UUIDField(required=False)
 
-#     class Meta:
-#         model = models.Comment
-#         fields = ["article", "body", "parent", "replying_to"]
+    class Meta:
+        model = models.Comment
+        fields = ["article_id", "thread_id", "body"]
 
-#     def create(self, validated_data):
-#         user = self.context["request"].user
-#         replying_to_id = validated_data.pop("replying_to", None)
-#         # Get the parent comment to determine who we're replying to
-#         parent_comment = validated_data.get("parent")
+    def validate(self, data):
+        """Validate article and thread relationship"""
 
-#         # AUTO-MENTION LOGIC: If replying_to not provided but we have a parent, use parent's author
-#         if not replying_to_id and parent_comment:
-#             replying_to_id = parent_comment.user_id
+        # Validate article exists and is published
+        try:
+            article = Article.published.get(id=data["article_id"])
+        except Article.DoesNotExist:
+            raise serializers.ValidationError("Article not found")
 
-#         comment = models.Comment.objects.create(user=user, **validated_data)
+        # If thread_id provided, validate it belongs to the article
+        if data.get("thread_id"):
+            try:
+                thread = CommentThread.objects.select_related("root_comment").get(
+                    id=data["thread_id"], article_id=data["article_id"], is_active=True
+                )
 
-#         # Set who we're replying to (either explicitly provided or auto-detected from parent)
+                # Check thread hasn't reached max replies
+                if thread.reply_count >= 100:
+                    raise serializers.ValidationError(
+                        "This thread has reached the maximum number of replies (100)"
+                    )
 
-#         if replying_to_id:
-#             try:
-#                 from apps.accounts.models import User
+                # Store thread for use in create()
+                self.thread = thread
 
-#                 replying_to_user = User.objects.get(id=replying_to_id)
-#                 comment.replying_to = replying_to_user
-#                 comment.save()
-#             except User.DoesNotExist:
-#                 pass  # Silently fail if user doesn't exist
+            except CommentThread.DoesNotExist:
+                raise serializers.ValidationError("Thread not found")
+        else:
+            self.thread = None
 
-#         return comment
+        # Store article for use in create()
+        self.article = article
+
+        return data
+
+    def create(self, validated_data):
+        """Create root comment or reply with proper thread handling"""
+
+        from django.db import transaction
+
+        user = self.context["request"].user
+
+        with transaction.atomic():
+            if self.thread:
+                # CASE: Creating a reply
+                comment = Comment.objects.create(
+                    article=self.article,
+                    thread=self.thread,
+                    user=user,
+                    body=validated_data["body"],
+                    replying_to=self.thread.root_comment.user,  # Auto-mention root author
+                )
+
+                # Increment thread reply count
+                self.thread.reply_count += 1
+                self.thread.save(update_fields=["reply_count"])
+
+            else:
+                # CASE: Creating root comment (new thread)
+                # Step 1: Create comment without thread
+                comment = Comment.objects.create(
+                    article=self.article,
+                    user=user,
+                    body=validated_data["body"],
+                )
+
+                # Step 2: Create thread pointing to this comment
+                thread = CommentThread.objects.create(
+                    article=self.article,
+                    root_comment=comment,
+                )
+
+                # Step 3: Link comment back to thread
+                comment.thread = thread
+                comment.save(update_fields=["thread"])
+
+        return comment
+
+
+class CommentResponseSerializer(serializers.ModelSerializer):
+    """Serializer for returning comment data after creation"""
+
+    user_name = serializers.CharField(source="user.full_name", read_only=True)
+    user_username = serializers.CharField(source="user.username", read_only=True)
+    user_avatar = serializers.URLField(source="user.avatar_url", read_only=True)
+    thread_id = serializers.UUIDField(source="thread.id", read_only=True)
+    is_root = serializers.SerializerMethodField(read_only=True)
+    reply_count = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = models.Comment
+        fields = [
+            "id",
+            "thread_id",
+            "body",
+            "created_at",
+            "user_name",
+            "user_username",
+            "user_avatar",
+            "is_root",
+            "reply_count",
+        ]
+
+    @extend_schema_field(serializers.BooleanField)
+    def get_is_root(self, obj):
+        return obj.is_root_comment
+
+    @extend_schema_field(serializers.IntegerField)
+    def get_reply_count(self, obj):
+        return obj.get_all_replies_count()
 
 
 class ArticleCommentSerializer(serializers.ModelSerializer):
@@ -267,7 +352,7 @@ class ArticleCommentSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source="user.full_name", read_only=True)
     user_avatar = serializers.URLField(source="user.avatar_url", read_only=True)
     user_username = serializers.CharField(source="user.username", read_only=True)
-    reply_count = serializers.SerializerMethodField(read_only=True)
+    total_replies = serializers.SerializerMethodField(read_only=True)
     thread_id = serializers.UUIDField(source="thread.id", read_only=True)
 
     class Meta:
@@ -280,11 +365,11 @@ class ArticleCommentSerializer(serializers.ModelSerializer):
             "user_name",
             "user_username",
             "user_avatar",
-            "reply_count",
+            "total_replies",
         ]
 
     @extend_schema_field(serializers.IntegerField)
-    def get_reply_count(self, obj):
+    def get_total_replies(self, obj):
         """Count active replies for this comment"""
         return obj.get_all_replies_count()
 
@@ -302,7 +387,8 @@ class ArticleDetailSerializer(ArticleSerializer):
         root_comments = [
             comment
             for comment in obj.comments.all()
-            if comment.thread is not None and comment.thread.root_comment_id == comment.id
+            if comment.thread is not None
+            and comment.thread.root_comment_id == comment.id
         ]
 
         # Sort by recency (newest first) - TODO: CHECK IF IT SORTS BY DEFAULT
@@ -320,13 +406,12 @@ class ArticleDetailSerializer(ArticleSerializer):
         return obj.all_comments_count
 
 
-class CommentWithRepliesSerializer(serializers.ModelSerializer):
-    """Serializer for fetching replies of a specific comment"""
+class ThreadReplySerializer(serializers.ModelSerializer):
+    """Serializer for displaying replies in a thread"""
 
     user_name = serializers.CharField(source="user.full_name", read_only=True)
     user_avatar = serializers.URLField(source="user.avatar_url", read_only=True)
     user_username = serializers.CharField(source="user.username", read_only=True)
-    reply_count = serializers.SerializerMethodField(read_only=True)
 
     replying_to_name = serializers.CharField(
         source="replying_to.full_name", read_only=True
@@ -344,15 +429,9 @@ class CommentWithRepliesSerializer(serializers.ModelSerializer):
             "user_name",
             "user_username",
             "user_avatar",
-            "reply_count",
             "replying_to_name",
             "replying_to_username",
         ]
-
-    @extend_schema_field(serializers.IntegerField)
-    def get_reply_count(self, obj):
-        """Count active replies for this comment"""
-        return obj.get_all_replies_count()
 
 
 class JobSerializer(serializers.ModelSerializer):

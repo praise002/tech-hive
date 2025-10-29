@@ -1,6 +1,7 @@
 import logging
 
 from apps.accounts.utils import UserRoles
+from apps.common.errors import ErrorCode
 from apps.common.exceptions import NotFoundError
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
@@ -10,13 +11,14 @@ from apps.content.schema_examples import (
     ARTICLE_DETAIL_RESPONSE_EXAMPLE,
     ARTICLE_LIST_RESPONSE_EXAMPLE,
     TAG_RESPONSE_EXAMPLE,
+    THREAD_REPLIES_RESPONSE_EXAMPLE,
 )
 from apps.content.serializers import (
     ArticleDetailSerializer,
     ArticleSerializer,
-    CommentWithRepliesSerializer,
     ContributorOnboardingSerializer,
     TagSerializer,
+    ThreadReplySerializer,
 )
 from django.contrib.auth.models import Group
 from django.db import transaction
@@ -75,12 +77,6 @@ class AcceptGuidelinesView(APIView):
             message="Congratulations! You are now a Tech Hive contributor!",
             status_code=status.HTTP_201_CREATED,
         )
-
-
-# In your view
-# comment.replies.filter(
-#     active=True
-# ).select_related('user').order_by('-created_at')
 
 
 class ArticleListView(ListAPIView):
@@ -147,7 +143,7 @@ class ArticleRetrieveView(APIView):
                 Article.published.prefetch_related(
                     Prefetch(
                         "comments",
-                        queryset=Comment.objects.filter(active=True),
+                        queryset=Comment.objects.filter(is_active=True),
                     )
                 )
                 .select_related("author")
@@ -165,28 +161,58 @@ class ArticleRetrieveView(APIView):
             raise NotFoundError(err_msg="Article not found.")
 
 
-class CommentRepliesView(APIView):
-    """View for fetching replies of a specific comment"""
+class ThreadRepliesView(APIView):
+    """View for fetching all replies in a thread"""
 
-    serializer_class = CommentWithRepliesSerializer
+    serializer_class = ThreadReplySerializer
 
     @extend_schema(
-        summary="Get replies for a comment",
-        description="Retrieve all direct replies for a specific comment. "
-        "This endpoint supports lazy-loading of nested comments - "
-        "it returns only the direct children of the specified comment, "
-        "sorted by recency (newest first).",
+        summary="Get replies for a thread",
+        description=(
+            "Retrieve all replies in a thread. Pass the root comment ID to get all replies. "
+            "Returns replies sorted chronologically (oldest first) for natural conversation flow. "
+            "Only works for root comments - returns error if called on a reply."
+        ),
         tags=article_tags,
-        # responses={},
+        responses=THREAD_REPLIES_RESPONSE_EXAMPLE,
     )
     def get(self, request, comment_id):
         """
-        Get direct replies for a specific comment.
+        Get all replies in a thread.
 
         Args:
-            comment_id: UUID of the parent comment
+            comment_id: UUID of the ROOT comment (not a reply)
         """
-        pass
+        try:
+            comment = Comment.active.select_related("thread", "user").get(
+                id=comment_id,
+            )
+        except Comment.DoesNotExist:
+            raise NotFoundError(err_msg="Comment not found")
+
+        if not comment.is_root_comment:
+            return CustomResponse.error(
+                message="Can only fetch replies for root comments",
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                err_code=ErrorCode.VALIDATION_ERROR,
+            )
+
+        replies = (
+            Comment.active.filter(
+                thread=comment.thread,
+            )
+            .exclude(id=comment.id)  # Don't include root in replies list
+            .select_related("user")
+            .order_by("created_at")
+        )  # Oldest first
+
+        serializer = self.serializer_class(replies, many=True)
+
+        return CustomResponse.success(
+            message="Replies retrieved successfully.",
+            data=serializer.data,
+            status_code=status.HTTP_200_OK,
+        )
 
 
 class TagGenericView(ListAPIView):

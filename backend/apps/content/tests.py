@@ -1,10 +1,15 @@
+import uuid
+
 from apps.accounts.models import ContributorOnboarding
 from apps.accounts.utils import UserRoles
+from apps.common.errors import ErrorCode
 from apps.common.utils import TestUtil
 from apps.content.models import (
     Article,
     ArticleStatusChoices,
     Category,
+    Comment,
+    CommentThread,
     Event,
     Job,
     Resource,
@@ -108,6 +113,37 @@ class TestContents(APITestCase):
         self.tool1 = Tool.objects.create(name="VS Code", category=self.category)
         self.tool2 = Tool.objects.create(name="PyCharm", category=self.category)
 
+        self.root_comment = Comment.objects.create(
+            article=self.published_article1,
+            user=self.user2,
+            body="This is a root comment",
+        )
+        self.thread = CommentThread.objects.create(
+            article=self.published_article1,
+            root_comment=self.root_comment,
+        )
+        self.root_comment.thread = self.thread
+        self.root_comment.save()
+
+        Comment.objects.create(
+            article=self.published_article1,
+            user=self.user3,
+            body="First reply",
+            thread=self.thread,
+        )
+        Comment.objects.create(
+            article=self.published_article1,
+            user=self.user1,
+            body="Second reply",
+            thread=self.thread,
+        )
+        Comment.objects.create(
+            article=self.published_article1,
+            user=self.user2,
+            body="Third reply",
+            thread=self.thread,
+        )
+
     def test_onboarding(self):
         self.valid_data = {"terms_accepted": True}
         self.invalid_data = {"terms_accepted": False}
@@ -186,6 +222,7 @@ class TestContents(APITestCase):
             f"/api/v1/articles/{self.user2.username}/{self.published_article1.slug}/"
         )
         response = self.client.get(article_detail_url)
+        print(response.json())
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("data", response.json())
@@ -279,5 +316,249 @@ class TestContents(APITestCase):
 
         self.assertEqual(len(data["results"]), 2)
 
+    def test_thread_replies_success_with_replies(self):
+        url = f"/api/v1/comments/{self.root_comment.id}/replies/"
+        response = self.client.get(url)
 
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()["data"]
+
+        # Should return 3 replies (excluding root)
+        self.assertEqual(len(data), 3)
+
+        self.assertEqual(data[0]["body"], "First reply")
+        self.assertEqual(data[1]["body"], "Second reply")
+        self.assertEqual(data[2]["body"], "Third reply")
+
+        # Verify root comment is NOT in replies
+        reply_bodies = [reply["body"] for reply in data]
+        self.assertNotIn("This is a root comment", reply_bodies)
+
+        # Verify user information is included
+        self.assertIn("user_name", data[0])
+        self.assertIn("user_username", data[0])
+        self.assertIn("user_avatar", data[0])
+        self.assertEqual(data[0]["user_username"], self.user3.username)
+
+    def test_thread_replies_empty_thread(self):
+        root_comment = Comment.objects.create(
+            article=self.published_article1,
+            user=self.user2,
+            body="Root comment with no replies",
+        )
+        thread = CommentThread.objects.create(
+            article=self.published_article1,
+            root_comment=root_comment,
+        )
+        root_comment.thread = thread
+        root_comment.save()
+
+        url = f"/api/v1/comments/{root_comment.id}/replies/"
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()["data"]
+        self.assertEqual(len(data), 0)
+        self.assertIsInstance(data, list)
+
+    def test_thread_replies_excludes_inactive_replies(self):
+        root_comment = Comment.objects.create(
+            article=self.published_article1,
+            user=self.user2,
+            body="Root comment",
+        )
+        thread = CommentThread.objects.create(
+            article=self.published_article1,
+            root_comment=root_comment,
+        )
+        root_comment.thread = thread
+        root_comment.save()
+
+        # Create active and inactive replies
+        Comment.objects.create(
+            article=self.published_article1,
+            user=self.user3,
+            body="Active reply",
+            thread=thread,
+        )
+        Comment.objects.create(
+            article=self.published_article1,
+            user=self.user1,
+            body="Inactive reply (deleted)",
+            thread=thread,
+            is_active=False,  # Soft deleted
+        )
+
+        url = f"/api/v1/comments/{root_comment.id}/replies/"
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()["data"]
+
+        # Should only return 1 active reply
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["body"], "Active reply")
+
+        # Verify inactive reply is not included
+        reply_bodies = [reply["body"] for reply in data]
+        self.assertNotIn("Inactive reply (deleted)", reply_bodies)
+
+    def test_thread_replies_comment_not_found(self):
+        non_existent_id = uuid.uuid4()
+        url = f"/api/v1/comments/{non_existent_id}/replies/"
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.json()["message"], "Comment not found")
+        self.assertEqual(response.json()["code"], ErrorCode.NON_EXISTENT)
+
+    def test_thread_replies_inactive_root_comment(self):
+        # Create inactive root comment
+        inactive_root = Comment.objects.create(
+            article=self.published_article1,
+            user=self.user2,
+            body="Deleted root comment",
+            is_active=False,
+        )
+
+        url = f"/api/v1/comments/{inactive_root.id}/replies/"
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.json()["message"], "Comment not found")
+        self.assertEqual(response.json()["code"], ErrorCode.NON_EXISTENT)
+
+    def test_thread_replies_for_reply_not_root(self):
+
+        root_comment = Comment.objects.create(
+            article=self.published_article1,
+            user=self.user2,
+            body="Root comment",
+        )
+        thread = CommentThread.objects.create(
+            article=self.published_article1,
+            root_comment=root_comment,
+        )
+        root_comment.thread = thread
+        root_comment.save()
+
+        # Create a reply (not a root)
+        reply = Comment.objects.create(
+            article=self.published_article1,
+            user=self.user3,
+            body="This is a reply",
+            thread=thread,
+        )
+
+        # Try to fetch replies for the reply (should fail)
+        url = f"/api/v1/comments/{reply.id}/replies/"
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    def test_thread_replies_multiple_threads_no_contamination(self):
+        """
+
+        Ensure thread isolation.
+        """
+
+        root1 = Comment.objects.create(
+            article=self.published_article1,
+            user=self.user2,
+            body="Root 1",
+        )
+        thread1 = CommentThread.objects.create(
+            article=self.published_article1,
+            root_comment=root1,
+        )
+        root1.thread = thread1
+        root1.save()
+
+        Comment.objects.create(
+            article=self.published_article1,
+            user=self.user3,
+            body="Reply to thread 1",
+            thread=thread1,
+        )
+
+        root2 = Comment.objects.create(
+            article=self.published_article1,
+            user=self.user1,
+            body="Root 2",
+        )
+        thread2 = CommentThread.objects.create(
+            article=self.published_article1,
+            root_comment=root2,
+        )
+        root2.thread = thread2
+        root2.save()
+
+        Comment.objects.create(
+            article=self.published_article1,
+            user=self.user2,
+            body="Reply to thread 2",
+            thread=thread2,
+        )
+
+        # Fetch replies for thread 1
+        url1 = f"/api/v1/comments/{root1.id}/replies/"
+        response1 = self.client.get(url1)
+        data1 = response1.json()["data"]
+
+        # Should only contain thread 1 replies
+        self.assertEqual(len(data1), 1)
+        self.assertEqual(data1[0]["body"], "Reply to thread 1")
+
+        # Fetch replies for thread 2
+        url2 = f"/api/v1/comments/{root2.id}/replies/"
+        response2 = self.client.get(url2)
+        data2 = response2.json()["data"]
+
+        # Should only contain thread 2 replies
+        self.assertEqual(len(data2), 1)
+        self.assertEqual(data2[0]["body"], "Reply to thread 2")
+
+    def test_thread_replies_max_replies(self):
+        """
+        Test thread with maximum replies (100).
+        Ensure all replies are returned and properly ordered.
+        """
+
+        root_comment = Comment.objects.create(
+            article=self.published_article1,
+            user=self.user2,
+            body="Root with many replies",
+        )
+        thread = CommentThread.objects.create(
+            article=self.published_article1,
+            root_comment=root_comment,
+        )
+        root_comment.thread = thread
+        root_comment.save()
+
+        # Create 100 replies
+        replies = []
+        for i in range(100):
+            reply = Comment.objects.create(
+                article=self.published_article1,
+                user=self.user3 if i % 2 == 0 else self.user1,
+                body=f"Reply number {i+1}",
+                thread=thread,
+            )
+            replies.append(reply)
+
+        url = f"/api/v1/comments/{root_comment.id}/replies/"
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()["data"]
+
+        # Should return all 100 replies
+        self.assertEqual(len(data), 100)
+
+        # Verify chronological order
+        self.assertEqual(data[0]["body"], "Reply number 1")
+        self.assertEqual(data[99]["body"], "Reply number 100")
+
+# python manage.py test apps.content.tests.TestContents -k thread_replies
 # python manage.py test apps.content.tests.TestContents.test_article_list

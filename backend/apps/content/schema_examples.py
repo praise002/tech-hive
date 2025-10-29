@@ -2,10 +2,11 @@ from apps.accounts.schema_examples import UNAUTHORIZED_USER_RESPONSE
 from apps.common.schema_examples import (
     AVATAR_URL,
     COVER_IMAGE_URL,
+    ERR_RESPONSE_STATUS,
     SUCCESS_RESPONSE_STATUS,
     UUID_EXAMPLE,
 )
-from apps.common.serializers import ErrorDataResponseSerializer
+from apps.common.serializers import ErrorDataResponseSerializer, ErrorResponseSerializer
 from apps.content.serializers import (
     ArticleSerializer,
     CategorySerializer,
@@ -14,9 +15,12 @@ from apps.content.serializers import (
     JobSerializer,
     ResourceSerializer,
     TagSerializer,
+    ThreadReplySerializer,
     ToolSerializer,
 )
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse
+
+from apps.common.errors import ErrorCode
 
 CATEGORY_LIST_EXAMPLE = {
     "id": UUID_EXAMPLE,
@@ -92,7 +96,7 @@ ARTICLE_DETAIL_EXAMPLE = {
             "user_name": "Praise ID",
             "user_username": "praise-id",
             "user_avatar": AVATAR_URL,
-            "reply_count": 0,
+            "total_replies": 0,
         }
     ],
     "comments_count": 1,
@@ -174,6 +178,29 @@ JOBS_DATA_EXAMPLE = {
     "previous": None,
     "results": [JOB_EXAMPLE],
 }
+
+REPLIES_DATA_EXAMPLE = [
+    {
+        "id": UUID_EXAMPLE,
+        "body": "Great article!",
+        "created_at": "2025-10-27T10:00:00Z",
+        "user_name": "John Doe",
+        "user_username": "john-doe",
+        "user_avatar": AVATAR_URL,
+        "replying_to_name": "Joseph Ayo",
+        "replying_to_username": "josedev"
+    },
+    {
+        "id": UUID_EXAMPLE,
+        "body": "I agree with you",
+        "created_at": "2025-10-27T10:05:00Z",
+        "user_name": "Jane Smith",
+        "user_username": "jane-smith",
+        "user_avatar": AVATAR_URL,
+        "replying_to_name": "Joseph Ayo",
+        "replying_to_username": "josedev"
+    },
+]
 
 ACCEPT_GUIDELINES_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(
@@ -340,6 +367,38 @@ JOB_RESPONSE_EXAMPLE = {
                     "status": SUCCESS_RESPONSE_STATUS,
                     "message": "Jobs retrieved successfully.",
                     "data": JOBS_DATA_EXAMPLE,
+                },
+            ),
+        ],
+    ),
+}
+
+THREAD_REPLIES_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Replies retrieved successfully",
+        response=ThreadReplySerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Replies retrieved successfully.",
+                    "data": REPLIES_DATA_EXAMPLE,
+                },
+            ),
+        ],
+    ),
+    400: ErrorDataResponseSerializer,
+    404: OpenApiResponse(
+        description="Comment not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "err_msg": "Comment not found",
+                    "err_code": ErrorCode.NON_EXISTENT,
                 },
             ),
         ],
