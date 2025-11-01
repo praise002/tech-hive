@@ -4,12 +4,14 @@ from apps.notification.serializers import NotificationSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
 
 tags = ["Notifications"]
 
 
 class NotificationListView(ListAPIView):
     serializer_class = NotificationSerializer
+    permission_classes = (IsAuthenticated,)
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ("is_read",)
     pagination_class = DefaultPagination

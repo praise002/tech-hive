@@ -29,7 +29,6 @@ from apps.profiles.schema_examples import (
     SAVED_ARTICLES_CREATE_RESPONSE_EXAMPLE,
     SAVED_ARTICLES_RESPONSE_EXAMPLE,
     USERNAMES_RESPONSE_EXAMPLE,
-    build_avatar_request_schema,
 )
 from apps.profiles.serializers import (
     AvatarSerializer,
@@ -247,7 +246,10 @@ class AvatarUpdateView(APIView):
         summary="Update user avatar",
         description="This endpoint allows authenticated users to upload or update their profile avatar.",
         tags=tags,
-        request=build_avatar_request_schema(),
+        # request=build_avatar_request_schema(),
+        request={
+            "multipart/form-data": AvatarSerializer,
+        },
         responses=AVATAR_UPDATE_RESPONSE_EXAMPLE,
     )
     def patch(self, request):
