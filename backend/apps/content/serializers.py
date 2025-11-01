@@ -1,8 +1,9 @@
-from apps.accounts.models import ContributorOnboarding
+from apps.accounts.models import ContributorOnboarding, User
 from apps.content import models
 from apps.content.CustomRelations import CustomHyperlinkedIdentityField
-from apps.content.models import Article, Comment, CommentThread
+from apps.content.models import Article, Comment, CommentMention, CommentThread
 from apps.content.utils import ArticleStatusChoices
+from apps.notification.utils import create_notification
 from django.db.models import F
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
@@ -289,12 +290,47 @@ class CommentCreateSerializer(serializers.ModelSerializer):
                 )
 
                 # Increment thread reply count
-                self.thread.reply_count += 1
                 CommentThread.objects.filter(id=self.thread.id).update(
                     reply_count=F("reply_count") + 1
                 )
 
                 self.thread.refresh_from_db()
+
+                # Notify the root comment author (thread starter) about the reply
+                root_comment_author = self.thread.root_comment.user
+                if (
+                    root_comment_author != user
+                ):  # Don't notify if replying to own thread
+                    create_notification(
+                        user, root_comment_author, "replied to your thread", comment
+                    )
+
+                # Notify post author
+                recipient = self.article.author
+
+                if recipient != user:
+                    create_notification(
+                        user, recipient, "commented on your post", comment
+                    )
+
+                # NOTE: The business logic is to only allow @mention inside a thread
+                # So only a reply can mention
+                mentions = self.extract_mentions(validated_data["body"])
+
+                for username in mentions:
+                    try:
+                        recipient = User.objects.get(username=username)
+                        if self.can_be_mentioned(recipient, comment):
+                            mention = CommentMention.objects.create(
+                                comment=comment, mentioned_user=recipient
+                            )
+                            # 4. Create notification
+                            create_notification(
+                                user, recipient, "mentioned you in a comment", mention
+                            )
+
+                    except User.DoesNotExist:
+                        pass
 
             else:
                 # CASE: Creating root comment (new thread)
@@ -315,7 +351,26 @@ class CommentCreateSerializer(serializers.ModelSerializer):
                 comment.thread = thread
                 comment.save(update_fields=["thread"])
 
+                recipient = self.article.author
+
+                if recipient != user:  # Don't notify if commenting on own article
+                    create_notification(
+                        user, recipient, "commented on your post", comment
+                    )
+
         return comment
+
+    def extract_mentions(self, text):
+        """Extract @mentions from text"""
+        import re
+
+        pattern = r"\B@([\w-]+)"
+        matches = re.findall(pattern, text)
+        return list(set(matches))
+
+    def can_be_mentioned(self, user, comment):
+        """Validate if user can be mentioned"""
+        return not user.mentions_disabled and user != comment.user
 
 
 class CommentResponseSerializer(serializers.ModelSerializer):

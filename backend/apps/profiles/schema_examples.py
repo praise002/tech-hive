@@ -569,6 +569,51 @@ COMMENTS_ARTICLES_RESPONSE_EXAMPLE = {
     401: UNAUTHORIZED_USER_RESPONSE,
 }
 
+USERNAMES_DATA_EXAMPLE = {
+    "count": 5,
+    "next": None,
+    "previous": None,
+    "results": [
+        {
+            "id": "63edac98-9f67-4afb-a944-aa3cb69c580b",
+            "username": "john-doe",
+        },
+        {
+            "id": "8f7e6d5c-4b3a-2918-7654-3c2b1a0f9e8d",
+            "username": "jane-smith",
+        },
+        {
+            "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "username": "bob-wilson",
+        },
+        {
+            "id": "9876fedc-ba98-7654-3210-fedcba987654",
+            "username": "alice-johnson",
+        },
+        {
+            "id": "11223344-5566-7788-99aa-bbccddeeff00",
+            "username": "mike-brown",
+        },
+    ],
+}
+
+USERNAMES_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Usernames retrieved successfully",
+        response=UserSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Usernames retrieved successfully.",
+                    "data": USERNAMES_DATA_EXAMPLE,
+                },
+            ),
+        ],
+    ),
+}
+
 
 def build_avatar_request_schema():
     return {

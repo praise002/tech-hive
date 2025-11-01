@@ -28,9 +28,14 @@ from apps.profiles.schema_examples import (
     PROFILE_UPDATE_RESPONSE_EXAMPLE,
     SAVED_ARTICLES_CREATE_RESPONSE_EXAMPLE,
     SAVED_ARTICLES_RESPONSE_EXAMPLE,
+    USERNAMES_RESPONSE_EXAMPLE,
     build_avatar_request_schema,
 )
-from apps.profiles.serializers import AvatarSerializer, UserSerializer
+from apps.profiles.serializers import (
+    AvatarSerializer,
+    UsernameSerializer,
+    UserSerializer,
+)
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
@@ -47,6 +52,43 @@ tags = ["Profiles"]
 
 logger = logging.getLogger(__name__)
 security_logger = logging.getLogger("security")
+
+
+class UsernameListView(ListAPIView):
+    serializer_class = UsernameSerializer
+    pagination_class = DefaultPagination
+
+    def get_queryset(self):
+        return Comment.objects.filter(is_active=True)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            paginated_data = self.get_paginated_response(serializer.data)
+            return CustomResponse.success(
+                message="Usernames retrieved successfully.",
+                data=paginated_data.data,
+                status_code=status.HTTP_200_OK,
+            )
+
+        serializer = self.get_serializer(queryset, many=True)
+        return CustomResponse.success(
+            message="Usernames retrieved successfully.",
+            data=serializer.data,
+            status_code=status.HTTP_200_OK,
+        )
+
+    @extend_schema(
+        summary="Retrieve user's usernames",
+        description="This endpoint retrieves a list of usernames. It's primarily used to populate the user mention feature in the comment section.",
+        tags=tags,
+        responses=USERNAMES_RESPONSE_EXAMPLE,
+    )
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
 
 class ProfileView(APIView):
