@@ -204,10 +204,6 @@ class CommentSerializer(serializers.ModelSerializer):
     )
     user_id = serializers.SerializerMethodField()
 
-    replying_to_username = serializers.CharField(
-        source="replying_to.username", read_only=True
-    )
-
     class Meta:
         model = models.Comment
         fields = [
@@ -217,7 +213,6 @@ class CommentSerializer(serializers.ModelSerializer):
             "article_title",
             "article_created_at",
             "body",
-            "replying_to_username",
         ]
 
     @extend_schema_field(serializers.UUIDField)
@@ -417,13 +412,6 @@ class ThreadReplySerializer(serializers.ModelSerializer):
     user_avatar = serializers.URLField(source="user.avatar_url", read_only=True)
     user_username = serializers.CharField(source="user.username", read_only=True)
 
-    replying_to_name = serializers.CharField(
-        source="replying_to.full_name", read_only=True
-    )
-    replying_to_username = serializers.CharField(
-        source="replying_to.username", read_only=True
-    )
-
     class Meta:
         model = models.Comment
         fields = [
@@ -433,8 +421,6 @@ class ThreadReplySerializer(serializers.ModelSerializer):
             "user_name",
             "user_username",
             "user_avatar",
-            "replying_to_name",
-            "replying_to_username",
         ]
 
 

@@ -251,14 +251,7 @@ class Comment(BaseModel):
     body = models.CharField(max_length=250)
     is_active = models.BooleanField(default=True)  # for moderation purposes
 
-    replying_to = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="replies_to_user",
-        help_text="The user being replied to (for mentions)",
-    )
+    
     updated_at = models.DateTimeField(auto_now=True)
 
     objects = models.Manager()
@@ -271,8 +264,8 @@ class Comment(BaseModel):
         ]
 
     def __str__(self):
-        if self.replying_to:
-            return f"{self.user.full_name} → @{self.replying_to.username}: {self.body[:30]}..."
+        # if self.replying_to:
+        #     return f"{self.user.full_name} → @{self.replying_to.username}: {self.body[:30]}..."
         return f"{self.user.full_name}: {self.body[:40]}..."
 
     @property
