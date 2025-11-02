@@ -28,12 +28,13 @@ const sendRequest = async (
 
   if (!response.ok) {
     const error = await response.json();
+    throw error;
 
-    if (error.data) {
-      throw error;
-    } else {
-      throw new Error(error.message || 'Request failed');
-    }
+    // if (error.data) {
+    //   throw error;
+    // } else {
+    //   throw new Error(error.message || 'Request failed');
+    // }
   }
 
   return await response.json();

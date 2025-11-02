@@ -59,7 +59,8 @@ class User(AbstractBaseUser, IsDeletedModel, PermissionsMixin):
         try:
             url = self.avatar.url
         except:
-            url = "https://res.cloudinary.com/dq0ow9lxw/image/upload/v1732236186/default-image_foxagq.jpg"
+            # url = "https://res.cloudinary.com/dq0ow9lxw/image/upload/v1732236186/default-image_foxagq.jpg"
+            url = "https://res.cloudinary.com/dq0ow9lxw/image/upload/v1762111366/Avatars_fpmuzf.png"
         return url
 
 

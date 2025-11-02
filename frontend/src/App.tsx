@@ -92,7 +92,7 @@ function App() {
             <Route path="login" element={<Login />} />
             <Route path="logout" element={<Logout />} />
             <Route path="register" element={<Register />} />
-            <Route path="profile" element={<ProfileDetail />} />
+            <Route path="profile/:username" element={<ProfileDetail />} />
             <Route path="verify-email" element={<VerifyEmail />} />
             <Route
               path="auth/google/register/callback"

@@ -220,7 +220,7 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.UserRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "100/day",
+        "anon": "500/day",
         "user": "1000/day",
     },
     "EXCEPTION_HANDLER": "apps.common.exceptions.custom_exception_handler",
