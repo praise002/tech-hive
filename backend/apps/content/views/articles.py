@@ -263,8 +263,10 @@ class TagGenericView(ListAPIView):
 
         try:
             limit = int(request.query_params.get("limit", self.default_limit))
+            if limit <= 0:
+                limit = self.default_limit
         except ValueError:
-            # TODO: TEST IT: if an invalid integer uses the default instead of crashing
+            # if an invalid integer uses the default instead of crashing
             limit = self.default_limit
 
         queryset = queryset[:limit]

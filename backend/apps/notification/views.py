@@ -1,8 +1,10 @@
 from apps.common.pagination import DefaultPagination
+from apps.common.responses import CustomResponse
 from apps.notification.models import Notification
 from apps.notification.serializers import NotificationSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
+from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 
@@ -15,6 +17,7 @@ class NotificationListView(ListAPIView):
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ("is_read",)
     pagination_class = DefaultPagination
+    queryset = Notification.objects.none()
 
     def get_queryset(self):
         return Notification.objects.select_related("actor", "recipient").filter(
@@ -47,4 +50,5 @@ class NotificationListView(ListAPIView):
         tags=tags,
     )
     def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
         return self.list(request, *args, **kwargs)

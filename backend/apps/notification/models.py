@@ -6,7 +6,8 @@ from django.db import models
 
 class Notification(models.Model):
     actor = models.ForeignKey(
-        settings.AUTH_USER_MODEL, related_name="acted_notifications", on_delete=models.CASCADE
+        settings.AUTH_USER_MODEL, related_name="acted_notifications", on_delete=models.CASCADE,
+        null=True, blank=True
     )  # who performed the action
     recipient = models.ForeignKey(
         settings.AUTH_USER_MODEL, related_name="received_notifications",  on_delete=models.CASCADE

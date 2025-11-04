@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 
 
-def create_notification(actor, recipient, verb, target=None):
+def create_notification(recipient, verb, target=None, actor=None):
     # check for any similar notification made in the last minute
     now = timezone.now()
     last_minute = now - datetime.timedelta(seconds=60)

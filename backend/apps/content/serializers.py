@@ -302,7 +302,7 @@ class CommentCreateSerializer(serializers.ModelSerializer):
                     root_comment_author != user
                 ):  # Don't notify if replying to own thread
                     create_notification(
-                        user, root_comment_author, "replied to your thread", comment
+                        root_comment_author, "replied to your thread", comment, user
                     )
 
                 # Notify post author
@@ -326,7 +326,7 @@ class CommentCreateSerializer(serializers.ModelSerializer):
                             )
                             # 4. Create notification
                             create_notification(
-                                user, recipient, "mentioned you in a comment", mention
+                                recipient, "mentioned you in a comment", mention, user
                             )
 
                     except User.DoesNotExist:
@@ -355,7 +355,7 @@ class CommentCreateSerializer(serializers.ModelSerializer):
 
                 if recipient != user:  # Don't notify if commenting on own article
                     create_notification(
-                        user, recipient, "commented on your post", comment
+                        recipient, "commented on your post", comment, user
                     )
 
         return comment

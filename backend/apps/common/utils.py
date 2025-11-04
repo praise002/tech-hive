@@ -37,6 +37,17 @@ class TestUtil:
         }
         user = User.objects.create_user(**user_dict)
         return user
+    
+    def another_verified_user():
+        user_dict = {
+            "first_name": "Test",
+            "last_name": "Another",
+            "email": "testanotheruser@example.com",
+            "is_email_verified": True,
+            "password": "Testpassword2008@",
+        }
+        user = User.objects.create_user(**user_dict)
+        return user
 
     def disabled_user():
         user_dict = {
