@@ -84,12 +84,8 @@ function AccountDetail() {
   const { updateCurrentUserProfile, isPending: isUpdating } =
     useUpdateUserProfile();
 
-  const {
-    updateCurrentUserAvatar,
-    isPending: isAvatarUpdating,
-    isError: isAvatarError,
-    error: avatarError,
-  } = useUpdateUserAvatar();
+  const { updateCurrentUserAvatar, isPending: isAvatarUpdating } =
+    useUpdateUserAvatar();
 
   const {
     first_name: firstName,

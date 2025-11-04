@@ -25,8 +25,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config("SECRET_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -69,6 +67,7 @@ LOCAL_APPS = [
     "apps.common",
     "apps.general",
     "apps.content",
+    "apps.notification",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -221,7 +220,7 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.UserRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "100/day",
+        "anon": "500/day",
         "user": "1000/day",
     },
     "EXCEPTION_HANDLER": "apps.common.exceptions.custom_exception_handler",
@@ -248,6 +247,8 @@ SPECTACULAR_SETTINGS = {
     """,
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "UPLOADED_FILES_USE_URL": False,
+    "COMPONENT_SPLIT_REQUEST": True,
 }
 
 

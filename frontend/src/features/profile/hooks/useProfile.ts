@@ -48,7 +48,7 @@ export function useCurrentUserProfile() {
   return { isPending, isError, profile, error };
 }
 
-export function useUserProfile(username: string) {
+export function useUserProfile(username?: string) {
   const { getUserProfileByUsername } = useProfileApi();
 
   const {
@@ -58,7 +58,7 @@ export function useUserProfile(username: string) {
     error,
   } = useQuery({
     queryKey: ['userProfile', username],
-    queryFn: () => getUserProfileByUsername(username),
+    queryFn: () => getUserProfileByUsername(username!),
     enabled: !!username, // Only run if username is provided
   });
 

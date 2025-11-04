@@ -1,7 +1,16 @@
+from apps.accounts.models import User
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from apps.accounts.models import User
+
+class UsernameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "username",
+        ]
+
 
 class UserSerializer(serializers.ModelSerializer):
     avatar_url = serializers.SerializerMethodField(read_only=True)

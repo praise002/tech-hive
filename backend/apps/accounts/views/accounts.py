@@ -33,6 +33,7 @@ from apps.accounts.utils import (
 )
 from apps.common.errors import ErrorCode
 from apps.common.responses import CustomResponse
+from apps.notification.utils import create_notification
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -309,6 +310,11 @@ class VerifyEmailView(APIView):
             invalidate_previous_otps(user)
 
             SendEmail.welcome(request, user)
+            create_notification(
+                user,
+                "Welcome to Tech Hive! We're glad to have you",
+            )
+
             return CustomResponse.success(
                 message="Email verified successfully.",
                 status_code=status.HTTP_200_OK,

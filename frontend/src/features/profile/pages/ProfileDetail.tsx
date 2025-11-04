@@ -5,32 +5,47 @@ import { useState } from 'react';
 import CommentsContent from '../componenets/CommentsContent';
 import PublishedContent from '../componenets/PublishedContent';
 import Text from '../../../components/common/Text';
+import { useParams } from 'react-router-dom';
+import { useUserProfile } from '../hooks/useProfile';
+import { formatDate } from '../../../utils/utils';
+import ProfileSkeleton from './ProfileSkeleton';
 
-// import { useProfile } from './useProfile';
-// import Spinner from '../../components/common/Spinner';
-// import { BsFillArchiveFill } from 'react-icons/bs';
+interface CustomError extends Error {
+  code?: string;
+  message: string;
+}
 
 function ProfileDetail() {
-  const [isActiveTab, setIsActiveTab] = useState('saved');
-  // const { isPending, isError, profile, error } = useProfile();
+  const [isActiveTab, setIsActiveTab] = useState('comments');
+  const { username } = useParams();
+  const { isPending, isError, profile, error } = useUserProfile(username);
 
-  // const {
-  //   first_name: firstName,
-  //   last_name: lastName,
-  //   avatar_url: avatarUrl,
-  // } = profile;
+  if (isPending) return <ProfileSkeleton />;
 
-  // if (isPending)
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center">
-  //       <Spinner />
-  //     </div>
-  //   );
+  if (isError) {
+    console.log(error);
+    const customError = error as CustomError | null;
 
-  // if (isError) {
-  //   // TODO: STYLE LETER
-  //   return <span>Error: {error?.message}</span>;
-  // }
+    if (customError?.code === 'non_existent') {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          {customError.message}
+        </div>
+      );
+    }
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Failed to load profile
+      </div>
+    );
+  }
+
+  const {
+    first_name: firstName,
+    last_name: lastName,
+    avatar_url: avatarUrl,
+    created_at: createdAt,
+  } = profile;
 
   const profileTabs = [
     {
@@ -72,11 +87,9 @@ function ProfileDetail() {
           <div>
             <div className="relative">
               <img
-                className="w-20 h-20 md:w-40 md:h-40"
-                // src={avatarUrl || "/assets/icons/Avatars.png"}
-                src="/assets/icons/Avatars.png"
-                // alt={`${firstName} ${lastName}'s profile picture` || "Elizabeth Stone's profile picture"}
-                alt=""
+                className="w-20 h-20 md:w-40 md:h-40 rounded-full"
+                src={avatarUrl}
+                alt={`${firstName} ${lastName}'s profile picture`}
               />
             </div>
           </div>
@@ -88,10 +101,11 @@ function ProfileDetail() {
               bold={false}
               className="font-semibold mb-1 text-gray-900 dark:text-custom-white"
             >
-              {/* {`${firstName} ${lastName}` || 'Elizabeth Stone'} */}
-              Elizabeth Stone
+              {`${firstName} ${lastName}`}
             </Text>
-            <p className="text-secondary text-sm">Joined 27th January 2025</p>
+            <p className="text-secondary text-sm">
+              Joined {formatDate(createdAt)}
+            </p>
           </div>
         </div>
       </div>

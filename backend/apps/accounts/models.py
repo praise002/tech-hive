@@ -32,7 +32,7 @@ class User(AbstractBaseUser, IsDeletedModel, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     is_email_verified = models.BooleanField(default=False)
     user_active = models.BooleanField(default=True)
-    can_be_mentioned = models.BooleanField(default=True)
+    mentions_disabled = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -59,7 +59,8 @@ class User(AbstractBaseUser, IsDeletedModel, PermissionsMixin):
         try:
             url = self.avatar.url
         except:
-            url = "https://res.cloudinary.com/dq0ow9lxw/image/upload/v1732236186/default-image_foxagq.jpg"
+            # url = "https://res.cloudinary.com/dq0ow9lxw/image/upload/v1732236186/default-image_foxagq.jpg"
+            url = "https://res.cloudinary.com/dq0ow9lxw/image/upload/v1762111366/Avatars_fpmuzf.png"
         return url
 
 

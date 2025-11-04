@@ -282,7 +282,18 @@ class Comment(BaseModel):
             return self.thread.reply_count
         return 0
 
-
+class CommentMention(BaseModel):
+    """Track who was mentioned in a comment"""
+    comment = models.ForeignKey(Comment, related_name='mentions', on_delete=models.CASCADE)
+    mentioned_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_mentions', on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('comment', 'mentioned_user')
+        indexes = [
+            models.Index(fields=['mentioned_user']),
+        ]
+        
 class Job(BaseModel):
     JOB_TYPE_CHOICES = [
         ("FULL_TIME", "Full-time"),

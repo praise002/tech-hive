@@ -6,7 +6,6 @@ from apps.common.exceptions import NotFoundError
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
 from apps.content.models import Article, Comment, Tag
-from apps.content.permissions import IsPublished
 from apps.content.schema_examples import (
     ACCEPT_GUIDELINES_RESPONSE_EXAMPLE,
     ARTICLE_DETAIL_RESPONSE_EXAMPLE,
@@ -264,8 +263,10 @@ class TagGenericView(ListAPIView):
 
         try:
             limit = int(request.query_params.get("limit", self.default_limit))
+            if limit <= 0:
+                limit = self.default_limit
         except ValueError:
-            # TODO: TEST IT: if an invalid integer uses the default instead of crashing
+            # if an invalid integer uses the default instead of crashing
             limit = self.default_limit
 
         queryset = queryset[:limit]

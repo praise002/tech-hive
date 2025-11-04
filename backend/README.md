@@ -92,9 +92,9 @@ A scalable Django REST framework backend providing APIs for:
 
 - [ ] **Social Features API**
   - [ ] Article likes and reactions
-  - [ ] Comment system for articles
+  - ✅ Comment system for articles
   - [ ] User activity feeds
-  - [ ] Notification system
+  - ✅ Notification system
   - [ ] Social sharing endpoints
 
 - [ ] **Collaboration Features**
