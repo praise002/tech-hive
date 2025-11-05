@@ -385,6 +385,7 @@ class CommentLikeToggleView(APIView):
     """
 
     permission_classes = (IsAuthenticated,)
+    serializer_class = CommentLikeSerializer
 
     @extend_schema(
         summary="Like or Unlike a Comment",
@@ -430,7 +431,7 @@ class CommentLikeToggleView(APIView):
             }
             message = (f"Comment {result['action']} successfully",)
 
-            serializer = CommentLikeSerializer(response_data)
+            serializer = self.serializer_class(response_data)
             return CustomResponse.success(
                 message=message, data=serializer.data, status_code=status.HTTP_200_OK
             )
@@ -443,8 +444,9 @@ class CommentLikeStatusView(APIView):
     """
 
     Get like status for a comment.
-
     """
+
+    serializer_class = CommentLikeStatusSerializer
 
     @extend_schema(
         summary="Get Like Status for a Comment",
@@ -488,8 +490,7 @@ class CommentLikeStatusView(APIView):
                 "is_liked": result["is_liked"],
             }
 
-            # 5. Serialize and return
-            serializer = CommentLikeStatusSerializer(response_data)
+            serializer = self.serializer_class(response_data)
             return CustomResponse.success(
                 message="Comment like status retrieved successfully.",
                 data=serializer.data,

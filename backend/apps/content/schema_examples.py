@@ -11,6 +11,8 @@ from apps.common.serializers import ErrorDataResponseSerializer, ErrorResponseSe
 from apps.content.serializers import (
     ArticleSerializer,
     CategorySerializer,
+    CommentLikeSerializer,
+    CommentLikeStatusSerializer,
     CommentResponseSerializer,
     ContributorOnboardingSerializer,
     EventSerializer,
@@ -465,39 +467,36 @@ COMMENT_CREATE_RESPONSE_EXAMPLE = {
 
 
 COMMENT_LIKE_TOGGLE_RESPONSE_EXAMPLE = {
-    "200": {
-        "description": "Like status toggled successfully. The 'action' field indicates whether the comment was 'liked' or 'unliked'.",
-        "content": {
-            "application/json": {
-                "examples": {
-                    "Liked": {
-                        "summary": "User liked the comment",
-                        "value": {
-                            "status": SUCCESS_RESPONSE_STATUS,
-                            "message": "Comment liked successfully.",
-                            "data": {
-                                "is_liked": True,
-                                "like_count": 16,
-                                "action": "liked",
-                            },
-                        },
+    200: OpenApiResponse(
+        description="Like status toggled successfully. The 'action' field indicates whether the comment was 'liked' or 'unliked'.",
+        response=CommentLikeSerializer,
+        examples=[
+            OpenApiExample(
+                name="User liked the comment",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Comment liked successfully.",
+                    "data": {
+                        "is_liked": True,
+                        "like_count": 16,
+                        "action": "liked",
                     },
-                    "Unliked": {
-                        "summary": "User unliked the comment",
-                        "value": {
-                            "status": SUCCESS_RESPONSE_STATUS,
-                            "message": "Comment unliked successfully.",
-                            "data": {
-                                "is_liked": False,
-                                "like_count": 15,
-                                "action": "unliked",
-                            },
-                        },
+                },
+            ),
+            OpenApiExample(
+                name="User unliked the comment",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Comment unliked successfully.",
+                    "data": {
+                        "is_liked": False,
+                        "like_count": 15,
+                        "action": "unliked",
                     },
-                }
-            }
-        },
-    },
+                },
+            ),
+        ],
+    ),
     404: OpenApiResponse(
         description="Comment not found",
         response=ErrorResponseSerializer,
@@ -531,39 +530,37 @@ COMMENT_LIKE_TOGGLE_RESPONSE_EXAMPLE = {
 
 
 COMMENT_LIKE_STATUS_RESPONSE_EXAMPLE = {
-    "200": {
-        "description": "Like status retrieved successfully. `is_liked` will be `null` for unauthenticated users.",
-        "content": {
-            "application/json": {
-                "examples": {
-                    "User Has Liked": {
-                        "summary": "Authenticated user has liked",
-                        "value": {
-                            "status": SUCCESS_RESPONSE_STATUS,
-                            "message": "Like status retrieved successfully.",
-                            "data": {"like_count": 15, "is_liked": True},
-                        },
-                    },
-                    "User Has Not Liked": {
-                        "summary": "Authenticated user has not liked",
-                        "value": {
-                            "status": SUCCESS_RESPONSE_STATUS,
-                            "message": "Like status retrieved successfully.",
-                            "data": {"like_count": 15, "is_liked": False},
-                        },
-                    },
-                    "Unauthenticated User": {
-                        "summary": "Unauthenticated user",
-                        "value": {
-                            "status": SUCCESS_RESPONSE_STATUS,
-                            "message": "Like status retrieved successfully.",
-                            "data": {"like_count": 15, "is_liked": None},
-                        },
-                    },
-                }
-            }
-        },
-    },
+    200: OpenApiResponse(
+        description="Like status retrieved successfully. `is_liked` will be `null` for unauthenticated users.",
+        response=CommentLikeStatusSerializer,
+        examples=[
+            OpenApiExample(
+                name="Authenticated user has liked",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Like status retrieved successfully.",
+                    "data": {"like_count": 15, "is_liked": True},
+                },
+            ),
+            OpenApiExample(
+                name="Authenticated user has not liked",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Comment unliked successfully.",
+                    "message": "Like status retrieved successfully.",
+                    "data": {"like_count": 15, "is_liked": False},
+                },
+            ),
+            OpenApiExample(
+                name="Unauthenticated user",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Like status retrieved successfully.",
+                    "data": {"like_count": 15, "is_liked": None},
+                },
+            ),
+        ],
+    ),
     404: OpenApiResponse(
         description="Comment not found",
         response=ErrorResponseSerializer,
