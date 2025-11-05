@@ -36,7 +36,12 @@ class TestContents(APITestCase):
         self.user1 = TestUtil.new_user()
         self.user2 = TestUtil.verified_user()
         self.user3 = TestUtil.other_verified_user()
+        self.user4 = TestUtil.another_verified_user()
         self.contributor_group = Group.objects.get_or_create(name=UserRoles.CONTRIBUTOR)
+
+        self.article = TestUtil.create_article(author=self.user4)
+        self.comment = TestUtil.create_comment(article=self.article, user=self.user4)
+        self.comment_del_url = f"/api/v1/comments/{self.comment.id}/"
 
         # Create test data
         self.category = Category.objects.create(
@@ -827,7 +832,30 @@ class TestContents(APITestCase):
         # Initial setup had 3 replies + 2 new = 5
         self.assertEqual(self.thread.reply_count, 5)
 
+    def test_delete_comment_unauthenticated(self):
+        response = self.client.delete(self.comment_del_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_delete_comment_not_author(self):
+        self.client.force_authenticate(user=self.user2)
+        response = self.client.delete(self.comment_del_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertTrue(Comment.objects.filter(id=self.comment.id).exists())
+
+    def test_delete_comment_success(self):
+        self.client.force_authenticate(user=self.user4)
+        response = self.client.delete(self.comment_del_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Comment.objects.filter(id=self.comment.id).exists())
+
+    def test_delete_non_existent_comment(self):
+        non_existent_uuid = "12345678-1234-5678-1234-567812345678"
+        url = f"/api/v1/comments/{non_existent_uuid}/"
+        self.client.force_authenticate(user=self.user1)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
 
 # python manage.py test apps.content.tests.TestContents -k thread_replies
 # python manage.py test apps.content.tests.TestContents.test_article_list
-# python manage.py test apps.content.tests.TestContents.test_article_list
+# python manage.py test apps.content.tests.TestContents.test_delete_comment_unauthenticated

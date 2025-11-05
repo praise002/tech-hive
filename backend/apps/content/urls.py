@@ -21,4 +21,16 @@ urlpatterns = [
         name="article_detail",
     ),
     path("comments/<uuid:comment_id>/replies/", views.ThreadRepliesView.as_view()),
+    path(
+        "comments/<uuid:comment_id>/",
+        views.CommentDeleteView.as_view(),
+    ),
+    path(
+        "comments/<int:comment_id>/like/",
+        views.CommentLikeToggleView.as_view(),
+    ),
+    path(
+        "comments/<int:comment_id>/likes/",
+        views.CommentLikeStatusView.as_view(),
+    ),
 ]

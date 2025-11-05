@@ -2,9 +2,12 @@ from .articles import (
     AcceptGuidelinesView,
     ArticleListView,
     ArticleRetrieveView,
+    CommentCreateView,
+    CommentDeleteView,
+    CommentLikeStatusView,
+    CommentLikeToggleView,
     TagGenericView,
     ThreadRepliesView,
-    CommentCreateView,
 )
 from .contents import (
     CategoryGenericView,
@@ -26,4 +29,7 @@ __all__ = [
     "ToolListView",
     "ThreadRepliesView",
     "CommentCreateView",
+    "CommentDeleteView",
+    "CommentLikeToggleView",
+    "CommentLikeStatusView",
 ]

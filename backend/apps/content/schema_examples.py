@@ -462,3 +462,134 @@ COMMENT_CREATE_RESPONSE_EXAMPLE = {
     ),
     422: ErrorDataResponseSerializer,
 }
+
+
+COMMENT_LIKE_TOGGLE_RESPONSE_EXAMPLE = {
+    "200": {
+        "description": "Like status toggled successfully. The 'action' field indicates whether the comment was 'liked' or 'unliked'.",
+        "content": {
+            "application/json": {
+                "examples": {
+                    "Liked": {
+                        "summary": "User liked the comment",
+                        "value": {
+                            "status": SUCCESS_RESPONSE_STATUS,
+                            "message": "Comment liked successfully.",
+                            "data": {
+                                "is_liked": True,
+                                "like_count": 16,
+                                "action": "liked",
+                            },
+                        },
+                    },
+                    "Unliked": {
+                        "summary": "User unliked the comment",
+                        "value": {
+                            "status": SUCCESS_RESPONSE_STATUS,
+                            "message": "Comment unliked successfully.",
+                            "data": {
+                                "is_liked": False,
+                                "like_count": 15,
+                                "action": "unliked",
+                            },
+                        },
+                    },
+                }
+            }
+        },
+    },
+    404: OpenApiResponse(
+        description="Comment not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Comment Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Article not found",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+    422: ErrorDataResponseSerializer,
+    503: OpenApiResponse(
+        description="Like service unavailable",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Like service unavailable",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Like service temporarily unavailable",
+                    "code": ErrorCode.SERVICE_UNAVAILABLE,
+                },
+            ),
+        ],
+    ),
+}
+
+
+COMMENT_LIKE_STATUS_RESPONSE_EXAMPLE = {
+    "200": {
+        "description": "Like status retrieved successfully. `is_liked` will be `null` for unauthenticated users.",
+        "content": {
+            "application/json": {
+                "examples": {
+                    "User Has Liked": {
+                        "summary": "Authenticated user has liked",
+                        "value": {
+                            "status": SUCCESS_RESPONSE_STATUS,
+                            "message": "Like status retrieved successfully.",
+                            "data": {"like_count": 15, "is_liked": True},
+                        },
+                    },
+                    "User Has Not Liked": {
+                        "summary": "Authenticated user has not liked",
+                        "value": {
+                            "status": SUCCESS_RESPONSE_STATUS,
+                            "message": "Like status retrieved successfully.",
+                            "data": {"like_count": 15, "is_liked": False},
+                        },
+                    },
+                    "Unauthenticated User": {
+                        "summary": "Unauthenticated user",
+                        "value": {
+                            "status": SUCCESS_RESPONSE_STATUS,
+                            "message": "Like status retrieved successfully.",
+                            "data": {"like_count": 15, "is_liked": None},
+                        },
+                    },
+                }
+            }
+        },
+    },
+    404: OpenApiResponse(
+        description="Comment not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Comment Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Comment not found",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+    503: OpenApiResponse(
+        description="Like service unavailable",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Like service unavailable",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Like service temporarily unavailable",
+                    "code": ErrorCode.SERVICE_UNAVAILABLE,
+                },
+            ),
+        ],
+    ),
+}

@@ -144,9 +144,3 @@ class ReadabilityMetrics:
         total_seconds = text_time + image_time + code_time
 
         return math.ceil(total_seconds)
-
-def extract_mentions(body):
-    pass
-
-def send_mention_notification(user_id, comment):
-    pass

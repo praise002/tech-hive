@@ -556,6 +556,43 @@ class ToolSerializer(serializers.ModelSerializer):
         ]
 
 
-# TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH
-# TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH
+class CommentLikeSerializer(serializers.Serializer):
+    """
+    Serializer for comment like response.
+    """
+
+    comment_id = serializers.IntegerField(read_only=True)
+    is_liked = serializers.BooleanField(read_only=True)
+    like_count = serializers.IntegerField(read_only=True)
+    message = serializers.CharField(read_only=True)
+
+
+class CommentLikeStatusSerializer(serializers.Serializer):
+    """
+    Serializer for getting like status without modifying it.
+    """
+
+    comment_id = serializers.IntegerField(read_only=True)
+    like_count = serializers.IntegerField(read_only=True)
+    is_liked = serializers.BooleanField(
+        read_only=True, allow_null=True
+    )  # None for unauthenticated users
+
+
+class ArticleCommentWithLikesSerializer(ArticleSerializer):
+    """
+    Extended comment serializer that includes like data.
+    """
+
+    like_count = serializers.IntegerField(read_only=True)
+    is_liked_by_current_user = serializers.BooleanField(read_only=True)
+
+    class Meta(ArticleSerializer.Meta):
+        model = Comment
+        fields = ArticleSerializer.Meta.fields + [
+            "like_count",
+            "is_liked_by_current_user",
+        ]
+
+
 # TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH
