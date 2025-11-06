@@ -1,8 +1,6 @@
 # Tech Hive - Role-Based Permissions Matrix
 
 ---
-
-- `POST /articles/like/` → Like/unlike an article - any authenticated user
 - `POST /articles/summary/` → Summarize an article 
   
 ## 🎯 Contributor Role

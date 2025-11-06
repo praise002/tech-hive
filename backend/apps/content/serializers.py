@@ -1,7 +1,13 @@
 from apps.accounts.models import ContributorOnboarding, User
 from apps.content import models
 from apps.content.CustomRelations import CustomHyperlinkedIdentityField
-from apps.content.models import Article, Comment, CommentMention, CommentThread
+from apps.content.models import (
+    Article,
+    ArticleReaction,
+    Comment,
+    CommentMention,
+    CommentThread,
+)
 from apps.content.utils import ArticleStatusChoices
 from apps.notification.utils import create_notification
 from django.db.models import F
@@ -593,6 +599,49 @@ class ArticleCommentWithLikesSerializer(ArticleSerializer):
             "like_count",
             "is_liked_by_current_user",
         ]
+
+
+class ArticleReactionToggleSerializer(serializers.Serializer):
+    """
+    Serializer for toggling article reactions.
+    Input: reaction_type
+    Output: reaction status and counts
+    """
+
+    # INPUT field
+    reaction_type = serializers.ChoiceField(
+        choices=ArticleReaction.EMOJI_CHOICES,
+        required=True,
+        help_text="The emoji reaction type",
+    )
+
+    # OUTPUT fields (read-only, returned in response)
+    article_id = serializers.UUIDField(read_only=True)
+    action = serializers.CharField(read_only=True)  # "added" or "removed"
+    is_reacted = serializers.BooleanField(read_only=True)
+    reaction_counts = serializers.DictField(read_only=True)
+    total_reactions = serializers.IntegerField(read_only=True)
+
+
+class ArticleReactionStatusSerializer(serializers.Serializer):
+    """
+    Serializer for getting article reaction status.
+    Output only (no input fields).
+    """
+
+    article_id = serializers.UUIDField(read_only=True)
+    reaction_counts = serializers.DictField(
+        read_only=True, help_text="Dictionary of reaction types and their counts"
+    )
+    total_reactions = serializers.IntegerField(
+        read_only=True, help_text="Total number of reactions across all types"
+    )
+    user_reactions = serializers.ListField(
+        child=serializers.CharField(),
+        read_only=True,
+        allow_null=True,
+        help_text="List of reaction types the current user has used (null if not authenticated or no reaction)",
+    )
 
 
 # TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH

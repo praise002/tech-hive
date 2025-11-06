@@ -33,4 +33,12 @@ urlpatterns = [
         "comments/<int:comment_id>/likes/",
         views.CommentLikeStatusView.as_view(),
     ),
+    path(
+        "articles/<int:article_id>/reactions/",
+        views.ArticleReactionToggleView.as_view(),
+    ),
+    path(
+        "articles/<int:article_id>/reactions/",
+        views.ArticleReactionStatusView.as_view(),
+    ),
 ]
