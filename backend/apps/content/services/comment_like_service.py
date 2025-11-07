@@ -1,4 +1,5 @@
 import logging
+import uuid
 from typing import Dict, List, Optional, Set
 
 import redis
@@ -39,48 +40,50 @@ class CommentLikeService:
             logger.error(f"Unexpected error connecting to Redis: {e}")
             raise
 
-    def _get_key(self, comment_id: int) -> str:
+    def _get_key(self, comment_id: uuid.UUID) -> str:
         """
         Generate Redis key for a comment's likes.
 
         Args:
-            comment_id: ID of the comment
+            comment_id: ID of the comment (UUID)
 
         Returns:
-            Redis key string (e.g., "comment:likes:123")
+            Redis key string (e.g., "comment:likes:550e8400-e29b-41d4-a716-446655440000")
         """
-        return f"comment:likes:{comment_id}"
+        return f"comment:likes:{str(comment_id)}"
 
-    def toggle_like(self, comment_id: int, user_id: int) -> Dict[str, any]:
+    def toggle_like(self, comment_id: uuid.UUID, user_id: uuid.UUID) -> Dict[str, any]:
         """
         Toggle like status for a comment.
         If user already liked, it unlikes. If not liked, it likes.
 
         Args:
-            comment_id: ID of the comment
-            user_id: ID of the user
+            comment_id: ID of the comment (UUID)
+            user_id: ID of the user (UUID)
 
         Returns:
             Dictionary with:
             - is_liked: bool (current like status)
-            - like_count: int (total likes)
+            - like_count: uuid (total likes)
             - action: str ('liked' or 'unliked')
         """
         try:
             redis_key = self._get_key(comment_id)
 
+            user_id_str = str(user_id)
+
             # Check if user already liked this comment
-            is_currently_liked = self.redis_client.sismember(redis_key, user_id)
+            is_currently_liked = self.redis_client.sismember(redis_key, user_id_str)
 
             if is_currently_liked:
                 # Unlike: Remove user from set
-                self.redis_client.srem(redis_key, user_id)
+                self.redis_client.srem(redis_key, user_id_str)
                 action = "unliked"
                 is_liked = False
                 logger.info(f"User {user_id} unliked comment {comment_id}")
             else:
                 # Like: Add user to set
-                self.redis_client.sadd(redis_key, user_id)
+                self.redis_client.sadd(redis_key, user_id_str)
                 action = "liked"
                 is_liked = True
                 logger.info(f"User {user_id} liked comment {comment_id}")
@@ -98,15 +101,15 @@ class CommentLikeService:
             raise
 
     def get_like_status(
-        self, comment_id: int, user_id: Optional[int] = None
+        self, comment_id: int, user_id: Optional[uuid.UUID] = None
     ) -> Dict[str, any]:
         # filled-in like button for authenticated user
         """
         Get like status for a comment.
 
         Args:
-            comment_id: ID of the comment
-            user_id: ID of the user (optional, to check if they liked)
+            comment_id: ID of the comment (UUID)
+            user_id: ID of the user (optional UUID, to check if they liked)
 
         Returns:
             Dictionary with:
@@ -122,7 +125,8 @@ class CommentLikeService:
             # Check if specific user liked (if user_id provided)
             is_liked = None
             if user_id is not None:
-                is_liked = self.redis_client.sismember(redis_key, user_id)
+                user_id_str = str(user_id)
+                is_liked = self.redis_client.sismember(redis_key, user_id_str)
 
             return {"like_count": like_count, "is_liked": is_liked}
 
@@ -134,21 +138,21 @@ class CommentLikeService:
             raise
 
     def get_bulk_like_status(
-        self, comment_ids: List[int], user_id: Optional[int] = None
-    ) -> Dict[int, Dict[str, any]]:
+        self, comment_ids: List[uuid.UUID], user_id: Optional[uuid.UUID] = None
+    ) -> Dict[uuid.UUID, Dict[str, any]]:
         """
         Get like status for multiple comments efficiently using Redis pipeline.
         This is useful when displaying a list of comments.
 
         Args:
-            comment_ids: List of comment IDs
-            user_id: ID of the user (optional)
+            comment_ids: List of comment IDs (UUIDs)
+            user_id: ID of the user (optional UUID)
 
         Returns:
             Dictionary mapping comment_id to like data:
             {
-                123: {'like_count': 5, 'is_liked': True},
-                124: {'like_count': 3, 'is_liked': False},
+                UUID('...'): {'like_count': 5, 'is_liked': True},
+                UUID('...'): {'like_count': 3, 'is_liked': False},
                 ...
             }
         """
@@ -158,6 +162,7 @@ class CommentLikeService:
 
             # Use pipeline for batch operations (single round-trip to Redis)
             pipeline = self.redis_client.pipeline()
+            user_id_str = str(user_id) if user_id is not None else None
 
             # Queue all operations
             for comment_id in comment_ids:
@@ -165,7 +170,7 @@ class CommentLikeService:
                 pipeline.scard(redis_key)  # Get like count
 
                 if user_id is not None:
-                    pipeline.sismember(redis_key, user_id)  # Check if user liked
+                    pipeline.sismember(redis_key, user_id_str)  # Check if user liked
 
             # Execute all operations at once
             responses = pipeline.execute()
@@ -193,15 +198,15 @@ class CommentLikeService:
             logger.error(f"Unexpected error in get_bulk_like_status: {e}")
             raise
 
-    def get_users_who_liked(self, comment_id: int) -> Set[int]:
+    def get_users_who_liked(self, comment_id: uuid.UUID) -> Set[str]:
         """
         Get all user IDs who liked a comment.
 
         Args:
-            comment_id: ID of the comment
+            comment_id: ID of the comment (UUID)
 
         Returns:
-            Set of user IDs
+            Set of user IDs (as strings)
         """
         try:
             redis_key = self._get_key(comment_id)
@@ -217,12 +222,12 @@ class CommentLikeService:
             logger.error(f"Unexpected error in get_users_who_liked: {e}")
             raise
 
-    def remove_all_likes(self, comment_id: int) -> int:
+    def remove_all_likes(self, comment_id: uuid.UUID) -> int:
         """
         Remove all likes from a comment (useful when comment is deleted).
 
         Args:
-            comment_id: ID of the comment
+            comment_id: ID of the comment (UUID)
 
         Returns:
             Number of likes removed

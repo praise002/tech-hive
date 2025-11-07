@@ -316,7 +316,7 @@ class CommentCreateSerializer(serializers.ModelSerializer):
 
                 if recipient != user:
                     create_notification(
-                        user, recipient, "commented on your post", comment
+                        recipient, "commented on your post", comment, user
                     )
 
                 # NOTE: The business logic is to only allow @mention inside a thread
@@ -567,7 +567,7 @@ class CommentLikeSerializer(serializers.Serializer):
     Serializer for comment like response.
     """
 
-    comment_id = serializers.IntegerField(read_only=True)
+    comment_id = serializers.UUIDField(read_only=True)
     is_liked = serializers.BooleanField(read_only=True)
     like_count = serializers.IntegerField(read_only=True)
     message = serializers.CharField(read_only=True)
@@ -578,7 +578,7 @@ class CommentLikeStatusSerializer(serializers.Serializer):
     Serializer for getting like status without modifying it.
     """
 
-    comment_id = serializers.IntegerField(read_only=True)
+    comment_id = serializers.UUIDField(read_only=True)
     like_count = serializers.IntegerField(read_only=True)
     is_liked = serializers.BooleanField(
         read_only=True, allow_null=True
