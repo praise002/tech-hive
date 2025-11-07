@@ -17,7 +17,7 @@ from .contents import (
     ToolListView,
 )
 
-from .article_reaction import ArticleReactionToggleView, ArticleReactionStatusView
+from .article_reaction import ArticleReactionView
 
 __all__ = [
     "ArticleListView",
@@ -34,6 +34,5 @@ __all__ = [
     "CommentDeleteView",
     "CommentLikeToggleView",
     "CommentLikeStatusView",
-    "ArticleReactionToggleView",
-    "ArticleReactionStatusView",
+    "ArticleReactionView",
 ]

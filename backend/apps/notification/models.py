@@ -21,7 +21,7 @@ class Notification(models.Model):
         related_name="target_obj",
         on_delete=models.CASCADE,
     )
-    target_id = models.PositiveIntegerField(null=True, blank=True)
+    target_id = models.CharField(null=True, blank=True)
     target = GenericForeignKey("target_ct", "target_id")
     is_read = models.BooleanField(default=False)
 
