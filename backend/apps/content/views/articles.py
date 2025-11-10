@@ -11,6 +11,8 @@ from apps.content.schema_examples import (
     ARTICLE_DETAIL_RESPONSE_EXAMPLE,
     ARTICLE_LIST_RESPONSE_EXAMPLE,
     COMMENT_CREATE_RESPONSE_EXAMPLE,
+    COMMENT_LIKE_STATUS_RESPONSE_EXAMPLE,
+    COMMENT_LIKE_TOGGLE_RESPONSE_EXAMPLE,
     TAG_RESPONSE_EXAMPLE,
     THREAD_REPLIES_RESPONSE_EXAMPLE,
 )
@@ -18,16 +20,20 @@ from apps.content.serializers import (
     ArticleDetailSerializer,
     ArticleSerializer,
     CommentCreateSerializer,
+    CommentLikeSerializer,
+    CommentLikeStatusSerializer,
     CommentResponseSerializer,
     ContributorOnboardingSerializer,
     TagSerializer,
     ThreadReplySerializer,
 )
+from apps.content.services import comment_like_service
 from django.contrib.auth.models import Group
 from django.db import transaction
 from django.db.models import Prefetch
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
+from redis import RedisError
 from rest_framework import status
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView
@@ -86,6 +92,7 @@ class ArticleListView(ListAPIView):
     # List all published article
     queryset = Article.published.select_related("category", "author").all()
     serializer_class = ArticleSerializer
+    # serializer_class = ArticleCommentWithLikesSerializer
     filter_backends = (DjangoFilterBackend, SearchFilter)
     filterset_fields = ("is_featured",)
     search_fields = ["title", "content"]
@@ -338,3 +345,157 @@ class RSSFeedInfoView(APIView):
             },
             status_code=status.HTTP_200_OK,
         )
+
+
+class CommentDeleteView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    @extend_schema(
+        summary="Delete a comment",
+        description="Deletes a specific comment. Only the author of the comment can perform this action.",
+        tags=article_tags,
+        responses={204: None},
+    )
+    def delete(self, request, *args, **kwargs):
+        comment_id = self.kwargs.get("comment_id")
+        try:
+            comment = Comment.objects.get(id=comment_id)
+        except Comment.DoesNotExist:
+            raise NotFoundError("Comment not found.")
+
+        if comment.user != request.user:
+            return CustomResponse.error(
+                message="You do not have permission to delete this comment.",
+                status_code=status.HTTP_403_FORBIDDEN,
+                err_code=ErrorCode.FORBIDDEN,
+            )
+
+        comment.delete()
+
+        return CustomResponse.success(
+            message="Comment deleted successfully.",
+            status_code=status.HTTP_204_NO_CONTENT,
+        )
+
+
+class CommentLikeToggleView(APIView):
+    """
+    Toggle like status for a comment.
+    If already liked, it will unlike. If not liked, it will like.
+    """
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = CommentLikeSerializer
+
+    @extend_schema(
+        summary="Like or Unlike a Comment",
+        description="Toggles the like status for a specific comment. If the user has already liked the comment, it will be unliked. If they haven't, it will be liked. This endpoint returns the new like status, the total like count, and the action performed ('liked' or 'unliked').",
+        tags=article_tags,
+        responses=COMMENT_LIKE_TOGGLE_RESPONSE_EXAMPLE,
+    )
+    def post(self, request, comment_id):
+        """
+        Toggle like on a comment.
+
+        Args:
+            comment_id: ID of the comment (from URL)
+
+        Returns:
+            200: Success with like status
+            422: Unprocessible entity
+            404: Comment not found
+            503: Redis service unavailable
+        """
+        try:
+
+            comment = Comment.active.select_related("user").get(id=comment_id)
+
+            user_id = request.user.id
+
+            try:
+                result = comment_like_service.toggle_like(
+                    comment_id=comment.id, user_id=user_id
+                )
+            except RedisError as e:
+                logger.error(f"Redis error in toggle like: {e}")
+                return CustomResponse.error(
+                    message="Like service temporarily unavailable",
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    err_code=ErrorCode.SERVICE_UNAVAILABLE,
+                )
+
+            response_data = {
+                "comment_id": comment.id,
+                "is_liked": result["is_liked"],
+                "like_count": result["like_count"],
+            }
+            message = (f"Comment {result['action']} successfully",)
+
+            serializer = self.serializer_class(response_data)
+            return CustomResponse.success(
+                message=message, data=serializer.data, status_code=status.HTTP_200_OK
+            )
+
+        except Comment.DoesNotExist:
+            raise NotFoundError("Comment not found")
+
+
+class CommentLikeStatusView(APIView):
+    """
+
+    Get like status for a comment.
+    """
+
+    serializer_class = CommentLikeStatusSerializer
+
+    @extend_schema(
+        summary="Get Like Status for a Comment",
+        description="Retrieves the total like count for a comment and indicates whether the current authenticated user has liked it. For unauthenticated users, `is_liked` will be `null`.",
+        tags=article_tags,
+        responses=COMMENT_LIKE_STATUS_RESPONSE_EXAMPLE,
+    )
+    def get(self, request, comment_id):
+        """
+        Get like status for a comment.
+
+        Args:
+            comment_id: ID of the comment (from URL)
+
+        Returns:
+            200: Success with like status
+            404: Comment not found
+            503: Redis service unavailable
+        """
+        try:
+
+            comment = Comment.active.get(id=comment_id)
+
+            user_id = request.user.id if request.user.is_authenticated else None
+
+            try:
+                result = comment_like_service.get_like_status(
+                    comment_id=comment.id, user_id=user_id
+                )
+            except RedisError as e:
+                logger.error(f"Redis error in get like status: {e}")
+                return CustomResponse.error(
+                    message="Like service temporarily unavailable",
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    err_code=ErrorCode.SERVICE_UNAVAILABLE,
+                )
+
+            response_data = {
+                "comment_id": comment.id,
+                "like_count": result["like_count"],
+                "is_liked": result["is_liked"],
+            }
+
+            serializer = self.serializer_class(response_data)
+            return CustomResponse.success(
+                message="Comment like status retrieved successfully.",
+                data=serializer.data,
+                status_code=status.HTTP_200_OK,
+            )
+
+        except Comment.DoesNotExist:
+            raise NotFoundError("Comment not found")

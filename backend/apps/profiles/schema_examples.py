@@ -182,8 +182,9 @@ SUBMITTED_ARTICLES = [
     },
 ]
 
+
 COMMENTS_DATA_EXAMPLE = {
-    "count": 3,
+    "count": 0,
     "next": None,
     "previous": None,
     "results": [
@@ -192,7 +193,7 @@ COMMENTS_DATA_EXAMPLE = {
             "user_id": "63edac98-9f67-4afb-a944-aa3cb69c580b",
             "article_id": "146541be-1b9b-48a2-8117-2b5fd4bd301b",
             "article_title": "Test title 2",
-            "article_created_at": "2025-08-12T10:00:54.576519Z",
+            "created_at": "2025-08-12T10:00:54.576519Z",
             "is_reply": False,
             "reply_count": 1,
             "body": "portfolio",
@@ -202,7 +203,7 @@ COMMENTS_DATA_EXAMPLE = {
             "user_id": "63edac98-9f67-4afb-a944-aa3cb69c580b",
             "article_id": "146541be-1b9b-48a2-8117-2b5fd4bd301b",
             "article_title": "Test title 2",
-            "article_created_at": "2025-08-12T10:00:54.576519Z",
+            "created_at": "2025-08-12T10:00:54.576519Z",
             "is_reply": False,
             "reply_count": 0,
             "body": "Lorem",
@@ -212,7 +213,7 @@ COMMENTS_DATA_EXAMPLE = {
             "user_id": "63edac98-9f67-4afb-a944-aa3cb69c580b",
             "article_id": "146541be-1b9b-48a2-8117-2b5fd4bd301b",
             "article_title": "Test title 2",
-            "article_created_at": "2025-08-12T10:00:54.576519Z",
+            "created_at": "2025-08-12T10:00:54.576519Z",
             "is_reply": True,
             "reply_count": 0,
             "body": "Ikr",
@@ -568,6 +569,7 @@ COMMENTS_ARTICLES_RESPONSE_EXAMPLE = {
     ),
     401: UNAUTHORIZED_USER_RESPONSE,
 }
+
 
 USERNAMES_DATA_EXAMPLE = {
     "count": 5,

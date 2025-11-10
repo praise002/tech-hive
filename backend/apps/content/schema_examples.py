@@ -11,6 +11,8 @@ from apps.common.serializers import ErrorDataResponseSerializer, ErrorResponseSe
 from apps.content.serializers import (
     ArticleSerializer,
     CategorySerializer,
+    CommentLikeSerializer,
+    CommentLikeStatusSerializer,
     CommentResponseSerializer,
     ContributorOnboardingSerializer,
     EventSerializer,
@@ -68,7 +70,7 @@ ARTICLES = [
         "is_featured": False,
         "author": "Praise Idowu",
         "total_reaction_counts": 4,
-        "reaction_counts": {"❤️": 1, "👍": 1, "🔥": 1, "😍": 1},
+        "reaction_counts": {"❤️": 4, "👍": 1, "🔥": 1, "😍": 3},
         "tags": [{"id": "d5afcd69-4c7d-4ea5-94bd-e1a2549a3f72", "name": "python"}],
     },
 ]
@@ -461,4 +463,285 @@ COMMENT_CREATE_RESPONSE_EXAMPLE = {
         ],
     ),
     422: ErrorDataResponseSerializer,
+}
+
+
+COMMENT_LIKE_TOGGLE_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Like status toggled successfully. The 'action' field indicates whether the comment was 'liked' or 'unliked'.",
+        response=CommentLikeSerializer,
+        examples=[
+            OpenApiExample(
+                name="User liked the comment",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Comment liked successfully.",
+                    "data": {
+                        "is_liked": True,
+                        "like_count": 16,
+                        "action": "liked",
+                    },
+                },
+            ),
+            OpenApiExample(
+                name="User unliked the comment",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Comment unliked successfully.",
+                    "data": {
+                        "is_liked": False,
+                        "like_count": 15,
+                        "action": "unliked",
+                    },
+                },
+            ),
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Comment not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Comment Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Article not found",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+    422: ErrorDataResponseSerializer,
+    503: OpenApiResponse(
+        description="Like service unavailable",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Like service unavailable",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Like service temporarily unavailable",
+                    "code": ErrorCode.SERVICE_UNAVAILABLE,
+                },
+            ),
+        ],
+    ),
+}
+
+
+COMMENT_LIKE_STATUS_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Like status retrieved successfully. `is_liked` will be `null` for unauthenticated users.",
+        response=CommentLikeStatusSerializer,
+        examples=[
+            OpenApiExample(
+                name="Authenticated user has liked",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Like status retrieved successfully.",
+                    "data": {"like_count": 15, "is_liked": True},
+                },
+            ),
+            OpenApiExample(
+                name="Authenticated user has not liked",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Like status retrieved successfully.",
+                    "data": {"like_count": 15, "is_liked": False},
+                },
+            ),
+            OpenApiExample(
+                name="Unauthenticated user",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Like status retrieved successfully.",
+                    "data": {"like_count": 15, "is_liked": None},
+                },
+            ),
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Comment not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Comment Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Comment not found",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+    503: OpenApiResponse(
+        description="Like service unavailable",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Like service unavailable",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Like service temporarily unavailable",
+                    "code": ErrorCode.SERVICE_UNAVAILABLE,
+                },
+            ),
+        ],
+    ),
+}
+
+
+ARTICLE_REACTION_TOGGLE_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Reaction toggled successfully. The 'action' field indicates whether the reaction was 'added' or 'removed'.",
+        examples=[
+            OpenApiExample(
+                name="Reaction added",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Reaction added successfully",
+                    "data": {
+                        "article_id": UUID_EXAMPLE,
+                        "reaction_type": "❤️",
+                        "action": "added",
+                        "is_reacted": True,
+                        "reaction_counts": {
+                            "❤️": 13,
+                            "😍": 8,
+                            "👍": 5,
+                            "🔥": 3,
+                        },
+                        "total_reactions": 29,
+                    },
+                },
+            ),
+            OpenApiExample(
+                name="Reaction removed",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Reaction removed successfully",
+                    "data": {
+                        "article_id": UUID_EXAMPLE,
+                        "reaction_type": "❤️",
+                        "action": "removed",
+                        "is_reacted": False,
+                        "reaction_counts": {
+                            "❤️": 12,
+                            "😍": 8,
+                            "👍": 5,
+                            "🔥": 3,
+                        },
+                        "total_reactions": 28,
+                    },
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        description="Article is not published",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Unpublished Article",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Cannot react to unpublished articles",
+                    "code": ErrorCode.FORBIDDEN,
+                },
+            ),
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Article not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Article Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Article not found",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+    422: ErrorDataResponseSerializer,
+}
+
+
+ARTICLE_REACTION_STATUS_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Reaction status retrieved successfully. `user_reactions` will be `null` for unauthenticated users.",
+        examples=[
+            OpenApiExample(
+                name="Authenticated user with reactions",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Reaction status retrieved successfully",
+                    "data": {
+                        "article_id": UUID_EXAMPLE,
+                        "reaction_counts": {
+                            "❤️": 12,
+                            "😍": 8,
+                            "👍": 5,
+                            "🔥": 3,
+                        },
+                        "total_reactions": 28,
+                        "user_reactions": ["❤️", "👍"],
+                    },
+                },
+            ),
+            OpenApiExample(
+                name="Authenticated user without reactions",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Reaction status retrieved successfully",
+                    "data": {
+                        "article_id": UUID_EXAMPLE,
+                        "reaction_counts": {
+                            "❤️": 12,
+                            "😍": 8,
+                            "👍": 5,
+                            "🔥": 3,
+                        },
+                        "total_reactions": 28,
+                        "user_reactions": [],
+                    },
+                },
+            ),
+            OpenApiExample(
+                name="Unauthenticated user",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Reaction status retrieved successfully",
+                    "data": {
+                        "article_id": UUID_EXAMPLE,
+                        "reaction_counts": {
+                            "❤️": 12,
+                            "😍": 8,
+                            "👍": 5,
+                            "🔥": 3,
+                        },
+                        "total_reactions": 28,
+                        "user_reactions": None,
+                    },
+                },
+            ),
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Article not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Article Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Article not found",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
 }
