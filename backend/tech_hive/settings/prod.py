@@ -50,16 +50,8 @@ REDIS_CONNECTION_POOL = {
 
 CACHES = {
     "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
         "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}",
-        "OPTIONS": {
-            "SOCKET_CONNECT_TIMEOUT": 5,
-            "SOCKET_TIMEOUT": 5,
-            "CONNECTION_POOL_KWARGS": {
-                "max_connections": 50,
-                "retry_on_timeout": True,
-            },
-        },
     }
 }
 
