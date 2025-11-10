@@ -51,4 +51,3 @@ class NotificationListView(ListAPIView):
     )
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
-        return self.list(request, *args, **kwargs)

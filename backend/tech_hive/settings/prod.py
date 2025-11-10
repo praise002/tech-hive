@@ -42,6 +42,27 @@ REDIS_HOST = "redis"
 REDIS_PORT = 6379
 REDIS_DB = 1
 
+
+REDIS_CONNECTION_POOL = {
+    "max_connections": 50,
+    "decode_responses": True,  # Important: converts bytes to strings
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}",
+        "OPTIONS": {
+            "SOCKET_CONNECT_TIMEOUT": 5,
+            "SOCKET_TIMEOUT": 5,
+            "CONNECTION_POOL_KWARGS": {
+                "max_connections": 50,
+                "retry_on_timeout": True,
+            },
+        },
+    }
+}
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(
         minutes=60

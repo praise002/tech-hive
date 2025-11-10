@@ -1,8 +1,6 @@
 # Tech Hive - Role-Based Permissions Matrix
 
 ---
-
-- `POST /articles/like/` → Like/unlike an article - any authenticated user
 - `POST /articles/summary/` → Summarize an article 
   
 ## 🎯 Contributor Role
@@ -15,13 +13,14 @@
 ## 👀 Reviewer Role
 
 **Review Management:**
-- `GET /articles/review/assigned/` → View assigned articles
-- `PUT /articles/review/{id}/status/under_review` → Mark as under review
-- `PUT /articles/review/{id}/status/changes_requested` → Request changes
-- `PUT /articles/review/{id}/status/review_completed` → Complete review
-- 
-- `PUT /articles/review/{id}/status/ready_for_publishing` → Mark ready to publish
-- `POST /articles/review/{id}/reject` → Reject article
+- GET    /api/reviews/assigned/                 # List reviews assigned to me
+- GET    /api/reviews/{review_id}/        # Get specific review details
+- PATCH  /api/reviews/{review_id}/        # Update review (status, feedback etc.)
+
+POST /api/articles/review/{id}/start/          # Start review
+POST /api/articles/review/{id}/request-changes/ # Request changes
+POST /api/articles/review/{id}/approve/        # Approve (mark ready)
+POST /api/articles/review/{id}/reject/         # Reject
 
 ---
 

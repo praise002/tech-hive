@@ -194,6 +194,9 @@ class ArticleReview(BaseModel):
         on_delete=models.CASCADE,
     )
     is_active = models.BooleanField(default=True)
+    
+    objects = models.Manager()
+    active = ActiveManager()
 
     class Meta:
         unique_together = ("article", "is_active")

@@ -566,8 +566,8 @@ class UserCommentsGenericView(ListAPIView):
     def get_queryset(self):
         """Filter saved articles to only return those belonging to the authenticated user."""
         return Comment.objects.filter(
-            user=self.request.user, active=True
-        ).select_related("article", "user", "replying_to")
+            user=self.request.user, is_active=True
+        ).select_related("article", "user")
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
