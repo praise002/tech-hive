@@ -48,21 +48,13 @@ DATABASES = {
 }
 
 CELERY_BROKER_URL = "redis://127.0.0.1:6378/0"
+REDIS_URL = "localhost://127.0.0.1:6378/0"
 
-REDIS_HOST = "localhost"
-REDIS_PORT = 6378
-REDIS_DB = 0
-
-
-REDIS_CONNECTION_POOL = {
-    "max_connections": 50,
-    "decode_responses": True,  # Important: converts bytes to strings
-}
 
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}",
+        "LOCATION": REDIS_URL,
     }
 }
 

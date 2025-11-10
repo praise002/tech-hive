@@ -33,25 +33,19 @@ if DATABASE_URL:
             conn_health_checks=True,
         )
 
-# CELERY_BROKER_URL = "redis://redis:6379/1"
+
 CELERY_BROKER_URL = config("REDIS_URL")
 
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
-REDIS_HOST = "redis"
-REDIS_PORT = 6379
-REDIS_DB = 1
 
+REDIS_URL = config("REDIS_URL")
 
-REDIS_CONNECTION_POOL = {
-    "max_connections": 50,
-    "decode_responses": True,  # Important: converts bytes to strings
-}
 
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}",
+        "LOCATION": REDIS_URL,
     }
 }
 

@@ -21,13 +21,11 @@ class CommentLikeService:
     def __init__(self):
         """Initialize Redis connection with connection pooling."""
         try:
-            self.pool = redis.ConnectionPool(
-                host=settings.REDIS_HOST,
-                port=settings.REDIS_PORT,
-                db=settings.REDIS_DB,
-                **settings.REDIS_CONNECTION_POOL,
+            self.redis_client = redis.from_url(
+                settings.REDIS_URL,
+                decode_responses=True,
+                max_connections=50,
             )
-            self.redis_client = redis.Redis(connection_pool=self.pool)
 
             # Test connection
             self.redis_client.ping()
