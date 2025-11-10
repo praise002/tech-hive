@@ -48,7 +48,7 @@ DATABASES = {
 }
 
 CELERY_BROKER_URL = "redis://127.0.0.1:6378/0"
-REDIS_URL = "localhost://127.0.0.1:6378/0"
+REDIS_URL = "redis://localhost:6378/0"
 
 
 CACHES = {
