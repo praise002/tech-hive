@@ -206,9 +206,6 @@ class SaveArticleCreateSerializer(serializers.Serializer):
 class CommentSerializer(serializers.ModelSerializer):
     article_id = serializers.SerializerMethodField()
     article_title = serializers.CharField(source="article.title", read_only=True)
-    article_created_at = serializers.DateTimeField(
-        source="article.created_at", read_only=True
-    )
     user_id = serializers.SerializerMethodField()
 
     class Meta:
@@ -218,7 +215,7 @@ class CommentSerializer(serializers.ModelSerializer):
             "user_id",
             "article_id",
             "article_title",
-            "article_created_at",
+            "created_at",
             "body",
         ]
 

@@ -65,7 +65,7 @@ show-logs:
 	docker-compose logs
 
 redis:
-	sudo docker run -it --rm --name redis -p 6379:6379 redis
+	sudo docker run -it --rm --name redis -p 6378:6379 redis
 
 celery:
 	celery -A tech_hive worker -l info --pool=solo

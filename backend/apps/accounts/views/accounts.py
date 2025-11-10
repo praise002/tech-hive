@@ -299,7 +299,7 @@ class VerifyEmailView(APIView):
                 # Clear the OTP
                 invalidate_previous_otps(user)
                 return CustomResponse.success(
-                    message="Email address already verified. No OTP sent.",
+                    message="Email address already verified.",
                     status_code=status.HTTP_200_OK,
                 )
 
