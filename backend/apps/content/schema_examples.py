@@ -7,7 +7,11 @@ from apps.common.schema_examples import (
     SUCCESS_RESPONSE_STATUS,
     UUID_EXAMPLE,
 )
-from apps.common.serializers import ErrorDataResponseSerializer, ErrorResponseSerializer
+from apps.common.serializers import (
+    ErrorDataResponseSerializer,
+    ErrorResponseSerializer,
+    SuccessResponseSerializer,
+)
 from apps.content.serializers import (
     ArticleSerializer,
     CategorySerializer,
@@ -42,6 +46,7 @@ TAG_LIST_EXAMPLE = [
     },
 ]
 
+
 ARTICLES = [
     {
         "id": "146541be-1b9b-48a2-8117-2b5fd4bd301b",
@@ -74,6 +79,7 @@ ARTICLES = [
         "tags": [{"id": "d5afcd69-4c7d-4ea5-94bd-e1a2549a3f72", "name": "python"}],
     },
 ]
+
 
 ARTICLE_DETAIL_EXAMPLE = {
     "id": "09fc9e71-d071-4fb4-ba28-16a493e609d6",
@@ -257,11 +263,7 @@ CATEGORY_RESPONSE_EXAMPLE = {
         examples=[
             OpenApiExample(
                 name="Categories Fetched",
-                value={
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Categories retrieved successfully.",
-                    "data": CATEGORY_LIST_EXAMPLE,
-                },
+                value=CATEGORY_LIST_EXAMPLE,
             ),
         ],
     ),
@@ -284,6 +286,30 @@ TAG_RESPONSE_EXAMPLE = {
     ),
 }
 
+RSS_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        response=SuccessResponseSerializer,
+        description="RSS Feed Fetched",
+        examples=[
+            OpenApiExample(
+                name="RSS Feed Fetched",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "RSS Feed information retrieved successfully.",
+                    "data": {
+                        "rss_url": "https://127.0.0.1:8000/api/v1/articles/feed/",
+                        "description": "Subscribe to get the latest Tech Hive articles",
+                        "format": "RSS 2.0 XML",
+                        "items_count": 10,
+                        "update_frequency": "When new articles are published",
+                    },
+                },
+            ),
+        ],
+    ),
+}
+
+
 ARTICLE_LIST_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(
         description="Articles Fetched",
@@ -291,11 +317,7 @@ ARTICLE_LIST_RESPONSE_EXAMPLE = {
         examples=[
             OpenApiExample(
                 name="Success Response",
-                value={
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Articles retrieved successfully.",
-                    "data": ARTICLES,
-                },
+                value=ARTICLES,
             ),
         ],
     ),

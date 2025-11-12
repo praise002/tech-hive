@@ -13,6 +13,7 @@ from apps.content.schema_examples import (
     COMMENT_CREATE_RESPONSE_EXAMPLE,
     COMMENT_LIKE_STATUS_RESPONSE_EXAMPLE,
     COMMENT_LIKE_TOGGLE_RESPONSE_EXAMPLE,
+    RSS_RESPONSE_EXAMPLE,
     TAG_RESPONSE_EXAMPLE,
     THREAD_REPLIES_RESPONSE_EXAMPLE,
 )
@@ -315,27 +316,17 @@ class TagGenericView(ListAPIView):
         return self.list(request, *args, **kwargs)
 
 
-# Do for every content
 class RSSFeedInfoView(APIView):
     @extend_schema(
         summary="RSS Feed Information",
         description="Get information about subscribing to Tech Hive's RSS feed.",
         tags=article_tags,
-        responses={
-            200: {
-                "type": "object",
-                "properties": {
-                    "rss_url": {"type": "string"},
-                    "description": {"type": "string"},
-                    "items_count": {"type": "integer"},
-                },
-            }
-        },
+        responses=RSS_RESPONSE_EXAMPLE,
     )
     def get(self, request):
         base_url = request.build_absolute_uri("/").rstrip("/")
         return CustomResponse.success(
-            message="Tags retrieved successfully.",
+            message="RSS Feed information retrieved successfully.",
             data={
                 "rss_url": f"{base_url}/api/v1/articles/feed/",
                 "description": "Subscribe to get the latest Tech Hive articles",

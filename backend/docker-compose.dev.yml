@@ -9,6 +9,7 @@ services:
       timeout: 5s
       retries: 10
     restart: always
+    shm_size: 128mb
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -71,7 +72,7 @@ services:
     env_file:
       - .env
     environment:
-      # explicitly set it cos dev.py is using localPOSTGRES_HOST
+      # explicitly set it cos dev.py is using local POSTGRES_HOST
       - CELERY_BROKER_URL=redis://redis:6379/0
       - SERVICE_TYPE=celery
       - POSTGRES_HOST=db

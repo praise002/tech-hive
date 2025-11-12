@@ -14,7 +14,7 @@ urlpatterns = [
     path("articles/", views.ArticleListView.as_view()),
     path("comments/", views.CommentCreateView.as_view()),
     path("articles/feed/", LatestArticlesFeed()),
-    # path("articles/rss/", views.RSSFeedInfoView.as_view()),
+    path("articles/rss/", views.RSSFeedInfoView.as_view()),
     path(
         "articles/<uuid:article_id>/reactions/",
         views.ArticleReactionView.as_view(),

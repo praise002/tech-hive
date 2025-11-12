@@ -183,43 +183,38 @@ SUBMITTED_ARTICLES = [
 ]
 
 
-COMMENTS_DATA_EXAMPLE = {
-    "count": 0,
-    "next": None,
-    "previous": None,
-    "results": [
-        {
-            "id": "9217d492-ec33-4e05-af2c-62aa220b4c51",
-            "user_id": "63edac98-9f67-4afb-a944-aa3cb69c580b",
-            "article_id": "146541be-1b9b-48a2-8117-2b5fd4bd301b",
-            "article_title": "Test title 2",
-            "created_at": "2025-08-12T10:00:54.576519Z",
-            "is_reply": False,
-            "reply_count": 1,
-            "body": "portfolio",
-        },
-        {
-            "id": "1e3c03a8-9535-40d7-98e4-30db724a0abb",
-            "user_id": "63edac98-9f67-4afb-a944-aa3cb69c580b",
-            "article_id": "146541be-1b9b-48a2-8117-2b5fd4bd301b",
-            "article_title": "Test title 2",
-            "created_at": "2025-08-12T10:00:54.576519Z",
-            "is_reply": False,
-            "reply_count": 0,
-            "body": "Lorem",
-        },
-        {
-            "id": "353949d0-2738-4eb7-a411-e70d8026915d",
-            "user_id": "63edac98-9f67-4afb-a944-aa3cb69c580b",
-            "article_id": "146541be-1b9b-48a2-8117-2b5fd4bd301b",
-            "article_title": "Test title 2",
-            "created_at": "2025-08-12T10:00:54.576519Z",
-            "is_reply": True,
-            "reply_count": 0,
-            "body": "Ikr",
-        },
-    ],
-}
+COMMENTS_DATA_EXAMPLE = [
+    {
+        "id": "9217d492-ec33-4e05-af2c-62aa220b4c51",
+        "user_id": "63edac98-9f67-4afb-a944-aa3cb69c580b",
+        "article_id": "146541be-1b9b-48a2-8117-2b5fd4bd301b",
+        "article_title": "Test title 2",
+        "created_at": "2025-08-12T10:00:54.576519Z",
+        "is_reply": False,
+        "reply_count": 1,
+        "body": "portfolio",
+    },
+    {
+        "id": "1e3c03a8-9535-40d7-98e4-30db724a0abb",
+        "user_id": "63edac98-9f67-4afb-a944-aa3cb69c580b",
+        "article_id": "146541be-1b9b-48a2-8117-2b5fd4bd301b",
+        "article_title": "Test title 2",
+        "created_at": "2025-08-12T10:00:54.576519Z",
+        "is_reply": False,
+        "reply_count": 0,
+        "body": "Lorem",
+    },
+    {
+        "id": "353949d0-2738-4eb7-a411-e70d8026915d",
+        "user_id": "63edac98-9f67-4afb-a944-aa3cb69c580b",
+        "article_id": "146541be-1b9b-48a2-8117-2b5fd4bd301b",
+        "article_title": "Test title 2",
+        "created_at": "2025-08-12T10:00:54.576519Z",
+        "is_reply": True,
+        "reply_count": 0,
+        "body": "Ikr",
+    },
+]
 
 SAVED_ARTICLE_EXAMPLE = [
     {
@@ -366,29 +361,17 @@ ARTICLE_LIST_EXAMPLE = {
             OpenApiExample(
                 name="All Articles (No Filter)",
                 summary="Default response with all user articles",
-                value={
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Articles retrieved successfully.",
-                    "data": ARTICLES,
-                },
+                value=ARTICLES,
             ),
             OpenApiExample(
                 name="Draft Articles Only",
                 summary="Filtered by status=draft",
-                value={
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Articles retrieved successfully.",
-                    "data": DRAFTS_ARTICLES,
-                },
+                value=DRAFTS_ARTICLES,
             ),
             OpenApiExample(
                 name="Published Articles Only",
                 summary="Filtered by status=published",
-                value={
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Articles retrieved successfully.",
-                    "data": PUBLISHED_ARTICLES,
-                },
+                value=PUBLISHED_ARTICLES,
             ),
             OpenApiExample(
                 name="Submitted Articles (Multiple Statuses)",
@@ -402,11 +385,7 @@ ARTICLE_LIST_EXAMPLE = {
             OpenApiExample(
                 name="Empty Results",
                 summary="No articles found matching the filter criteria",
-                value={
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Articles retrieved successfully.",
-                    "data": [],
-                },
+                value=[],
             ),
         ],
     ),
@@ -557,14 +536,7 @@ COMMENTS_ARTICLES_RESPONSE_EXAMPLE = {
         description="Comments retrieved successfully",
         response=CommentSerializer,
         examples=[
-            OpenApiExample(
-                name="Success Response",
-                value={
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Comments retrieved successfully.",
-                    "data": COMMENTS_DATA_EXAMPLE,
-                },
-            ),
+            OpenApiExample(name="Success Response", value=COMMENTS_DATA_EXAMPLE),
         ],
     ),
     401: UNAUTHORIZED_USER_RESPONSE,
