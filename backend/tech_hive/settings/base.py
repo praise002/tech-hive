@@ -59,6 +59,7 @@ THIRD_PARTY_APPS = [
     "django_ckeditor_5",
     "silk",
     "django_prometheus",
+    "redisboard",
 ]
 
 LOCAL_APPS = [
@@ -222,6 +223,8 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "anon": "500/day",
         "user": "1000/day",
+        "article_summary": "10/hour",
+        "article_summary_regenerate": "3/hour",
     },
     "EXCEPTION_HANDLER": "apps.common.exceptions.custom_exception_handler",
 }
@@ -487,8 +490,32 @@ CKEDITOR_5_FILE_STORAGE = "tech_hive.storage.CustomCloudinaryStorage"
 CKEDITOR_5_FILE_UPLOAD_PERMISSION = "staff"
 
 import sentry_sdk
+from django.conf import settings
 
 sentry_sdk.init(
     dsn="https://382d8ac9d3e4c8cd95f0942926fd98a4@o4510200278941696.ingest.de.sentry.io/4510200289427536",
     send_default_pii=True,
 )
+
+ARTICLE_SUMMARY_MAX_CONTENT_LENGTH = 10000  # Max chars to send to AI
+
+REDIS_URL = config("REDIS_URL")  #  prod uses prod redis url
+CELERY_BROKER_URL = config("REDIS_URL")
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": REDIS_URL,
+    },
+    "summaries": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": (
+            "redis://127.0.0.1:6378/2" if settings.DEBUG else config("REDIS_URL")
+        ),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+        "KEY_PREFIX": "article_summaries",
+        "TIMEOUT": 60 * 60 * 24 * 30,  # 30 days for summaries
+    },
+}

@@ -9,6 +9,7 @@ from .articles import (
     TagGenericView,
     ThreadRepliesView,
     RSSFeedInfoView,
+    ArticleSummaryView,
 )
 from .contents import (
     CategoryGenericView,
@@ -37,4 +38,5 @@ __all__ = [
     "CommentLikeStatusView",
     "ArticleReactionView",
     "RSSFeedInfoView",
+    "ArticleSummaryView",
 ]
