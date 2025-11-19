@@ -1,6 +1,8 @@
-from apps.accounts.models import Otp, User
+from apps.accounts.models import ContributorOnboarding, Otp, User
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.urls import reverse
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
@@ -88,3 +90,16 @@ class UserAdmin(BaseUserAdmin):
 
 admin.site.register(Otp)
 admin.site.register(User, UserAdmin)
+
+
+@admin.register(ContributorOnboarding)
+class ContributorOnboardingAdmin(admin.ModelAdmin):
+    list_display = ["id", "user_email", "terms_accepted", "accepted_at"]
+    search_fields = ["user__email", "user__first_name", "user__last_name"]
+    readonly_fields = ["id"]
+
+    def user_email(self, obj):
+        url = reverse("admin:accounts_user_change", args=[obj.user.id])
+        return format_html('<a href="{}">{}</a>', url, obj.user.email)
+
+    user_email.short_description = "User"

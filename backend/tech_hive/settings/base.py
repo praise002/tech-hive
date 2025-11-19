@@ -69,6 +69,7 @@ LOCAL_APPS = [
     "apps.general",
     "apps.content",
     "apps.notification",
+    "apps.subscriptions",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -519,3 +520,10 @@ CACHES = {
         "TIMEOUT": 60 * 60 * 24 * 30,  # 30 days for summaries
     },
 }
+
+# Subscription
+PREMIUM_PRICE = 5000  # NGN
+TRIAL_DAYS = 7
+GRACE_PERIOD_DAYS = 7
+RETRY_SCHEDULE = [3, 5, 7]  # Days after failure
+FINAL_GRACE_DAYS = 3

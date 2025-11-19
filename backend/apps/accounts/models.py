@@ -81,54 +81,6 @@ class Otp(models.Model):
         return timezone.now() < expiration_time
 
 
-class SubscriptionPlan(BaseModel):
-    PLAN_CHOICES = [
-        ("BASIC", "Basic"),
-        ("PREMIUM", "Premium"),
-    ]
-    BILLING_INTERVAL_CHOICES = [
-        ("MONTHLY", "Monthly"),
-        ("YEARLY", "Yearly"),
-    ]
-    name = models.CharField(max_length=20, choices=PLAN_CHOICES, default="BASIC")
-    price = models.DecimalField(max_digits=6, decimal_places=2)
-    features = models.TextField()
-    paystack_plan_code = models.CharField(max_length=50)
-    billing_interval = models.CharField(
-        max_length=20, choices=BILLING_INTERVAL_CHOICES, default="MONTHLY"
-    )
-    updated_at = models.DateTimeField(auto_now=True)
-    
-class Subscription(BaseModel):
-    STATUS_CHOICES = [
-        ("TRAILING", "Trailing"),
-        ("ACTIVE", "Active"),
-        ("PAST_DUE", "Past Due"),
-        ("EXPIRED", "Expired"),
-        ("CANCELLED", "Cancelled"),
-    ]
-    
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    plan = models.ForeignKey(
-        SubscriptionPlan, on_delete=models.SET_NULL, null=True
-    )
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
-    
-    paystack_subscription_code = models.CharField(max_length=50, unique=True)
-    paystack_customer_code = models.CharField(max_length=50)
-    paystack_authorization_code = models.CharField(max_length=50)
-    card_last4 = models.CharField(max_length=4)
-    card_type = models.CharField(max_length=20)
-    card_bank = models.CharField(max_length=20)
-
-
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    subscription = models.ForeignKey(
-        SubscriptionPlan, on_delete=models.SET_NULL, null=True
-    )
-
-
 class ContributorOnboarding(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     terms_accepted = models.BooleanField(default=False)

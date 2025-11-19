@@ -1,79 +1,173 @@
 from apps.content import models
 from django.contrib import admin
 
-from apps.accounts.models import ContributorOnboarding
-
-@admin.register(ContributorOnboarding)
-class ContributorOnboardingAdmin(admin.ModelAdmin):
-    pass
 
 @admin.register(models.Category)
 class CategoryAdmin(admin.ModelAdmin):
-    pass
+    list_display = ["name", "slug", "articles_count", "created_at"]
+    search_fields = ["name"]
+    readonly_fields = ["id", "slug", "created_at"]
+
+    def articles_count(self, obj):
+        return obj.articles.count()
+
+    articles_count.short_description = "Articles"
 
 
 @admin.register(models.Article)
 class ArticleAdmin(admin.ModelAdmin):
-    filter_horizontal = ('tags',)  
-    list_filter = ('status', 'category')
-    list_display = ('title', 'status', 'author', 'get_tags')
-    
+    list_display = [
+        "title",
+        "status",
+        "author",
+        "category",
+        "is_featured",
+        "published_at",
+        "get_tags",
+    ]
+    list_filter = ["status", "category", "is_featured", "created_at"]
+    search_fields = ["title", "author__email", "author__first_name"]
+    filter_horizontal = ["tags"]
+    readonly_fields = ["id", "slug", "created_at", "updated_at", "cover_image_url"]
+
+    fieldsets = (
+        (
+            "Basic Information",
+            {"fields": ("title", "slug", "author", "category", "content")},
+        ),
+        ("Media", {"fields": ("cover_image", "cover_image_url")}),
+        ("Classification", {"fields": ("tags", "status", "is_featured")}),
+        (
+            "Dates",
+            {
+                "fields": ("published_at", "created_at", "updated_at"),
+                "classes": ("collapse",),
+            },
+        ),
+        ("Metadata", {"fields": ("id",), "classes": ("collapse",)}),
+    )
+
     def get_tags(self, obj):
-        return ", ".join([tag.name for tag in obj.tags.all()])
-    
-    get_tags.short_description = 'Tags'
+        return ", ".join([tag.name for tag in obj.tags.all()[:3]])
+
+    get_tags.short_description = "Tags"
 
 
 @admin.register(models.Tag)
 class TagAdmin(admin.ModelAdmin):
-    pass
+    list_display = ["name", "articles_count", "created_at"]
+    search_fields = ["name"]
+    readonly_fields = ["id", "created_at"]
+
+    def articles_count(self, obj):
+        return obj.articles.count()
+
+    articles_count.short_description = "Articles"
 
 
 @admin.register(models.ArticleReaction)
 class ArticleReactionAdmin(admin.ModelAdmin):
-    pass
+    list_display = ["user", "article", "reaction_type", "created_at"]
+    list_filter = ["reaction_type", "created_at"]
+    search_fields = ["user__email", "article__title"]
+    readonly_fields = ["id", "created_at"]
 
 
 @admin.register(models.ArticleReview)
-class ArticleReview(admin.ModelAdmin):
-    pass
+class ArticleReviewAdmin(admin.ModelAdmin):
+    list_display = ["article", "reviewed_by", "is_active", "created_at"]
+    list_filter = ["is_active", "created_at"]
+    search_fields = ["article__title", "reviewed_by__email"]
+    readonly_fields = ["id", "created_at"]
 
 
 @admin.register(models.SavedArticle)
 class SavedArticleAdmin(admin.ModelAdmin):
-    pass
+    list_display = ["article", "user", "saved_at"]
+    list_filter = ["saved_at"]
+    search_fields = ["article__title", "user__email"]
+    readonly_fields = ["id", "saved_at", "created_at"]
+
 
 @admin.register(models.CommentThread)
 class CommentThreadAdmin(admin.ModelAdmin):
-    pass
+    list_display = ["article", "reply_count", "is_active", "created_at"]
+    list_filter = ["is_active", "created_at"]
+    search_fields = ["article__title"]
+    readonly_fields = ["id", "reply_count", "created_at"]
+
 
 @admin.register(models.Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display=('user', 'body', 'is_active')
-    list_filter = ('is_active', 'created_at', 'updated_at')
-    search_fields = ('body',)
+    list_display = ['user', 'article', 'body_preview', 'is_root', 'is_active', 'created_at']
+    list_filter = ['is_active', 'created_at']
+    search_fields = ['body', 'user__email', 'article__title']
+    readonly_fields = ['id', 'created_at', 'updated_at']
+
+    def body_preview(self, obj):
+        return obj.body[:50] + '...' if len(obj.body) > 50 else obj.body
+
+    body_preview.short_description = 'Comment'
+
+    def is_root(self, obj):
+        return '✓' if obj.is_root_comment else '-'
+
+    is_root.short_description = 'Root'
+
+
+@admin.register(models.CommentMention)
+class CommentMentionAdmin(admin.ModelAdmin):
+    list_display = ['comment', 'mentioned_user', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['mentioned_user__email', 'comment__body']
+    readonly_fields = ['id', 'created_at']
 
 
 @admin.register(models.Job)
 class JobAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['title', 'company', 'job_type', 'work_mode', 'location', 'is_active', 'created_at']
+    list_filter = ['job_type', 'work_mode', 'is_active', 'category', 'created_at']
+    search_fields = ['title', 'company', 'location']
+    readonly_fields = ['id', 'created_at']
 
 
 @admin.register(models.Event)
 class EventAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['title', 'location', 'start_date', 'end_date', 'category', 'created_at']
+    list_filter = ['category', 'start_date', 'created_at']
+    search_fields = ['title', 'location']
+    readonly_fields = ['id', 'created_at']
 
 
 @admin.register(models.Resource)
 class ResourceAdmin(admin.ModelAdmin):
-    list_filter = ('is_featured',)
+    list_display = ['name', 'category', 'is_featured', 'created_at']
+    list_filter = ['is_featured', 'category', 'created_at']
+    search_fields = ['name', 'body']
+    readonly_fields = ['id', 'image_url', 'created_at']
 
 
 @admin.register(models.ToolTag)
 class ToolTagAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['name', 'tools_count', 'created_at']
+    search_fields = ['name']
+    readonly_fields = ['id', 'created_at']
+
+    def tools_count(self, obj):
+        return obj.tool_set.count()
+
+    tools_count.short_description = "Tools"
 
 
 @admin.register(models.Tool)
 class ToolAdmin(admin.ModelAdmin):
-    list_filter = ('is_featured',)
+    list_display = ['name', 'category', 'call_to_action', 'is_featured', 'get_tags', 'created_at']
+    list_filter = ['is_featured', 'category', 'created_at']
+    search_fields = ['name', 'desc']
+    filter_horizontal = ['tags']
+    readonly_fields = ['id', 'created_at']
+
+    def get_tags(self, obj):
+        return ", ".join([tag.name for tag in obj.tags.all()[:3]])
+
+    get_tags.short_description = 'Tags'
