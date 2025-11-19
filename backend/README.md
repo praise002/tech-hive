@@ -78,7 +78,7 @@ A scalable Django REST framework backend providing APIs for:
 - [ ] **File Upload & Media Management**
   - ✅ Image upload for articles
   - ✅ File size and type validation
-  - ✅ Cloud storage integration (AWS S3/Cloudinary)
+  - ✅ Cloud storage integration (Cloudinary)
   - [ ] Temporary image cleanup system
 
 - [ ] **Search & Discovery**
@@ -90,12 +90,10 @@ A scalable Django REST framework backend providing APIs for:
 
 ### Phase 3: Social & Collaboration Features (Priority: Medium)
 
-- [ ] **Social Features API**
-  - [ ] Article likes and reactions
+- ✅  **Social Features API**
+  - ✅ Article likes and reactions
   - ✅ Comment system for articles
-  - [ ] User activity feeds
   - ✅ Notification system
-  - [ ] Social sharing endpoints
 
 - [ ] **Collaboration Features**
   - [ ] Real-time collaboration support (Liveblocks integration)

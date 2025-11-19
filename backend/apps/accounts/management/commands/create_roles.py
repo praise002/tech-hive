@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 
 from apps.accounts.models import User
 
-
+# TODO
 class Command(BaseCommand):
     help = "Creates default roles (Author, Reviewer, Editor, Manager) and assigns permissions."
 
