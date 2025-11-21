@@ -15,15 +15,13 @@ class Command(BaseCommand):
             name="Premium",
             description="Unlimited access to all Tech Hive features",
             price=5000.00,
-            billing_cycle="MONTHLY",
+            billing_cycle="monthly",
             paystack_plan_code="PLN_PLACEHOLDER",
             features={
-                "unlimited_articles": True,
                 "priority_support": True,
                 "analytics_dashboard": True,
                 "ad_free": True,
                 "early_access": True,
-                "max_articles_per_month": None,  # None = unlimited
             },
         )
 

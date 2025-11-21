@@ -1,12 +1,11 @@
 from decimal import Decimal
 
 from apps.common.models import BaseModel
+from apps.subscriptions.manager import SubscriptionManager
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
-
-from apps.subscriptions.manager import SubscriptionManager
 
 
 class SubscriptionPlan(BaseModel):
@@ -77,6 +76,11 @@ class Subscription(BaseModel):
         help_text="Current subscription status",
     )
 
+    reference = models.CharField(
+        max_length=20,
+        help_text="Custom reference",
+    )
+
     # Paystack Integration Fields
     paystack_subscription_code = models.CharField(
         max_length=50,
@@ -89,6 +93,12 @@ class Subscription(BaseModel):
     paystack_authorization_code = models.CharField(
         max_length=50,
         help_text="Authorization code for charging card (e.g., AUTH_abc123xyz)",
+    )
+    paystack_email_token = models.CharField(
+        max_length=50,
+        help_text="Token for managing subscription on Paystack (e.g., d7gofp6yppn3qz7)",
+        null=True,
+        blank=True,
     )
 
     # Card details (for display only)
@@ -112,7 +122,9 @@ class Subscription(BaseModel):
     )
 
     # ===== Date Fields =====
-    start_date = models.DateTimeField(null=True, blank=True, help_text="When subscription started")
+    start_date = models.DateTimeField(
+        null=True, blank=True, help_text="When subscription started"
+    )
     # a subscription may not start immediately
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -316,7 +328,7 @@ class PaymentTransaction(BaseModel):
     )
 
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     # Transaction details
     reference = models.CharField(
         max_length=100,
@@ -415,7 +427,9 @@ class WebhookLog(BaseModel):
         max_length=100,
         help_text="Event type (e.g., 'subscription.create')",
     )
-    payload = models.JSONField(null=True, blank=True, help_text="Full webhook payload from Paystack")
+    payload = models.JSONField(
+        null=True, blank=True, help_text="Full webhook payload from Paystack"
+    )
     signature = models.CharField(
         max_length=255, help_text="Paystack signature for verification"
     )

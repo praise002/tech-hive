@@ -120,7 +120,7 @@ notes:
 	python manage.py notes
 
 flush-tokens: 
-    python manage.py flushexpiredtokens
+	python manage.py flushexpiredtokens
 
 flush-tokens-verbose:
 	python manage.py cleanup_tokens_verbose
