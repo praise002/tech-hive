@@ -1,6 +1,11 @@
 from decimal import Decimal
 
 from apps.common.models import BaseModel
+from apps.subscriptions.choices import (
+    StatusChoices,
+    SubscriptionChoices,
+    TransactionTypeChoices,
+)
 from apps.subscriptions.manager import SubscriptionManager
 from django.conf import settings
 from django.core.validators import MinValueValidator
@@ -49,14 +54,6 @@ class SubscriptionPlan(BaseModel):
 
 
 class Subscription(BaseModel):
-    STATUS_CHOICES = [
-        ("TRIALING", "Trialing"),  # In free trial period
-        ("ACTIVE", "Active"),  # Paid and current
-        ("PAST_DUE", "Past Due"),  # Payment failed, in grace period
-        ("EXPIRED", "Expired"),  # Subscription ended
-        ("CANCELLED", "Cancelled"),  # User cancelled, waiting for period end
-    ]
-
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -71,8 +68,8 @@ class Subscription(BaseModel):
     )
     status = models.CharField(
         max_length=20,
-        choices=STATUS_CHOICES,
-        default="TRIALING",
+        choices=SubscriptionChoices.choices,
+        default=SubscriptionChoices.TRAILING,
         help_text="Current subscription status",
     )
 
@@ -250,12 +247,28 @@ class Subscription(BaseModel):
 
     def cancel(self, reason=None):
         """Cancel subscription"""
+        cancellable_statuses = [
+            SubscriptionChoices.ACTIVE,
+            SubscriptionChoices.TRIALING,
+            SubscriptionChoices.PAST_DUE,
+        ]
+
+        if self.status not in cancellable_statuses:
+            status_messages = {
+                SubscriptionChoices.CANCELLED: "Subscription is already cancelled",
+                SubscriptionChoices.EXPIRED: "Cannot cancel an expired subscription",
+            }
+            error_message = status_messages.get(
+                self.status, f"Cannot cancel subscription with status: {self.status}"
+            )
+            raise ValueError(error_message)
+
         self.cancelled_at = timezone.now()
         self.cancel_reason = reason
         self.auto_renew = False
 
         # Deferred cancellation: Keep access until period ends
-        self.status = "CANCELLED"
+        self.status = SubscriptionChoices.CANCELLED
         self.cancel_at_period_end = True
 
         self.save()
@@ -299,21 +312,6 @@ class PaymentTransaction(BaseModel):
     Used for billing history and debugging.
     """
 
-    STATUS_CHOICES = [
-        ("PENDING", "Pending"),
-        ("SUCCESS", "Success"),
-        ("FAILED", "Failed"),
-        ("ABANDONED", "Abandoned"),
-    ]
-
-    TRANSACTION_TYPE_CHOICES = [
-        ("SUBSCRIPTION", "New Subscription"),
-        ("RENEWAL", "Monthly Renewal"),
-        ("RETRY", "Automatic Retry"),
-        ("MANUAL_RETRY", "Manual Retry"),
-        ("REACTIVATION", "Reactivation"),
-    ]
-
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -351,10 +349,12 @@ class PaymentTransaction(BaseModel):
     currency = models.CharField(max_length=3, default="NGN", help_text="Currency code")
 
     # Status
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="PENDING")
+    status = models.CharField(
+        max_length=20, choices=StatusChoices.choices, default=StatusChoices.PENDING
+    )
     transaction_type = models.CharField(
         max_length=20,
-        choices=TRANSACTION_TYPE_CHOICES,
+        choices=TransactionTypeChoices.choices,
         help_text="What triggered this transaction",
     )
 
@@ -400,7 +400,7 @@ class PaymentTransaction(BaseModel):
 
     def mark_as_success(self, paystack_response=None):
         """Mark transaction as successful"""
-        self.status = "SUCCESS"
+        self.status = StatusChoices.SUCCESS
         self.paid_at = timezone.now()
         if paystack_response:
             self.paystack_response = paystack_response
@@ -408,7 +408,7 @@ class PaymentTransaction(BaseModel):
 
     def mark_as_failed(self, reason=None, paystack_response=None):
         """Mark transaction as failed"""
-        self.status = "FAILED"
+        self.status = StatusChoices.FAILED
         self.failed_at = timezone.now()
         self.failure_reason = reason
         if paystack_response:
@@ -472,6 +472,12 @@ class WebhookLog(BaseModel):
 
     def mark_as_failed(self, error_message):
         """Mark webhook processing as failed"""
+        self.error = error_message
+        self.processed = False
+        self.save()
+        self.error = error_message
+        self.processed = False
+        self.save()
         self.error = error_message
         self.processed = False
         self.save()

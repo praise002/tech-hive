@@ -112,6 +112,7 @@ class PaystackService:
         email: str,
         amount: str,
         plan_code: str,
+        callback_url: Optional[str] = None,
         metadata: Optional[Dict] = None,
         reference: Optional[str] = None,
     ) -> Dict[str, Any]:
@@ -122,17 +123,14 @@ class PaystackService:
             email: Customer email
             amount: Amount in Naira (will be converted to kobo)
             plan_code: Paystack plan code (for subscriptions)
+            callback_url: URL to redirect after payment
             metadata: Additional data to attach
             reference: Custom reference (optional)
         Returns:
             {
-                "status": true,
-                "message": "Authorization URL created",
-                "data": {
-                    "authorization_url": "https://checkout.paystack.com/nkdks46nymizns7",
-                    "access_code": "nkdks46nymizns7",
-                    "reference": "nms6uvr1pl"
-                }
+                "authorization_url": "https://checkout.paystack.com/nkdks46nymizns7",
+                "access_code": "nkdks46nymizns7",
+                "reference": "nms6uvr1pl"
             }
 
         Raises:
@@ -147,6 +145,9 @@ class PaystackService:
                 "amount": amount_in_kobo,
                 "plan": plan_code,  # it invalidates the value provided in amount
             }
+
+            if callback_url:
+                payload["callback_url"] = callback_url
 
             if metadata:
                 payload["metadata"] = metadata
