@@ -568,3 +568,15 @@ class SubscriptionService:
         return settings.FRONTEND_URL
 
 subscription_service = SubscriptionService()
+
+# TODO:
+# If a customer has multiple authorizations, you can select which one to use for 
+# the subscription, by passing the authorization_code as authorization when creating the subscription. 
+# Otherwise, Paystack picks the most recent authorization to charge.
+
+# Monthly Subscription Billing
+# Billing for subscriptions with a monthly interval depends on the day of the month the 
+# subscription was created. If the subscription was created on or before the 28th of the month, 
+# it gets billed on the same day, every month, for the duration of the plan. Subscriptions created on 
+# or between the 29th - 31st, 
+# will get billed on the 28th of every subsequent month, for the duration of the plan

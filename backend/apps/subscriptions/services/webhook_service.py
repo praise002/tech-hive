@@ -47,8 +47,10 @@ class WebhookService:
             try:
                 # Route to appropriate handler
                 handler_map = {
+                    # happens on first subscription
                     "subscription.create": self.handle_subscription_create,
-                    "charge.success": self.handle_charge_success,
+                    "charge.success": self.handle_charge_success,  # occurs if plan code used
+                    # happens for each subsequent billing cycle
                     "subscription.not_renew": self.handle_subscription_not_renew,
                     "subscription.disable": self.handle_subscription_disable,
                     "invoice.payment_failed": self.handle_invoice_payment_failed,
@@ -81,10 +83,11 @@ class WebhookService:
         """
         Handle subscription.create event.
         Fired when user authorizes card for subscription.
+        A subscription.create event is sent to indicate that a subscription was 
+        created for the customer who was charged.
         """
         try:
             subscription_code = data.get("subscription_code")
-            email_token = data.get("email_token")
             customer = data.get("customer", {})
             authorization = data.get("authorization", {})
 
@@ -106,9 +109,9 @@ class WebhookService:
 
             # Update subscription with Paystack data
             with transaction.atomic():
+                # NOTE: the actual endpoint returns email token but webhook doesn't
                 subscription.paystack_subscription_code = subscription_code
                 subscription.paystack_customer_code = customer_code
-                subscription.paystack_email_token = email_token
                 subscription.paystack_authorization_code = authorization.get(
                     "authorization_code"
                 )
@@ -124,21 +127,22 @@ class WebhookService:
         except Exception as e:
             logger.error(f"Error handling subscription.create: {str(e)}")
             raise
-
+    
+    # TODO:
     def handle_charge_success(self, data: Dict) -> None:
         """
         Handle charge.success event.
-        Fired when payment is successful (on next payment).
+        If you created the subscription by adding a plan code to a transaction, 
+        a charge.success event is also sent to indicate that the transaction was successful.
         """
         try:
-            reference = data.get("reference")
             customer = data.get("customer", {})
             customer_code = customer.get("customer_code")
             amount = Decimal(data.get("amount", 0)) / Decimal(
                 ("100")
             )  # Convert from kobo
 
-            # Find subscription by customer code or reference
+            # Find subscription by customer code 
             subscription = None
 
             if customer_code:
@@ -147,14 +151,14 @@ class WebhookService:
                 ).first()
 
             if not subscription:
-                logger.warning(f"No subscription found for charge: {reference}")
+                logger.warning(f"No subscription found for charge: {customer_code}")
                 return
 
             # Process successful payment
             subscription_service.process_successful_payment(
                 subscription=subscription,
                 transaction_data=data,
-                transaction_type="RENEWAL",
+                transaction_type="SUBSCRIPTION",
             )
 
             logger.info(f"Charge successful for {subscription.user.email}: ₦{amount}")
@@ -162,38 +166,17 @@ class WebhookService:
         except Exception as e:
             logger.error(f"Error handling charge.success: {str(e)}")
             raise
-
+    
+    # TODO:
     def handle_subscription_not_renew(self, data: Dict) -> None:
         """
         Handle subscription.not_renew event.
-        Fired when subscription renewal payment fails.
+        A subscription.not_renew event will be sent to indicate that the subscription will 
+        not renew on the next payment date.
         """
-        try:
-            subscription_code = data.get("subscription_code")
-
-            # Find subscription
-            subscription = Subscription.objects.filter(
-                paystack_subscription_code=subscription_code
-            ).first()
-
-            if not subscription:
-                logger.warning(f"No subscription found: {subscription_code}")
-                return
-
-            # Process failed payment
-            failure_reason = "Subscription renewal failed"
-            subscription_service.process_failed_payment(
-                subscription=subscription,
-                failure_reason=failure_reason,
-                transaction_data=data,
-            )
-
-            logger.warning(f"Subscription not renewed: {subscription.user.email}")
-
-        except Exception as e:
-            logger.error(f"Error handling subscription.not_renew: {str(e)}")
-            raise
-
+        pass
+    
+    # TODO:
     def handle_invoice_payment_failed(self, data: Dict) -> None:
         """
         Handle invoice.payment_failed event.
@@ -243,11 +226,14 @@ class WebhookService:
         except Exception as e:
             logger.error(f"Error handling invoice.payment_failed: {str(e)}")
             raise
-
+    
+    # TODO:
     def handle_subscription_disable(self, data: Dict) -> None:
         """
         Handle subscription.disable event.
         Fired when subscription is disabled/cancelled.
+        On the next payment date, a subscription.disable event will be sent to indicate that 
+        the subscription has been cancelled.
         """
         try:
             subscription_code = data.get("subscription_code")
@@ -269,87 +255,12 @@ class WebhookService:
             logger.error(f"Error handling subscription.disable: {str(e)}")
             raise
 
-    # def handle_invoice_update(self, data: Dict) -> None:
-    #     """
-    #     Handle invoice.update event.
-    #     Fired after charge attempt (success or failure).
-
-    #     This contains the final status of the invoice:
-    #     - 'success': Payment succeeded
-    #     - 'failed': Payment failed
-    #     - 'pending': Still processing
-    #     """
-    #     try:
-    #         subscription_code = data.get("subscription", {}).get("subscription_code")
-    #         customer = data.get("customer", {})
-    #         customer_email = customer.get("email")
-    #         invoice_status = data.get("status")  # 'success', 'failed', 'pending'
-    #         amount = Decimal(data.get("amount", 0)) / 100
-    #         paid = data.get("paid", False)
-    #         paid_at = data.get("paid_at")
-
-    #         # Find subscription
-    #         subscription = self._find_subscription_by_code_or_email(
-    #             subscription_code=subscription_code, email=customer_email
-    #         )
-    #         if not subscription:
-    #             logger.warning(
-    #                 f"No subscription found for invoice.update: {subscription_code}"
-    #             )
-    #             return
-
-    #         # Process based on invoice status
-    #         if invoice_status == "success" and paid:
-    #             # Payment successful - update subscription if not already done
-    #             if subscription.status == "PAST_DUE":
-    #                 # Recovery from failed payment
-    #                 subscription_service.process_successful_payment(
-    #                     subscription=subscription,
-    #                     transaction_data=data,
-    #                     transaction_type="RENEWAL",
-    #                 )
-
-    #                 logger.info(
-    #                     f"Invoice paid (recovery): {subscription.user.email} - ₦{amount}"
-    #                 )
-    #             else:
-    #                 logger.info(
-    #                     f"Invoice paid (already processed): {subscription.user.email} - ₦{amount}"
-    #                 )
-    #         elif invoice_status == "failed" and not paid:
-    #             # Payment failed - mark as past due if not already done
-    #             if subscription.status != "PAST_DUE":
-    #                 failure_reason = data.get(
-    #                     "gateway_response", "Invoice payment failed"
-    #                 )
-    #                 subscription_service.process_failed_payment(
-    #                     subscription=subscription,
-    #                     failure_reason=failure_reason,
-    #                     transaction_data=data,
-    #                 )
-
-    #                 logger.warning(
-    #                     f"Invoice failed: {subscription.user.email} - {failure_reason}"
-    #                 )
-    #             else:
-    #                 logger.info(
-    #                     f"Invoice failed (already marked): {subscription.user.email}"
-    #                 )
-
-    #         elif invoice_status == "pending":
-    #             # Payment still processing - just log it
-    #             logger.info(f"Invoice pending for {subscription.user.email}: ₦{amount}")
-
-    #         else:
-    #             logger.warning(
-    #                 f"Unknown invoice status: {invoice_status} for {subscription.user.email}"
-    #             )
-    #     except Exception as e:
-    #         logger.error(f"Error handling invoice.update: {str(e)}")
-    #         raise
+    def handle_invoice_update(self, data: Dict) -> None:
+        pass
+    
 
 
 webhook_service = WebhookService()
 
 
-# TODO: UPDATE CARD DETAILS
+# TODO: UPDATE CARD DETAILS IMPLEMENTATION

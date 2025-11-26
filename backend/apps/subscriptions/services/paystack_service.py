@@ -303,7 +303,10 @@ class PaystackService:
         except Exception as e:
             logger.error(f"Error charging authorization: {str(e)}")
             return {"status": False, "message": str(e), "data": None}
-
+    # TODO: SHOULD WE ADD IT OR CALL IT MANUALLY WHEN THE CUSTOMER IS READY TO SUBSCRIBE
+    # You can also pass a start_date parameter, which lets you set the date for the first debit. 
+    # This makes this method useful for situations where you'd like to give a customer a free period before you start charging them, 
+    # or when you want to switch a customer to a different plan.
     def create_subscription(
         self,
         customer_code: str,
