@@ -4,7 +4,11 @@ from datetime import timedelta
 from decimal import Decimal
 from typing import Dict, Optional, Tuple
 
-from apps.subscriptions.choices import StatusChoices, SubscriptionChoices
+from apps.subscriptions.choices import (
+    StatusChoices,
+    SubscriptionChoices,
+    TransactionTypeChoices,
+)
 from apps.subscriptions.models import PaymentTransaction, Subscription, SubscriptionPlan
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -53,7 +57,7 @@ class SubscriptionService:
 
             # Calculate dates
             now = timezone.now()
-
+            # TODO: REFACTOR IT FOR HAS_TRIAL, WE DON'T CALL SUBSCRIPTION ENDPOINT
             if has_trial:
                 trial_start = now
                 trial_end = now + timedelta(days=7)
@@ -90,15 +94,20 @@ class SubscriptionService:
                     next_billing_date=next_billing,
                 )
 
+                
                 # Initialize Paystack transaction
-                paystack_response = paystack_service.initialize_transaction(
-                    email=user.email,
-                    amount=amount,
-                    plan_code=plan.paystack_plan_code,
-                    callback_url=f"{self._get_frontend_url()}/payment/callback",
-                    metadata=metadata,
-                    reference=reference,
-                )
+                if not has_trial:
+                    paystack_response = paystack_service.initialize_transaction(
+                        email=user.email,
+                        amount=amount,
+                        plan_code=plan.paystack_plan_code,
+                        callback_url=f"{self._get_frontend_url()}/payment/callback",
+                        metadata=metadata,
+                        reference=reference,
+                    )
+                else:
+                    # No Paystack initialization for trial subscriptions
+                    paystack_response = {"reference": None}
 
                 # Create PaymentTransaction record
                 payment_transaction = PaymentTransaction.objects.create(
@@ -108,8 +117,7 @@ class SubscriptionService:
                     paystack_reference=paystack_response["reference"],
                     amount=plan.price,  # Store full price even for trial
                     currency="NGN",
-                    status="PENDING",
-                    transaction_type="SUBSCRIPTION",
+                    transaction_type=TransactionTypeChoices.SUBSCRIPTION,
                 )
 
                 logger.info(
@@ -449,6 +457,8 @@ class SubscriptionService:
     def reactivate_subscription(self, subscription: Subscription) -> bool:
         """
         Reactivate a cancelled subscription.
+        If a user does not reactivate before the period ends,
+        it cannot be reactivated.
 
         Args:
             subscription: Subscription to reactivate
@@ -511,72 +521,102 @@ class SubscriptionService:
         except Exception as e:
             logger.error(f"Error expiring subscription: {str(e)}")
             raise
-    
+
     def get_subscription_status(self, user) -> Dict:
         """Get detailed subscription status for a user."""
         try:
             subscription = user.subscription
-            
+
             return {
-                'has_subscription': True,
-                'is_premium': subscription.is_active,
-                'status': subscription.status,
-                'plan': {
-                    'name': subscription.plan.name,
-                    'price': float(subscription.plan.price),
-                    'billing_cycle': subscription.plan.billing_cycle,
+                "has_subscription": True,
+                "is_premium": subscription.is_active,
+                "status": subscription.status,
+                "plan": {
+                    "name": subscription.plan.name,
+                    "price": float(subscription.plan.price),
+                    "billing_cycle": subscription.plan.billing_cycle,
                 },
-                'trial': {
-                    'is_trial': subscription.is_trial,
-                    'trial_start': subscription.trial_start,
-                    'trial_end': subscription.trial_end.isoformat() if subscription.trial_end else None,
+                "trial": {
+                    "is_trial": subscription.is_trial,
+                    "trial_start": subscription.trial_start,
+                    "trial_end": (
+                        subscription.trial_end.isoformat()
+                        if subscription.trial_end
+                        else None
+                    ),
                 },
-                'billing': {
-                    'current_period_start': subscription.current_period_start.isoformat(),
-                    'current_period_end': subscription.current_period_end.isoformat(),
-                    'next_billing_date': subscription.next_billing_date.isoformat() if subscription.next_billing_date else None,
-                    'days_remaining': subscription.days_until_expiry,
+                "billing": {
+                    "current_period_start": subscription.current_period_start.isoformat(),
+                    "current_period_end": subscription.current_period_end.isoformat(),
+                    "next_billing_date": (
+                        subscription.next_billing_date.isoformat()
+                        if subscription.next_billing_date
+                        else None
+                    ),
+                    "days_remaining": subscription.days_until_expiry,
                 },
-                'card': {
-                    'last4': subscription.card_last4,
-                    'type': subscription.card_type,
-                    'bank': subscription.card_bank,
-                } if subscription.card_last4 else None,
-                'cancellation': {
-                    'cancelled': subscription.cancelled_at is not None,  # returns a boolean
-                    'cancelled_at': subscription.cancelled_at.isoformat() if subscription.cancelled_at else None,
-                    'cancel_at_period_end': subscription.cancel_at_period_end,
-                    'reason': subscription.cancel_reason,
+                "card": (
+                    {
+                        "last4": subscription.card_last4,
+                        "type": subscription.card_type,
+                        "bank": subscription.card_bank,
+                    }
+                    if subscription.card_last4
+                    else None
+                ),
+                "cancellation": {
+                    "cancelled": subscription.cancelled_at
+                    is not None,  # returns a boolean
+                    "cancelled_at": (
+                        subscription.cancelled_at.isoformat()
+                        if subscription.cancelled_at
+                        else None
+                    ),
+                    "cancel_at_period_end": subscription.cancel_at_period_end,
+                    "reason": subscription.cancel_reason,
                 },
-                'payment_status': {
-                    'is_past_due': subscription.status == 'PAST_DUE',
-                    'payment_failed_at': subscription.payment_failed_at.isoformat() if subscription.payment_failed_at else None,
-                    'retry_count': subscription.retry_count,
-                    'is_in_grace_period': subscription.is_in_grace_period,
-                    'grace_period_ends_at': subscription.grace_period_ends_at.isoformat() if subscription.grace_period_ends_at else None,
+                "payment_status": {
+                    "is_past_due": subscription.status == "PAST_DUE",
+                    "payment_failed_at": (
+                        subscription.payment_failed_at.isoformat()
+                        if subscription.payment_failed_at
+                        else None
+                    ),
+                    "retry_count": subscription.retry_count,
+                    "is_in_grace_period": subscription.is_in_grace_period,
+                    "grace_period_ends_at": (
+                        subscription.grace_period_ends_at.isoformat()
+                        if subscription.grace_period_ends_at
+                        else None
+                    ),
                 },
             }
         except Subscription.DoesNotExist:
             return {
-                'has_subscription': False,
-                'is_premium': False,
-                'current_plan': 'Basic',
+                "has_subscription": False,
+                "is_premium": False,
+                "current_plan": "Basic",
             }
-            
+
     def _get_frontend_url(self) -> str:
         """Get frontend URL from settings."""
         return settings.FRONTEND_URL
 
+
 subscription_service = SubscriptionService()
 
 # TODO:
-# If a customer has multiple authorizations, you can select which one to use for 
-# the subscription, by passing the authorization_code as authorization when creating the subscription. 
+# If a customer has multiple authorizations, you can select which one to use for
+# the subscription, by passing the authorization_code as authorization when creating the subscription.
 # Otherwise, Paystack picks the most recent authorization to charge.
 
 # Monthly Subscription Billing
-# Billing for subscriptions with a monthly interval depends on the day of the month the 
-# subscription was created. If the subscription was created on or before the 28th of the month, 
-# it gets billed on the same day, every month, for the duration of the plan. Subscriptions created on 
-# or between the 29th - 31st, 
+# Billing for subscriptions with a monthly interval depends on the day of the month the
+# subscription was created. If the subscription was created on or before the 28th of the month,
+# it gets billed on the same day, every month, for the duration of the plan. Subscriptions created on
+# or between the 29th - 31st,
+# will get billed on the 28th of every subsequent month, for the duration of the plan
+# subscription was created. If the subscription was created on or before the 28th of the month,
+# it gets billed on the same day, every month, for the duration of the plan. Subscriptions created on
+# or between the 29th - 31st,
 # will get billed on the 28th of every subsequent month, for the duration of the plan

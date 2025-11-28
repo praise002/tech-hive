@@ -107,6 +107,53 @@ class PaystackService:
             logger.error(f"Error creating plan: {str(e)}")
             raise
 
+    def update_plan(self, plan_code: str, data: Dict) -> Dict:
+        """
+        Updates the details of a subscription plan on Paystack.
+
+        Args:
+            plan_code: The ID or code of the plan to update.
+            data: A dictionary containing the fields to update.
+                  e.g., {"name": "New Name", "amount": 55000, "update_existing_subscriptions": True} ues is TRue by default
+                  Amount should be in the subunit (kobo).
+
+        Returns:
+            The response dictionary from Paystack.
+
+        Raises:
+            Exception: If the update fails.
+        """
+        try:
+            url = f"{self.base_url}/plan/{plan_code}"
+            logger.info(f"Updating plan '{plan_code}' with data: {data}")
+
+            response = requests.put(
+                url,
+                headers=self.headers,
+                json=data,
+                timeout=30,
+            )
+
+            response.raise_for_status()
+            response_data = response.json()
+
+            if not response_data.get("status"):
+                error_message = response_data.get("message", "Failed to update plan")
+                logger.error(f"Failed to update plan '{plan_code}': {error_message}")
+                raise Exception(error_message)
+
+            logger.info(f"Plan '{plan_code}' updated successfully: {response_data.get('message')}")
+            return response_data
+
+        except requests.exceptions.RequestException as e:
+            logger.error(
+                f"Paystack API request failed while updating plan '{plan_code}': {str(e)}"
+            )
+            raise Exception(f"Failed to connect to Paystack: {str(e)}")
+        except Exception as e:
+            logger.error(f"Error updating plan '{plan_code}': {str(e)}")
+            raise
+
     def initialize_transaction(
         self,
         email: str,
@@ -303,10 +350,7 @@ class PaystackService:
         except Exception as e:
             logger.error(f"Error charging authorization: {str(e)}")
             return {"status": False, "message": str(e), "data": None}
-    # TODO: SHOULD WE ADD IT OR CALL IT MANUALLY WHEN THE CUSTOMER IS READY TO SUBSCRIBE
-    # You can also pass a start_date parameter, which lets you set the date for the first debit. 
-    # This makes this method useful for situations where you'd like to give a customer a free period before you start charging them, 
-    # or when you want to switch a customer to a different plan.
+
     def create_subscription(
         self,
         customer_code: str,
@@ -323,7 +367,9 @@ class PaystackService:
             plan_code: Paystack plan code
             authorization_code: Card authorization code
             start_date: ISO 8601 format (optional)
-
+            start_date parameter, which lets you set the date for the first debit.
+            This makes this method useful for situations where you'd like to give a customer a free period before you start charging them,
+            or when you want to switch a customer to a different plan.
         Returns:
             Subscription data
         """
@@ -504,5 +550,91 @@ class PaystackService:
             logger.error(f"Error verifying webhook signature: {str(e)}")
             return False
 
+    def enable_subscription(self, subscription_code: str, email_token: str) -> bool:
+        """
+        Enable (reactivate) a subscription.
+
+        Args:
+            subscription_code: Paystack subscription code
+            email_token: Email token for the subscription
+
+        Returns:
+            True if successful
+        """
+        try:
+            payload = {
+                "code": subscription_code,
+                "token": email_token,
+            }
+
+            logger.info(f"Enabling subscription: {subscription_code}")
+
+            response = requests.post(
+                f"{self.base_url}/subscription/enable",
+                json=payload,
+                headers=self.headers,
+                timeout=30,
+            )
+
+            response.raise_for_status()
+            data = response.json()
+
+            if not data.get("status"):
+                error_message = data.get("message", "Failed to enable subscription")
+                logger.error(f"Failed to enable subscription: {error_message}")
+                raise Exception(error_message)
+
+            logger.info(f"Subscription enabled successfully: {subscription_code}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Error enabling subscription: {str(e)}")
+            raise
+
+    def generate_update_subscription_link(self, subscription_code: str) -> str:
+        """
+        Generate a link for a customer to update the card on a subscription.
+
+        Args:
+            subscription_code: The code of the subscription to generate a link for.
+
+        Returns:
+            The management link URL as a string.
+
+        Raises:
+            Exception: If link generation fails.
+        """
+        try:
+            url = f"{self.base_url}/subscription/{subscription_code}/manage/link"
+            logger.info(f"Generating update link for subscription: {subscription_code}")
+
+            response = requests.get(
+                url,
+                headers=self.headers,
+                timeout=30,
+            )
+
+            response.raise_for_status()
+            data = response.json()
+
+            if not data.get("status"):
+                error_message = data.get("message", "Failed to generate update link")
+                logger.error(f"Failed to generate update link: {error_message}")
+                raise Exception(error_message)
+
+            link = data["data"]["link"]
+            logger.info(f"Update link generated successfully for {subscription_code}")
+
+            return link
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Paystack API request failed: {str(e)}")
+            raise Exception(f"Failed to connect to Paystack: {str(e)}")
+        except Exception as e:
+            logger.error(f"Error generating subscription update link: {str(e)}")
+            raise
+
 
 paystack_service = PaystackService()
+
+# TODO: Build the subscription_service for the newly written endpoints

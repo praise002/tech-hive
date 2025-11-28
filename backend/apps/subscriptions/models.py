@@ -84,6 +84,7 @@ class Subscription(BaseModel):
         unique=True,
         help_text="Subscription code from Paystack (e.g., SUB_abc123xyz)",
     )
+
     paystack_customer_code = models.CharField(
         max_length=50, help_text="Customer code from Paystack (e.g., CUS_abc123xyz)"
     )
@@ -335,9 +336,10 @@ class PaymentTransaction(BaseModel):
     )
     paystack_reference = models.CharField(
         max_length=100,
-        unique=True,
+        null=True,
+        blank=True,
         help_text="Paystack's transaction reference",
-    )
+    )  # TODO: PAYSTACK ASK TO DO IT A CERTAIN WAY
 
     # Payment details
     amount = models.DecimalField(
