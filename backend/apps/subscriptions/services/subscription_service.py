@@ -27,16 +27,166 @@ class SubscriptionService:
     Handles all subscription business logic.
     """
 
-    def create_subscription(
+    def start_trial(
+        self, user, plan: SubscriptionPlan
+    ) -> Tuple[Subscription, PaymentTransaction]:
+        """
+        Start a 7-day trial for a first-time user.
+        No Paystack API calls are made.
+
+        Args:
+            user: User starting trial
+            plan: SubscriptionPlan for the trial
+
+        Returns:
+            (Subscription, PaymentTransaction)
+
+        Raises:
+            ValueError: If user already has subscription or is not eligible for trial
+        """
+        try:
+            # Check for active subscription
+            active_subscription = user.subscription
+            if active_subscription:
+                raise ValueError("User already has an active subscription")
+
+            # Check eligibility based on any previous subscriptions
+            has_previous_subscription = user.subscriptions.exists()
+            if has_previous_subscription:
+                raise ValueError(
+                    "User is not eligible for trial (previous subscription exists)"
+                )
+
+            now = timezone.now()
+            trial_start = now
+            trial_end = now + timedelta(days=7)
+            reference = f"TXN_{uuid.uuid4().hex[:12].upper()}"
+
+            with transaction.atomic():
+                subscription = Subscription.objects.create(
+                    user=user,
+                    plan=plan,
+                    status="TRIALING",
+                    start_date=now,
+                    trial_start=trial_start,
+                    trial_end=trial_end,
+                    # No billing periods during trial
+                    current_period_start=None,
+                    current_period_end=None,
+                    next_billing_date=trial_end,
+                )
+
+                payment_transaction = PaymentTransaction.objects.create(
+                    user=user,
+                    subscription=subscription,
+                    reference=reference,
+                    amount=plan.price,  # Store full price even for trial
+                    currency="NGN",
+                    status=StatusChoices.SUCCESS,  # Trial is immediately "successful"
+                    transaction_type=TransactionTypeChoices.SUBSCRIPTION,
+                )
+
+                logger.info(
+                    f"Trial started for {user.email}: {plan.name} "
+                    f"(expires: {trial_end.strftime('%Y-%m-%d %H:%M')})"
+                )
+
+                return subscription, payment_transaction
+
+        except ValueError as e:
+            logger.warning(f"Trial creation failed: {str(e)}")
+            raise
+        except Exception as e:
+            logger.error(f"Error starting trial: {str(e)}")
+            raise Exception(f"Failed to start trial: {str(e)}")
+
+    def create_subscription_after_trial(
+        self, trial_subscription: Subscription
+    ) -> Tuple[PaymentTransaction, str]:
+        """
+        Convert a trial subscription to a paid subscription.
+        Called when trial period ends and user wants to continue.
+
+        Args:
+            trial_subscription: The existing trial subscription
+
+        Returns:
+            (PaymentTransaction, authorization_url)
+
+        Raises:
+            ValueError: If subscription is not a valid trial
+        """
+        try:
+            if trial_subscription.status != "TRIALING":
+                raise ValueError("Subscription is not in trial state")
+
+            if not trial_subscription.is_trial:
+                raise ValueError("Subscription was not a trial")
+
+            now = timezone.now()
+            if now < trial_subscription.trial_end:
+                logger.warning(
+                    f"Trial has not yet ended for {trial_subscription.user.email}. "
+                    f"Proceeding with early conversion."
+                )
+
+            # Prepare metadata
+            metadata = {
+                "user_id": str(trial_subscription.user.id),
+                "user_email": trial_subscription.user.email,
+                "plan_id": str(trial_subscription.plan.id),
+                "plan_name": trial_subscription.plan.name,
+                "subscription_id": str(trial_subscription.id),
+            }
+
+            with transaction.atomic():
+                # Initialize Paystack transaction for the trial conversion
+                paystack_response = paystack_service.initialize_transaction(
+                    email=trial_subscription.user.email,
+                    amount=trial_subscription.plan.price,
+                    plan_code=trial_subscription.plan.paystack_plan_code,
+                    callback_url=f"{self._get_frontend_url()}/payment/callback",
+                    metadata=metadata,
+                    reference=trial_subscription.reference,
+                )
+                # Create payment transaction record
+                payment_transaction = PaymentTransaction.objects.create(
+                    user=trial_subscription.user,
+                    subscription=trial_subscription,
+                    reference=trial_subscription.reference,
+                    paystack_reference=paystack_response.get("reference"),
+                    amount=trial_subscription.plan.price,
+                    currency="NGN",
+                    transaction_type=TransactionTypeChoices.SUBSCRIPTION,
+                )
+
+                authorization_url = paystack_response.get("authorization_url", "")
+
+                logger.info(
+                    f"Trial conversion initiated for {trial_subscription.user.email}: "
+                    f"{trial_subscription.plan.name} (reference: {reference})"
+                )
+
+                return payment_transaction, authorization_url
+
+        except ValueError as e:
+            logger.warning(f"Trial conversion failed: {str(e)}")
+            raise
+        except Exception as e:
+            logger.error(f"Error converting trial: {str(e)}")
+            raise Exception(f"Failed to convert trial: {str(e)}")
+
+    def create_paid_subscription(
         self, user, plan: SubscriptionPlan, has_trial: bool = True
     ) -> Tuple[Subscription, PaymentTransaction, str]:
         """
-        Initialize a new subscription for a user.
+        Create an immediate paid subscription (no trial).
+        Makes Paystack API calls for payment processing.
 
         Args:
             user: User subscribing
             plan: SubscriptionPlan to subscribe to
-            has_trial: Whether to include 7-day trial
+
 
         Returns:
             (Subscription, PaymentTransaction, authorization_url)
@@ -54,22 +204,10 @@ class SubscriptionService:
             reference = f"TXN_{uuid.uuid4().hex[:12].upper()}"
 
             # Determine amount (0 for trial, full price otherwise)
-            amount = Decimal("0.00") if has_trial else plan.price
+            amount = plan.price
 
             # Calculate dates
             now = timezone.now()
-
-            if has_trial:
-                trial_start = now
-                trial_end = now + timedelta(days=7)
-                period_start = now
-                period_end = trial_end
-                next_billing = trial_end
-                start_date = now
-            else:
-                period_start = None
-                period_end = None
-                next_billing = None
 
             # Prepare metadata
             metadata = {
@@ -77,36 +215,31 @@ class SubscriptionService:
                 "user_email": user.email,
                 "plan_id": str(plan.id),
                 "plan_name": plan.name,
-                "has_trial": has_trial,
             }
 
             with transaction.atomic():
-                # Create Subscription record
                 subscription = Subscription.objects.create(
                     user=user,
                     plan=plan,
-                    status="TRIALING" if has_trial else "ACTIVE",
                     start_date=now,
-                    trial_start=trial_start,
-                    trial_end=trial_end,
-                    current_period_start=period_start,
-                    current_period_end=period_end,
-                    next_billing_date=next_billing,
+                    # No trial for immediate subscriptions
+                    trial_start=None,
+                    trial_end=None,
+                    # Billing periods will be set by webhook after payment
+                    current_period_start=None,
+                    current_period_end=None,
+                    next_billing_date=None,
                 )
+                metadata["subscription_id"] = str(subscription.id)
 
-                # Initialize Paystack transaction
-                if not has_trial:
-                    paystack_response = paystack_service.initialize_transaction(
-                        email=user.email,
-                        amount=amount,
-                        plan_code=plan.paystack_plan_code,
-                        callback_url=f"{self._get_frontend_url()}/payment/callback",
-                        metadata=metadata,
-                        reference=reference,
-                    )
-                else:
-                    # No Paystack initialization for trial subscriptions
-                    paystack_response = {"reference": None}
+                paystack_response = paystack_service.initialize_transaction(
+                    email=user.email,
+                    amount=amount,
+                    plan_code=plan.paystack_plan_code,
+                    callback_url=f"{self._get_frontend_url()}/payment/callback",
+                    metadata=metadata,
+                    reference=reference,
+                )
 
                 # Create PaymentTransaction record
                 payment_transaction = PaymentTransaction.objects.create(
@@ -278,7 +411,7 @@ class SubscriptionService:
                     subscription.current_period_start = now
                     subscription.current_period_end = now + timedelta(days=30)
                     subscription.next_billing_date = subscription.current_period_end
-                    
+
                     logger.info(
                         f"Using manual billing calculation for {subscription.user.email} "
                         f"(no Paystack period data available)"
@@ -644,3 +777,7 @@ subscription_service = SubscriptionService()
 # or between the 29th - 31st,
 # will get billed on the 28th of every subsequent month, for the duration of the plan
 # will get billed on the 28th of every subsequent month, for the duration of the plan
+
+# TODO: REVISIT THIS
+# MANUAL_RETRY, ETC
+# The right place toupdate transaction_type for PaymentTransaction

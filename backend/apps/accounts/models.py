@@ -64,6 +64,18 @@ class User(AbstractBaseUser, IsDeletedModel, PermissionsMixin):
             url = "https://res.cloudinary.com/dq0ow9lxw/image/upload/v1762111366/Avatars_fpmuzf.png"
         return url
 
+    @property
+    def subscription(self):
+        """Get user's active subscription"""
+        return self.subscriptions.filter(
+            status__in=["TRIALING", "ACTIVE", "PAST_DUE", "CANCELLED"]
+        ).first()
+
+    @property
+    def has_active_subscription(self):
+        """Check if user has any active subscription"""
+        return self.subscription is not None
+
 
 class Otp(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

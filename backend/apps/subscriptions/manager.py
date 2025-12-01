@@ -4,6 +4,17 @@ from django.utils import timezone
 
 class SubscriptionManager(models.Manager):
     """Custom manager for Subscription model"""
+    
+    def get_active_subscription(self, user):
+        """Get user's active subscription (if any)"""
+        return self.filter(
+            user=user,
+            status__in=['TRIALING', 'ACTIVE', 'PAST_DUE', 'CANCELLED']
+        ).first()
+
+    def get_latest_subscription(self, user):
+        """Get user's most recent subscription (active or expired)"""
+        return self.filter(user=user).order_by('-created_at').first()
 
     def active(self):
         """Get all active subscriptions (including trials and grace period)"""

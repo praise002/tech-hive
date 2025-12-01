@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from apps.common.models import BaseModel
+from apps.common.models import BaseModel, IsDeletedModel
 from apps.subscriptions.choices import (
     StatusChoices,
     SubscriptionChoices,
@@ -53,11 +53,11 @@ class SubscriptionPlan(BaseModel):
         return f"{self.name} - ₦{self.price}/{self.billing_cycle}"
 
 
-class Subscription(BaseModel):
-    user = models.OneToOneField(
+class Subscription(IsDeletedModel, BaseModel):
+    user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="subscription",
+        related_name="subscriptions",
         help_text="User who owns this subscription",
     )
     plan = models.ForeignKey(
@@ -81,15 +81,21 @@ class Subscription(BaseModel):
     # Paystack Integration Fields
     paystack_subscription_code = models.CharField(
         max_length=50,
-        unique=True,
+        null=True,
+        blank=True,
         help_text="Subscription code from Paystack (e.g., SUB_abc123xyz)",
     )
 
     paystack_customer_code = models.CharField(
-        max_length=50, help_text="Customer code from Paystack (e.g., CUS_abc123xyz)"
+        max_length=50,
+        null=True,
+        blank=True,
+        help_text="Customer code from Paystack (e.g., CUS_abc123xyz)",
     )
     paystack_authorization_code = models.CharField(
         max_length=50,
+        null=True,
+        blank=True,
         help_text="Authorization code for charging card (e.g., AUTH_abc123xyz)",
     )
     paystack_email_token = models.CharField(
@@ -136,9 +142,11 @@ class Subscription(BaseModel):
 
     # Billing cycle dates
     current_period_start = models.DateTimeField(
-        help_text="Start of current billing period"
+        null=True, blank=True, help_text="Start of current billing period"
     )
-    current_period_end = models.DateTimeField(help_text="End of current billing period")
+    current_period_end = models.DateTimeField(
+        null=True, blank=True, help_text="End of current billing period"
+    )
     next_billing_date = models.DateTimeField(
         null=True, blank=True, help_text="When next charge will happen"
     )
@@ -302,12 +310,23 @@ class Subscription(BaseModel):
         indexes = [
             models.Index(fields=["paystack_subscription_code"]),
         ]
+        constraints = [
+            # Ensure only one active subscription per user
+            models.UniqueConstraint(
+                fields=["user"],
+                condition=models.Q(
+                    status__in=["TRIALING", "ACTIVE", "PAST_DUE", "CANCELLED"]
+                ),
+                name="unique_active_subscription_per_user",
+                violation_error_message="User already has an active subscription",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.user.email} - {self.plan.name} ({self.status})"
 
 
-class PaymentTransaction(BaseModel):
+class PaymentTransaction(IsDeletedModel, BaseModel):
     """
     Records every payment attempt (success or failure).
     Used for billing history and debugging.
@@ -339,7 +358,7 @@ class PaymentTransaction(BaseModel):
         null=True,
         blank=True,
         help_text="Paystack's transaction reference",
-    )  # TODO: PAYSTACK ASK TO DO IT A CERTAIN WAY
+    )
 
     # Payment details
     amount = models.DecimalField(
