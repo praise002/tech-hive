@@ -122,7 +122,7 @@ class Subscription(BaseModel):
     # ===== Date Fields =====
     start_date = models.DateTimeField(
         null=True, blank=True, help_text="When subscription started"
-    )
+    )  # Only once, when the subscription is first created
     # a subscription may not start immediately
     updated_at = models.DateTimeField(auto_now=True)
 

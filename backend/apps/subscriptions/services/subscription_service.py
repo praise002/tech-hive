@@ -14,6 +14,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 
 from .paystack_service import paystack_service
 
@@ -57,19 +58,18 @@ class SubscriptionService:
 
             # Calculate dates
             now = timezone.now()
-            # TODO: REFACTOR IT FOR HAS_TRIAL, WE DON'T CALL SUBSCRIPTION ENDPOINT
+
             if has_trial:
                 trial_start = now
                 trial_end = now + timedelta(days=7)
                 period_start = now
                 period_end = trial_end
                 next_billing = trial_end
+                start_date = now
             else:
-                trial_start = None
-                trial_end = None
-                period_start = now
-                period_end = now + timedelta(days=30)
-                next_billing = period_end
+                period_start = None
+                period_end = None
+                next_billing = None
 
             # Prepare metadata
             metadata = {
@@ -94,7 +94,6 @@ class SubscriptionService:
                     next_billing_date=next_billing,
                 )
 
-                
                 # Initialize Paystack transaction
                 if not has_trial:
                     paystack_response = paystack_service.initialize_transaction(
@@ -218,6 +217,9 @@ class SubscriptionService:
         subscription: Subscription,
         transaction_data: Dict,
         transaction_type: str = "RENEWAL",
+        period_start: Optional[str] = None,
+        period_end: Optional[str] = None,
+        next_billing_date: Optional[str] = None,
     ) -> PaymentTransaction:
         """
         Process a successful payment.
@@ -226,6 +228,10 @@ class SubscriptionService:
             subscription: Subscription that was paid
             transaction_data: Data from Paystack
             transaction_type: Type of transaction
+            period_start: Period start from Paystack (ISO format)
+            period_end: Period end from Paystack (ISO format)
+            next_billing_date: Next billing date from Paystack (ISO format)
+
 
         Returns:
             PaymentTransaction record
@@ -255,11 +261,28 @@ class SubscriptionService:
                     # Recovered from failed payment
                     subscription.status = "ACTIVE"
 
-                # Update billing dates
-                now = timezone.now()
-                subscription.current_period_start = now
-                subscription.current_period_end = now + timedelta(days=30)
-                subscription.next_billing_date = subscription.current_period_end
+                # Update billing dates - use Paystack data if available (it is being returned in invoice.update)
+                if period_start and period_end and next_billing_date:
+                    subscription.current_period_start = parse_datetime(period_start)
+                    subscription.current_period_end = parse_datetime(period_end)
+                    subscription.next_billing_date = parse_datetime(next_billing_date)
+
+                    logger.info(
+                        f"Updated billing periods from Paystack for {subscription.user.email}: "
+                        f"{period_start} to {period_end}, next: {next_billing_date}"
+                    )
+                else:
+                    # TODO: FIGURE OUT A WAY TO FIX LATER FOR FIRST SUBSCRIPTION
+                    # Fallback to manual calculation (for initial payments without invoice data and for first subscription that doesn't return invoice.update)
+                    now = timezone.now()
+                    subscription.current_period_start = now
+                    subscription.current_period_end = now + timedelta(days=30)
+                    subscription.next_billing_date = subscription.current_period_end
+                    
+                    logger.info(
+                        f"Using manual billing calculation for {subscription.user.email} "
+                        f"(no Paystack period data available)"
+                    )
 
                 # Reset retry tracking
                 subscription.retry_count = 0
@@ -414,7 +437,7 @@ class SubscriptionService:
         self,
         subscription: Subscription,
         reason: Optional[str] = None,
-    ) -> bool:
+    ) -> bool:  # TODO: USER CAN CALL MANUALLY OR BE CALLED WHEN GRACE PERIOD EXCEEDED
         """
         Cancel a subscription.
 
@@ -605,7 +628,7 @@ class SubscriptionService:
 
 subscription_service = SubscriptionService()
 
-# TODO:
+# NOTE:
 # If a customer has multiple authorizations, you can select which one to use for
 # the subscription, by passing the authorization_code as authorization when creating the subscription.
 # Otherwise, Paystack picks the most recent authorization to charge.
@@ -619,4 +642,5 @@ subscription_service = SubscriptionService()
 # subscription was created. If the subscription was created on or before the 28th of the month,
 # it gets billed on the same day, every month, for the duration of the plan. Subscriptions created on
 # or between the 29th - 31st,
+# will get billed on the 28th of every subsequent month, for the duration of the plan
 # will get billed on the 28th of every subsequent month, for the duration of the plan

@@ -394,6 +394,17 @@ class WebhookService:
 
             # --- Main Reconciliation Logic ---
             if invoice_status == "success" and is_paid:
+                # Update the billing periods from paystack
+                period_start = data.get("period_start")
+                period_end = data.get("period_end")
+                subscription_data = data.get("subscription", {})
+                next_payment_date = subscription_data.get("next_payment_date")
+                subscription_service.process_successful_payment(
+                    period_start=period_start,
+                    period_end=period_end,
+                    next_billing_date=next_payment_date,
+                )
+
                 # SCENARIO A: Payment was successful.
                 # Verify our system agrees.
                 if subscription.status != SubscriptionChoices.ACTIVE:
@@ -406,6 +417,9 @@ class WebhookService:
                         subscription=subscription,
                         transaction_data=data.get("transaction", data),
                         transaction_type=TransactionTypeChoices.RENEWAL,
+                        period_start=period_start,
+                        period_end=period_end,
+                        next_billing_date=next_payment_date,
                     )
                 else:
                     logger.info(
@@ -649,7 +663,7 @@ class WebhookService:
         except Exception as e:
             logger.error(f"Error handling subscription.disable: {str(e)}")
             raise
-    
+
     def handle_subscription_expiring_cards(self, data: list) -> None:
         """
         Handle subscription.expiring_cards event.
@@ -699,6 +713,7 @@ class WebhookService:
         except Exception as e:
             logger.error(f"Error handling subscription.expiring_cards: {str(e)}")
             raise
+
 
 webhook_service = WebhookService()
 

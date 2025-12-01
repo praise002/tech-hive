@@ -169,7 +169,7 @@ class PaystackService:
         Args:
             email: Customer email
             amount: Amount in Naira (will be converted to kobo)
-            plan_code: Paystack plan code (for subscriptions)
+            plan_code: Paystack plan code (for subscriptions)- will override transaction amount passed
             callback_url: URL to redirect after payment
             metadata: Additional data to attach
             reference: Custom reference (optional)
@@ -177,7 +177,7 @@ class PaystackService:
             {
                 "authorization_url": "https://checkout.paystack.com/nkdks46nymizns7",
                 "access_code": "nkdks46nymizns7",
-                "reference": "nms6uvr1pl"
+                "reference": "nms6uvr1pl"  # paystack or reference(not sure yet)
             }
 
         Raises:
