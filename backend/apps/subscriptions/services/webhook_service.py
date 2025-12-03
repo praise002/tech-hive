@@ -9,6 +9,7 @@ from backend.apps.subscriptions.choices import (
     SubscriptionChoices,
     TransactionTypeChoices,
 )
+from backend.apps.subscriptions.services import notification_service
 
 from .paystack_service import paystack_service
 from .subscription_service import subscription_service
@@ -109,7 +110,17 @@ class WebhookService:
                 .order_by("-created_at")
                 .first()
             )
-            # TODO: SEND AN EMAIL
+
+            try:
+                notification_service.send_subscription_created_email(
+                    user=subscription.user,
+                    subscription=subscription,
+                )
+                logger.info(f"Sent subscription created email to {customer_email}")
+            except Exception as e:
+                logger.error(
+                    f"Failed to send subscription created email to {customer_email}: {str(e)}"
+                )
 
             if not subscription:
                 logger.warning(f"No subscription found for email: {customer_email}")
@@ -196,14 +207,14 @@ class WebhookService:
             # Process as successful payment
             # First subscription
             if metadata is None:
-                subscription_service.process_successful_payment(
+                payment_transaction = subscription_service.process_successful_payment(
                     subscription=subscription,
                     transaction_data=data,
                     transaction_type=TransactionTypeChoices.SUBSCRIPTION,
                 )
             else:
                 # on next payment
-                subscription_service.process_successful_payment(
+                payment_transaction = subscription_service.process_successful_payment(
                     subscription=subscription,
                     transaction_data=data,
                     transaction_type=TransactionTypeChoices.RENEWAL,
@@ -213,7 +224,17 @@ class WebhookService:
             logger.info(
                 f"Charge successful for {subscription.user.email}: ₦{amount}, Card: ****{card_last4}"
             )
-            # TODO: Send a charge success notification email
+
+            try:
+                notification_service.send_payment_success_email(
+                    user=subscription.user,
+                    transaction=payment_transaction,
+                )
+                logger.info(f"Sent payment success email to {subscription.user.email}")
+            except Exception as e:
+                logger.error(
+                    f"Failed to send payment success email to {subscription.user.email}: {str(e)}"
+                )
 
         except Exception as e:
             logger.error(f"Error handling charge.success: {str(e)}")
@@ -293,8 +314,20 @@ class WebhookService:
                     f"₦{amount} on {next_payment_date}"
                 )
 
-                # Send "Upcoming Charge" email
-                # TODO: BUILD THIS ENDPOINT
+                try:
+                    notification_service.send_upcoming_charge_email(
+                        user=subscription.user,
+                        subscription=subscription,
+                        amount=amount,
+                        charge_date=next_payment_date,
+                    )
+                    logger.info(
+                        f"Sent upcoming charge email to {subscription.user.email}"
+                    )
+                except Exception as e:
+                    logger.error(
+                        f"Failed to send upcoming charge email to {subscription.user.email}: {str(e)}"
+                    )
 
             elif paid and invoice_status == "success":
                 # This is retroactive invoice creation (payment already happened)
@@ -502,7 +535,7 @@ class WebhookService:
             subscription_data = data.get("subscription", {})
             subscription_code = subscription_data.get("subscription_code")
             open_invoice = subscription_data.get("open_invoice")
-            paystack_subscription_status = subscription_data.get("status")
+            # paystack_subscription_status = subscription_data.get("status")
 
             # Get customer info
             customer_data = data.get("customer", {})
@@ -545,9 +578,10 @@ class WebhookService:
                 return
 
             # Process failed payment
+            reason = "Invoice payment failed"
             subscription_service.process_failed_payment(
                 subscription=subscription,
-                failure_reason=f"Invoice payment failed",
+                failure_reason=reason,
                 transaction_data=data,
             )
 
@@ -556,7 +590,9 @@ class WebhookService:
                 f"Invoice: {invoice_code}, Amount: ₦{amount}"
             )
 
-            # TODO: Send failure notification
+            notification_service.send_payment_failed_email(
+                user=subscription.user, reason=reason
+            )
 
         except Exception as e:
             logger.error(f"Error handling invoice.payment_failed: {str(e)}")
@@ -684,7 +720,6 @@ class WebhookService:
             for entry in data:
                 expiry_date = entry.get("expiry_date")
                 description = entry.get("description")
-                brand = entry.get("brand")
                 subscription_info = entry.get("subscription", {})
                 customer_info = entry.get("customer", {})
 
@@ -707,8 +742,19 @@ class WebhookService:
                     f"[expiring_cards] Card expiring soon for {customer_email}: {description} (expires {expiry_date})"
                 )
 
-                # TODO: Send notification email to customer
-                # Example: send_expiring_card_email(subscription.user, subscription, expiry_date, description, brand)
+                # Send notification email to customer
+                try:
+                    notification_service.send_card_expiring_email(
+                        user=subscription.user,
+                        subscription=subscription,
+                        expiry_date=expiry_date,
+                        card_description=description,
+                    )
+                    logger.info(f"Sent card expiring email to {customer_email}")
+                except Exception as e:
+                    logger.error(
+                        f"Failed to send card expiring email to {customer_email}: {str(e)}"
+                    )
 
         except Exception as e:
             logger.error(f"Error handling subscription.expiring_cards: {str(e)}")

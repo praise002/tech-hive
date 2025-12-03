@@ -34,7 +34,6 @@ class SendEmail:
         context = {
             "frontend_url": settings.FRONTEND_URL,
             "name": user.full_name,
-            "email": email,
             "otp": otp,
         }
         message = render_to_string("verify_email_request.html", context)
@@ -70,7 +69,6 @@ class SendEmail:
         context = {
             "frontend_url": settings.FRONTEND_URL,
             "name": user.full_name,
-            "email": email,
             "otp": otp,
         }
         message = render_to_string("password_reset_email.html", context)

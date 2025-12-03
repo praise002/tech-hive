@@ -164,7 +164,7 @@ class SubscriptionService:
 
                 logger.info(
                     f"Trial conversion initiated for {trial_subscription.user.email}: "
-                    f"{trial_subscription.plan.name} (reference: {reference})"
+                    f"{trial_subscription.plan.name} (reference: {trial_subscription.reference})"
                 )
 
                 return payment_transaction, authorization_url
