@@ -969,6 +969,105 @@ class SubscriptionService:
                 "errors": [str(e)],
             }
 
+    def create_plan(
+        self,
+        name: str,
+        interval: str,
+        amount: int,  # int for paystack, Decimal for local db
+        features: str,
+        description: Optional[str] = None,
+        currency: str = "NGN",
+    ) -> SubscriptionPlan:
+        """
+        Create a subscription plan in both Paystack and local database.
+
+        Flow:
+        1. Validate inputs (name not empty, valid interval, amount > 0)
+        2. Create plan in Paystack first
+        3. If Paystack succeeds, create in local DB
+        4. If Paystack fails, don't create in DB
+
+        Args:
+            name: Plan name (e.g., "Premium Monthly")
+            interval: Billing cycle - "monthly", "annually", "weekly", etc.
+            amount: Price in kobo
+            description: Optional description
+            currency: Currency code (default: "NGN")
+
+        Returns:
+            SubscriptionPlan: The created plan instance
+
+        Raises:
+            ValueError: If validation fails
+            Exception: If Paystack API call fails
+
+        Example:
+            plan = subscription_service.create_plan(
+                name="Premium Monthly",
+                interval="monthly",
+                amount=Decimal("10000"),
+                description="Full access to all premium features"
+            )
+            print(f"Plan created: {plan.paystack_plan_code}")
+        """
+        try:
+            if not name or not name.strip():
+                raise ValueError("Plan name cannot be empty")
+
+            if amount <= 0:
+                raise ValueError("Plan amount must be greater than 0")
+
+            valid_intervals = [
+                "monthly",
+                "annually",
+            ]  # based on my app logic
+            if interval not in valid_intervals:
+                raise ValueError(
+                    f"Invalid interval '{interval}'. "
+                    f"Must be one of: {', '.join(valid_intervals)}"
+                )
+
+            logger.info(f"Creating plan: {name} - {amount}kobo/{interval}")
+
+            # This is the source of truth - if Paystack fails, we don't create locally
+            paystack_response = paystack_service.create_plan(
+                name=name,
+                interval=interval,
+                amount=amount,
+                currency=currency,
+                description=description,
+            )
+
+            plan_code = paystack_response["plan_code"]
+            logger.info(f"Plan created in Paystack: {plan_code}")
+
+            # Now that Paystack succeeded, we can safely create locally
+            with transaction.atomic():
+                plan = SubscriptionPlan.objects.create(
+                    name=name,
+                    price=amount,
+                    billing_cycle=interval,
+                    description=description,
+                    currency=currency,
+                    paystack_plan_code=plan_code,
+                    features=features,
+                )
+
+            logger.info(
+                f"Plan created successfully in database: {plan.name} "
+                f"(ID: {plan.id}, Paystack: {plan_code})"
+            )
+
+            return plan
+
+        except ValueError as ve:
+            logger.warning(f"Validation error creating plan: {str(ve)}")
+            raise
+
+        except Exception as e:
+            logger.error(f"Error creating plan '{name}': {str(e)}")
+            raise Exception(f"Failed to create plan: {str(e)}")
+
     def _get_frontend_url(self) -> str:
         """Get frontend URL from settings."""
         return settings.FRONTEND_URL

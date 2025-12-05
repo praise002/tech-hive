@@ -2,6 +2,8 @@ from apps.subscriptions.models import SubscriptionPlan
 from apps.subscriptions.services import paystack_service
 from django.core.management.base import BaseCommand
 
+from backend.apps.subscriptions.services import subscription_service
+
 
 class Command(BaseCommand):
     help = "Creates the Premium subscription plan"
@@ -16,22 +18,17 @@ class Command(BaseCommand):
         interval = "monthly"
         amount = 5000.00
         description = "Unlimited access to all Tech Hive features"
-        
-        paystack_response = paystack_service.create_plan(self, name, interval, amount, description)
-        plan_code = paystack_response["plan_code"]
-        
-        plan = SubscriptionPlan.objects.create(
-            name=name,
-            description=description,
-            price=amount,
-            billing_cycle=interval,
-            paystack_plan_code=plan_code,  
-            features={
-                "priority_support": True,
-                "analytics_dashboard": True,
-                "ad_free": True,
-                "early_access": True,
-            },
+        features = {
+            "priority_support": True,
+            "analytics_dashboard": True,
+            "ad_free": True,
+            "early_access": True,
+        }
+
+        subscription_service.create_plan(self, name, interval, amount)
+
+        paystack_service.create_plan(
+            self, name, interval, amount, description, features, description
         )
 
         self.stdout.write(

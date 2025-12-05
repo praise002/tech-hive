@@ -30,7 +30,7 @@ class PaystackService:
         self,
         name: str,
         interval: str,
-        amount: Decimal,
+        amount: int,
         currency: Optional[str] = None,
         description: Optional[str] = None,
     ) -> Dict[str, Any]:
