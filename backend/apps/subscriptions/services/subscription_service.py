@@ -1187,6 +1187,91 @@ class SubscriptionService:
             logger.error(f"Error updating plan '{plan.name}': {str(e)}")
             raise Exception(f"Failed to update plan: {str(e)}")
 
+    def fetch_subscription_details(self, subscription: Subscription) -> Dict[str, Any]:
+        """
+        Fetch latest subscription details from Paystack.
+
+        This is useful for:
+        - Debugging discrepancies between your DB and Paystack
+        - Support tickets (checking actual status in Paystack)
+        - Verifying webhook processing worked correctly
+        - Admin dashboard showing live Paystack data
+
+        Flow:
+        1. Validate subscription has Paystack subscription code
+        2. Call Paystack API to fetch subscription
+        3. Format and return the data
+
+        Args:
+            subscription: The subscription to fetch details for
+
+        Returns:
+             {
+                  "subscriptions": [],
+                  "integration": 100032,
+                  "domain": "test",
+                  "name": "Monthly retainer",
+                  "plan_code": "PLN_gx2wn530m0i3w3m",
+                  "description": null,
+                  "amount": 50000,
+                  "interval": "monthly",
+                  "send_invoices": true,
+                  "send_sms": true,
+                  "hosted_page": false,
+                  "hosted_page_url": null,
+                  "hosted_page_summary": null,
+                  "currency": "NGN",
+                  "id": 28,
+                  "createdAt": "2016-03-29T22:42:50.000Z",
+                  "updatedAt": "2016-03-29T22:42:50.000Z"
+              }
+
+
+        Raises:
+            ValueError: If subscription doesn't have Paystack subscription code
+            Exception: If Paystack API call fails
+
+        Example:
+            # Admin debugging a subscription issue
+            subscription = Subscription.objects.get(id=123)
+            paystack_data = subscription_service.fetch_subscription_details(subscription)
+
+            print(f"Paystack Status: {paystack_data['status']}")
+            print(f"DB Status: {subscription.status}")
+            # Compare to find discrepancies
+        """
+        try:
+            if not subscription.paystack_subscription_code:
+                raise ValueError(
+                    f"Subscription for user {subscription.user.email} has no Paystack code. "
+                    f"Cannot fetch details."
+                )
+
+            logger.info(
+                f"Fetching subscription details from Paystack for {subscription.user.email} "
+                f"(subscription: {subscription.paystack_subscription_code})"
+            )
+
+            paystack_data = paystack_service.fetch_subscription(
+                subscription.paystack_subscription_code
+            )
+
+            logger.info(
+                f"Successfully fetched subscription details for {subscription.user.email}"
+            )
+
+            return paystack_data
+
+        except ValueError as ve:
+            logger.warning(f"Validation error fetching subscription details: {str(ve)}")
+            raise
+
+        except Exception as e:
+            logger.error(
+                f"Error fetching subscription details for {subscription.user.email}: {str(e)}"
+            )
+            raise Exception(f"Failed to fetch subscription details: {str(e)}")
+
     def _get_frontend_url(self) -> str:
         """Get frontend URL from settings."""
         return settings.FRONTEND_URL
