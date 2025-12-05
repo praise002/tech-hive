@@ -1045,7 +1045,7 @@ class SubscriptionService:
             with transaction.atomic():
                 plan = SubscriptionPlan.objects.create(
                     name=name,
-                    price=amount,
+                    price=Decimal(amount) / Decimal("100"),
                     billing_cycle=interval,
                     description=description,
                     currency=currency,
@@ -1067,6 +1067,125 @@ class SubscriptionService:
         except Exception as e:
             logger.error(f"Error creating plan '{name}': {str(e)}")
             raise Exception(f"Failed to create plan: {str(e)}")
+
+    def update_plan(
+        self, plan: SubscriptionPlan, data: Dict[str, Any]
+    ) -> SubscriptionPlan:
+        """
+        Update a subscription plan in both Paystack and local database.
+
+        Flow:
+        1. Validate plan exists and has Paystack code
+        2. Prepare update payload (convert amount to kobo if provided)
+        3. Update in Paystack first
+        4. If Paystack succeeds, update local DB
+        5. If Paystack fails, don't update DB
+
+        Args:
+            plan: SubscriptionPlan instance to update
+            data: Dictionary with fields to update:
+                {
+                    "name": "New Plan Name",
+                    "amount": 15000,
+                    "description": "Updated description",
+                    "interval": "annually",
+                    "update_existing_subscriptions": True
+                }
+
+        Returns:
+            SubscriptionPlan: The updated plan instance
+
+        Raises:
+            ValueError: If plan doesn't have Paystack code
+            Exception: If Paystack API call fails
+
+        Example:
+            plan = SubscriptionPlan.objects.get(id=1)
+            updated_plan = subscription_service.update_plan(
+                plan=plan,
+                data={
+                    "name": "Premium Plus",
+                    "amount": 12000,
+                }
+            )
+        """
+        try:
+            if not plan.paystack_plan_code:
+                raise ValueError(
+                    f"Plan '{plan.name}' has no Paystack plan code. " f"Cannot update."
+                )
+
+            logger.info(f"Updating plan: {plan.name} ({plan.paystack_plan_code})")
+
+            paystack_data = {}
+
+            if "name" in data:
+                paystack_data["name"] = data["name"]
+
+            if "description" in data:
+                paystack_data["description"] = data["description"]
+
+            # Convert amount from Naira to kobo if provided
+            if "amount" in data:
+                amount_naira = data["amount"]
+                if not isinstance(amount_naira, int):
+                    amount_naira = int(amount_naira)
+
+                # Paystack expects amount in kobo (smallest currency unit)
+                amount_kobo = int(amount_naira * Decimal("100"))
+                paystack_data["amount"] = amount_kobo
+
+            if "interval" in data:
+                paystack_data["interval"] = data["interval"]
+
+            # If True, all current subscribers will be affected
+            # If False, only new subscribers will use new price
+            if "update_existing_subscriptions" in data:
+                paystack_data["update_existing_subscriptions"] = data[
+                    "update_existing_subscriptions"
+                ]
+
+            logger.info(f"Updating plan in Paystack with data: {paystack_data}")
+
+            paystack_service.update_plan(
+                plan_code=plan.paystack_plan_code, data=paystack_data
+            )
+
+            logger.info(
+                f"Plan updated successfully in Paystack: {plan.paystack_plan_code}"
+            )
+
+            # Now that Paystack succeeded, update our records
+            with transaction.atomic():
+                # Update each field if provided
+                if "name" in data:
+                    plan.name = data["name"]
+
+                if "amount" in data:
+                    plan.price = data["amount"]
+
+                if "description" in data:
+                    plan.description = data["description"]
+
+                if "interval" in data:
+                    plan.billing_cycle = data["interval"]
+
+                plan.save()
+
+            logger.info(
+                f"Plan updated successfully in database: {plan.name} "
+                f"(ID: {plan.id})"
+            )
+
+            return plan
+
+        except ValueError as ve:
+            logger.warning(f"Validation error updating plan: {str(ve)}")
+            raise
+
+        except Exception as e:
+            logger.error(f"Error updating plan '{plan.name}': {str(e)}")
+            raise Exception(f"Failed to update plan: {str(e)}")
 
     def _get_frontend_url(self) -> str:
         """Get frontend URL from settings."""

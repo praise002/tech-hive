@@ -32,7 +32,7 @@ class Command(BaseCommand):
         )
 
         self.stdout.write(
-            self.style.SUCCESS(f"Successfully created Premium plan: {plan}")
+            self.style.SUCCESS("Successfully created Premium plan")
         )
         self.stdout.write(
             self.style.WARNING(
