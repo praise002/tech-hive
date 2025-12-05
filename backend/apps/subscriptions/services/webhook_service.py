@@ -387,7 +387,7 @@ class WebhookService:
                 )
                 return
 
-            # If the user updaates their card via the paystack management link
+            # If the user updates their card via the paystack management link
             new_auth_data = data.get("authorization")
             new_auth_data = data.get("authorization")
             if new_auth_data:
@@ -590,9 +590,17 @@ class WebhookService:
                 f"Invoice: {invoice_code}, Amount: ₦{amount}"
             )
 
-            notification_service.send_payment_failed_email(
-                user=subscription.user, reason=reason
-            )
+            try:
+                notification_service.send_payment_failed_email(
+                    user=subscription.user, reason=reason
+                )
+                logger.info(
+                        f"Sent payment failed email to {subscription.user.email}"
+                    )
+            except Exception as e:
+                logger.error(
+                    f"Failed to send payment failed email to {subscription.user.email}: {str(e)}"
+                )
 
         except Exception as e:
             logger.error(f"Error handling invoice.payment_failed: {str(e)}")

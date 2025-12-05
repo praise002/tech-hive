@@ -2,7 +2,7 @@ import logging
 import uuid
 from datetime import timedelta
 from decimal import Decimal
-from typing import Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from apps.subscriptions.choices import (
     StatusChoices,
@@ -752,6 +752,221 @@ class SubscriptionService:
                 "has_subscription": False,
                 "is_premium": False,
                 "current_plan": "Basic",
+            }
+
+    def update_payment_method(self, subscription: Subscription) -> str:
+        """
+        Generate secure link for user to update their payment card.
+
+        This is used when:
+        - User's card is expiring
+        - Payment has failed
+        - User wants to change their card
+
+        Flow:
+        1. Validate subscription has Paystack subscription code
+        2. Call Paystack API to generate management link
+        3. Return URL for user to visit
+        4. User updates card on Paystack's hosted page
+        5. New card is stored in Paystack (no webhook sent at this point)
+        6. Next billing cycle: charge.success webhook will contain new card details
+        7. Webhook handler updates card_last4, card_type, etc. in DB
+
+        Args:
+            subscription: The subscription to update payment method for
+
+        Returns:
+            str: URL where user can update their card
+
+        Raises:
+            ValueError: If subscription doesn't have Paystack subscription code
+            Exception: If Paystack API call fails
+        """
+        try:
+
+            if not subscription.paystack_subscription_code:
+                error_msg = (
+                    f"No Paystack subscription found for user {subscription.user.email}. "
+                    f"Cannot generate update link."
+                )
+                logger.error(error_msg)
+                raise ValueError(error_msg)
+
+            logger.info(
+                f"Generating payment update link for {subscription.user.email} "
+                f"(subscription: {subscription.paystack_subscription_code})"
+            )
+
+            update_link = paystack_service.generate_update_subscription_link(
+                subscription.paystack_subscription_code
+            )
+
+            logger.info(
+                f"Payment update link generated successfully for {subscription.user.email}"
+            )
+
+            return update_link
+
+        except ValueError as ve:
+            logger.warning(f"Validation error generating update link: {str(ve)}")
+            raise
+
+        except Exception as e:
+            logger.error(
+                f"Error generating payment update link for {subscription.user.email}: {str(e)}"
+            )
+            raise Exception(f"Failed to generate payment update link: {str(e)}")
+
+    def sync_plans_from_paystack(self) -> Dict[str, Any]:
+        """
+        Sync all subscription plans from Paystack to local database.
+
+        This ensures your DB stays in sync with Paystack, especially useful for:
+        - Initial setup (importing existing plans)
+        - Regular maintenance (cron job)
+        - After creating/updating plans in Paystack dashboard
+
+        Flow:
+        1. Fetch all plans from Paystack (with pagination)
+        2. For each plan:
+            a. Check if exists in DB (by paystack_plan_code)
+            b. If exists: Update fields (name, amount, interval, etc.)
+            c. If not exists: Create new SubscriptionPlan
+        3. Return summary of operations
+
+        Returns:
+            {
+                "success": True,
+                "synced": 5,      # Total plans processed
+                "created": 2,     # New plans created
+                "updated": 3,     # Existing plans updated
+                "errors": []      # List of any errors encountered
+            }
+
+        Example:
+            # Run manually
+            result = subscription_service.sync_plans_from_paystack()
+            print(f"Synced {result['synced']} plans")
+
+            # Or via cron job (daily at 2am)
+            # 0 2 * * * python manage.py sync_paystack_plans
+        """
+        try:
+            logger.info("Starting plan synchronization from Paystack...")
+
+            # Initialize counters to track what we did
+            synced_count = 0
+            created_count = 0
+            updated_count = 0
+            errors = []
+
+            page = 1
+            per_page = 50
+
+            while True:
+                try:
+
+                    logger.info(f"Fetching plans page {page}...")
+                    result = paystack_service.list_plans(page=page, per_page=per_page)
+
+                    plans = result["plans"]
+                    meta = result["meta"]
+
+                    # If no plans returned, we're done
+                    if not plans:
+                        logger.info("No more plans to sync")
+                        break
+
+                    logger.info(f"Processing {len(plans)} plans from page {page}")
+
+                    for plan_data in plans:
+                        try:
+                            plan_code = plan_data["plan_code"]
+                            name = plan_data["name"]
+                            amount = Decimal(plan_data["amount"]) / Decimal(
+                                "100"
+                            )  # Convert kobo to Naira
+                            interval = plan_data["interval"]
+                            description = plan_data.get("description")
+                            currency = plan_data.get("currency", "NGN")
+
+                            # update_or_create is atomic - it either updates existing or creates new
+                            _, created = SubscriptionPlan.objects.update_or_create(
+                                # Find by: paystack_plan_code (unique identifier)
+                                paystack_plan_code=plan_code,
+                                # Update/Create with:
+                                defaults={
+                                    "name": name,
+                                    "price": amount,
+                                    "billing_cycle": interval,  # "monthly", "annually", etc.
+                                    "description": description,
+                                    "currency": currency,
+                                },
+                            )
+
+                            # Track what we did
+                            if created:
+                                created_count += 1
+                                logger.info(f"✓ Created new plan: {name} ({plan_code})")
+                            else:
+                                updated_count += 1
+                                logger.info(
+                                    f"✓ Updated existing plan: {name} ({plan_code})"
+                                )
+
+                            synced_count += 1
+
+                        except Exception as plan_error:
+                            # If one plan fails, log it but continue with others
+                            error_msg = f"Failed to sync plan {plan_data.get('plan_code')}: {str(plan_error)}"
+                            logger.error(error_msg)
+                            errors.append(error_msg)
+                            continue
+
+                    # Check if there are more pages
+                    # meta contains: {"total": 10, "page": 1, "pageCount": 2}
+                    current_page = meta.get("page", page)
+                    total_pages = meta.get("pageCount", 1)
+
+                    if current_page >= total_pages:
+                        # We've processed all pages
+                        logger.info(f"Processed all {total_pages} pages")
+                        break
+
+                    # Move to next page
+                    page += 1
+
+                except Exception as page_error:
+                    # If fetching a page fails, log and stop
+                    error_msg = f"Failed to fetch page {page}: {str(page_error)}"
+                    logger.error(error_msg)
+                    errors.append(error_msg)
+                    break
+
+            result = {
+                "success": len(errors) == 0,
+                "synced": synced_count,
+                "created": created_count,
+                "updated": updated_count,
+                "errors": errors,
+            }
+
+            logger.info(
+                f"Plan sync completed: {synced_count} synced "
+                f"({created_count} created, {updated_count} updated, "
+                f"{len(errors)} errors)"
+            )
+
+            return result
+
+        except Exception as e:
+            logger.error(f"Fatal error during plan sync: {str(e)}")
+            return {
+                "success": False,
+                "synced": 0,
+                "created": 0,
+                "updated": 0,
+                "errors": [str(e)],
             }
 
     def _get_frontend_url(self) -> str:

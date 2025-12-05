@@ -6,7 +6,6 @@ from typing import Any, Dict, Optional
 
 import requests
 from django.conf import settings
-from rest_framework import status
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +31,7 @@ class PaystackService:
         name: str,
         interval: str,
         amount: Decimal,
+        currency: Optional[str] = None,
         description: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
@@ -77,6 +77,9 @@ class PaystackService:
             if description:
                 payload["description"] = description
 
+            if currency:
+                payload["currency"] = currency
+
             logger.info(f"Creating Paystack plan: {name} - ₦{amount}/{interval}")
 
             response = requests.post(
@@ -114,7 +117,7 @@ class PaystackService:
         Args:
             plan_code: The ID or code of the plan to update.
             data: A dictionary containing the fields to update.
-                  e.g., {"name": "New Name", "amount": 55000, "update_existing_subscriptions": True} ues is TRue by default
+                  e.g., {"name": "New Name", "amount": 55000, "update_existing_subscriptions": True} this is True by default
                   Amount should be in the subunit (kobo).
 
         Returns:
@@ -142,7 +145,9 @@ class PaystackService:
                 logger.error(f"Failed to update plan '{plan_code}': {error_message}")
                 raise Exception(error_message)
 
-            logger.info(f"Plan '{plan_code}' updated successfully: {response_data.get('message')}")
+            logger.info(
+                f"Plan '{plan_code}' updated successfully: {response_data.get('message')}"
+            )
             return response_data
 
         except requests.exceptions.RequestException as e:
@@ -152,6 +157,150 @@ class PaystackService:
             raise Exception(f"Failed to connect to Paystack: {str(e)}")
         except Exception as e:
             logger.error(f"Error updating plan '{plan_code}': {str(e)}")
+            raise
+
+    def list_plans(
+        self,
+        page: int = 1,
+        per_page: int = 50,
+        status: Optional[str] = None,
+        interval: Optional[str] = None,
+        amount: Optional[Decimal] = None,
+    ) -> Dict[str, Any]:
+        """
+        List all subscription plans on your Paystack integration.
+
+        Args:
+            page: Page number for pagination (default: 1)
+            per_page: Number of plans per page (default: 50, max: 100)
+            status: Filter by plan status (optional) - e.g., "active"
+            interval: Filter by billing interval (optional) - e.g., "monthly", "annually"
+            amount: Filter by plan amount in Naira (optional)
+
+        Returns:
+            {
+                "plans": [ ... ],
+                "meta": { ... }
+            }
+
+        Raises:
+            Exception: If API call fails
+        """
+        try:
+            # Build query parameters
+            params = {
+                "page": page,
+                "perPage": per_page,
+            }
+
+            if status:
+                params["status"] = status
+
+            if interval:
+                params["interval"] = interval
+
+            if amount:
+                # Convert amount to kobo
+                params["amount"] = int(amount * Decimal("100"))
+
+            logger.info(
+                f"Fetching plans (page {page}, per_page {per_page}, "
+                f"status={status}, interval={interval}, amount={amount})"
+            )
+
+            response = requests.get(
+                f"{self.base_url}/plan",
+                headers=self.headers,
+                params=params,
+                timeout=30,
+            )
+
+            response.raise_for_status()
+            data = response.json()
+
+            if not data.get("status"):
+                error_message = data.get("message", "Failed to list plans")
+                logger.error(f"Failed to list plans: {error_message}")
+                raise Exception(f"Paystack error: {error_message}")
+
+            plans_data = data["data"]
+            meta = data.get("meta", {})
+
+            logger.info(
+                f"Retrieved {len(plans_data)} plans (total: {meta.get('total', 0)})"
+            )
+
+            return {
+                "plans": plans_data,
+                "meta": meta,
+            }
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Paystack API request failed: {str(e)}")
+            raise Exception(f"Failed to connect to Paystack: {str(e)}")
+
+        except Exception as e:
+            logger.error(f"Error listing plans: {str(e)}")
+            raise
+
+    def fetch_plan(self, id_or_code: str) -> Dict[str, Any]:
+        """
+        Fetch details of a specific plan on your integration.
+
+        Args:
+            id_or_code: The plan ID or plan_code (e.g., "PLN_gx2wn530m0i3w3m" or "28")
+
+        Returns:
+            {
+                "subscriptions": [],
+                "integration": 100032,
+                "domain": "test",
+                "name": "Monthly retainer",
+                "plan_code": "PLN_gx2wn530m0i3w3m",
+                "description": null,
+                "amount": 50000,  # in kobo
+                "interval": "monthly",
+                "send_invoices": true,
+                "send_sms": true,
+                "currency": "NGN",
+                "id": 28,
+                "createdAt": "2016-03-29T22:42:50.000Z",
+                "updatedAt": "2016-03-29T22:42:50.000Z"
+            }
+
+        Raises:
+            Exception: If plan fetch fails
+        """
+        try:
+            logger.info(f"Fetching plan: {id_or_code}")
+
+            response = requests.get(
+                f"{self.base_url}/plan/{id_or_code}",
+                headers=self.headers,
+                timeout=30,
+            )
+
+            response.raise_for_status()
+            data = response.json()
+
+            if not data.get("status"):
+                error_message = data.get("message", "Failed to fetch plan")
+                logger.error(f"Failed to fetch plan '{id_or_code}': {error_message}")
+                raise Exception(f"Paystack error: {error_message}")
+
+            plan_data = data["data"]
+            logger.info(
+                f"Plan '{id_or_code}' retrieved successfully: {plan_data['name']}"
+            )
+
+            return plan_data
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Paystack API request failed: {str(e)}")
+            raise Exception(f"Failed to connect to Paystack: {str(e)}")
+
+        except Exception as e:
+            logger.error(f"Error fetching plan '{id_or_code}': {str(e)}")
             raise
 
     def initialize_transaction(
