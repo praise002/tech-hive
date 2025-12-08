@@ -527,9 +527,9 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.subscriptions.tasks.retry_failed_payments",
         "schedule": crontab(hour=14, minute=0),  # 2:00 PM daily
     },
-    # Expire unconverted trials daily at midnight
+    # Expire  trials daily at midnight
     "expire-trials": {
-        "task": "apps.subscriptions.tasks.expire_unconverted_trials",
+        "task": "apps.subscriptions.tasks.expire_trials",
         "schedule": crontab(hour=0, minute=0),  # 12:00 AM daily
     },
     # Check and expire grace periods every 6 hours
@@ -541,6 +541,16 @@ CELERY_BEAT_SCHEDULE = {
     "trial-ending-reminders": {
         "task": "apps.subscriptions.tasks.send_trial_ending_reminders",
         "schedule": crontab(hour=10, minute=0),  # 10:00 AM daily
+    },
+    # Send upcoming charge reminders daily at 9 AM
+    'upcoming-charge-reminders': {
+        'task': 'apps.subscriptions.tasks.send_upcoming_charge_reminders',
+        'schedule': crontab(hour=9, minute=0),
+    },
+    # Send final grace warnings daily at 6 PM
+    'final-grace-warnings': {
+        'task': 'apps.subscriptions.tasks.send_final_grace_warnings',
+        'schedule': crontab(hour=18, minute=0),
     },
 }
 

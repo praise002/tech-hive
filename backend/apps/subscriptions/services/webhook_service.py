@@ -1,4 +1,5 @@
 import logging
+from datetime import timedelta
 from decimal import Decimal
 from typing import Dict
 
@@ -187,7 +188,7 @@ class WebhookService:
             customer = data.get("customer", {})
             customer_code = customer.get("customer_code")
             reference = data.get("reference")
-            metadata = customer.get("metadata")
+
             amount = Decimal(data.get("amount", 0)) / Decimal(
                 ("100")
             )  # Convert from kobo
@@ -430,6 +431,14 @@ class WebhookService:
                         ]
                     )
 
+                try:
+                    notification_service.send_card_updated_email(
+                        user=subscription.user, subscription=subscription
+                    )
+                    logger.info(f"Sent card updated email to {subscription.user.email}")
+                except Exception as e:
+                    logger.error(f"Failed to send card updated email: {str(e)}")
+
             # Analyze the final status of the invoice
             invoice_status = data.get("status")
             is_paid = data.get("paid", False)
@@ -607,13 +616,24 @@ class WebhookService:
 
             try:
                 notification_service.send_payment_failed_email(
-                    user=subscription.user, reason=reason
+                    user=subscription.user, subscription=subscription, reason=reason
                 )
                 logger.info(f"Sent payment failed email to {subscription.user.email}")
             except Exception as e:
                 logger.error(
                     f"Failed to send payment failed email to {subscription.user.email}: {str(e)}"
                 )
+
+            try:
+                next_retry_date = subscription.payment_failed_at + timedelta(days=3)
+                notification_service.send_retry_scheduled_email(
+                    user=subscription.user,
+                    subscription=subscription,
+                    next_retry_date=next_retry_date,
+                )
+                logger.info(f"Sent retry scheduled email to {subscription.user.email}")
+            except Exception as e:
+                logger.error(f"Failed to send retry scheduled email: {str(e)}")
 
         except Exception as e:
             logger.error(f"Error handling invoice.payment_failed: {str(e)}")

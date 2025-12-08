@@ -16,6 +16,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
+from .notification_service import notification_service
 from .paystack_service import paystack_service
 
 User = get_user_model()
@@ -89,6 +90,14 @@ class SubscriptionService:
                     f"Trial started for {user.email}: {plan.name} "
                     f"(expires: {trial_end.strftime('%Y-%m-%d %H:%M')})"
                 )
+
+                try:
+                    notification_service.send_trial_started_email(
+                        user=user, subscription=subscription
+                    )
+                    logger.info(f"Trial started email sent to {user.email}")
+                except Exception as e:
+                    logger.error(f"Failed to send trial started email: {str(e)}")
 
                 return subscription, payment_transaction
 
@@ -520,6 +529,14 @@ class SubscriptionService:
 
                 logger.info(f"Subscription cancelled for {subscription.user.email} ")
 
+                try:
+                    notification_service.send_cancellation_confirmed_email(
+                        user=subscription.user, subscription=subscription
+                    )
+                    logger.info(f"Sent cancellation email to {subscription.user.email}")
+                except Exception as e:
+                    logger.error(f"Failed to send cancellation email: {str(e)}")
+
                 return True
 
         except Exception as e:
@@ -560,6 +577,14 @@ class SubscriptionService:
 
                 # Reactivate subscription
                 subscription.reactivate()
+
+                try:
+                    notification_service.send_reactivation_email(
+                        user=subscription.user, subscription=subscription
+                    )
+                    logger.info(f"Sent reactivation email to {subscription.user.email}")
+                except Exception as e:
+                    logger.error(f"Failed to send reactivation email: {str(e)}")
 
                 logger.info(f"Subscription reactivated for {subscription.user.email}")
 
@@ -1212,4 +1237,5 @@ subscription_service = SubscriptionService()
 # will get billed on the 28th of every subsequent month, for the duration of the plan
 # will get billed on the 28th of every subsequent month, for the duration of the plan
 
+#
 #

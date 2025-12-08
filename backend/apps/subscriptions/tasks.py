@@ -1,23 +1,25 @@
+import logging
+from datetime import timedelta
+
+from apps.subscriptions.choices import SubscriptionChoices
+from apps.subscriptions.models import Subscription
+from apps.subscriptions.services.notification_service import notification_service
+from apps.subscriptions.services.subscription_service import subscription_service
 from celery import shared_task
 from django.utils import timezone
-from apps.subscriptions.models import Subscription
-from apps.subscriptions.choices import SubscriptionChoices
-from apps.subscriptions.services.subscription_service import subscription_service
-import logging
 
 logger = logging.getLogger(__name__)
 
 
 @shared_task(
-    name='apps.subscriptions.tasks.retry_failed_payments',
-    bind=True,
-    max_retries=3,
-    default_retry_delay=300,  # 5 minutes
+    bind=True,  # Gives access to 'self' (the task instance)
+    max_retries=3,  # If the task itself crashes, retry it 3 times
+    default_retry_delay=300,  # Wait 5 minutes before retrying crashed task
 )
 def retry_failed_payments(self):
     """
     Automatically retry failed subscription payments.
-    
+
     Retry schedule:
     - Day 0: Initial failure
     - Day 3: First retry
@@ -27,7 +29,7 @@ def retry_failed_payments(self):
     """
     try:
         now = timezone.now()
-        
+
         logger.info("Starting automatic payment retry job...")
 
         # Find PAST_DUE subscriptions that need retry
@@ -71,7 +73,6 @@ def retry_failed_payments(self):
                 # Attempt retry
                 success, message, _ = subscription_service.retry_payment(
                     subscription=subscription,
-                    is_manual=False,
                 )
 
                 retries_attempted += 1
@@ -85,15 +86,28 @@ def retry_failed_payments(self):
                         f"✗ Retry failed for {subscription.user.email}: {message}"
                     )
 
+                try:
+                    notification_service.send_retry_failed_email(
+                        user=subscription.user,
+                        subscription=subscription,
+                        retry_number=subscription.retry_count,
+                    )
+                    logger.info(
+                        f"Sent retry failed email to {subscription.user.email} "
+                        f"(retry #{subscription.retry_count})"
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to send retry failed email: {str(e)}")
+
         logger.info(
             f"Retry job completed: {retries_attempted} attempted, "
             f"{retries_successful} successful, {retries_failed} failed"
         )
-        
+
         return {
-            'attempted': retries_attempted,
-            'successful': retries_successful,
-            'failed': retries_failed,
+            "attempted": retries_attempted,
+            "successful": retries_successful,
+            "failed": retries_failed,
         }
 
     except Exception as exc:
@@ -102,107 +116,92 @@ def retry_failed_payments(self):
         raise self.retry(exc=exc)
 
 
-@shared_task(name='apps.subscriptions.tasks.expire_unconverted_trials')
-def expire_unconverted_trials():
+@shared_task
+def expire_trials():
     """
-    Expire trials that ended but weren't converted to paid.
+    Expire trials that ended.
     Runs daily at midnight.
     """
-    from datetime import timedelta
-    
+
     try:
         now = timezone.now()
-        
+
         logger.info("Starting trial expiration job...")
-        
+
         # Find trials that:
         # 1. Are still in TRIALING status
         # 2. Trial ended more than 24 hours ago
-        # 3. Haven't been paid
-        unconverted_trials = Subscription.objects.filter(
+        expired_trials = Subscription.objects.filter(
             status=SubscriptionChoices.TRIALING,
             trial_end__lt=now - timedelta(hours=24),  # Ended >24h ago
             paystack_subscription_code__isnull=True,  # Never got Paystack code
         )
-        
+
         expired_count = 0
-        for subscription in unconverted_trials:
+        for subscription in expired_trials:
             subscription.expire()
-            logger.info(f"Expired unconverted trial for {subscription.user.email}")
+            logger.info(f"Expired trial for {subscription.user.email}")
             expired_count += 1
-        
+
         logger.info(f"Trial expiration completed: {expired_count} trials expired")
-        
-        return {'expired_count': expired_count}
-        
+
+        return {"expired_count": expired_count}
+
     except Exception as exc:
         logger.error(f"Error in expire_unconverted_trials task: {str(exc)}")
         raise
 
 
-@shared_task(name='apps.subscriptions.tasks.expire_grace_periods')
+@shared_task
 def expire_grace_periods():
     """
     Expire subscriptions that exceeded grace period (10 days).
     Runs every 6 hours.
     """
-    from datetime import timedelta
-    
+
     try:
-        now = timezone.now()
-        grace_period_days = 10
-        
         logger.info("Starting grace period expiration job...")
-        
+
         # Find PAST_DUE subscriptions that exceeded grace period
-        expired_grace_periods = Subscription.objects.filter(
-            status=SubscriptionChoices.PAST_DUE,
-            payment_failed_at__lt=now - timedelta(days=grace_period_days),
-        )
-        
+        expired_grace_periods = Subscription.objects.grace_period_expired()
+
         expired_count = 0
         for subscription in expired_grace_periods:
-            subscription.expire()
+            subscription_service.cancel_subscription(subscription)
             logger.info(
                 f"Expired subscription for {subscription.user.email} "
                 f"(grace period exceeded)"
             )
             expired_count += 1
-        
+
         logger.info(f"Grace period expiration completed: {expired_count} expired")
-        
-        return {'expired_count': expired_count}
-        
+
+        return {"expired_count": expired_count}
+
     except Exception as exc:
         logger.error(f"Error in expire_grace_periods task: {str(exc)}")
         raise
 
 
-@shared_task(name='apps.subscriptions.tasks.send_trial_ending_reminders')
+@shared_task
 def send_trial_ending_reminders():
     """
     Send reminder emails to users whose trial is ending soon.
     Runs daily at 10 AM.
     """
-    from datetime import timedelta
-    from apps.subscriptions.services.notification_service import notification_service
-    
+
     try:
         now = timezone.now()
-        
+
         logger.info("Starting trial reminder job...")
-        
+
         # Find trials ending in 2 days
-        trials_ending_soon = Subscription.objects.filter(
-            status=SubscriptionChoices.TRIALING,
-            trial_end__gte=now + timedelta(days=1),
-            trial_end__lte=now + timedelta(days=3),
-        )
-        
+        trials_ending_soon = Subscription.objects.trial_ending_soon()
+
         reminders_sent = 0
         for subscription in trials_ending_soon:
             days_remaining = (subscription.trial_end - now).days
-            
+
             try:
                 notification_service.send_trial_ending_reminder(
                     user=subscription.user,
@@ -218,11 +217,94 @@ def send_trial_ending_reminders():
                 logger.error(
                     f"Failed to send trial reminder to {subscription.user.email}: {str(e)}"
                 )
-        
+
         logger.info(f"Trial reminder job completed: {reminders_sent} reminders sent")
-        
-        return {'reminders_sent': reminders_sent}
-        
+
+        return {"reminders_sent": reminders_sent}
+
     except Exception as exc:
         logger.error(f"Error in send_trial_ending_reminders task: {str(exc)}")
+        raise
+
+
+@shared_task
+def send_upcoming_charge_reminders():
+    """
+    Send email 3 days before subscription renewal.
+    Runs daily.
+    """
+    try:
+        now = timezone.now()
+        reminder_date = now + timedelta(days=3)
+
+        logger.info("Starting upcoming charge reminder job...")
+
+        # Find subscriptions renewing in 3 days
+        upcoming_renewals = Subscription.objects.filter(
+            status=SubscriptionChoices.ACTIVE,
+            next_billing_date__date=reminder_date.date(),
+        )
+
+        reminders_sent = 0
+        for subscription in upcoming_renewals:
+            try:
+                notification_service.send_upcoming_charge_email(
+                    user=subscription.user,
+                    subscription=subscription,
+                    amount=subscription.plan.price,
+                    charge_date=subscription.next_billing_date,
+                )
+                logger.info(
+                    f"Sent upcoming charge reminder to {subscription.user.email}"
+                )
+                reminders_sent += 1
+            except Exception as e:
+                logger.error(
+                    f"Failed to send upcoming charge email to {subscription.user.email}: {str(e)}"
+                )
+
+        logger.info(f"Upcoming charge reminders sent: {reminders_sent}")
+        return {"reminders_sent": reminders_sent}
+
+    except Exception as exc:
+        logger.error(f"Error in send_upcoming_charge_reminders task: {str(exc)}")
+        raise
+
+
+@shared_task
+def send_final_grace_warnings():
+    """
+    Send final warning email 1 day before grace period expires.
+    Runs daily.
+    """
+    try:
+        now = timezone.now()
+
+        logger.info("Starting final grace period warning job...")
+
+        # Find subscriptions expiring tomorrow
+        expiring_tomorrow = Subscription.objects.filter(
+            status=SubscriptionChoices.PAST_DUE,
+            payment_failed_at__lte=now - timedelta(days=9),  # 9 days since failure
+            payment_failed_at__gt=now - timedelta(days=10),  # Not yet 10 days
+        )
+
+        warnings_sent = 0
+        for subscription in expiring_tomorrow:
+            try:
+                notification_service.send_final_grace_period_email(
+                    user=subscription.user, subscription=subscription
+                )
+                logger.info(f"Sent final grace warning to {subscription.user.email}")
+                warnings_sent += 1
+            except Exception as e:
+                logger.error(
+                    f"Failed to send final grace warning to {subscription.user.email}: {str(e)}"
+                )
+
+        logger.info(f"Final grace warnings sent: {warnings_sent}")
+        return {"warnings_sent": warnings_sent}
+
+    except Exception as exc:
+        logger.error(f"Error in send_final_grace_warnings task: {str(exc)}")
         raise

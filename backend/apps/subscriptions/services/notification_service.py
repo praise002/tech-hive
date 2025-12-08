@@ -1,6 +1,6 @@
-from decimal import Decimal
 import logging
 from datetime import timezone
+from decimal import Decimal
 
 from apps.accounts.emails import EmailThread
 from apps.subscriptions.models import PaymentTransaction, Subscription
@@ -63,9 +63,10 @@ class NotificationService:
             context=context,
         )
 
-    def send_trial_ending_soon_email(self, user, subscription: Subscription) -> bool:
+    def send_trial_ending_soon_email(
+        self, user, subscription: Subscription, days_remaining
+    ) -> bool:
         """Send email 2 days before trial ends."""
-        days_remaining = (subscription.trial_end - timezone.now()).days
 
         context = {
             "user": user,
@@ -311,3 +312,6 @@ class NotificationService:
             template_name="card_expiring.html",
             context=context,
         )
+
+
+notification_service = NotificationService()
