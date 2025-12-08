@@ -40,7 +40,7 @@ class PaystackService:
         Args:
             name: Plan name (e.g., "Premium Monthly")
             interval: Billing interval - hourly, daily, weekly, monthly, quarterly, biannually (every 6 months) and annually
-            amount: Amount in kobo
+            amount: Amount in naira (will be converted to kobo)
             description: Plan description (optional)
             currency: Currency code (default: NGN)
         Returns:
@@ -326,7 +326,7 @@ class PaystackService:
             {
                 "authorization_url": "https://checkout.paystack.com/nkdks46nymizns7",
                 "access_code": "nkdks46nymizns7",
-                "reference": "nms6uvr1pl"  # paystack or reference(not sure yet)
+                "reference": "nms6uvr1pl"  # REFRENCE NOT PASSED, PAYSTACK RETURNS A REFRENCE, REFRENCE PASSED NOT SURE IF PAYSTACK RETURNS MINE
             }
 
         Raises:
@@ -452,7 +452,7 @@ class PaystackService:
         try:
             amount_in_kobo = str(
                 amount * Decimal("100")
-            )  # in subunit of suported currency
+            )  # in subunit of supported currency
 
             payload = {
                 "authorization_code": authorization_code,
@@ -699,47 +699,6 @@ class PaystackService:
             logger.error(f"Error verifying webhook signature: {str(e)}")
             return False
 
-    def enable_subscription(self, subscription_code: str, email_token: str) -> bool:
-        """
-        Enable (reactivate) a subscription.
-
-        Args:
-            subscription_code: Paystack subscription code
-            email_token: Email token for the subscription
-
-        Returns:
-            True if successful
-        """
-        try:
-            payload = {
-                "code": subscription_code,
-                "token": email_token,
-            }
-
-            logger.info(f"Enabling subscription: {subscription_code}")
-
-            response = requests.post(
-                f"{self.base_url}/subscription/enable",
-                json=payload,
-                headers=self.headers,
-                timeout=30,
-            )
-
-            response.raise_for_status()
-            data = response.json()
-
-            if not data.get("status"):
-                error_message = data.get("message", "Failed to enable subscription")
-                logger.error(f"Failed to enable subscription: {error_message}")
-                raise Exception(error_message)
-
-            logger.info(f"Subscription enabled successfully: {subscription_code}")
-            return True
-
-        except Exception as e:
-            logger.error(f"Error enabling subscription: {str(e)}")
-            raise
-
     def generate_update_subscription_link(self, subscription_code: str) -> str:
         """
         Generate a link for a customer to update the card on a subscription.
@@ -785,5 +744,3 @@ class PaystackService:
 
 
 paystack_service = PaystackService()
-
-# TODO: Build the subscription_service for the newly written endpoints

@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 
+from celery.schedules import crontab
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -520,6 +521,29 @@ CACHES = {
         "TIMEOUT": 60 * 60 * 24 * 30,  # 30 days for summaries
     },
 }
+
+CELERY_BEAT_SCHEDULE = {
+    "retry-failed-payments": {
+        "task": "apps.subscriptions.tasks.retry_failed_payments",
+        "schedule": crontab(hour=14, minute=0),  # 2:00 PM daily
+    },
+    # Expire unconverted trials daily at midnight
+    "expire-trials": {
+        "task": "apps.subscriptions.tasks.expire_unconverted_trials",
+        "schedule": crontab(hour=0, minute=0),  # 12:00 AM daily
+    },
+    # Check and expire grace periods every 6 hours
+    "expire-grace-periods": {
+        "task": "apps.subscriptions.tasks.expire_grace_periods",
+        "schedule": crontab(hour="*/6", minute=0),  # Every 6 hours
+    },
+    # Send trial ending reminders daily at 10 AM
+    "trial-ending-reminders": {
+        "task": "apps.subscriptions.tasks.send_trial_ending_reminders",
+        "schedule": crontab(hour=10, minute=0),  # 10:00 AM daily
+    },
+}
+
 
 # Subscription
 PREMIUM_PRICE = 5000  # NGN

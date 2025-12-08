@@ -46,7 +46,7 @@ class SubscriptionService:
         """
         try:
             # Check for active subscription
-            active_subscription = user.subscription
+            active_subscription = Subscription.objects.get_active_subscription(user)
             if active_subscription:
                 raise ValueError("User already has an active subscription")
 
@@ -66,7 +66,7 @@ class SubscriptionService:
                 subscription = Subscription.objects.create(
                     user=user,
                     plan=plan,
-                    status="TRIALING",
+                    status=SubscriptionChoices.TRIALING,
                     start_date=now,
                     trial_start=trial_start,
                     trial_end=trial_end,
@@ -81,7 +81,6 @@ class SubscriptionService:
                     subscription=subscription,
                     reference=reference,
                     amount=plan.price,  # Store full price even for trial
-                    currency="NGN",
                     status=StatusChoices.SUCCESS,  # Trial is immediately "successful"
                     transaction_type=TransactionTypeChoices.SUBSCRIPTION,
                 )
@@ -99,82 +98,6 @@ class SubscriptionService:
         except Exception as e:
             logger.error(f"Error starting trial: {str(e)}")
             raise Exception(f"Failed to start trial: {str(e)}")
-
-    def create_subscription_after_trial(
-        self, trial_subscription: Subscription
-    ) -> Tuple[PaymentTransaction, str]:
-        """
-        Convert a trial subscription to a paid subscription.
-        Called when trial period ends and user wants to continue.
-
-        Args:
-            trial_subscription: The existing trial subscription
-
-        Returns:
-            (PaymentTransaction, authorization_url)
-
-        Raises:
-            ValueError: If subscription is not a valid trial
-        """
-        try:
-            if trial_subscription.status != "TRIALING":
-                raise ValueError("Subscription is not in trial state")
-
-            if not trial_subscription.is_trial:
-                raise ValueError("Subscription was not a trial")
-
-            now = timezone.now()
-            if now < trial_subscription.trial_end:
-                logger.warning(
-                    f"Trial has not yet ended for {trial_subscription.user.email}. "
-                    f"Proceeding with early conversion."
-                )
-
-            # Prepare metadata
-            metadata = {
-                "user_id": str(trial_subscription.user.id),
-                "user_email": trial_subscription.user.email,
-                "plan_id": str(trial_subscription.plan.id),
-                "plan_name": trial_subscription.plan.name,
-                "subscription_id": str(trial_subscription.id),
-            }
-
-            with transaction.atomic():
-                # Initialize Paystack transaction for the trial conversion
-                paystack_response = paystack_service.initialize_transaction(
-                    email=trial_subscription.user.email,
-                    amount=trial_subscription.plan.price,
-                    plan_code=trial_subscription.plan.paystack_plan_code,
-                    callback_url=f"{self._get_frontend_url()}/payment/callback",
-                    metadata=metadata,
-                    reference=trial_subscription.reference,
-                )
-                # Create payment transaction record
-                payment_transaction = PaymentTransaction.objects.create(
-                    user=trial_subscription.user,
-                    subscription=trial_subscription,
-                    reference=trial_subscription.reference,
-                    paystack_reference=paystack_response.get("reference"),
-                    amount=trial_subscription.plan.price,
-                    currency="NGN",
-                    transaction_type=TransactionTypeChoices.SUBSCRIPTION,
-                )
-
-                authorization_url = paystack_response.get("authorization_url", "")
-
-                logger.info(
-                    f"Trial conversion initiated for {trial_subscription.user.email}: "
-                    f"{trial_subscription.plan.name} (reference: {trial_subscription.reference})"
-                )
-
-                return payment_transaction, authorization_url
-
-        except ValueError as e:
-            logger.warning(f"Trial conversion failed: {str(e)}")
-            raise
-        except Exception as e:
-            logger.error(f"Error converting trial: {str(e)}")
-            raise Exception(f"Failed to convert trial: {str(e)}")
 
     def create_paid_subscription(
         self, user, plan: SubscriptionPlan, has_trial: bool = True
@@ -203,7 +126,7 @@ class SubscriptionService:
             # Generate unique reference
             reference = f"TXN_{uuid.uuid4().hex[:12].upper()}"
 
-            # Determine amount (0 for trial, full price otherwise)
+            # Determine amount
             amount = plan.price
 
             # Calculate dates
@@ -247,8 +170,7 @@ class SubscriptionService:
                     subscription=subscription,
                     reference=reference,
                     paystack_reference=paystack_response["reference"],
-                    amount=plan.price,  # Store full price even for trial
-                    currency="NGN",
+                    amount=plan.price,
                     transaction_type=TransactionTypeChoices.SUBSCRIPTION,
                 )
 
@@ -308,36 +230,22 @@ class SubscriptionService:
                     paystack_response=paystack_data,
                 )
 
-                # Delete subscription if exists
-                if payment_transaction.subscription:
-                    payment_transaction.subscription.delete()
-
                 logger.warning(f"Payment verification failed: {reference}")
                 return False, "Payment failed", None
 
-            # Payment successful
-            with transaction.atomic():
-                subscription = payment_transaction.subscription
+            # Mark transaction as successful
+            payment_transaction.mark_as_success(paystack_response=paystack_data)
 
-                # Update subscription with Paystack data
-                authorization = paystack_data.get("authorization", {})
-                customer = paystack_data.get("customer", {})
+            logger.info(
+                f"Payment verified successfully: {reference}. "
+                f"Waiting for webhook to activate subscription."
+            )
 
-                subscription.paystack_customer_code = customer.get("customer_code")
-                subscription.paystack_authorization_code = authorization.get(
-                    "authorization_code"
-                )
-                subscription.card_last4 = authorization.get("last4")
-                subscription.card_type = authorization.get("card_type")
-                subscription.card_bank = authorization.get("bank")
-                subscription.save()
-
-                # Mark transaction as successful
-                payment_transaction.mark_as_success(paystack_response=paystack_data)
-
-                logger.info(f"Subscription activated: {subscription.user.email}")
-
-                return True, "Subscription activated", subscription
+            return (
+                True,
+                "Payment successful. Activating subscription...",
+                payment_transaction,
+            )
 
         except Exception as e:
             logger.error(f"Error verifying subscription: {str(e)}")
@@ -348,7 +256,7 @@ class SubscriptionService:
     def process_successful_payment(
         self,
         subscription: Subscription,
-        transaction_data: Dict,
+        transaction_data: Optional[Dict],
         transaction_type: str = "RENEWAL",
         period_start: Optional[str] = None,
         period_end: Optional[str] = None,
@@ -388,8 +296,8 @@ class SubscriptionService:
 
                 # Update subscription
                 if subscription.status == SubscriptionChoices.TRIALING:
-                    # Trial ended, now active
-                    subscription.status = "ACTIVE"
+                    # Trial ended
+                    subscription.status = "EXPIRED"
                 elif subscription.status in ["PAST_DUE", "EXPIRED"]:
                     # Recovered from failed payment
                     subscription.status = "ACTIVE"
@@ -421,6 +329,8 @@ class SubscriptionService:
                 subscription.retry_count = 0
                 subscription.payment_failed_at = None
                 subscription.last_retry_at = None
+
+                subscription.mark_as_paid()
 
                 subscription.save()
 
@@ -524,8 +434,8 @@ class SubscriptionService:
                 payment_transaction = self.process_successful_payment(
                     subscription=subscription,
                     transaction_data=transaction_data,
-                    transaction_type="MANUAL_RETRY" if is_manual else "RETRY",
                 )
+                # TODO: NOTIFICATION
 
                 logger.info(f"Payment retry successful for {subscription.user.email}")
 
@@ -538,21 +448,27 @@ class SubscriptionService:
                 payment_transaction = PaymentTransaction.objects.create(
                     user=subscription.user,
                     subscription=subscription,
-                    reference=f"TXN_{uuid.uuid4().hex[:12].upper()}",
+                    reference=subscription.reference,
                     amount=subscription.plan.price,
-                    currency="NGN",
-                    status="FAILED",
-                    transaction_type="MANUAL_RETRY" if is_manual else "RETRY",
+                    status=StatusChoices.FAILED,
                     failed_at=timezone.now(),
                     failure_reason=failure_reason,
                     is_retry=True,
-                    retry_number=subscription.retry_count + 1,
                 )
-                # TODO: last_retry_at
 
                 # Increment retry count
                 if not is_manual:
                     subscription.increment_retry_count()
+                    logger.info(
+                        f"Automatic retry #{subscription.retry_number} for {subscription.user.email}"
+                    )
+                    # TODO: NOTIFICATION
+                else:
+                    logger.info(
+                        f"Manual retry for {subscription.user.email} "
+                        f"(subscription has {subscription.retry_count} auto retries)"
+                    )
+                    # TODO: NOTIFICATION
 
                 logger.warning(
                     f"Payment retry failed for {subscription.user.email}: {failure_reason}"
@@ -990,7 +906,7 @@ class SubscriptionService:
         Args:
             name: Plan name (e.g., "Premium Monthly")
             interval: Billing cycle - "monthly", "annually", "weekly", etc.
-            amount: Price in kobo
+            amount: Price in NAIRA (Will be converted to kobo)
             description: Optional description
             currency: Currency code (default: "NGN")
 
@@ -1027,13 +943,13 @@ class SubscriptionService:
                     f"Must be one of: {', '.join(valid_intervals)}"
                 )
 
-            logger.info(f"Creating plan: {name} - {amount}kobo/{interval}")
+            logger.info(f"Creating plan: {name} - {amount}/{interval}")
 
             # This is the source of truth - if Paystack fails, we don't create locally
             paystack_response = paystack_service.create_plan(
                 name=name,
                 interval=interval,
-                amount=amount,
+                amount=int(amount * Decimal("100")),
                 currency=currency,
                 description=description,
             )
@@ -1045,7 +961,7 @@ class SubscriptionService:
             with transaction.atomic():
                 plan = SubscriptionPlan.objects.create(
                     name=name,
-                    price=Decimal(amount) / Decimal("100"),
+                    price=Decimal(amount),
                     billing_cycle=interval,
                     description=description,
                     currency=currency,
@@ -1296,6 +1212,4 @@ subscription_service = SubscriptionService()
 # will get billed on the 28th of every subsequent month, for the duration of the plan
 # will get billed on the 28th of every subsequent month, for the duration of the plan
 
-# TODO: REVISIT THIS
-# MANUAL_RETRY, ETC
-# The right place toupdate transaction_type for PaymentTransaction
+#

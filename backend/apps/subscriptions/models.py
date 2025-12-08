@@ -29,7 +29,7 @@ class SubscriptionPlan(BaseModel):
         validators=[MinValueValidator(Decimal("0.01"))],
         help_text="Price in Naira (e.g., 5000.00)",
     )
-    features = models.TextField()
+    features = models.JSONField(default=dict)
     paystack_plan_code = models.CharField(max_length=50)
     billing_cycle = models.CharField(
         max_length=20, choices=BILLING_CYCLE_CHOICES, default="MONTHLY"
@@ -74,7 +74,7 @@ class Subscription(IsDeletedModel, BaseModel):
     )
 
     reference = models.CharField(
-        max_length=20,
+        max_length=30,
         help_text="Custom reference",
     )
 
@@ -190,7 +190,7 @@ class Subscription(IsDeletedModel, BaseModel):
     def is_trial(self):
         """Check if currently in trial period"""
         return (
-            self.status == "TRIALING"
+            self.status == SubscriptionChoices.TRIALING
             and self.trial_end
             and self.trial_end > timezone.now()
         )
@@ -235,7 +235,7 @@ class Subscription(IsDeletedModel, BaseModel):
 
     def mark_as_paid(self):
         """Mark subscription as paid (after successful payment)"""
-        self.status = "ACTIVE"
+        self.status = SubscriptionChoices.ACTIVE
         self.retry_count = 0
         self.payment_failed_at = None
         self.last_retry_at = None
@@ -243,7 +243,7 @@ class Subscription(IsDeletedModel, BaseModel):
 
     def mark_as_failed(self):
         """Mark payment as failed"""
-        self.status = "PAST_DUE"
+        self.status = SubscriptionChoices.PAST_DUE
         if not self.payment_failed_at:
             self.payment_failed_at = timezone.now()
         self.save()
@@ -284,14 +284,14 @@ class Subscription(IsDeletedModel, BaseModel):
 
     def expire(self):
         """Expire subscription (end of period or grace period)"""
-        self.status = "EXPIRED"
+        self.status = SubscriptionChoices.EXPIRED
         self.expires_at = timezone.now()
         self.auto_renew = False
         self.save()
 
     def reactivate(self):
         """Reactivate a cancelled subscription"""
-        if self.status != "CANCELLED":
+        if self.status != SubscriptionChoices.CANCELLED:
             raise ValueError("Can only reactivate cancelled subscriptions")
 
         if timezone.now() > self.current_period_end:
@@ -299,7 +299,7 @@ class Subscription(IsDeletedModel, BaseModel):
                 "Subscription period has ended. Must create new subscription."
             )
 
-        self.status = "ACTIVE"
+        self.status = SubscriptionChoices.ACTIVE
         self.cancelled_at = None
         self.cancel_at_period_end = False
         self.auto_renew = True
@@ -308,6 +308,7 @@ class Subscription(IsDeletedModel, BaseModel):
     class Meta:
         ordering = ["-created_at"]
         indexes = [
+            models.Index(fields=["user", "status"]),
             models.Index(fields=["paystack_subscription_code"]),
         ]
         constraints = [
@@ -351,13 +352,6 @@ class PaymentTransaction(IsDeletedModel, BaseModel):
     reference = models.CharField(
         max_length=100,
         unique=True,
-        help_text="Our internal reference (e.g., TXN_abc123xyz)",
-    )
-    paystack_reference = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-        help_text="Paystack's transaction reference",
     )
 
     # Payment details
@@ -493,12 +487,6 @@ class WebhookLog(BaseModel):
 
     def mark_as_failed(self, error_message):
         """Mark webhook processing as failed"""
-        self.error = error_message
-        self.processed = False
-        self.save()
-        self.error = error_message
-        self.processed = False
-        self.save()
         self.error = error_message
         self.processed = False
         self.save()

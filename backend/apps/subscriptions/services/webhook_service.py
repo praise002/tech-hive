@@ -6,6 +6,7 @@ from apps.subscriptions.models import Subscription, WebhookLog
 from django.db import transaction
 
 from backend.apps.subscriptions.choices import (
+    StatusChoices,
     SubscriptionChoices,
     TransactionTypeChoices,
 )
@@ -62,6 +63,7 @@ class WebhookService:
                     "subscription.not_renew": self.handle_subscription_not_renew,
                     "subscription.disable": self.handle_subscription_disable,
                     "invoice.payment_failed": self.handle_invoice_payment_failed,
+                    "subscription.expiring_cards": self.handle_subscription_expiring_cards,
                 }
 
                 handler = handler_map.get(event_type)
@@ -184,6 +186,7 @@ class WebhookService:
         try:
             customer = data.get("customer", {})
             customer_code = customer.get("customer_code")
+            reference = data.get("reference")
             metadata = customer.get("metadata")
             amount = Decimal(data.get("amount", 0)) / Decimal(
                 ("100")
@@ -205,24 +208,35 @@ class WebhookService:
                 return
 
             # Process as successful payment
-            # First subscription
-            if metadata is None:
-                payment_transaction = subscription_service.process_successful_payment(
-                    subscription=subscription,
-                    transaction_data=data,
-                    transaction_type=TransactionTypeChoices.SUBSCRIPTION,
+
+            has_previous_payments = subscription.payment_transactions.filter(
+                status=StatusChoices.SUCCESS
+            ).exists()
+
+            if has_previous_payments:
+                # This is a RENEWAL (subscription already had successful payments)
+                transaction_type = TransactionTypeChoices.RENEWAL
+                logger.info(
+                    f"Processing RENEWAL payment for {subscription.user.email} "
+                    f"(Reference: {reference})"
                 )
             else:
-                # on next payment
-                payment_transaction = subscription_service.process_successful_payment(
-                    subscription=subscription,
-                    transaction_data=data,
-                    transaction_type=TransactionTypeChoices.RENEWAL,
+                # This is a NEW SUBSCRIPTION (first successful payment)
+                transaction_type = TransactionTypeChoices.SUBSCRIPTION
+                logger.info(
+                    f"Processing FIRST payment for {subscription.user.email} "
+                    f"(Reference: {reference})"
                 )
-                # TODO: RETRY, MANUAL RETRY, REACTIVATION
+            # Process the payment with correct type
+            payment_transaction = subscription_service.process_successful_payment(
+                subscription=subscription,
+                transaction_data=data,
+                transaction_type=transaction_type,
+            )
 
             logger.info(
-                f"Charge successful for {subscription.user.email}: ₦{amount}, Card: ****{card_last4}"
+                f"Charge successful for {subscription.user.email}: ₦{amount}, "
+                f"Card: ****{card_last4}, Type: {transaction_type}"
             )
 
             try:
@@ -433,6 +447,7 @@ class WebhookService:
                 subscription_data = data.get("subscription", {})
                 next_payment_date = subscription_data.get("next_payment_date")
                 subscription_service.process_successful_payment(
+                    subscription=subscription,
                     period_start=period_start,
                     period_end=period_end,
                     next_billing_date=next_payment_date,
@@ -594,9 +609,7 @@ class WebhookService:
                 notification_service.send_payment_failed_email(
                     user=subscription.user, reason=reason
                 )
-                logger.info(
-                        f"Sent payment failed email to {subscription.user.email}"
-                    )
+                logger.info(f"Sent payment failed email to {subscription.user.email}")
             except Exception as e:
                 logger.error(
                     f"Failed to send payment failed email to {subscription.user.email}: {str(e)}"
