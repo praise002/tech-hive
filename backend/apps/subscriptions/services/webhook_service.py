@@ -4,14 +4,15 @@ from decimal import Decimal
 from typing import Dict
 
 from apps.subscriptions.models import Subscription, WebhookLog
+from apps.subscriptions.services import notification_service
 from django.db import transaction
+from django.utils.dateparse import parse_datetime
 
 from backend.apps.subscriptions.choices import (
     StatusChoices,
     SubscriptionChoices,
     TransactionTypeChoices,
 )
-from backend.apps.subscriptions.services import notification_service
 
 from .paystack_service import paystack_service
 from .subscription_service import subscription_service
@@ -105,6 +106,10 @@ class WebhookService:
             customer_code = customer.get("customer_code")
             customer_email = customer.get("email")
 
+            # Extract billing dates from Paystack
+            next_payment_date = data.get("next_payment_date")
+            created_at = data.get("created_at")
+
             # Find subscription by user email
             subscription = (
                 Subscription.objects.filter(
@@ -140,7 +145,21 @@ class WebhookService:
                 subscription.card_last4 = authorization.get("last4")
                 subscription.card_type = authorization.get("card_type")
                 subscription.card_bank = authorization.get("bank")
-                subscription.save()
+
+                # Set billing dates for first subscription
+                if created_at and next_payment_date:
+                    period_start = parse_datetime(created_at)
+                    period_end = parse_datetime(next_payment_date)
+                    subscription.current_period_start = period_start
+                    subscription.current_period_end = period_end
+                    subscription.next_billing_date = period_end
+                    subscription.save()
+
+                    logger.info(
+                        f"Set next billing date from Paystack for {customer_email}: "
+                        f"{subscription.current_period_start} to {subscription.current_period_end}"
+                        f"{subscription.next_billing_date}"
+                    )
 
                 logger.info(
                     f"Subscription created: {subscription_code} for {customer_email}"
@@ -805,4 +824,5 @@ class WebhookService:
 webhook_service = WebhookService()
 
 
+#
 #

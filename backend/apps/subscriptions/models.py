@@ -6,7 +6,7 @@ from apps.subscriptions.choices import (
     SubscriptionChoices,
     TransactionTypeChoices,
 )
-from apps.subscriptions.manager import SubscriptionManager
+from apps.subscriptions.manager import SubscriptionManager, SubscriptionPlanManager
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -36,6 +36,9 @@ class SubscriptionPlan(BaseModel):
     )
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
+    
+    objects = SubscriptionPlanManager()
+    
 
     @property
     def price_in_kobo(self):
@@ -69,7 +72,7 @@ class Subscription(IsDeletedModel, BaseModel):
     status = models.CharField(
         max_length=20,
         choices=SubscriptionChoices.choices,
-        default=SubscriptionChoices.TRAILING,
+        default=SubscriptionChoices.TRIALING,
         help_text="Current subscription status",
     )
 
@@ -352,6 +355,7 @@ class PaymentTransaction(IsDeletedModel, BaseModel):
     reference = models.CharField(
         max_length=100,
         unique=True,
+        help_text="Subscription refrence",
     )
 
     # Payment details
@@ -401,7 +405,6 @@ class PaymentTransaction(IsDeletedModel, BaseModel):
     class Meta:
         indexes = [
             models.Index(fields=["reference"]),
-            models.Index(fields=["paystack_reference"]),
         ]
 
     def __str__(self):

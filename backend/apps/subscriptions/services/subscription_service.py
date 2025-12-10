@@ -109,7 +109,7 @@ class SubscriptionService:
             raise Exception(f"Failed to start trial: {str(e)}")
 
     def create_paid_subscription(
-        self, user, plan: SubscriptionPlan, has_trial: bool = True
+        self, user, plan: SubscriptionPlan, 
     ) -> Tuple[Subscription, PaymentTransaction, str]:
         """
         Create an immediate paid subscription (no trial).
@@ -153,6 +153,7 @@ class SubscriptionService:
                 subscription = Subscription.objects.create(
                     user=user,
                     plan=plan,
+                    reference=reference,
                     start_date=now,
                     # No trial for immediate subscriptions
                     trial_start=None,
@@ -178,14 +179,13 @@ class SubscriptionService:
                     user=user,
                     subscription=subscription,
                     reference=reference,
-                    paystack_reference=paystack_response["reference"],
                     amount=plan.price,
                     transaction_type=TransactionTypeChoices.SUBSCRIPTION,
                 )
 
                 logger.info(
                     f"Subscription initialized for {user.email}: "
-                    f"{plan.name} (Trial: {has_trial})"
+                    f"{plan.name}"
                 )
 
                 return (
@@ -281,8 +281,6 @@ class SubscriptionService:
             period_start: Period start from Paystack (ISO format)
             period_end: Period end from Paystack (ISO format)
             next_billing_date: Next billing date from Paystack (ISO format)
-
-
         Returns:
             PaymentTransaction record
         """
@@ -292,24 +290,19 @@ class SubscriptionService:
                 payment_transaction = PaymentTransaction.objects.create(
                     user=subscription.user,
                     subscription=subscription,
-                    reference=f"TXN_{uuid.uuid4().hex[:12].upper()}",
-                    paystack_reference=transaction_data.get("reference"),
+                    reference=transaction_data.get("reference"),
                     amount=Decimal(transaction_data.get("amount", 0))
                     / Decimal("100"),  # Convert from kobo
                     currency=transaction_data.get("currency", "NGN"),
-                    status="SUCCESS",
+                    status=StatusChoices.SUCCESS,
                     transaction_type=transaction_type,
                     paid_at=timezone.now(),
                     paystack_response=transaction_data,
                 )
 
-                # Update subscription
-                if subscription.status == SubscriptionChoices.TRIALING:
-                    # Trial ended
-                    subscription.status = "EXPIRED"
-                elif subscription.status in ["PAST_DUE", "EXPIRED"]:
+                if subscription.status in ["PAST_DUE", "CANCELLED"]:
                     # Recovered from failed payment
-                    subscription.status = "ACTIVE"
+                    subscription.status = SubscriptionChoices.ACTIVE
 
                 # Update billing dates - use Paystack data if available (it is being returned in invoice.update)
                 if period_start and period_end and next_billing_date:
@@ -321,18 +314,7 @@ class SubscriptionService:
                         f"Updated billing periods from Paystack for {subscription.user.email}: "
                         f"{period_start} to {period_end}, next: {next_billing_date}"
                     )
-                else:
-                    # TODO: FIGURE OUT A WAY TO FIX LATER FOR FIRST SUBSCRIPTION
-                    # Fallback to manual calculation (for initial payments without invoice data and for first subscription that doesn't return invoice.update)
-                    now = timezone.now()
-                    subscription.current_period_start = now
-                    subscription.current_period_end = now + timedelta(days=30)
-                    subscription.next_billing_date = subscription.current_period_end
-
-                    logger.info(
-                        f"Using manual billing calculation for {subscription.user.email} "
-                        f"(no Paystack period data available)"
-                    )
+                
 
                 # Reset retry tracking
                 subscription.retry_count = 0
@@ -377,14 +359,13 @@ class SubscriptionService:
                 payment_transaction = PaymentTransaction.objects.create(
                     user=subscription.user,
                     subscription=subscription,
-                    reference=f"TXN_{uuid.uuid4().hex[:12].upper()}",
+                    reference=subscription.reference,
                     paystack_reference=(
                         transaction_data.get("reference") if transaction_data else None
                     ),
                     amount=subscription.plan.price,
-                    currency="NGN",
-                    status="FAILED",
-                    transaction_type="RENEWAL",
+                    status=StatusChoices.FAILED,
+                    transaction_type=TransactionTypeChoices.RENEWAL,
                     failed_at=timezone.now(),
                     failure_reason=failure_reason,
                     paystack_response=transaction_data,
@@ -444,7 +425,6 @@ class SubscriptionService:
                     subscription=subscription,
                     transaction_data=transaction_data,
                 )
-                # TODO: NOTIFICATION
 
                 logger.info(f"Payment retry successful for {subscription.user.email}")
 
@@ -471,13 +451,11 @@ class SubscriptionService:
                     logger.info(
                         f"Automatic retry #{subscription.retry_number} for {subscription.user.email}"
                     )
-                    # TODO: NOTIFICATION
                 else:
                     logger.info(
                         f"Manual retry for {subscription.user.email} "
                         f"(subscription has {subscription.retry_count} auto retries)"
                     )
-                    # TODO: NOTIFICATION
 
                 logger.warning(
                     f"Payment retry failed for {subscription.user.email}: {failure_reason}"
@@ -495,7 +473,7 @@ class SubscriptionService:
         self,
         subscription: Subscription,
         reason: Optional[str] = None,
-    ) -> bool:  # TODO: USER CAN CALL MANUALLY OR BE CALLED WHEN GRACE PERIOD EXCEEDED
+    ) -> bool:  # NOTE: USER CAN CALL MANUALLY OR BE CALLED WHEN GRACE PERIOD EXCEEDED
         """
         Cancel a subscription.
 
@@ -635,7 +613,11 @@ class SubscriptionService:
                 },
                 "trial": {
                     "is_trial": subscription.is_trial,
-                    "trial_start": subscription.trial_start,
+                    "trial_start": (
+                        subscription.trial_start.isoformat()
+                        if subscription.trial_start
+                        else None
+                    ),
                     "trial_end": (
                         subscription.trial_end.isoformat()
                         if subscription.trial_end
@@ -643,8 +625,16 @@ class SubscriptionService:
                     ),
                 },
                 "billing": {
-                    "current_period_start": subscription.current_period_start.isoformat(),
-                    "current_period_end": subscription.current_period_end.isoformat(),
+                    "current_period_start": (
+                        subscription.current_period_start.isoformat()
+                        if subscription.current_period_start
+                        else None
+                    ),
+                    "current_period_end": (
+                        subscription.current_period_end.isoformat()
+                        if subscription.current_period_end
+                        else None
+                    ),
                     "next_billing_date": (
                         subscription.next_billing_date.isoformat()
                         if subscription.next_billing_date
@@ -673,7 +663,7 @@ class SubscriptionService:
                     "reason": subscription.cancel_reason,
                 },
                 "payment_status": {
-                    "is_past_due": subscription.status == "PAST_DUE",
+                    "is_past_due": subscription.status == SubscriptionChoices.PAST_DUE,
                     "payment_failed_at": (
                         subscription.payment_failed_at.isoformat()
                         if subscription.payment_failed_at
@@ -1236,6 +1226,3 @@ subscription_service = SubscriptionService()
 # or between the 29th - 31st,
 # will get billed on the 28th of every subsequent month, for the duration of the plan
 # will get billed on the 28th of every subsequent month, for the duration of the plan
-
-#
-#

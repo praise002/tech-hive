@@ -1,5 +1,3 @@
-from apps.common.pagination import DefaultPagination
-from apps.common.responses import CustomResponse
 from apps.content.filters import EventFilter, JobFilter
 from apps.content.models import Category, Event, Job, Resource, Tool
 from apps.content.schema_examples import (
@@ -16,37 +14,12 @@ from apps.content.serializers import (
     ResourceSerializer,
     ToolSerializer,
 )
+from apps.general.views import CustomListView
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
-from rest_framework import status
 from rest_framework.filters import OrderingFilter, SearchFilter
-from rest_framework.generics import ListAPIView
 
 tags = ["Contents"]
-
-
-class CustomListView(ListAPIView):
-    pagination_class = DefaultPagination
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            paginated_data = self.get_paginated_response(serializer.data)
-            return CustomResponse.success(
-                message=f"{self.queryset.model._meta.verbose_name_plural} retrieved successfully.",
-                data=paginated_data.data,
-                status_code=status.HTTP_200_OK,
-            )
-
-        serializer = self.get_serializer(queryset, many=True)
-        return CustomResponse.success(
-            message=f"{self.queryset.model._meta.verbose_name_plural} retrieved successfully.",
-            data=serializer.data,
-            status_code=status.HTTP_200_OK,
-        )
 
 
 class CategoryGenericView(CustomListView):

@@ -86,18 +86,19 @@ def retry_failed_payments(self):
                         f"✗ Retry failed for {subscription.user.email}: {message}"
                     )
 
-                try:
-                    notification_service.send_retry_failed_email(
-                        user=subscription.user,
-                        subscription=subscription,
-                        retry_number=subscription.retry_count,
-                    )
-                    logger.info(
-                        f"Sent retry failed email to {subscription.user.email} "
-                        f"(retry #{subscription.retry_count})"
-                    )
-                except Exception as e:
-                    logger.error(f"Failed to send retry failed email: {str(e)}")
+                    try:
+                        # only notify on failure
+                        notification_service.send_retry_failed_email(
+                            user=subscription.user,
+                            subscription=subscription,
+                            retry_number=subscription.retry_count,
+                        )
+                        logger.info(
+                            f"Sent retry failed email to {subscription.user.email} "
+                            f"(retry #{subscription.retry_count})"
+                        )
+                    except Exception as e:
+                        logger.error(f"Failed to send retry failed email: {str(e)}")
 
         logger.info(
             f"Retry job completed: {retries_attempted} attempted, "

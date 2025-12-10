@@ -1,5 +1,6 @@
 from apps.accounts.emails import SendEmail
 from apps.common.errors import ErrorCode
+from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
 from apps.general.models import Newsletter, SiteDetail
 from apps.general.schema_examples import (
@@ -13,13 +14,37 @@ from apps.general.serializer import (
     NewsletterSerializer,
     SiteDetailSerializer,
 )
-from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, RetrieveAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 tags = ["General"]
+
+
+class CustomListView(ListAPIView):
+    pagination_class = DefaultPagination
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            paginated_data = self.get_paginated_response(serializer.data)
+            return CustomResponse.success(
+                message=f"{self.queryset.model._meta.verbose_name_plural} retrieved successfully.",
+                data=paginated_data.data,
+                status_code=status.HTTP_200_OK,
+            )
+
+        serializer = self.get_serializer(queryset, many=True)
+        return CustomResponse.success(
+            message=f"{self.queryset.model._meta.verbose_name_plural} retrieved successfully.",
+            data=serializer.data,
+            status_code=status.HTTP_200_OK,
+        )
 
 
 class NewsletterView(APIView):

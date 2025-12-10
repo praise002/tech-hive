@@ -2,6 +2,11 @@ from django.db import models
 from django.utils import timezone
 
 
+class SubscriptionPlanManager(models.Manager):
+    def active(self):
+        return self.filter(is_active=True)
+    
+
 class SubscriptionManager(models.Manager):
     """Custom manager for Subscription model"""
     
@@ -54,3 +59,4 @@ class SubscriptionManager(models.Manager):
         return self.filter(
             status="CANCELLED", cancel_at_period_end=True, current_period_end__lte=now
         )
+        

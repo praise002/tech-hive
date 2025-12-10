@@ -266,7 +266,6 @@ class NotificationService:
         )
 
     # ===== Card Update Email =====
-
     def send_card_updated_email(self, user, subscription: Subscription) -> bool:
         """Send email when payment card is updated."""
         context = {
