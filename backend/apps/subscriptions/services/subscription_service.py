@@ -212,7 +212,7 @@ class SubscriptionService:
             reference: Transaction reference
 
         Returns:
-            (success: bool, message: str, subscription: Optional[Subscription])
+            (success: bool, message: str, payment_transaction: PaymentTransaction)
         """
         try:
             # Find payment transaction
@@ -552,6 +552,7 @@ class SubscriptionService:
                         logger.warning(
                             f"Failed to enable Paystack subscription: {str(e)}"
                         )
+                        return False
 
                 # Reactivate subscription
                 subscription.reactivate()

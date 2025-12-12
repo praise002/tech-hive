@@ -8,7 +8,7 @@ from apps.subscriptions.services import notification_service
 from django.db import transaction
 from django.utils.dateparse import parse_datetime
 
-from backend.apps.subscriptions.choices import (
+from apps.subscriptions.choices import (
     StatusChoices,
     SubscriptionChoices,
     TransactionTypeChoices,

@@ -1,10 +1,17 @@
 from apps.accounts.schema_examples import UNAUTHORIZED_USER_RESPONSE
 from apps.common.errors import ErrorCode
 from apps.common.schema_examples import ERR_RESPONSE_STATUS, SUCCESS_RESPONSE_STATUS
-from apps.common.serializers import ErrorDataResponseSerializer, ErrorResponseSerializer, SuccessDataResponseSerializer
+from apps.common.serializers import (
+    ErrorDataResponseSerializer,
+    ErrorResponseSerializer,
+    SuccessDataResponseSerializer,
+)
 from apps.subscriptions.serializers import (
+    CancelResponseSerializer,
+    RetryPaymentResponseSerializer,
     SubscriptionDetailSerializer,
     SubscriptionPlanSerializer,
+    UpdateCardResponseSerializer,
 )
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse
 
@@ -148,4 +155,132 @@ SUBSCRIBE_TO_PREMIUM_RESPONSE_EXAMPLE = {
     ),
     401: UNAUTHORIZED_USER_RESPONSE,
     422: ErrorDataResponseSerializer,
+}
+
+
+CANCEL_SUBSCRIPTION_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        response=CancelResponseSerializer,
+        description="Subscription cancelled successfully. Access will remain active until the end of the current billing period.",
+        examples=[
+            OpenApiExample(
+                name="Cancellation Successful",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Subscription cancelled successfully. Your access will continue until the end of the current period.",
+                    "data": {"access_until": "2026-01-12"},
+                },
+            )
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    404: OpenApiResponse(
+        response=ErrorResponseSerializer,
+        description="The user does not have an active subscription to cancel.",
+        examples=[
+            OpenApiExample(
+                name="No Active Subscription",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "No active subscription found",
+                    "err_code": ErrorCode.NON_EXISTENT,
+                },
+            )
+        ],
+    ),
+    422: ErrorDataResponseSerializer,  # NOTE; AND ErrorResponse
+}
+
+
+REACTIVATE_SUBSCRIPTION_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        response=SuccessDataResponseSerializer,
+        description="Subscription reactivated successfully. The response returns the full, updated subscription details.",
+        examples=[
+            OpenApiExample(
+                name="Reactivation Successful",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Subscription reactivated successfully",
+                    # The data field contains the full subscription object
+                    "data": {
+                        **SUBSCRIPTION_DETAIL_EXAMPLE,
+                        "status": "ACTIVE",  # Show the new status
+                        "cancel_at_period_end": False,
+                        "cancelled_at": None,
+                    },
+                },
+            )
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    404: OpenApiResponse(
+        response=ErrorResponseSerializer,
+        description="The user does not have a cancelled subscription that can be reactivated.",
+        examples=[
+            OpenApiExample(
+                name="No Cancelled Subscription Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "No cancelled subscription found to reactivate.",
+                    "err_code": ErrorCode.NON_EXISTENT,
+                },
+            )
+        ],
+    ),
+    422: ErrorResponseSerializer,
+}
+
+
+RETRY_PAYMENT_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        response=RetryPaymentResponseSerializer,
+        description="Payment retry was successful and the subscription is now active.",
+        examples=[
+            OpenApiExample(
+                name="Payment Retry Successful",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Payment retry successful. Your subscription is now active.",
+                    "data": {
+                        "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+                        "reference": "T123456789",
+                        "amount": "5000.00",
+                        "status": "SUCCESS",
+                        "transaction_type": "RENEWAL",
+                        "initiated_at": "2025-12-12T10:00:00Z",
+                        "paid_at": "2025-12-12T10:00:05Z",
+                        "failed_at": None,
+                        "failure_reason": None,
+                    },
+                },
+            )
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    404: ErrorResponseSerializer,
+    422: ErrorResponseSerializer,
+}
+
+
+UPDATE_PAYMENT_METHOD_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        response=UpdateCardResponseSerializer,
+        description="A link to update the payment method was successfully generated.",
+        examples=[
+            OpenApiExample(
+                name="Update Link Generated",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Visit this link to update your payment card",
+                    "data": {
+                        "update_link": "https://paystack.com/manage/update/card/link"
+                    },
+                },
+            )
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    404: ErrorResponseSerializer,
+    422: ErrorResponseSerializer,
 }

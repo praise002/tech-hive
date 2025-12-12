@@ -111,7 +111,7 @@ class SubscribeRequestSerializer(serializers.Serializer):
             raise serializers.ValidationError("Invalid or inactive plan")
 
 
-class CancelSubscriptionSerializer(serializers.Serializer):
+class CancelRequestSerializer(serializers.Serializer):
     """
     Write-only serializer for cancelling a subscription.
     Includes an optional reason for cancellation.
@@ -120,3 +120,34 @@ class CancelSubscriptionSerializer(serializers.Serializer):
     reason = serializers.CharField(
         required=False, allow_blank=True, max_length=500, write_only=True
     )
+
+
+class CancelResponseSerializer(serializers.Serializer):
+    """Serializer for cancel response"""
+
+    status = serializers.CharField()
+    message = serializers.CharField()
+    data = serializers.DictField()
+
+
+class PaymentCallbackResponseSerializer(serializers.Serializer):
+    """Serializer for payment callback response"""
+
+    status = serializers.CharField()
+    message = serializers.CharField()
+
+
+class RetryPaymentResponseSerializer(serializers.Serializer):
+    """Serializer for retry payment response"""
+
+    status = serializers.CharField()
+    message = serializers.CharField()
+    data = serializers.DictField()
+
+
+class UpdateCardResponseSerializer(serializers.Serializer):
+    """Serializer for update card response"""
+
+    status = serializers.CharField()
+    message = serializers.CharField()
+    data = serializers.DictField()
