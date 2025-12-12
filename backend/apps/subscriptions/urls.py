@@ -17,7 +17,7 @@ urlpatterns = [
     ),
     path(
         "premium/",
-        views.SubscriptionCreateAPIView.as_view(),
+        views.SubscribeToPremiumView.as_view(),
     ),
     path(
         "premium/",

@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from .models import PaymentTransaction, Subscription, SubscriptionPlan
@@ -80,6 +81,7 @@ class SubscriptionDetailSerializer(serializers.ModelSerializer):
             "card_details",
         ]
 
+    @extend_schema_field(serializers.DictField)
     def get_card_details(self, obj):
         """
         Groups card information into a nested object.
@@ -94,22 +96,19 @@ class SubscriptionDetailSerializer(serializers.ModelSerializer):
         return None
 
 
-class CreateSubscriptionSerializer(serializers.Serializer):
-    """
-    Write-only serializer for creating a new subscription.
-    Validates the plan_id and an optional trial flag.
-    """
+class SubscribeRequestSerializer(serializers.Serializer):
+    """Serializer for subscribe request"""
 
-    plan_id = serializers.UUIDField(write_only=True)
-    start_trial = serializers.BooleanField(default=False, write_only=True)
+    plan_id = serializers.UUIDField(required=True)
+    start_trial = serializers.BooleanField(default=False)
 
     def validate_plan_id(self, value):
-        """
-        Check that the plan exists and is active.
-        """
-        if not SubscriptionPlan.objects.filter(id=value, is_active=True).exists():
-            raise serializers.ValidationError("A valid, active plan ID is required.")
-        return value
+        """Validate plan exists and is active"""
+        try:
+            plan = SubscriptionPlan.objects.get(id=value, is_active=True)
+            return plan
+        except SubscriptionPlan.DoesNotExist:
+            raise serializers.ValidationError("Invalid or inactive plan")
 
 
 class CancelSubscriptionSerializer(serializers.Serializer):

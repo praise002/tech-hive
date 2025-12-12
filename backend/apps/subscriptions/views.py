@@ -1,10 +1,15 @@
 import logging
 
-from amqp import NotFound
 from apps.common.errors import ErrorCode
 from apps.common.exceptions import NotFoundError
 from apps.common.responses import CustomResponse
 from apps.general.views import CustomListView
+from apps.subscriptions.schema_examples import (
+    PAYMENT_HISTORY_RESPONSE_EXAMPLE,
+    SUBSCRIBE_TO_PREMIUM_RESPONSE_EXAMPLE,
+    SUBSCRIPTION_DETAIL_RESPONSE_EXAMPLE,
+    SUBSCRIPTION_PLAN_RESPONSE_EXAMPLE,
+)
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, permissions, status
 from rest_framework.views import APIView
@@ -12,8 +17,8 @@ from rest_framework.views import APIView
 from .models import PaymentTransaction, Subscription, SubscriptionPlan
 from .serializers import (
     CancelSubscriptionSerializer,
-    CreateSubscriptionSerializer,
     PaymentTransactionSerializer,
+    SubscribeRequestSerializer,
     SubscriptionDetailSerializer,
     SubscriptionPlanSerializer,
 )
@@ -39,7 +44,7 @@ class SubscriptionPlanListView(generics.ListAPIView):
 
         serializer = self.get_serializer(queryset, many=True)
         return CustomResponse.success(
-            message="Subscription plans retrieved successfully.",
+            message="Subscription plans retrieved successfully",
             data=serializer.data,
             status_code=status.HTTP_200_OK,
         )
@@ -48,7 +53,7 @@ class SubscriptionPlanListView(generics.ListAPIView):
         summary="List all subscription plans",
         description="Retrieve a list of all active subscription plans available for purchase",
         tags=tags,
-        # responses=SUBSCRIPTION_PLAN_RESPONSE_EXAMPLE,
+        responses=SUBSCRIPTION_PLAN_RESPONSE_EXAMPLE,
     )
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -104,7 +109,7 @@ class SubscriptionDetailView(generics.RetrieveAPIView):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return CustomResponse.success(
-            message="Subscription retrieved successfully.",
+            message="Subscription retrieved successfully",
             data=serializer.data,
             status_code=status.HTTP_200_OK,
         )
@@ -113,7 +118,7 @@ class SubscriptionDetailView(generics.RetrieveAPIView):
         summary="Retrieve subscription",
         description="Retrieve the detailed status of the current user's subscription.",
         tags=tags,
-        # responses=SUBSCRIPTION_DETAIL_RESPONSE_EXAMPLE,
+        responses=SUBSCRIPTION_DETAIL_RESPONSE_EXAMPLE,
     )
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -124,6 +129,7 @@ class PaymentHistoryListView(CustomListView):
     Provides a paginated list of the user's payment history.
     """
 
+    queryset = PaymentTransaction.objects.all()
     serializer_class = PaymentTransactionSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -140,30 +146,43 @@ class PaymentHistoryListView(CustomListView):
         summary="List Payment History",
         description="Retrieve a paginated list of the current user's payment transactions.",
         tags=tags,
-        # responses=PAYMENT_HISTORY_RESPONSE_EXAMPLE,
+        # We are merging the PAYMENT_HISTORY_RESPONSE_EXAMPLE dictionary (which contains the 401)
+        # with a dictionary that tells spectacular to generate the default for the 200 response.
+        responses={
+            200: PaymentTransactionSerializer(many=True),
+            **PAYMENT_HISTORY_RESPONSE_EXAMPLE,
+        },
     )
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
 
-class SubscriptionCreateAPIView(APIView):
+class SubscribeToPremiumView(APIView):
     """
     Creates a new trial or paid subscription for a user.
     """
 
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = CreateSubscriptionSerializer
+    serializer_class = SubscribeRequestSerializer
 
+    @extend_schema(
+        summary="Create Subscription",
+        description="Create a new trial or paid subscription for the authenticated user.",
+        tags=tags,
+        request=SubscribeRequestSerializer,
+        responses=SUBSCRIBE_TO_PREMIUM_RESPONSE_EXAMPLE,
+    )
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
 
-        plan = SubscriptionPlan.objects.get(id=validated_data["plan_id"])
+        plan = validated_data["plan_id"]
+        start_trial = validated_data["start_trial"]
         user = request.user
 
         try:
-            if validated_data["start_trial"]:
+            if start_trial:
                 subscription, _ = subscription_service.start_trial(user=user, plan=plan)
                 response_data = {
                     "status": subscription.status,
@@ -199,7 +218,7 @@ class SubscriptionCreateAPIView(APIView):
         except Exception as e:
             logger.error(f"Subscription creation failed for {user.email}: {e}")
             return CustomResponse.error(
-                message="An unexpected error occurred.",
+                message="Failed to create subscription. Please try again.",
                 err_code=ErrorCode.BAD_REQUEST,
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -249,6 +268,9 @@ class SubscriptionCancelAPIView(APIView):
 #             )
 
 
+# # Note: Other views like Reactivate, Retry Payment, Update Card, and Webhook
+# # would follow a similar pattern, using APIView for custom actions and
+# # calling the appropriate methods from `subscription_service` and `webhook_service`.
 # # Note: Other views like Reactivate, Retry Payment, Update Card, and Webhook
 # # would follow a similar pattern, using APIView for custom actions and
 # # calling the appropriate methods from `subscription_service` and `webhook_service`.
