@@ -1,0 +1,53 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Payment Successful{% endblock %}
+
+{% block content %}
+<h1>✓ Payment Received</h1>
+
+<p>Hi {{ user.first_name|default:"there" }},</p>
+
+<p>We've successfully received your payment for Tech Hive Premium. Thank you!</p>
+
+<div class="success-box">
+    <p style="margin: 0; font-weight: 600; color: #2ea316;">Payment Successful</p>
+    <p class="text-small" style="margin: 10px 0 0 0;">
+        Transaction completed on {{ transaction.paid_at|date:"F j, Y" }} at {{ transaction.paid_at|time:"g:i A" }}
+    </p>
+</div>
+
+<h2>Payment Details</h2>
+<table class="details-table">
+    <tr>
+        <td>Amount Paid</td>
+        <td>₦{{ transaction.amount|floatformat:2 }}</td>
+    </tr>
+    <tr>
+        <td>Reference</td>
+        <td>{{ transaction.reference }}</td>
+    </tr>
+    <tr>
+        <td>Plan</td>
+        <td>{{ subscription.plan.name }}</td>
+    </tr>
+    <tr>
+        <td>Next Billing Date</td>
+        <td>{{ subscription.next_billing_date|date:"F j, Y" }}</td>
+    </tr>
+    {% if subscription.card_last4 %}
+    <tr>
+        <td>Payment Method</td>
+        <td>{{ subscription.card_type|upper }} •••• {{ subscription.card_last4 }}</td>
+    </tr>
+    {% endif %}
+</table>
+
+<div style="text-align: center;">
+    <a href="{{ frontend_url }}/dashboard/billing" class="btn btn-secondary">View Receipt →</a>
+</div>
+
+<p style="margin-top: 30px;">
+    Best regards,<br>
+    <strong>The Tech Hive Team</strong>
+</p>
+{% endblock %}

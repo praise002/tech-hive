@@ -1,0 +1,63 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Welcome to Tech Hive Premium Trial{% endblock %}
+
+{% block content %}
+<h1>🎉 Welcome to Tech Hive Premium!</h1>
+
+<p>Hi {{ user.first_name|default:"there" }},</p>
+
+<p>Your 7-day free trial has started! You now have full access to all Tech Hive Premium features.</p>
+
+<div class="success-box">
+    <p style="margin: 0; font-weight: 600; color: #2ea316;">✓ Trial Active</p>
+    <p class="text-small" style="margin: 10px 0 0 0;">Your trial will expire on {{ subscription.trial_end|date:"F j, Y" }} at {{ subscription.trial_end|time:"g:i A" }}</p>
+</div>
+
+<h2>What's Included:</h2>
+<table style="width: 100%; margin: 20px 0;">
+    <tr>
+        <td style="padding: 10px 0;">
+            <span style="color: #2ea316; font-size: 18px;">✓</span>
+            <strong style="margin-left: 10px;">Unlimited AI Queries</strong>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 10px 0;">
+            <span style="color: #2ea316; font-size: 18px;">✓</span>
+            <strong style="margin-left: 10px;">Advanced Analytics</strong>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 10px 0;">
+            <span style="color: #2ea316; font-size: 18px;">✓</span>
+            <strong style="margin-left: 10px;">Priority Support</strong>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 10px 0;">
+            <span style="color: #2ea316; font-size: 18px;">✓</span>
+            <strong style="margin-left: 10px;">Collaboration Tools</strong>
+        </td>
+    </tr>
+</table>
+
+<div style="text-align: center;">
+    <a href="{{ frontend_url }}/dashboard" class="btn btn-primary">Start Exploring →</a>
+</div>
+
+<div class="info-box">
+    <p style="margin: 0; font-weight: 600;">📅 Trial Period</p>
+    <p class="text-small" style="margin: 10px 0 0 0;">
+        Your trial ends on {{ subscription.trial_end|date:"F j, Y" }}. We'll send you a reminder 2 days before it expires. 
+        You won't be charged unless you choose to continue after the trial.
+    </p>
+</div>
+
+<p>Need help getting started? Check out our <a href="{{ frontend_url }}/docs" style="color: #ee6649;">documentation</a> or reach out to our support team.</p>
+
+<p style="margin-top: 30px;">
+    Best regards,<br>
+    <strong>The Tech Hive Team</strong>
+</p>
+{% endblock %}

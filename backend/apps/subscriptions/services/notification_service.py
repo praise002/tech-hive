@@ -59,7 +59,7 @@ class NotificationService:
         return self.send_email(
             subject="Welcome to Tech Hive Premium - Your 7-Day Trial Has Started!",
             recipient=user.email,
-            template_name="trial_started.html",
+            template_name="emails/trial_started.html",
             context=context,
         )
 
@@ -77,7 +77,7 @@ class NotificationService:
         return self.send_email(
             subject=f"Your Tech Hive Premium Trial Ends in {days_remaining} Days",
             recipient=user.email,
-            template_name="trial_ending_soon.html",
+            template_name="emails/trial_ending_soon.html",
             context=context,
         )
 
@@ -94,7 +94,7 @@ class NotificationService:
         return self.send_email(
             subject="Payment Successful - Tech Hive Premium",
             recipient=user.email,
-            template_name="payment_success.html",
+            template_name="emails/payment_success.html",
             context=context,
         )
 
@@ -112,7 +112,7 @@ class NotificationService:
         return self.send_email(
             subject="Payment Failed - Action Required",
             recipient=user.email,
-            template_name="payment_failed.html",
+            template_name="emails/payment_failed.html",
             context=context,
         )
 
@@ -129,7 +129,7 @@ class NotificationService:
         return self.send_email(
             subject="Payment Retry Scheduled - Tech Hive Premium",
             recipient=user.email,
-            template_name="retry_scheduled.html",
+            template_name="emails/retry_scheduled.html",
             context=context,
         )
 
@@ -149,7 +149,7 @@ class NotificationService:
         return self.send_email(
             subject=f"Payment Retry #{retry_number} Failed",
             recipient=user.email,
-            template_name="retry_failed.html",
+            template_name="emails/retry_failed.html",
             context=context,
         )
 
@@ -164,7 +164,7 @@ class NotificationService:
         return self.send_email(
             subject="Final Notice - Update Payment Method",
             recipient=user.email,
-            template_name="final_grace_period.html",
+            template_name="emails/final_grace_period.html",
             context=context,
         )
 
@@ -178,7 +178,7 @@ class NotificationService:
         return self.send_email(
             subject="Your Tech Hive Premium Subscription Has Expired",
             recipient=user.email,
-            template_name="subscription_expired.html",
+            template_name="emails/subscription_expired.html",
             context=context,
         )
 
@@ -197,7 +197,7 @@ class NotificationService:
         return self.send_email(
             subject="Welcome to Tech Hive Premium!",
             recipient=user.email,
-            template_name="subscription_created.html",
+            template_name="emails/subscription_created.html",
             context=context,
         )
 
@@ -228,7 +228,7 @@ class NotificationService:
         return self.send_email(
             subject="Upcoming Charge: Your Tech Hive Premium Renewal",
             recipient=user.email,
-            template_name="upcoming_charge.html",
+            template_name="emails/upcoming_charge.html",
             context=context,
         )
 
@@ -247,7 +247,7 @@ class NotificationService:
         return self.send_email(
             subject="Subscription Cancelled - Tech Hive Premium",
             recipient=user.email,
-            template_name="cancellation_confirmed.html",
+            template_name="emails/cancellation_confirmed.html",
             context=context,
         )
 
@@ -261,7 +261,7 @@ class NotificationService:
         return self.send_email(
             subject="Welcome Back! Subscription Reactivated",
             recipient=user.email,
-            template_name="reactivation_success.html",
+            template_name="emails/reactivation_success.html",
             context=context,
         )
 
@@ -276,7 +276,7 @@ class NotificationService:
         return self.send_email(
             subject="Payment Method Updated Successfully",
             recipient=user.email,
-            template_name="card_updated.html",
+            template_name="emails/card_updated.html",
             context=context,
         )
 
@@ -308,7 +308,7 @@ class NotificationService:
         return self.send_email(
             subject="Action Required: Your Payment Card is Expiring Soon",
             recipient=user.email,
-            template_name="card_expiring.html",
+            template_name="emails/card_expiring.html",
             context=context,
         )
 

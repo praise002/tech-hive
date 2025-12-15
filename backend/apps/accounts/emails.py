@@ -36,7 +36,7 @@ class SendEmail:
             "name": user.full_name,
             "otp": otp,
         }
-        message = render_to_string("verify_email_request.html", context)
+        message = render_to_string("emails/verify_email_request.html", context)
         email_message = EmailMessage(subject=subject, body=message, to=[email])
         email_message.content_subtype = "html"
         EmailThread(email_message).start()
@@ -48,7 +48,7 @@ class SendEmail:
             "frontend_url": settings.FRONTEND_URL,
             "name": user.full_name,
         }
-        message = render_to_string("welcome_message.html", context)
+        message = render_to_string("emails/welcome_message.html", context)
         email_message = EmailMessage(subject=subject, body=message, to=[user.email])
         email_message.content_subtype = "html"
         EmailThread(email_message).start()
@@ -56,7 +56,7 @@ class SendEmail:
     @staticmethod
     def subscription(request, email):
         subject = "Newsletter Subscription Confirmation"
-        message = render_to_string("newsletter_subscribe_message.html")
+        message = render_to_string("emails/newsletter_subscribe_message.html")
         email_message = EmailMessage(subject=subject, body=message, to=[email])
         email_message.content_subtype = "html"
         EmailThread(email_message).start()
@@ -71,7 +71,7 @@ class SendEmail:
             "name": user.full_name,
             "otp": otp,
         }
-        message = render_to_string("password_reset_email.html", context)
+        message = render_to_string("emails/password_reset_email.html", context)
         email_message = EmailMessage(subject=subject, body=message, to=[email])
         email_message.content_subtype = "html"
         EmailThread(email_message).start()
@@ -83,7 +83,7 @@ class SendEmail:
             "frontend_url": settings.FRONTEND_URL,
             "name": user.full_name,
         }
-        message = render_to_string("password_reset_success.html", context)
+        message = render_to_string("emails/password_reset_success.html", context)
         email_message = EmailMessage(subject=subject, body=message, to=[user.email])
         email_message.content_subtype = "html"
         EmailThread(email_message).start()

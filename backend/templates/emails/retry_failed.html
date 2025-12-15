@@ -1,0 +1,47 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Payment Retry Failed{% endblock %}
+
+{% block content %}
+<h1>❌ Payment Retry #{{ retry_number }} Failed</h1>
+
+<p>Hi {{ user.first_name|default:"there" }},</p>
+
+<p>Our attempt to charge your payment method was unsuccessful.</p>
+
+<div class="warning-box">
+    <p style="margin: 0; font-weight: 600; color: #d67917;">Retry #{{ retry_number }} Failed</p>
+    <p class="text-small" style="margin: 10px 0 0 0;">
+        {% if remaining_retries > 0 %}
+            {{ remaining_retries }} automatic retry attempt{{ remaining_retries|pluralize }} remaining
+        {% else %}
+            No automatic retries remaining
+        {% endif %}
+    </p>
+</div>
+
+{% if remaining_retries > 0 %}
+<p>We'll try again in a few days, but we recommend updating your payment method now to avoid service interruption.</p>
+{% else %}
+<div class="error-box">
+    <p style="margin: 0; font-weight: 600; color: #a32816;">⚠️ Final Notice</p>
+    <p class="text-small" style="margin: 10px 0 0 0;">
+        Your subscription will be cancelled if payment isn't successful within the grace period.
+    </p>
+</div>
+<p><strong>Please update your payment method immediately to keep your premium access.</strong></p>
+{% endif %}
+
+<div style="text-align: center;">
+    <a href="{{ frontend_url }}/dashboard/subscription" class="btn btn-primary">Update Payment Method →</a>
+</div>
+
+<p style="margin-top: 30px;">
+    Need assistance? <a href="{{ frontend_url }}/support" style="color: #ee6649;">Contact support</a>
+</p>
+
+<p style="margin-top: 20px;">
+    Best regards,<br>
+    <strong>The Tech Hive Team</strong>
+</p>
+{% endblock %}
