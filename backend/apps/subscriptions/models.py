@@ -36,9 +36,8 @@ class SubscriptionPlan(BaseModel):
     )
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
-    
+
     objects = SubscriptionPlanManager()
-    
 
     @property
     def price_in_kobo(self):
@@ -72,7 +71,8 @@ class Subscription(IsDeletedModel, BaseModel):
     status = models.CharField(
         max_length=20,
         choices=SubscriptionChoices.choices,
-        default=SubscriptionChoices.TRIALING,
+        null=True,
+        default=None,
         help_text="Current subscription status",
     )
 
@@ -492,4 +492,5 @@ class WebhookLog(BaseModel):
         """Mark webhook processing as failed"""
         self.error = error_message
         self.processed = False
+        self.save()
         self.save()

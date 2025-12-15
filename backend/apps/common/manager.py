@@ -24,7 +24,7 @@ class IsDeletedQuerySet(GetOrNoneQuerySet):
             return super().delete()
         else:
             # Perform a soft delete
-            return self.update(is_deleted=True, deleted=timezone.now())
+            return self.update(is_deleted=True, deleted_at=timezone.now())
         
 class IsDeletedManager(GetOrNoneManager):
     def get_queryset(self):

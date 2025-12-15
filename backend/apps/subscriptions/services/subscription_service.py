@@ -15,7 +15,7 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
-
+from django.core.exceptions import ValidationError
 from .notification_service import notification_service
 from .paystack_service import paystack_service
 
@@ -46,6 +46,9 @@ class SubscriptionService:
             ValueError: If user already has subscription or is not eligible for trial
         """
         try:
+            # Validate the plan
+            plan.full_clean()  # This will raise ValidationError if price is invalid
+            
             # Check for active subscription
             active_subscription = Subscription.objects.get_active_subscription(user)
             if active_subscription:
@@ -104,12 +107,16 @@ class SubscriptionService:
         except ValueError as e:
             logger.warning(f"Trial creation failed: {str(e)}")
             raise
+        except ValidationError as e:
+            raise ValueError(f"Invalid plan: {e}")
         except Exception as e:
             logger.error(f"Error starting trial: {str(e)}")
             raise Exception(f"Failed to start trial: {str(e)}")
 
     def create_paid_subscription(
-        self, user, plan: SubscriptionPlan, 
+        self,
+        user,
+        plan: SubscriptionPlan,
     ) -> Tuple[Subscription, PaymentTransaction, str]:
         """
         Create an immediate paid subscription (no trial).
@@ -128,13 +135,13 @@ class SubscriptionService:
             Exception: If Paystack initialization fails
         """
         try:
-            existing = user.subscription
-            if existing and existing.is_active:
+            plan.full_clean()  # This will raise ValidationError if price is invalid
+            existing = Subscription.objects.get_active_subscription(user)
+            if existing:
                 raise ValueError("User already has an active subscription")
 
             # Generate unique reference
             reference = f"TXN_{uuid.uuid4().hex[:12].upper()}"
-
             # Determine amount
             amount = plan.price
 
@@ -184,8 +191,7 @@ class SubscriptionService:
                 )
 
                 logger.info(
-                    f"Subscription initialized for {user.email}: "
-                    f"{plan.name}"
+                    f"Subscription initialized for {user.email}: " f"{plan.name}"
                 )
 
                 return (
@@ -197,6 +203,9 @@ class SubscriptionService:
         except ValueError as e:
             logger.warning(f"Subscription creation failed: {str(e)}")
             raise
+        
+        except ValidationError as e:
+            raise ValueError(f"Invalid plan: {e}")
 
         except Exception as e:
             logger.error(f"Error creating subscription: {str(e)}")
@@ -314,7 +323,6 @@ class SubscriptionService:
                         f"Updated billing periods from Paystack for {subscription.user.email}: "
                         f"{period_start} to {period_end}, next: {next_billing_date}"
                     )
-                
 
                 # Reset retry tracking
                 subscription.retry_count = 0

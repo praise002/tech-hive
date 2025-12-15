@@ -46,7 +46,16 @@ class WebhookService:
                 logger.error("Invalid webhook signature")
                 return False
 
-            # Log webhook
+            # Idempotency
+            existing_log = WebhookLog.objects.filter(
+                event_type=event_type,
+                payload=payload,  
+                processed=True
+            ).first()
+            if existing_log:
+                logger.info(f"Webhook already processed: {event_type}")
+                return True
+                        
             webhook_log = WebhookLog.objects.create(
                 event_type=event_type,
                 payload=payload,
@@ -228,7 +237,6 @@ class WebhookService:
                 return
 
             # Process as successful payment
-
             has_previous_payments = subscription.payment_transactions.filter(
                 status=StatusChoices.SUCCESS
             ).exists()
