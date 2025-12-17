@@ -22,6 +22,7 @@ class SubscriptionPlan(BaseModel):
     name = models.CharField(
         max_length=20, help_text="Plan name (e.g., 'Premium Monthly')"
     )
+    currency = models.CharField(max_length=3, default="NGN", help_text="Currency code")
     description = models.TextField(blank=True, help_text="Plan description for display")
     price = models.DecimalField(
         max_digits=6,

@@ -454,7 +454,7 @@ class SubscriptionService:
                 if not is_manual:
                     subscription.increment_retry_count()
                     logger.info(
-                        f"Automatic retry #{subscription.retry_number} for {subscription.user.email}"
+                        f"Automatic retry #{subscription.retry_count} for {subscription.user.email}"
                     )
                 else:
                     logger.info(
@@ -581,10 +581,11 @@ class SubscriptionService:
         except Exception as e:
             logger.error(f"Error reactivating subscription: {str(e)}")
             raise
-
+    
+    # NOTE: METHOD NOT USED
     def expire_subscription(self, subscription: Subscription) -> bool:
         """
-        Expire a subscription (end of period or grace period).
+        Expire a subscription (end of period when received by webhook).
 
         Args:
             subscription: Subscription to expire
@@ -602,11 +603,12 @@ class SubscriptionService:
         except Exception as e:
             logger.error(f"Error expiring subscription: {str(e)}")
             raise
-
+    
+    # NOTE: NOT USED YET
     def get_subscription_status(self, user) -> Dict:
         """Get detailed subscription status for a user."""
         try:
-            subscription = user.subscription
+            subscription = Subscription.objects.get_active_subscription(user)
 
             return {
                 "has_subscription": True,
@@ -754,6 +756,7 @@ class SubscriptionService:
             )
             raise Exception(f"Failed to generate payment update link: {str(e)}")
 
+    # NOTE: NOT USED YET
     def sync_plans_from_paystack(self) -> Dict[str, Any]:
         """
         Sync all subscription plans from Paystack to local database.
@@ -1005,6 +1008,7 @@ class SubscriptionService:
             logger.error(f"Error creating plan '{name}': {str(e)}")
             raise Exception(f"Failed to create plan: {str(e)}")
 
+    # NOTE: NOT USED YET
     def update_plan(
         self, plan: SubscriptionPlan, data: Dict[str, Any]
     ) -> SubscriptionPlan:
@@ -1124,6 +1128,7 @@ class SubscriptionService:
             logger.error(f"Error updating plan '{plan.name}': {str(e)}")
             raise Exception(f"Failed to update plan: {str(e)}")
 
+    # NOTE: NOT USED YET
     def fetch_subscription_details(self, subscription: Subscription) -> Dict[str, Any]:
         """
         Fetch latest subscription details from Paystack.
