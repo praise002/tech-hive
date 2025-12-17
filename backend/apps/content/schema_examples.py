@@ -362,11 +362,7 @@ EVENTS_RESPONSE_EXAMPLE = {
         examples=[
             OpenApiExample(
                 name="Success Response",
-                value={
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Events retrieved successfully.",
-                    "data": EVENTS_DATA_EXAMPLE,
-                },
+                value=[EVENT_EXAMPLE],
             ),
         ],
     ),
@@ -379,11 +375,7 @@ RESOURCES_RESPONSE_EXAMPLE = {
         examples=[
             OpenApiExample(
                 name="Success Response",
-                value={
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Resources retrieved successfully.",
-                    "data": RESOURCES_DATA_EXAMPLE,
-                },
+                value=[RESOURCE_EXAMPLE],
             ),
         ],
     ),
@@ -396,11 +388,7 @@ TOOLS_RESPONSE_EXAMPLE = {
         examples=[
             OpenApiExample(
                 name="Success Response",
-                value={
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Tools retrieved successfully.",
-                    "data": TOOLS_DATA_EXAMPLE,
-                },
+                value=[TOOL_EXAMPLE],
             ),
         ],
     ),
@@ -413,11 +401,7 @@ JOB_RESPONSE_EXAMPLE = {
         examples=[
             OpenApiExample(
                 name="Success Response",
-                value={
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Jobs retrieved successfully.",
-                    "data": JOBS_DATA_EXAMPLE,
-                },
+                value=[JOB_EXAMPLE],
             ),
         ],
     ),

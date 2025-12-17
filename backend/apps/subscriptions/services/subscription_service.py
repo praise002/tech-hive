@@ -368,9 +368,6 @@ class SubscriptionService:
                     user=subscription.user,
                     subscription=subscription,
                     reference=subscription.reference,
-                    paystack_reference=(
-                        transaction_data.get("reference") if transaction_data else None
-                    ),
                     amount=subscription.plan.price,
                     status=StatusChoices.FAILED,
                     transaction_type=TransactionTypeChoices.RENEWAL,

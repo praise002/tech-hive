@@ -1,3 +1,4 @@
+from datetime import timedelta
 from decimal import Decimal
 from unittest.mock import patch
 
@@ -423,7 +424,182 @@ class VerifyAndActivateSubscriptionTestCase(APITestCase):
         self.assertIsNone(self.subscription.status)
 
 
-# python manage.py test apps.subscriptions.tests.VerifyAndActivateSubscriptionTestCase
-# python manage.py test apps.subscriptions.tests.CreatePaidSubscriptionTestCase
-# python manage.py test apps.subscriptions.tests.VerifyAndActivateSubscriptionTestCase
-# python manage.py test apps.subscriptions.tests.StartTrialTestCase
+class ProcessSuccessfulPaymentTestCase(APITestCase):
+    """Test cases for subscription_service.process_successful_payment()"""
+
+    def setUp(self):
+        """Set up test data"""
+        self.plan = SubscriptionPlan.objects.create(
+            name="Premium Monthly",
+            price=Decimal("5000.00"),
+            billing_cycle="MONTHLY",
+            paystack_plan_code="PLN_test123",
+            features={"max_articles": 100},
+        )
+        self.user = TestUtil.verified_user()
+
+    def test_process_successful_payment_first_payment(self):
+        """Test successful first payment processing"""
+
+        # Create subscription without status (first payment)
+        subscription = Subscription.objects.create(
+            user=self.user,
+            plan=self.plan,
+            start_date=timezone.now(),
+            reference="TXN_FIRST123",
+        )
+
+        # Mock transaction data from Paystack
+        transaction_data = {
+            "reference": "pay_test123",
+            "amount": 500000,  # 5000 NGN in kobo
+            "currency": "NGN",
+            "status": "success",
+        }
+
+        # period_end, start, next is handles manually in handle_subscription_create
+        payment_transaction = subscription_service.process_successful_payment(
+            subscription=subscription,
+            transaction_data=transaction_data,
+            transaction_type=TransactionTypeChoices.SUBSCRIPTION,
+        )
+
+        # Verify subscription was activated
+        subscription.refresh_from_db()
+        self.assertEqual(subscription.status, SubscriptionChoices.ACTIVE)
+
+        # Verify retry tracking was reset
+        self.assertEqual(subscription.retry_count, 0)
+        self.assertIsNone(subscription.payment_failed_at)
+        self.assertIsNone(subscription.last_retry_at)
+
+        # Verify transaction was created
+        self.assertEqual(payment_transaction.user, self.user)
+        self.assertEqual(payment_transaction.subscription, subscription)
+        self.assertEqual(payment_transaction.amount, Decimal("5000.00"))
+        self.assertEqual(payment_transaction.status, StatusChoices.SUCCESS)
+        self.assertIsNotNone(payment_transaction.paid_at)
+
+    def test_process_successful_payment_recovery_from_past_due(self):
+        """Test processing successful payment after failure"""
+        subscription = Subscription.objects.create(
+            user=self.user,
+            plan=self.plan,
+            reference="TXN_test123",
+            status=SubscriptionChoices.PAST_DUE,
+            payment_failed_at=timezone.now() - timedelta(days=3),
+            retry_count=2,
+        )
+
+        transaction_data = {
+            "reference": "TXN_retry",
+            "amount": 500000,
+            "currency": "NGN",
+            "status": "success",
+        }
+
+        subscription_service.process_successful_payment(
+            subscription=subscription,
+            transaction_data=transaction_data,
+            transaction_type="RENEWAL",
+        )
+
+        # Verify subscription recovered
+        subscription.refresh_from_db()
+        self.assertEqual(subscription.status, SubscriptionChoices.ACTIVE)
+        self.assertEqual(subscription.retry_count, 0)
+        self.assertIsNone(subscription.payment_failed_at)
+        self.assertIsNone(subscription.last_retry_at)
+
+
+class ProcessFailedPaymentTestCase(APITestCase):
+    """Test cases for subscription_service.process_failed_payment()"""
+
+    def setUp(self):
+        """Set up test data"""
+        self.plan = SubscriptionPlan.objects.create(
+            name="Premium Monthly",
+            price=Decimal("5000.00"),
+            billing_cycle="MONTHLY",
+            paystack_plan_code="PLN_test123",
+            features={"max_articles": 100},
+        )
+        self.user = TestUtil.verified_user()
+
+    def test_process_failed_payment(self):
+        """Test processing failed payment"""
+        subscription = Subscription.objects.create(
+            user=self.user,
+            plan=self.plan,
+            reference="TXN_test123",
+            status=SubscriptionChoices.ACTIVE,
+        )
+
+        transaction = subscription_service.process_failed_payment(
+            subscription=subscription, failure_reason="Insufficient funds"
+        )
+
+        # Verify transaction created
+        self.assertIsNotNone(transaction)
+        self.assertEqual(transaction.status, StatusChoices.FAILED)
+        self.assertEqual(transaction.failure_reason, "Insufficient funds")
+
+        # Verify subscription marked as PAST_DUE
+        subscription.refresh_from_db()
+        self.assertEqual(subscription.status, SubscriptionChoices.PAST_DUE)
+        self.assertIsNotNone(subscription.payment_failed_at)
+
+
+class RetryPaymentTestCase(APITestCase):
+    """Test cases for subscription_service.retry_payment()"""
+
+    def setUp(self):
+        """Set up test data"""
+        self.plan = SubscriptionPlan.objects.create(
+            name="Premium Monthly",
+            price=Decimal("5000.00"),
+            billing_cycle="MONTHLY",
+            paystack_plan_code="PLN_test123",
+            features={"max_articles": 100},
+        )
+        self.user = TestUtil.verified_user()
+
+    @patch("apps.subscriptions.services.subscription_service.paystack_service")
+    def test_retry_payment_success_manual(self, mock_paystack):
+        """Test manual retry success"""
+        subscription = Subscription.objects.create(
+            user=self.user,
+            plan=self.plan,
+            reference="TXN_test123",
+            status=SubscriptionChoices.PAST_DUE,
+            payment_failed_at=timezone.now() - timedelta(days=3),
+            retry_count=1,
+            paystack_authorization_code="AUTH_test123",
+        )
+
+        # Mock successful charge
+        mock_paystack.charge_authorization.return_value = {
+            "status": True,
+            "data": {
+                "reference": "pay_retry_success",
+                "amount": 500000,
+                "currency": "NGN",
+                "status": "success",
+            },
+        }
+
+        success, message, transaction = subscription_service.retry_payment(
+            subscription=subscription, is_manual=True
+        )
+        print(success, message, transaction)
+
+        # Verify success
+        self.assertTrue(success)
+        self.assertEqual(message, "Payment successful")
+        self.assertIsNotNone(transaction)
+
+        # Verify subscription recovered
+        subscription.refresh_from_db()
+        self.assertEqual(subscription.status, SubscriptionChoices.ACTIVE)
+        # Manual retry doesn't increment retry_count - it is also reset to 0 by process_successful_payment
+        self.assertEqual(subscription.retry_count, 0)

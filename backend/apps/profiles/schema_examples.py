@@ -576,14 +576,7 @@ USERNAMES_RESPONSE_EXAMPLE = {
         description="Usernames retrieved successfully",
         response=UserSerializer,
         examples=[
-            OpenApiExample(
-                name="Success Response",
-                value={
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Usernames retrieved successfully.",
-                    "data": USERNAMES_DATA_EXAMPLE,
-                },
-            ),
+            OpenApiExample(name="Success Response", value=USERNAMES_DATA_EXAMPLE),
         ],
     ),
 }
