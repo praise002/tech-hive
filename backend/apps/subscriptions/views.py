@@ -216,7 +216,7 @@ class SubscribeToPremiumView(APIView):
 
         except ValueError as e:
             # Catches eligibility errors (e.g., not eligible for trial)
-            CustomResponse.error(
+            return CustomResponse.error(
                 message=str(e),
                 err_code=ErrorCode.BAD_REQUEST,
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -316,14 +316,17 @@ class PaymentCallbackView(APIView):
                 reference
             )
 
-            return CustomResponse.success(
-                message=message,
-                status_code=(
-                    status.HTTP_200_OK
-                    if success
-                    else status.HTTP_422_UNPROCESSABLE_ENTITY
-                ),
-            )
+            if success:
+                return CustomResponse.success(
+                    message=message,
+                    status_code=status.HTTP_200_OK,
+                )
+            else:
+                return CustomResponse.error(
+                    message=message,
+                    err_code=ErrorCode.BAD_REQUEST,
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                )
 
         except Exception as e:
             logger.error(f"Error in payment callback: {str(e)}")

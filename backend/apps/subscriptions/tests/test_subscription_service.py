@@ -603,8 +603,8 @@ class RetryPaymentTestCase(APITestCase):
         self.assertEqual(subscription.status, SubscriptionChoices.ACTIVE)
         # Reset on success - it is also reset to 0 by process_successful_payment
         self.assertEqual(subscription.retry_count, 0)
-        
-    @patch('apps.subscriptions.services.subscription_service.paystack_service')
+
+    @patch("apps.subscriptions.services.subscription_service.paystack_service")
     def test_retry_payment_success_automatic(self, mock_paystack):
         """Test automatic retry success"""
         subscription = Subscription.objects.create(
@@ -614,31 +614,27 @@ class RetryPaymentTestCase(APITestCase):
             status=SubscriptionChoices.PAST_DUE,
             payment_failed_at=timezone.now() - timedelta(days=3),
             retry_count=1,
-            paystack_authorization_code="AUTH_test123"
+            paystack_authorization_code="AUTH_test123",
         )
-        
+
         # Mock successful charge
         mock_paystack.charge_authorization.return_value = {
-            'status': True,
-            'data': {
-                'reference': 'TXN_retry',
-                'amount': 500000,
-                'status': 'success'
-            }
+            "status": True,
+            "data": {"reference": "TXN_retry", "amount": 500000, "status": "success"},
         }
-        
+
         success, _, _ = subscription_service.retry_payment(
             subscription=subscription,
         )
-        
+
         # Verify success
         self.assertTrue(success)
-        
+
         # Reset on success
         subscription.refresh_from_db()
         self.assertEqual(subscription.retry_count, 0)
 
-    @patch('apps.subscriptions.services.subscription_service.paystack_service')
+    @patch("apps.subscriptions.services.subscription_service.paystack_service")
     def test_retry_payment_failure(self, mock_paystack):
         """Test retry failure"""
         subscription = Subscription.objects.create(
@@ -648,30 +644,30 @@ class RetryPaymentTestCase(APITestCase):
             status=SubscriptionChoices.PAST_DUE,
             payment_failed_at=timezone.now() - timedelta(days=3),
             retry_count=1,
-            paystack_authorization_code="AUTH_test123"
+            paystack_authorization_code="AUTH_test123",
         )
-        
+
         # Mock failed charge
         mock_paystack.charge_authorization.return_value = {
-            'status': False,
-            'message': 'Insufficient funds'
+            "status": False,
+            "message": "Insufficient funds",
         }
-        
+
         success, message, transaction = subscription_service.retry_payment(
             subscription=subscription,
         )
-        
+
         # Verify failure
         self.assertFalse(success)
-        self.assertEqual(message, 'Insufficient funds')
+        self.assertEqual(message, "Insufficient funds")
         self.assertIsNotNone(transaction)
         self.assertEqual(transaction.status, StatusChoices.FAILED)
-        
+
         # Verify retry_count incremented
         subscription.refresh_from_db()
         self.assertEqual(subscription.retry_count, 2)
-        
-    @patch('apps.subscriptions.services.subscription_service.paystack_service')
+
+    @patch("apps.subscriptions.services.subscription_service.paystack_service")
     def test_retry_payment_not_past_due(self, mock_paystack):
         """Test retry fails if subscription not PAST_DUE"""
         subscription = Subscription.objects.create(
@@ -679,22 +675,21 @@ class RetryPaymentTestCase(APITestCase):
             plan=self.plan,
             reference="TXN_test123",
             status=SubscriptionChoices.ACTIVE,
-            paystack_authorization_code="AUTH_test123"
+            paystack_authorization_code="AUTH_test123",
         )
-        
+
         success, message, transaction = subscription_service.retry_payment(
-            subscription=subscription,
-            is_manual=True
+            subscription=subscription, is_manual=True
         )
-        
+
         # Verify failure
         self.assertFalse(success)
         self.assertIn("not past due", message.lower())
         self.assertIsNone(transaction)
         # Paystack should not be called
         mock_paystack.charge_authorization.assert_not_called()
-        
-    @patch('apps.subscriptions.services.subscription_service.paystack_service')
+
+    @patch("apps.subscriptions.services.subscription_service.paystack_service")
     def test_retry_payment_no_authorization_code(self, mock_paystack):
         """Test retry fails if no saved payment method"""
         subscription = Subscription.objects.create(
@@ -703,19 +698,19 @@ class RetryPaymentTestCase(APITestCase):
             reference="TXN_test123",
             status=SubscriptionChoices.PAST_DUE,
             payment_failed_at=timezone.now() - timedelta(days=3),
-            paystack_authorization_code=None
+            paystack_authorization_code=None,
         )
-        
+
         success, message, transaction = subscription_service.retry_payment(
-            subscription=subscription,
-            is_manual=True
+            subscription=subscription, is_manual=True
         )
-        
+
         # Verify failure
         self.assertFalse(success)
         self.assertIn("No saved payment method", message)
         self.assertIsNone(transaction)
-        
+
+
 class CancelSubscriptionTestCase(APITestCase):
     """Test cases for subscription_service.cancel_subscription()"""
 
@@ -729,8 +724,8 @@ class CancelSubscriptionTestCase(APITestCase):
             features={"max_articles": 100},
         )
         self.user = TestUtil.verified_user()
-        
-    @patch('apps.subscriptions.services.subscription_service.paystack_service')
+
+    @patch("apps.subscriptions.services.subscription_service.paystack_service")
     @patch("apps.subscriptions.services.subscription_service.notification_service")
     def test_cancel_subscription_success(self, mock_notification, mock_paystack):
         """Test successful cancellation"""
@@ -741,20 +736,19 @@ class CancelSubscriptionTestCase(APITestCase):
             status=SubscriptionChoices.ACTIVE,
             paystack_subscription_code="SUB_test123",
             paystack_email_token="token123",
-            current_period_end=timezone.now() + timedelta(days=20)
+            current_period_end=timezone.now() + timedelta(days=20),
         )
-        
+
         # Mock Paystack disable success
         mock_paystack.disable_subscription.return_value = True
-        
+
         success = subscription_service.cancel_subscription(
-            subscription=subscription,
-            reason="Too expensive"
+            subscription=subscription, reason="Too expensive"
         )
-        
+
         # Verify success
         self.assertTrue(success)
-        
+
         # Verify subscription cancelled
         subscription.refresh_from_db()
         self.assertEqual(subscription.status, SubscriptionChoices.CANCELLED)
@@ -762,15 +756,14 @@ class CancelSubscriptionTestCase(APITestCase):
         self.assertEqual(subscription.cancel_reason, "Too expensive")
         self.assertTrue(subscription.cancel_at_period_end)
         self.assertFalse(subscription.auto_renew)
-        
+
         # Verify Paystack called
         mock_paystack.disable_subscription.assert_called_once_with(
-            subscription_code="SUB_test123",
-            email_token="token123"
+            subscription_code="SUB_test123", email_token="token123"
         )
         mock_notification.send_cancellation_confirmed_email.assert_called_once()
-        
-    @patch('apps.subscriptions.services.subscription_service.paystack_service')
+
+    @patch("apps.subscriptions.services.subscription_service.paystack_service")
     def test_cancel_subscription_paystack_fails(self, mock_paystack):
         """Test cancellation when Paystack fails"""
         subscription = Subscription.objects.create(
@@ -779,27 +772,25 @@ class CancelSubscriptionTestCase(APITestCase):
             reference="TXN_test123",
             status=SubscriptionChoices.ACTIVE,
             paystack_subscription_code="SUB_test123",
-            paystack_email_token="token123"
+            paystack_email_token="token123",
         )
-        
+
         # Mock Paystack disable failure
         mock_paystack.disable_subscription.side_effect = Exception("Paystack error")
-        
-        success = subscription_service.cancel_subscription(
-            subscription=subscription
-        )
-        
+
+        success = subscription_service.cancel_subscription(subscription=subscription)
+
         # Verify failure
         self.assertFalse(success)
-        
+
         # Verify subscription not cancelled
         subscription.refresh_from_db()
         self.assertEqual(subscription.status, SubscriptionChoices.ACTIVE)
         self.assertIsNone(subscription.cancelled_at)
-        
+
     def test_cancel_subscription_already_cancelled(self):
         """Test cancelling already cancelled subscription raises error"""
-        
+
         subscription = Subscription.objects.create(
             user=self.user,
             plan=self.plan,
@@ -811,10 +802,10 @@ class CancelSubscriptionTestCase(APITestCase):
             subscription_service.cancel_subscription(subscription=subscription)
 
         self.assertIn("already cancelled", str(context.exception))
-        
+
     def test_cancel_subscription_expired(self):
         """Test cancelling expired subscription raises error"""
-        
+
         subscription = Subscription.objects.create(
             user=self.user,
             plan=self.plan,
@@ -826,7 +817,8 @@ class CancelSubscriptionTestCase(APITestCase):
             subscription_service.cancel_subscription(subscription=subscription)
 
         self.assertIn("expired", str(context.exception).lower())
-        
+
+
 class ReactivateSubscriptionTestCase(APITestCase):
     """Test cases for subscription_service.reactivate_subscription()"""
 
@@ -840,8 +832,8 @@ class ReactivateSubscriptionTestCase(APITestCase):
             features={"max_articles": 100},
         )
         self.user = TestUtil.verified_user()
-        
-    @patch('apps.subscriptions.services.subscription_service.paystack_service')
+
+    @patch("apps.subscriptions.services.subscription_service.paystack_service")
     @patch("apps.subscriptions.services.subscription_service.notification_service")
     def test_reactivate_subscription_success(self, mock_notification, mock_paystack):
         """Test successful reactivation"""
@@ -854,42 +846,42 @@ class ReactivateSubscriptionTestCase(APITestCase):
             cancel_at_period_end=True,
             current_period_end=timezone.now() + timedelta(days=20),
             paystack_subscription_code="SUB_test123",
-            paystack_email_token="token123"
+            paystack_email_token="token123",
         )
-        
+
         # Mock Paystack enable success
         mock_paystack.enable_subscription.return_value = True
-        
+
         success = subscription_service.reactivate_subscription(subscription)
-        
+
         # Verify success
         self.assertTrue(success)
-        
+
         # Verify subscription reactivated
         subscription.refresh_from_db()
         self.assertEqual(subscription.status, SubscriptionChoices.ACTIVE)
         self.assertIsNone(subscription.cancelled_at)
         self.assertFalse(subscription.cancel_at_period_end)
         self.assertTrue(subscription.auto_renew)
-        
+
         mock_notification.send_reactivation_email.assert_called_once()
-        
-    @patch('apps.subscriptions.services.subscription_service.paystack_service')
+
+    @patch("apps.subscriptions.services.subscription_service.paystack_service")
     def test_reactivate_subscription_not_cancelled(self, mock_paystack):
         """Test reactivation fails if not cancelled"""
         subscription = Subscription.objects.create(
             user=self.user,
             plan=self.plan,
             reference="TXN_test123",
-            status=SubscriptionChoices.ACTIVE
+            status=SubscriptionChoices.ACTIVE,
         )
-        
+
         with self.assertRaises(ValueError) as context:
             subscription_service.reactivate_subscription(subscription)
-        
+
         self.assertIn("only reactivate cancelled", str(context.exception).lower())
-        
-    @patch('apps.subscriptions.services.subscription_service.paystack_service')
+
+    @patch("apps.subscriptions.services.subscription_service.paystack_service")
     def test_reactivate_subscription_period_ended(self, mock_paystack):
         """Test reactivation fails if period ended"""
         subscription = Subscription.objects.create(
@@ -898,18 +890,18 @@ class ReactivateSubscriptionTestCase(APITestCase):
             reference="TXN_test123",
             status=SubscriptionChoices.CANCELLED,
             cancelled_at=timezone.now() - timedelta(days=10),
-            current_period_end=timezone.now() - timedelta(days=1)
+            current_period_end=timezone.now() - timedelta(days=1),
         )
-        
+
         with self.assertRaises(ValueError) as context:
             subscription_service.reactivate_subscription(subscription)
-        
+
         self.assertIn("period has ended", str(context.exception).lower())
-        
+
     @patch("apps.subscriptions.services.subscription_service.paystack_service")
     def test_reactivate_subscription_paystack_fails(self, mock_paystack):
         """Test reactivation when Paystack enable fails"""
-        
+
         subscription = Subscription.objects.create(
             user=self.user,
             plan=self.plan,
@@ -926,11 +918,12 @@ class ReactivateSubscriptionTestCase(APITestCase):
         result = subscription_service.reactivate_subscription(subscription=subscription)
 
         self.assertFalse(result)
-        
+
         # Subscription should NOT be reactivated in our DB
         subscription.refresh_from_db()
         self.assertEqual(subscription.status, SubscriptionChoices.CANCELLED)
-        
+
+
 class ExpireSubscriptionTestCase(APITestCase):
     """Test cases for subscription_service.expire_subscription()"""
 
@@ -944,10 +937,10 @@ class ExpireSubscriptionTestCase(APITestCase):
             features={"max_articles": 100},
         )
         self.user = TestUtil.verified_user()
-        
+
     def test_expire_subscription_success(self):
         """Test successful subscription expiration"""
-        
+
         subscription = Subscription.objects.create(
             user=self.user,
             plan=self.plan,
@@ -965,7 +958,8 @@ class ExpireSubscriptionTestCase(APITestCase):
         self.assertEqual(subscription.status, SubscriptionChoices.EXPIRED)
         self.assertIsNotNone(subscription.expires_at)
         self.assertFalse(subscription.auto_renew)
-        
+
+
 class GetSubscriptionStatusTestCase(APITestCase):
     """Test cases for subscription_service.get_subscription_status()"""
 
@@ -979,7 +973,7 @@ class GetSubscriptionStatusTestCase(APITestCase):
             features={"max_articles": 100},
         )
         self.user = TestUtil.verified_user()
-        
+
     def test_get_subscription_status_with_subscription(self):
         """Test getting status for user with subscription"""
         Subscription.objects.create(
@@ -993,20 +987,20 @@ class GetSubscriptionStatusTestCase(APITestCase):
             next_billing_date=timezone.now() + timedelta(days=25),
             card_last4="4081",
             card_type="visa",
-            card_bank="Access Bank"
+            card_bank="Access Bank",
         )
-        
+
         status_data = subscription_service.get_subscription_status(self.user)
-        
+
         # Verify response structure
-        self.assertTrue(status_data['has_subscription'])
-        self.assertTrue(status_data['is_premium'])
-        self.assertEqual(status_data['status'], SubscriptionChoices.ACTIVE)
-        self.assertIsNotNone(status_data['plan'])
-        self.assertIsNotNone(status_data['billing'])
-        self.assertIsNotNone(status_data['card'])
-        self.assertIsNotNone(status_data['payment_status'])
-        
+        self.assertTrue(status_data["has_subscription"])
+        self.assertTrue(status_data["is_premium"])
+        self.assertEqual(status_data["status"], SubscriptionChoices.ACTIVE)
+        self.assertIsNotNone(status_data["plan"])
+        self.assertIsNotNone(status_data["billing"])
+        self.assertIsNotNone(status_data["card"])
+        self.assertIsNotNone(status_data["payment_status"])
+
     def test_get_subscription_status_without_subscription(self):
         """Test getting status for user without subscription"""
         status = subscription_service.get_subscription_status(self.user)
@@ -1015,7 +1009,8 @@ class GetSubscriptionStatusTestCase(APITestCase):
         self.assertFalse(status["has_subscription"])
         self.assertFalse(status["is_premium"])
         self.assertEqual(status["current_plan"], "Basic")
-        
+
+
 class UpdatePaymentMethodTestCase(APITestCase):
     """Test cases for subscription_service.update_payment_method()"""
 
@@ -1029,11 +1024,11 @@ class UpdatePaymentMethodTestCase(APITestCase):
             features={"max_articles": 100},
         )
         self.user = TestUtil.verified_user()
-        
+
     @patch("apps.subscriptions.services.subscription_service.paystack_service")
     def test_update_payment_method_success(self, mock_paystack):
         """Test successful payment method update link generation"""
-        
+
         subscription = Subscription.objects.create(
             user=self.user,
             plan=self.plan,
@@ -1048,17 +1043,21 @@ class UpdatePaymentMethodTestCase(APITestCase):
         )
 
         # Call update method
-        update_link = subscription_service.update_payment_method(subscription=subscription)
+        update_link = subscription_service.update_payment_method(
+            subscription=subscription
+        )
 
         # Assertions
         self.assertEqual(update_link, "https://paystack.com/manage/update/card/link")
-        
+
         # Verify Paystack was called
-        mock_paystack.generate_update_subscription_link.assert_called_once_with("SUB_test123")
+        mock_paystack.generate_update_subscription_link.assert_called_once_with(
+            "SUB_test123"
+        )
 
     def test_update_payment_method_no_subscription_code(self):
         """Test failure when no Paystack subscription code"""
-        
+
         subscription = Subscription.objects.create(
             user=self.user,
             plan=self.plan,
@@ -1071,11 +1070,11 @@ class UpdatePaymentMethodTestCase(APITestCase):
             subscription_service.update_payment_method(subscription=subscription)
 
         self.assertIn("No Paystack subscription", str(context.exception))
-        
+
     @patch("apps.subscriptions.services.subscription_service.paystack_service")
     def test_update_payment_method_paystack_fails(self, mock_paystack):
         """Test failure when Paystack API fails"""
-        
+
         subscription = Subscription.objects.create(
             user=self.user,
             plan=self.plan,
@@ -1085,21 +1084,23 @@ class UpdatePaymentMethodTestCase(APITestCase):
         )
 
         # Mock Paystack failure
-        mock_paystack.generate_update_subscription_link.side_effect = Exception("API error")
+        mock_paystack.generate_update_subscription_link.side_effect = Exception(
+            "API error"
+        )
 
         with self.assertRaises(Exception) as context:
             subscription_service.update_payment_method(subscription=subscription)
 
         self.assertIn("Failed to generate payment update link", str(context.exception))
-        
-        
+
+
 class CreatePlanTestCase(APITestCase):
     """Test cases for subscription_service.create_plan()"""
 
     @patch("apps.subscriptions.services.subscription_service.paystack_service")
     def test_create_plan_success(self, mock_paystack):
         """Test successful plan creation"""
-        
+
         # Mock Paystack response
         mock_paystack.create_plan.return_value = {
             "plan_code": "PLN_abc123",
@@ -1124,11 +1125,11 @@ class CreatePlanTestCase(APITestCase):
 
         # Verify Paystack was called
         mock_paystack.create_plan.assert_called_once()
-        
+
     @patch("apps.subscriptions.services.subscription_service.paystack_service")
     def test_create_plan_paystack_creation_fails(self, mock_paystack):
         """Test that plan is not created locally if Paystack fails"""
-        
+
         # Mock Paystack failure
         mock_paystack.create_plan.side_effect = Exception("Paystack API error")
 
@@ -1141,10 +1142,11 @@ class CreatePlanTestCase(APITestCase):
             )
 
         self.assertIn("Failed to create plan", str(context.exception))
-        
+
         # Verify no plan was created in DB
         self.assertEqual(SubscriptionPlan.objects.count(), 0)
-        
+
+
 class UpdatePlanTestCase(APITestCase):
     """Test cases for subscription_service.update_plan()"""
 
@@ -1157,11 +1159,11 @@ class UpdatePlanTestCase(APITestCase):
             paystack_plan_code="PLN_test123",
             features={},
         )
-        
+
     @patch("apps.subscriptions.services.subscription_service.paystack_service")
     def test_update_plan_success(self, mock_paystack):
         """Test successful plan update"""
-        
+
         # Mock successful Paystack update
         mock_paystack.update_plan.return_value = {"status": True}
 
@@ -1177,17 +1179,17 @@ class UpdatePlanTestCase(APITestCase):
         # Assertions
         self.assertEqual(updated_plan.name, "Updated Plan")
         self.assertEqual(updated_plan.price, Decimal("7000"))
-        
+
         # Verify Paystack was called with correct data
         mock_paystack.update_plan.assert_called_once()
         call_args = mock_paystack.update_plan.call_args[1]
         self.assertEqual(call_args["plan_code"], "PLN_test123")
         self.assertEqual(call_args["data"]["amount"], 700000)  # In kobo
-        
+
     @patch("apps.subscriptions.services.subscription_service.paystack_service")
     def test_update_plan_paystack_update_fails(self, mock_paystack):
         """Test that plan is not updated locally if Paystack fails"""
-        
+
         # Mock Paystack failure
         mock_paystack.update_plan.side_effect = Exception("Paystack API error")
 
@@ -1198,11 +1200,12 @@ class UpdatePlanTestCase(APITestCase):
             )
 
         self.assertIn("Failed to update plan", str(context.exception))
-        
+
         # Verify plan was NOT updated in DB
         self.plan.refresh_from_db()
         self.assertEqual(self.plan.name, "Original Plan")
-        
+
+
 class FetchSubscriptionDetailsTestCase(APITestCase):
     """Test cases for subscription_service.fetch_subscription_details()"""
 
@@ -1216,11 +1219,11 @@ class FetchSubscriptionDetailsTestCase(APITestCase):
             features={},
         )
         self.user = TestUtil.verified_user()
-        
+
     @patch("apps.subscriptions.services.subscription_service.paystack_service")
     def test_fetch_subscription_details_success(self, mock_paystack):
         """Test successful subscription details fetch"""
-        
+
         subscription = Subscription.objects.create(
             user=self.user,
             plan=self.plan,
@@ -1243,13 +1246,13 @@ class FetchSubscriptionDetailsTestCase(APITestCase):
         self.assertIsNotNone(details)
         self.assertEqual(details["subscription_code"], "SUB_test123")
         self.assertEqual(details["status"], "active")
-        
+
         # Verify Paystack was called
         mock_paystack.fetch_subscription.assert_called_once_with("SUB_test123")
 
     def test_fetch_subscription_details_no_subscription_code(self):
         """Test fetch fails if no Paystack subscription code"""
-        
+
         subscription = Subscription.objects.create(
             user=self.user,
             plan=self.plan,
@@ -1262,11 +1265,11 @@ class FetchSubscriptionDetailsTestCase(APITestCase):
             subscription_service.fetch_subscription_details(subscription)
 
         self.assertIn("no Paystack code", str(context.exception))
-        
+
     @patch("apps.subscriptions.services.subscription_service.paystack_service")
     def test_fetch_subscription_details_paystack_fails(self, mock_paystack):
         """Test fetch when Paystack API fails"""
-        
+
         subscription = Subscription.objects.create(
             user=self.user,
             plan=self.plan,
