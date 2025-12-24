@@ -180,26 +180,27 @@ class SubscriptionAdmin(admin.ModelAdmin):
 
     days_remaining.short_description = "Days Left"
 
-    actions = ["mark_as_expired", "cancel_subscriptions"]
+    # actions = ["mark_as_expired", "cancel_subscriptions"]
+    
 
-    def mark_as_expired(self, request, queryset):
-        count = 0
-        for subscription in queryset:
-            subscription.expire()
-            count += 1
-        self.message_user(request, f"{count} subscription(s) marked as expired.")
+    # def mark_as_expired(self, request, queryset):
+    #     count = 0
+    #     for subscription in queryset:
+    #         subscription.expire()
+    #         count += 1
+    #     self.message_user(request, f"{count} subscription(s) marked as expired.")
 
-    mark_as_expired.short_description = "Mark selected as expired"
+    # mark_as_expired.short_description = "Mark selected as expired"
 
-    def cancel_subscriptions(self, request, queryset):
-        count = 0
-        for subscription in queryset:
-            if subscription.status in ["TRIALING", "ACTIVE"]:
-                subscription.cancel(reason="Cancelled by admin")
-                count += 1
-        self.message_user(request, f"{count} subscription(s) cancelled.")
+    # def cancel_subscriptions(self, request, queryset):
+    #     count = 0
+    #     for subscription in queryset:
+    #         if subscription.status in ["TRIALING", "ACTIVE"]:
+    #             subscription.cancel(reason="Cancelled by admin")
+    #             count += 1
+    #     self.message_user(request, f"{count} subscription(s) cancelled.")
 
-    cancel_subscriptions.short_description = "Cancel selected subscriptions"
+    # cancel_subscriptions.short_description = "Cancel selected subscriptions"
 
 
 @admin.register(PaymentTransaction)

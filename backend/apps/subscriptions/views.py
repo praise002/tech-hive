@@ -104,13 +104,19 @@ class SubscriptionDetailView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
-        try:
-            subscription = Subscription.objects.get_latest_subscription(
-                user=self.request.user
-            )
-            return subscription
-        except Subscription.DoesNotExist:
+
+        subscription = Subscription.objects.get_latest_subscription(
+            user=self.request.user
+        )
+
+        # NOTE: Frontend will display this:
+        # "is_premium": False,
+        # "current_plan": "Basic",
+        # because using .first() returns NOne and doesn't raise error
+        if not subscription:
             raise NotFoundError("Subscription not found")
+
+        return subscription
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -250,12 +256,12 @@ class SubscriptionCancelAPIView(APIView):
         reason = serializer.validated_data.get("reason")
         user = request.user
 
+        subscription = Subscription.objects.get_active_subscription(user)
+
+        if not subscription:
+            raise NotFoundError("No active subscription found")
+
         try:
-            subscription = Subscription.objects.get_active_subscription(user)
-
-            if not subscription:
-                raise NotFoundError("No active subscription found")
-
             success = subscription_service.cancel_subscription(
                 subscription=subscription, reason=reason
             )
@@ -268,7 +274,7 @@ class SubscriptionCancelAPIView(APIView):
                 )
 
             response_data = {
-                "access_until": subscription.current_period_endstrftime("%Y-%m-%d"),
+                "access_until": subscription.current_period_end.strftime("%Y-%m-%d"),
             }
 
             return CustomResponse.success(
@@ -357,16 +363,16 @@ class ReactivateSubscriptionView(APIView):
     def post(self, request, *args, **kwargs):
         user = request.user
 
+        subscription = (
+            user.subscriptions.filter(status=SubscriptionChoices.CANCELLED)
+            .order_by("-created_at")
+            .first()
+        )
+
+        if not subscription:
+            raise NotFoundError("No cancelled subscription found")
+
         try:
-            subscription = (
-                user.subscriptions.filter(status=SubscriptionChoices.CANCELLED)
-                .order_by("-created_at")
-                .first()
-            )
-
-            if not subscription:
-                raise NotFoundError("No cancelled subscription found")
-
             success = subscription_service.reactivate_subscription(subscription)
 
             if not success:
@@ -375,8 +381,6 @@ class ReactivateSubscriptionView(APIView):
                     err_code=ErrorCode.SERVER_ERROR,
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
-
-            subscription.refresh_from_db()  # TODO: REMOVE AND TEST OF IT WORKS
 
             return CustomResponse.success(
                 message="Subscription reactivated successfully",
@@ -416,12 +420,12 @@ class RetryPaymentView(APIView):
         responses=RETRY_PAYMENT_RESPONSE_EXAMPLE,
     )
     def post(self, request, *args, **kwargs):
+        subscription = Subscription.objects.past_due().first()
+
+        if not subscription:
+            raise NotFoundError("No past due subscription found")
 
         try:
-            subscription = Subscription.objects.past_due().first()
-
-            if not subscription:
-                raise NotFoundError("No past due subscription found")
 
             success, message, transaction = subscription_service.retry_payment(
                 subscription=subscription, is_manual=True
@@ -467,12 +471,12 @@ class UpdatePaymentMethodView(APIView):
     def get(self, request, *args, **kwargs):
         user = request.user
 
+        subscription = Subscription.objects.get_active_subscription(user)
+
+        if not subscription:
+            raise NotFoundError("No active subscription found")
+
         try:
-            subscription = Subscription.objects.get_active_subscription(user)
-
-            if not subscription:
-                raise NotFoundError("No active subscription found")
-
             update_link = subscription_service.update_payment_method(subscription)
 
             return CustomResponse.success(

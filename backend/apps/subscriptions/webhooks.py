@@ -1,3 +1,4 @@
+import json
 import logging
 
 from apps.subscriptions.services import webhook_service
@@ -19,7 +20,15 @@ def webhook(request):
             return HttpResponse(status=400)
 
         raw_body = request.body
-        payload = request.data
+        # payload = request.data
+        # payload = raw_body.get("data", {})
+        
+        try:
+            payload = json.loads(raw_body) if raw_body else {}
+        except json.JSONDecodeError:
+            logger.error("Webhook received with invalid JSON")
+            return HttpResponse(status=400)
+            
         event_type = payload.get("event")
 
         if not event_type:

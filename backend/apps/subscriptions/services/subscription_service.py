@@ -12,10 +12,11 @@ from apps.subscriptions.choices import (
 from apps.subscriptions.models import PaymentTransaction, Subscription, SubscriptionPlan
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
-from django.core.exceptions import ValidationError
+
 from .notification_service import notification_service
 from .paystack_service import paystack_service
 
@@ -48,7 +49,7 @@ class SubscriptionService:
         try:
             # Validate the plan
             plan.full_clean()  # This will raise ValidationError if price is invalid
-            
+
             # Check for active subscription
             active_subscription = Subscription.objects.get_active_subscription(user)
             if active_subscription:
@@ -203,7 +204,7 @@ class SubscriptionService:
         except ValueError as e:
             logger.warning(f"Subscription creation failed: {str(e)}")
             raise
-        
+
         except ValidationError as e:
             raise ValueError(f"Invalid plan: {e}")
 
@@ -581,117 +582,115 @@ class SubscriptionService:
         except Exception as e:
             logger.error(f"Error reactivating subscription: {str(e)}")
             raise
-    
-    # NOTE: METHOD NOT USED
-    def expire_subscription(self, subscription: Subscription) -> bool:
-        """
-        Expire a subscription (end of period when received by webhook).
 
-        Args:
-            subscription: Subscription to expire
+    # def expire_subscription(self, subscription: Subscription) -> bool:
+    #     """
+    #     Expire a subscription (end of period when received by webhook).
 
-        Returns:
-            True if successful
-        """
-        try:
-            subscription.expire()
+    #     Args:
+    #         subscription: Subscription to expire
 
-            logger.info(f"Subscription expired for {subscription.user.email}")
+    #     Returns:
+    #         True if successful
+    #     """
+    #     try:
+    #         subscription.expire()
 
-            return True
+    #         logger.info(f"Subscription expired for {subscription.user.email}")
 
-        except Exception as e:
-            logger.error(f"Error expiring subscription: {str(e)}")
-            raise
-    
-    # NOTE: NOT USED YET
-    def get_subscription_status(self, user) -> Dict:
-        """Get detailed subscription status for a user."""
-        try:
-            subscription = Subscription.objects.get_active_subscription(user)
+    #         return True
 
-            return {
-                "has_subscription": True,
-                "is_premium": subscription.is_active,
-                "status": subscription.status,
-                "plan": {
-                    "name": subscription.plan.name,
-                    "price": float(subscription.plan.price),
-                    "billing_cycle": subscription.plan.billing_cycle,
-                },
-                "trial": {
-                    "is_trial": subscription.is_trial,
-                    "trial_start": (
-                        subscription.trial_start.isoformat()
-                        if subscription.trial_start
-                        else None
-                    ),
-                    "trial_end": (
-                        subscription.trial_end.isoformat()
-                        if subscription.trial_end
-                        else None
-                    ),
-                },
-                "billing": {
-                    "current_period_start": (
-                        subscription.current_period_start.isoformat()
-                        if subscription.current_period_start
-                        else None
-                    ),
-                    "current_period_end": (
-                        subscription.current_period_end.isoformat()
-                        if subscription.current_period_end
-                        else None
-                    ),
-                    "next_billing_date": (
-                        subscription.next_billing_date.isoformat()
-                        if subscription.next_billing_date
-                        else None
-                    ),
-                    "days_remaining": subscription.days_until_expiry,
-                },
-                "card": (
-                    {
-                        "last4": subscription.card_last4,
-                        "type": subscription.card_type,
-                        "bank": subscription.card_bank,
-                    }
-                    if subscription.card_last4
-                    else None
-                ),
-                "cancellation": {
-                    "cancelled": subscription.cancelled_at
-                    is not None,  # returns a boolean
-                    "cancelled_at": (
-                        subscription.cancelled_at.isoformat()
-                        if subscription.cancelled_at
-                        else None
-                    ),
-                    "cancel_at_period_end": subscription.cancel_at_period_end,
-                    "reason": subscription.cancel_reason,
-                },
-                "payment_status": {
-                    "is_past_due": subscription.status == SubscriptionChoices.PAST_DUE,
-                    "payment_failed_at": (
-                        subscription.payment_failed_at.isoformat()
-                        if subscription.payment_failed_at
-                        else None
-                    ),
-                    "retry_count": subscription.retry_count,
-                    "is_in_grace_period": subscription.is_in_grace_period,
-                    "grace_period_ends_at": (
-                        subscription.grace_period_ends_at.isoformat()
-                        if subscription.grace_period_ends_at
-                        else None
-                    ),
-                },
-            }
-        except Subscription.DoesNotExist:
-            return {
-                "has_subscription": False,
-                "is_premium": False,
-                "current_plan": "Basic",
-            }
+    #     except Exception as e:
+    #         logger.error(f"Error expiring subscription: {str(e)}")
+    #         raise
+
+    # def get_subscription_status(self, user) -> Dict:
+    #     """Get detailed subscription status for a user."""
+    #     try:
+    #         subscription = Subscription.objects.get_active_subscription(user)
+
+    #         return {
+    #             "has_subscription": True,
+    #             "is_premium": subscription.is_active,
+    #             "status": subscription.status,
+    #             "plan": {
+    #                 "name": subscription.plan.name,
+    #                 "price": float(subscription.plan.price),
+    #                 "billing_cycle": subscription.plan.billing_cycle,
+    #             },
+    #             "trial": {
+    #                 "is_trial": subscription.is_trial,
+    #                 "trial_start": (
+    #                     subscription.trial_start.isoformat()
+    #                     if subscription.trial_start
+    #                     else None
+    #                 ),
+    #                 "trial_end": (
+    #                     subscription.trial_end.isoformat()
+    #                     if subscription.trial_end
+    #                     else None
+    #                 ),
+    #             },
+    #             "billing": {
+    #                 "current_period_start": (
+    #                     subscription.current_period_start.isoformat()
+    #                     if subscription.current_period_start
+    #                     else None
+    #                 ),
+    #                 "current_period_end": (
+    #                     subscription.current_period_end.isoformat()
+    #                     if subscription.current_period_end
+    #                     else None
+    #                 ),
+    #                 "next_billing_date": (
+    #                     subscription.next_billing_date.isoformat()
+    #                     if subscription.next_billing_date
+    #                     else None
+    #                 ),
+    #                 "days_remaining": subscription.days_until_expiry,
+    #             },
+    #             "card": (
+    #                 {
+    #                     "last4": subscription.card_last4,
+    #                     "type": subscription.card_type,
+    #                     "bank": subscription.card_bank,
+    #                 }
+    #                 if subscription.card_last4
+    #                 else None
+    #             ),
+    #             "cancellation": {
+    #                 "cancelled": subscription.cancelled_at
+    #                 is not None,  # returns a boolean
+    #                 "cancelled_at": (
+    #                     subscription.cancelled_at.isoformat()
+    #                     if subscription.cancelled_at
+    #                     else None
+    #                 ),
+    #                 "cancel_at_period_end": subscription.cancel_at_period_end,
+    #                 "reason": subscription.cancel_reason,
+    #             },
+    #             "payment_status": {
+    #                 "is_past_due": subscription.status == SubscriptionChoices.PAST_DUE,
+    #                 "payment_failed_at": (
+    #                     subscription.payment_failed_at.isoformat()
+    #                     if subscription.payment_failed_at
+    #                     else None
+    #                 ),
+    #                 "retry_count": subscription.retry_count,
+    #                 "is_in_grace_period": subscription.is_in_grace_period,
+    #                 "grace_period_ends_at": (
+    #                     subscription.grace_period_ends_at.isoformat()
+    #                     if subscription.grace_period_ends_at
+    #                     else None
+    #                 ),
+    #             },
+    #         }
+    #     except Subscription.DoesNotExist:
+    #         return {
+    #             "has_subscription": False,
+    #             "is_premium": False,
+    #             "current_plan": "Basic",
+    #         }
 
     def update_payment_method(self, subscription: Subscription) -> str:
         """
@@ -1235,5 +1234,6 @@ subscription_service = SubscriptionService()
 # subscription was created. If the subscription was created on or before the 28th of the month,
 # it gets billed on the same day, every month, for the duration of the plan. Subscriptions created on
 # or between the 29th - 31st,
+# will get billed on the 28th of every subsequent month, for the duration of the plan
 # will get billed on the 28th of every subsequent month, for the duration of the plan
 # will get billed on the 28th of every subsequent month, for the duration of the plan

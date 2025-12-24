@@ -19,7 +19,7 @@ urlpatterns = [
         views.SubscribeToPremiumView.as_view(),
     ),
     path(
-        "premium/",
+        "premium/cancel/",
         views.SubscriptionCancelAPIView.as_view(),
     ),
     path(

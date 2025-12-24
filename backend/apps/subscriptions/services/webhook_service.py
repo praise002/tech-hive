@@ -3,16 +3,15 @@ from datetime import timedelta
 from decimal import Decimal
 from typing import Dict
 
-from apps.subscriptions.models import Subscription, WebhookLog
-from apps.subscriptions.services import notification_service
-from django.db import transaction
-from django.utils.dateparse import parse_datetime
-
 from apps.subscriptions.choices import (
     StatusChoices,
     SubscriptionChoices,
     TransactionTypeChoices,
 )
+from apps.subscriptions.models import Subscription, WebhookLog
+from apps.subscriptions.services import notification_service
+from django.db import transaction
+from django.utils.dateparse import parse_datetime
 
 from .paystack_service import paystack_service
 from .subscription_service import subscription_service
@@ -48,14 +47,12 @@ class WebhookService:
 
             # Idempotency
             existing_log = WebhookLog.objects.filter(
-                event_type=event_type,
-                payload=payload,  
-                processed=True
+                event_type=event_type, payload=payload, processed=True
             ).first()
             if existing_log:
                 logger.info(f"Webhook already processed: {event_type}")
                 return True
-                        
+
             webhook_log = WebhookLog.objects.create(
                 event_type=event_type,
                 payload=payload,
@@ -94,7 +91,7 @@ class WebhookService:
                 error_message = f"Error processing webhook: {str(e)}"
                 logger.error(error_message)
                 webhook_log.mark_as_failed(error_message)
-                raise
+                return False
 
         except Exception as e:
             logger.error(f"Webhook processing failed: {str(e)}")
@@ -830,7 +827,3 @@ class WebhookService:
 
 
 webhook_service = WebhookService()
-
-
-#
-#
