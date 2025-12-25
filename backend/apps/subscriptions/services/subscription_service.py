@@ -755,7 +755,6 @@ class SubscriptionService:
             )
             raise Exception(f"Failed to generate payment update link: {str(e)}")
 
-    # NOTE: NOT USED YET
     def sync_plans_from_paystack(self) -> Dict[str, Any]:
         """
         Sync all subscription plans from Paystack to local database.
@@ -1007,7 +1006,6 @@ class SubscriptionService:
             logger.error(f"Error creating plan '{name}': {str(e)}")
             raise Exception(f"Failed to create plan: {str(e)}")
 
-    # NOTE: NOT USED YET
     def update_plan(
         self, plan: SubscriptionPlan, data: Dict[str, Any]
     ) -> SubscriptionPlan:
@@ -1127,7 +1125,6 @@ class SubscriptionService:
             logger.error(f"Error updating plan '{plan.name}': {str(e)}")
             raise Exception(f"Failed to update plan: {str(e)}")
 
-    # NOTE: NOT USED YET
     def fetch_subscription_details(self, subscription: Subscription) -> Dict[str, Any]:
         """
         Fetch latest subscription details from Paystack.
