@@ -320,6 +320,7 @@ class WebhookService:
             subscription_data = data.get("subscription", {})
             subscription_code = subscription_data.get("subscription_code")
             next_payment_date = subscription_data.get("next_payment_date")
+            email_token = subscription_data.get("email_token")
 
             # Get customer info
             customer_data = data.get("customer", {})
@@ -344,6 +345,13 @@ class WebhookService:
                     f"(sub: {subscription_code}, email: {customer_email})"
                 )
                 return
+            
+            if email_token and not subscription.paystack_email_token:
+                subscription.paystack_email_token = email_token
+                subscription.save(update_fields=["paystack_email_token"])
+                logger.info(
+                    f"[invoice.create] Captured and saved email_token for {subscription.user.email}."
+                )
 
             # Check if this is advance notice (unpaid) or retroactive (paid)
             if not paid and invoice_status == "pending":
