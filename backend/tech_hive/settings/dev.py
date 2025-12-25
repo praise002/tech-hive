@@ -121,3 +121,6 @@ logging.config.dictConfig(
         },
     }
 )
+
+PAYSTACK_SECRET_KEY = config("PAYSTACK_TEST_SECRET_KEY")
+PAYSTACK_PUBLIC_KEY = config("PAYSTACK_TEST_PUBLIC_KEY")
