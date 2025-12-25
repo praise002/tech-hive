@@ -64,7 +64,7 @@ class Article(BaseModel):
     cover_image = models.ImageField(
         upload_to="articles/", null=True, blank=True, validators=[validate_file_size]
     )
-    tags = models.ManyToManyField(Tag, blank=True)
+    tags = models.ManyToManyField(Tag, blank=True, related_name='articles')
     status = models.CharField(
         max_length=20,
         choices=ArticleStatusChoices.choices,

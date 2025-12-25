@@ -6,6 +6,9 @@ from apps.common.errors import ErrorCode
 class SuccessResponseSerializer(serializers.Serializer):
     status = serializers.CharField(default="success")
     message = serializers.CharField()
+    
+class SuccessDataResponseSerializer(SuccessResponseSerializer):
+    data = serializers.DictField(required=False)
 
 
 class ErrorResponseSerializer(serializers.Serializer):

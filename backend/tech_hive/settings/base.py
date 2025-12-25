@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 
+from celery.schedules import crontab
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -59,6 +60,7 @@ THIRD_PARTY_APPS = [
     "django_ckeditor_5",
     "silk",
     "django_prometheus",
+    "redisboard",
 ]
 
 LOCAL_APPS = [
@@ -68,6 +70,7 @@ LOCAL_APPS = [
     "apps.general",
     "apps.content",
     "apps.notification",
+    "apps.subscriptions",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -222,6 +225,8 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "anon": "500/day",
         "user": "1000/day",
+        "article_summary": "10/hour",
+        "article_summary_regenerate": "3/hour",
     },
     "EXCEPTION_HANDLER": "apps.common.exceptions.custom_exception_handler",
 }
@@ -487,8 +492,75 @@ CKEDITOR_5_FILE_STORAGE = "tech_hive.storage.CustomCloudinaryStorage"
 CKEDITOR_5_FILE_UPLOAD_PERMISSION = "staff"
 
 import sentry_sdk
+from django.conf import settings
 
 sentry_sdk.init(
     dsn="https://382d8ac9d3e4c8cd95f0942926fd98a4@o4510200278941696.ingest.de.sentry.io/4510200289427536",
     send_default_pii=True,
 )
+
+ARTICLE_SUMMARY_MAX_CONTENT_LENGTH = 10000  # Max chars to send to AI
+
+REDIS_URL = config("REDIS_URL")  #  prod uses prod redis url
+CELERY_BROKER_URL = config("REDIS_URL")
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": REDIS_URL,
+    },
+    "summaries": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": (
+            "redis://127.0.0.1:6378/2" if settings.DEBUG else config("REDIS_URL")
+        ),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+        "KEY_PREFIX": "article_summaries",
+        "TIMEOUT": 60 * 60 * 24 * 30,  # 30 days for summaries
+    },
+}
+
+CELERY_BEAT_SCHEDULE = {
+    "retry-failed-payments": {
+        "task": "apps.subscriptions.tasks.retry_failed_payments",
+        "schedule": crontab(hour=14, minute=0),  # 2:00 PM daily
+    },
+    # Expire  trials daily at midnight
+    "expire-trials": {
+        "task": "apps.subscriptions.tasks.expire_trials",
+        "schedule": crontab(hour=0, minute=0),  # 12:00 AM daily
+    },
+    # Check and expire grace periods every 6 hours
+    "expire-grace-periods": {
+        "task": "apps.subscriptions.tasks.expire_grace_periods",
+        "schedule": crontab(hour="*/6", minute=0),  # Every 6 hours
+    },
+    # Send trial ending reminders daily at 10 AM
+    "trial-ending-reminders": {
+        "task": "apps.subscriptions.tasks.send_trial_ending_reminders",
+        "schedule": crontab(hour=10, minute=0),  # 10:00 AM daily
+    },
+    # Send upcoming charge reminders daily at 9 AM
+    'upcoming-charge-reminders': {
+        'task': 'apps.subscriptions.tasks.send_upcoming_charge_reminders',
+        'schedule': crontab(hour=9, minute=0),
+    },
+    # Send final grace warnings daily at 6 PM
+    'final-grace-warnings': {
+        'task': 'apps.subscriptions.tasks.send_final_grace_warnings',
+        'schedule': crontab(hour=18, minute=0),
+    },
+}
+
+
+# Subscription
+PREMIUM_PRICE = 5000  # NGN
+TRIAL_DAYS = 7
+GRACE_PERIOD_DAYS = 7
+RETRY_SCHEDULE = [3, 5, 7]  # Days after failure
+FINAL_GRACE_DAYS = 3
+
+PAYSTACK_SECRET_KEY = config("PAYSTACK_TEST_SECRET_KEY")
+PAYSTACK_PUBLIC_KEY = config("PAYSTACK_TEST_PUBLIC_KEY")

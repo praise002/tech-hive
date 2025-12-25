@@ -1,9 +1,12 @@
+import logging
 import math
 import re
 from typing import Dict
 
+from django.core.cache import caches
 from django.db import models
 
+logger = logging.getLogger(__name__)
 
 class ArticleStatusChoices(models.TextChoices):
     DRAFT = "draft", "Draft"
@@ -143,3 +146,17 @@ class ReadabilityMetrics:
         total_seconds = text_time + image_time + code_time
 
         return math.ceil(total_seconds)
+
+# Not needed because once article is published it can't be updated
+def invalidate_article_summary_cache(article_id: str):
+    """
+    Invalidate cached summary for an article
+    
+    Usage:
+        When article is updated
+        invalidate_article_summary_cache(str(article.id))
+    """
+    cache = caches['summaries']
+    cache_key = f"summary:{article_id}"
+    cache.delete(cache_key)
+    logger.info(f"Invalidated summary cache for article {article_id}")    

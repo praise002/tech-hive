@@ -10,15 +10,18 @@ from apps.content.schema_examples import (
     ACCEPT_GUIDELINES_RESPONSE_EXAMPLE,
     ARTICLE_DETAIL_RESPONSE_EXAMPLE,
     ARTICLE_LIST_RESPONSE_EXAMPLE,
+    ARTICLE_SUMMARY_RESPONSE_EXAMPLE,
     COMMENT_CREATE_RESPONSE_EXAMPLE,
     COMMENT_LIKE_STATUS_RESPONSE_EXAMPLE,
     COMMENT_LIKE_TOGGLE_RESPONSE_EXAMPLE,
+    RSS_RESPONSE_EXAMPLE,
     TAG_RESPONSE_EXAMPLE,
     THREAD_REPLIES_RESPONSE_EXAMPLE,
 )
 from apps.content.serializers import (
     ArticleDetailSerializer,
     ArticleSerializer,
+    ArticleSummaryResponseSerializer,
     CommentCreateSerializer,
     CommentLikeSerializer,
     CommentLikeStatusSerializer,
@@ -28,11 +31,18 @@ from apps.content.serializers import (
     ThreadReplySerializer,
 )
 from apps.content.services import comment_like_service
+from apps.content.services.ai_service import groq_service
+from apps.content.throttles import (
+    ArticleSummaryRegenerateThrottle,
+    ArticleSummaryThrottle,
+)
+from apps.content.utils import ArticleStatusChoices
 from django.contrib.auth.models import Group
 from django.db import transaction
 from django.db.models import Prefetch
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
+from groq import RateLimitError
 from redis import RedisError
 from rest_framework import status
 from rest_framework.filters import SearchFilter
@@ -315,27 +325,17 @@ class TagGenericView(ListAPIView):
         return self.list(request, *args, **kwargs)
 
 
-# Do for every content
 class RSSFeedInfoView(APIView):
     @extend_schema(
         summary="RSS Feed Information",
         description="Get information about subscribing to Tech Hive's RSS feed.",
         tags=article_tags,
-        responses={
-            200: {
-                "type": "object",
-                "properties": {
-                    "rss_url": {"type": "string"},
-                    "description": {"type": "string"},
-                    "items_count": {"type": "integer"},
-                },
-            }
-        },
+        responses=RSS_RESPONSE_EXAMPLE,
     )
     def get(self, request):
         base_url = request.build_absolute_uri("/").rstrip("/")
         return CustomResponse.success(
-            message="Tags retrieved successfully.",
+            message="RSS Feed information retrieved successfully.",
             data={
                 "rss_url": f"{base_url}/api/v1/articles/feed/",
                 "description": "Subscribe to get the latest Tech Hive articles",
@@ -499,3 +499,142 @@ class CommentLikeStatusView(APIView):
 
         except Comment.DoesNotExist:
             raise NotFoundError("Comment not found")
+
+
+class ArticleSummaryView(APIView):
+    """
+    Generate AI-powered bullet-point summary of an article using GROQ AI.
+
+    This endpoint uses GROQ AI to generate a concise bullet-point summary
+    of the article. Summaries are cached for 30 days for improved performance.
+
+    Requirements:
+    - User must be authenticated
+    - Article must be published
+
+    Query Parameters:
+    - force_regenerate: Set to 'true' to bypass cache and generate a fresh summary
+    """
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ArticleSummaryResponseSerializer
+    throttle_classes = [ArticleSummaryThrottle, ArticleSummaryRegenerateThrottle]
+
+    @extend_schema(
+        summary="Generate AI Summary",
+        description="Generate an AI-powered bullet-point summary of the article using GROQ AI. "
+        "Summaries are cached for 30 days. Only published articles can be summarized.",
+        responses=ARTICLE_SUMMARY_RESPONSE_EXAMPLE,
+        tags=["Articles"],
+        parameters=[
+            OpenApiParameter(
+                name="force_regenerate",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                # required=False,
+                description="Set to true to bypass cache and generate a fresh summary",
+            )
+        ],
+    )
+    def post(self, request, article_id):
+        """
+        Generate AI summary for an article
+
+        Args:
+            article_id: UUID of the article to summarize
+
+        Returns:
+            Response with summary data or error message
+        """
+        force_regenerate = (
+            request.query_params.get("force_regenerate", "false").lower() == "true"
+        )
+
+        try:
+            article = Article.objects.get(id=article_id)
+
+            if article.status != ArticleStatusChoices.PUBLISHED:
+                return CustomResponse.error(
+                    message="Cannot summarize unpublished articles",
+                    err_code=ErrorCode.FORBIDDEN,
+                    status_code=status.HTTP_403_FORBIDDEN,
+                )
+
+            if len(article.content.strip()) < 100:
+                print(len(article.content.strip()))
+                return CustomResponse.error(
+                    message="Article content is too short to summarize",
+                    err_code=ErrorCode.VALIDATION_ERROR,
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                )
+
+            try:
+                summary_data = groq_service.generate_summary(
+                    article_id=str(article.id),
+                    title=article.title,
+                    content=article.content,
+                    force_regenerate=force_regenerate,
+                )
+
+                response_data = {
+                    "article_id": str(article.id),
+                    "article_title": article.title,
+                    "article_slug": article.slug,
+                    "summary": summary_data["summary"],
+                    "cached": summary_data["cached"],
+                }
+
+                if summary_data["cached"]:
+                    message = "Article summary retrieved from cache."
+                else:
+                    message = "Article summary generated successfully."
+
+                logger.info(
+                    f"Summary {'regenerated' if force_regenerate else 'retrieved from cache' if summary_data['cached'] else 'generated'} "
+                    f"for article {article.id} by user {request.user.id}"
+                )
+
+                return CustomResponse.success(
+                    message,
+                    response_data,
+                    status_code=status.HTTP_200_OK,
+                )
+
+            except ValueError as e:
+                logger.warning(
+                    f"Content validation error for article {article.id}: {str(e)}"
+                )
+                return CustomResponse.error(
+                    message=str(e),
+                    err_code=ErrorCode.VALIDATION_ERROR,
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                )
+
+            except Exception as e:
+                logger.error(
+                    f"AI service error for article {article.id}: {str(e)}",
+                    exc_info=True,
+                )
+                return CustomResponse.error(
+                    message="Summary generation service temporarily unavailable",
+                    err_code=ErrorCode.VALIDATION_ERROR,
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                )
+
+        except Article.DoesNotExist:
+            logger.warning(f"Article not found: {article_id}")
+            return CustomResponse.error(
+                message="Article not found",
+                err_code=ErrorCode.NON_EXISTENT,
+                status_code=status.HTTP_404_NOT_FOUND,
+            )
+
+        # except Exception as e:
+        #     logger.error(
+        #         f"Unexpected error in article summary endpoint: {str(e)}", exc_info=True
+        #     )
+        #     return CustomResponse.error(
+        #         message="An unexpected error occurred",
+        #         err_code=ErrorCode.SERVER_ERROR,
+        #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        #     )

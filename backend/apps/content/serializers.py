@@ -642,3 +642,12 @@ class ArticleReactionStatusSerializer(serializers.Serializer):
 
 
 # TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH
+
+# Response serializer
+class ArticleSummaryResponseSerializer(serializers.Serializer):
+    """Serializer for article summary response"""
+    article_id = serializers.UUIDField(read_only=True)
+    article_title = serializers.CharField(read_only=True)
+    article_slug = serializers.CharField(read_only=True)
+    summary = serializers.CharField(read_only=True)
+    cached = serializers.BooleanField(read_only=True)

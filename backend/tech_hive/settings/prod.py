@@ -34,21 +34,6 @@ if DATABASE_URL:
         )
 
 
-CELERY_BROKER_URL = config("REDIS_URL")
-
-CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
-
-
-REDIS_URL = config("REDIS_URL")
-
-
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": REDIS_URL,
-    }
-}
-
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(
         minutes=60

@@ -2,13 +2,12 @@ import uuid
 from datetime import timedelta
 
 from apps.common.models import BaseModel, IsDeletedModel
+from apps.common.validators import validate_file_size
 from autoslug import AutoSlugField
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.utils import timezone
-
-from apps.common.validators import validate_file_size
 
 from .managers import CustomUserManager
 
@@ -37,7 +36,9 @@ class User(AbstractBaseUser, IsDeletedModel, PermissionsMixin):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    avatar = models.ImageField(upload_to="avatars/", null=True, blank=True, validators=[validate_file_size])
+    avatar = models.ImageField(
+        upload_to="avatars/", null=True, blank=True, validators=[validate_file_size]
+    )
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["first_name", "last_name"]
@@ -78,23 +79,6 @@ class Otp(models.Model):
             minutes=settings.EMAIL_OTP_EXPIRE_MINUTES
         )
         return timezone.now() < expiration_time
-
-
-class SubscriptionPlan(BaseModel):
-    PLAN_CHOICES = [
-        ("BASIC", "Basic"),
-        ("PREMIUM", "Premium"),
-    ]
-    name = models.CharField(max_length=20, choices=PLAN_CHOICES, default="BASIC")
-    price = models.DecimalField(max_digits=6, decimal_places=2)
-    features = models.TextField()
-
-
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    subscription = models.ForeignKey(
-        SubscriptionPlan, on_delete=models.SET_NULL, null=True
-    )
 
 
 class ContributorOnboarding(models.Model):

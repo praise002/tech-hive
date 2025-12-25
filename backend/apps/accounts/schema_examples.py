@@ -1,5 +1,6 @@
 from apps.accounts.serializers import (
     CustomTokenObtainPairSerializer,
+    LoginResponseSerializer,
     PasswordChangeSerializer,
     RefreshTokenResponseSerializer,
     RegisterSerializer,
@@ -106,7 +107,7 @@ REGISTER_RESPONSE_EXAMPLE = {
 
 LOGIN_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(
-        response=CustomTokenObtainPairSerializer,
+        response=LoginResponseSerializer,
         description="Login Successful",
         examples=[
             OpenApiExample(
@@ -120,7 +121,7 @@ LOGIN_RESPONSE_EXAMPLE = {
         ],
     ),
     401: OpenApiResponse(
-        response=CustomTokenObtainPairSerializer,
+        response=ErrorResponseSerializer,
         description="Unauthorized",
         examples=[
             OpenApiExample(
@@ -128,16 +129,13 @@ LOGIN_RESPONSE_EXAMPLE = {
                 value={
                     "status": ERR_RESPONSE_STATUS,
                     "message": "No active account found with the given credentials.",
-                    "data": {
-                        "email": EMAIL_EXAMPLE,
-                    },
                     "code": ErrorCode.UNAUTHORIZED,
                 },
             ),
         ],
     ),
     403: OpenApiResponse(
-        response=ErrorResponseSerializer,
+        response=ErrorDataResponseSerializer,
         description="Permission Denied",
         examples=[
             OpenApiExample(
@@ -145,6 +143,9 @@ LOGIN_RESPONSE_EXAMPLE = {
                 value={
                     "status": ERR_RESPONSE_STATUS,
                     "message": "Email not verified. Please verify your email before logging in.",
+                    "data": {
+                        "email": EMAIL_EXAMPLE,
+                    },
                     "code": ErrorCode.FORBIDDEN,
                 },
             ),

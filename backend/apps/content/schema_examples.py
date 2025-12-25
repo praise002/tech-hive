@@ -7,9 +7,14 @@ from apps.common.schema_examples import (
     SUCCESS_RESPONSE_STATUS,
     UUID_EXAMPLE,
 )
-from apps.common.serializers import ErrorDataResponseSerializer, ErrorResponseSerializer
+from apps.common.serializers import (
+    ErrorDataResponseSerializer,
+    ErrorResponseSerializer,
+    SuccessResponseSerializer,
+)
 from apps.content.serializers import (
     ArticleSerializer,
+    ArticleSummaryResponseSerializer,
     CategorySerializer,
     CommentLikeSerializer,
     CommentLikeStatusSerializer,
@@ -41,6 +46,7 @@ TAG_LIST_EXAMPLE = [
         "name": "python",
     },
 ]
+
 
 ARTICLES = [
     {
@@ -74,6 +80,7 @@ ARTICLES = [
         "tags": [{"id": "d5afcd69-4c7d-4ea5-94bd-e1a2549a3f72", "name": "python"}],
     },
 ]
+
 
 ARTICLE_DETAIL_EXAMPLE = {
     "id": "09fc9e71-d071-4fb4-ba28-16a493e609d6",
@@ -257,11 +264,7 @@ CATEGORY_RESPONSE_EXAMPLE = {
         examples=[
             OpenApiExample(
                 name="Categories Fetched",
-                value={
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Categories retrieved successfully.",
-                    "data": CATEGORY_LIST_EXAMPLE,
-                },
+                value=CATEGORY_LIST_EXAMPLE,
             ),
         ],
     ),
@@ -284,6 +287,30 @@ TAG_RESPONSE_EXAMPLE = {
     ),
 }
 
+RSS_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        response=SuccessResponseSerializer,
+        description="RSS Feed Fetched",
+        examples=[
+            OpenApiExample(
+                name="RSS Feed Fetched",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "RSS Feed information retrieved successfully.",
+                    "data": {
+                        "rss_url": "https://127.0.0.1:8000/api/v1/articles/feed/",
+                        "description": "Subscribe to get the latest Tech Hive articles",
+                        "format": "RSS 2.0 XML",
+                        "items_count": 10,
+                        "update_frequency": "When new articles are published",
+                    },
+                },
+            ),
+        ],
+    ),
+}
+
+
 ARTICLE_LIST_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(
         description="Articles Fetched",
@@ -291,11 +318,7 @@ ARTICLE_LIST_RESPONSE_EXAMPLE = {
         examples=[
             OpenApiExample(
                 name="Success Response",
-                value={
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Articles retrieved successfully.",
-                    "data": ARTICLES,
-                },
+                value=ARTICLES,
             ),
         ],
     ),
@@ -339,11 +362,7 @@ EVENTS_RESPONSE_EXAMPLE = {
         examples=[
             OpenApiExample(
                 name="Success Response",
-                value={
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Events retrieved successfully.",
-                    "data": EVENTS_DATA_EXAMPLE,
-                },
+                value=[EVENT_EXAMPLE],
             ),
         ],
     ),
@@ -356,11 +375,7 @@ RESOURCES_RESPONSE_EXAMPLE = {
         examples=[
             OpenApiExample(
                 name="Success Response",
-                value={
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Resources retrieved successfully.",
-                    "data": RESOURCES_DATA_EXAMPLE,
-                },
+                value=[RESOURCE_EXAMPLE],
             ),
         ],
     ),
@@ -373,11 +388,7 @@ TOOLS_RESPONSE_EXAMPLE = {
         examples=[
             OpenApiExample(
                 name="Success Response",
-                value={
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Tools retrieved successfully.",
-                    "data": TOOLS_DATA_EXAMPLE,
-                },
+                value=[TOOL_EXAMPLE],
             ),
         ],
     ),
@@ -390,11 +401,7 @@ JOB_RESPONSE_EXAMPLE = {
         examples=[
             OpenApiExample(
                 name="Success Response",
-                value={
-                    "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Jobs retrieved successfully.",
-                    "data": JOBS_DATA_EXAMPLE,
-                },
+                value=[JOB_EXAMPLE],
             ),
         ],
     ),
@@ -740,6 +747,101 @@ ARTICLE_REACTION_STATUS_RESPONSE_EXAMPLE = {
                     "status": ERR_RESPONSE_STATUS,
                     "message": "Article not found",
                     "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+}
+
+ARTICLE_SUMMARY_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Summary generated successfully",
+        response=ArticleSummaryResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Fresh Summary",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Article summary generated successfully.",
+                    "data": {
+                        "article_id": UUID_EXAMPLE,
+                        "article_title": "Getting Started with Django REST Framework",
+                        "article_slug": "getting-started-with-django-rest-framework",
+                        "summary": "- Django REST Framework (DRF) is a powerful toolkit for building Web APIs in Django\n- It provides serializers for converting complex data types to native Python datatypes\n- ViewSets and routers enable rapid API development with minimal code\n- Built-in authentication and permissions ensure secure API endpoints\n- The browsable API makes testing and debugging straightforward",
+                        "cached": False,
+                    },
+                },
+            ),
+            OpenApiExample(
+                name="Cached Summary",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Article summary retrieved from cache.",
+                    "data": {
+                        "article_id": UUID_EXAMPLE,
+                        "article_title": "Getting Started with Django REST Framework",
+                        "article_slug": "getting-started-with-django-rest-framework",
+                        "summary": "- Django REST Framework (DRF) is a powerful toolkit for building Web APIs in Django\n- It provides serializers for converting complex data types to native Python datatypes\n- ViewSets and routers enable rapid API development with minimal code\n- Built-in authentication and permissions ensure secure API endpoints\n- The browsable API makes testing and debugging straightforward",
+                        "cached": True,
+                    },
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        description="Article is not published",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Unpublished Article",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Cannot summarize unpublished articles",
+                    "code": ErrorCode.FORBIDDEN,
+                },
+            ),
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Article not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Article Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Article not found",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+    422: ErrorDataResponseSerializer,
+    429: OpenApiResponse(
+        description="Rate limit exceeded",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Rate Limit Exceeded",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Rate limit exceeded.",
+                    "code": ErrorCode.RATE_LIMIT_EXCEEDED,
+                },
+            ),
+        ],
+    ),
+    503: OpenApiResponse(
+        description="AI service unavailable",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Service Unavailable",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Summary generation service temporarily unavailable",
+                    "code": ErrorCode.SERVICE_UNAVAILABLE,
                 },
             ),
         ],

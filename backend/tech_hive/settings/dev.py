@@ -47,16 +47,6 @@ DATABASES = {
     }
 }
 
-CELERY_BROKER_URL = "redis://127.0.0.1:6378/0"
-REDIS_URL = "redis://localhost:6378/0"
-
-
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": REDIS_URL,
-    }
-}
 
 SILKY_PYTHON_PROFILER = True
 # SILKY_PYTHON_PROFILER_BINARY = True

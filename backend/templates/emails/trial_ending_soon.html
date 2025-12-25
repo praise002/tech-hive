@@ -1,0 +1,66 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Your Trial Ends in {{ days_remaining }} Days{% endblock %}
+
+{% block content %}
+<h1>Your Trial Ends in {{ days_remaining }} Days</h1>
+
+<p>Hi {{ user.first_name|default:"there" }},</p>
+
+<p>Just a friendly reminder that your Tech Hive Premium trial will end on <strong>{{ subscription.trial_end|date:"F j, Y" }}</strong>.</p>
+
+<div class="warning-box">
+    <p style="margin: 0; font-weight: 600; color: #d67917;">⏰ {{ days_remaining }} Days Remaining</p>
+    <p class="text-small" style="margin: 10px 0 0 0;">
+        Your trial expires on {{ subscription.trial_end|date:"F j, Y" }} at {{ subscription.trial_end|time:"g:i A" }}
+    </p>
+</div>
+
+<h2>Continue Your Premium Experience</h2>
+<p>Don't lose access to the features you love:</p>
+
+<table style="width: 100%; margin: 20px 0;">
+    <tr>
+        <td style="padding: 10px 0;">
+            <span style="color: #ee6649; font-size: 18px;">✓</span>
+            <strong style="margin-left: 10px;">Unlimited AI Queries</strong>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 10px 0;">
+            <span style="color: #ee6649; font-size: 18px;">✓</span>
+            <strong style="margin-left: 10px;">Advanced Analytics</strong>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 10px 0;">
+            <span style="color: #ee6649; font-size: 18px;">✓</span>
+            <strong style="margin-left: 10px;">Priority Support</strong>
+        </td>
+    </tr>
+</table>
+
+<div style="text-align: center;">
+    <a href="{{ frontend_url }}/pricing" class="btn btn-primary">Upgrade to Premium →</a>
+</div>
+
+<table class="details-table">
+    <tr>
+        <td>Premium Monthly</td>
+        <td>₦{{ subscription.plan.price }}</td>
+    </tr>
+    <tr>
+        <td>Billing Cycle</td>
+        <td>{{ subscription.plan.billing_cycle }}</td>
+    </tr>
+</table>
+
+<p class="text-small" style="text-align: center; margin-top: 20px;">
+    No action needed if you don't wish to continue. Your trial will simply expire.
+</p>
+
+<p style="margin-top: 30px;">
+    Questions? We're here to help!<br>
+    <strong>The Tech Hive Team</strong>
+</p>
+{% endblock %}

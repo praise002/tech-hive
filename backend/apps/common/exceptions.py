@@ -1,17 +1,17 @@
+import logging
 from http import HTTPStatus
-from rest_framework.exceptions import (
-    AuthenticationFailed,
-    NotAuthenticated,
-    ValidationError,
-    APIException,
-    NotFound,
-    PermissionDenied,
-)
 
 from apps.common.errors import ErrorCode
 from apps.common.responses import CustomResponse
-
-import logging
+from rest_framework.exceptions import (
+    APIException,
+    AuthenticationFailed,
+    NotAuthenticated,
+    NotFound,
+    PermissionDenied,
+    Throttled,
+    ValidationError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -158,6 +158,18 @@ def handle_invalid_token(exc):
     )
 
 
+def handle_throttled_error(exc):
+    """
+    Handle too many requests.
+    """
+    logger.debug(f"Invalid token error: {exc}")
+    return CustomResponse.error(
+        message="Rate limit exceeded. Please try again later.",
+        err_code=ErrorCode.RATE_LIMIT_EXCEEDED,
+        status_code=HTTPStatus.TOO_MANY_REQUESTS,
+    )
+
+
 def custom_exception_handler(exc, context):
     try:
         if isinstance(exc, AuthenticationFailed):
@@ -172,6 +184,8 @@ def custom_exception_handler(exc, context):
             return handle_not_authenticated(exc)
         elif isinstance(exc, PermissionDenied):
             return handle_permission_error(exc)
+        elif isinstance(exc, Throttled):
+            return handle_throttled_error(exc)
         elif isinstance(exc, NotFound):
             return handle_not_found_error(exc)
         elif isinstance(exc, NotFoundError):

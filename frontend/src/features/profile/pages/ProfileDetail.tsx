@@ -23,7 +23,6 @@ function ProfileDetail() {
   if (isPending) return <ProfileSkeleton />;
 
   if (isError) {
-    console.log(error);
     const customError = error as CustomError | null;
 
     if (customError?.code === 'non_existent') {

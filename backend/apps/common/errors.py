@@ -37,3 +37,5 @@ class ErrorCode:
     EXPIRED = "expired"
     TOO_LATE = "too_late"
     TOO_EARLY = "too_early"
+
+    RATE_LIMIT_EXCEEDED = "rate_limit_exceeded"
