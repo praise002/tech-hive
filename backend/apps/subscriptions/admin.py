@@ -1,7 +1,10 @@
-from django.contrib import admin
+import json
+from django.contrib import admin, messages
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
+
+from backend.apps.subscriptions.services import subscription_service
 
 from .models import PaymentTransaction, Subscription, SubscriptionPlan, WebhookLog
 
@@ -47,6 +50,86 @@ class SubscriptionPlanAdmin(admin.ModelAdmin):
         return f"{count} active"
 
     subscription_count.short_description = "Subscriptions"
+
+    actions = ["sync_with_paystack"]
+
+    def sync_with_paystack(self, request, queryset):
+        """Admin action to sync all plans from Paystack."""
+        try:
+            result = subscription_service.sync_plans_from_paystack()
+            if result["success"]:
+                message = (
+                    f"Paystack sync complete. "
+                    f"Synced: {result['synced']}, Created: {result['created']}, Updated: {result['updated']}."
+                )
+                self.message_user(request, message, messages.SUCCESS)
+            else:
+                self.message_user(
+                    request,
+                    f"Sync failed with errors: {result['errors']}",
+                    messages.ERROR,
+                )
+        except Exception as e:
+            self.message_user(
+                request,
+                f"An unexpected error occurred during sync: {e}",
+                messages.ERROR,
+            )
+
+    sync_with_paystack.short_description = "Sync all plans from Paystack"
+
+    def save_model(self, request, obj, form, change):
+        """
+        Override save_model to sync with Paystack before saving locally.
+        'change' is True if editing an existing object, False if creating a new one.
+        """
+        if change:  # Only run for updates, not new creations
+            try:
+                # The data to update in Paystack
+                update_data = {
+                    "name": form.cleaned_data["name"],
+                    "amount": form.cleaned_data["price"],
+                    "description": form.cleaned_data["description"],
+                    # NOTE: IN MY BUSINESS LOGIC, I DON'T ALLLOW UPDATING OF INTERVAL, CURRENCY, AND OTHER STUFFS IN PAYSTACK
+                }
+                subscription_service.update_plan(plan=obj, data=update_data)
+                self.message_user(
+                    request,
+                    "Plan updated successfully in Paystack and local DB.",
+                    messages.SUCCESS,
+                )
+                super().save_model(request, obj, form, change)
+            except Exception as e:
+                # If Paystack update fails, don't save the changes locally and show an error
+                self.message_user(
+                    request, f"Failed to update plan: {e}", messages.ERROR
+                )
+        else:
+            try:
+                plan_data = {
+                    "name": form.cleaned_data["name"],
+                    "amount": form.cleaned_data["price"],
+                    "interval": form.cleaned_data["billing_cycle"].lower(),
+                    "description": form.cleaned_data["description"],
+                }
+                subscription_service.create_plan(plan_data)
+
+                self.message_user(
+                    request,
+                    f"Plan created successfully on Paystack (Code: {obj.paystack_plan_code}).",
+                    messages.SUCCESS,
+                )
+
+                # Now save the object to the local database
+                super().save_model(request, obj, form, change)
+
+            except Exception as e:
+                # If Paystack creation fails, do not save the plan locally and show an error.
+                self.message_user(
+                    request,
+                    f"Failed to create plan on Paystack: {e}. The plan was not saved.",
+                    messages.ERROR,
+                )
 
 
 @admin.register(Subscription)
@@ -181,7 +264,6 @@ class SubscriptionAdmin(admin.ModelAdmin):
     days_remaining.short_description = "Days Left"
 
     # actions = ["mark_as_expired", "cancel_subscriptions"]
-    
 
     # def mark_as_expired(self, request, queryset):
     #     count = 0
@@ -201,6 +283,49 @@ class SubscriptionAdmin(admin.ModelAdmin):
     #     self.message_user(request, f"{count} subscription(s) cancelled.")
 
     # cancel_subscriptions.short_description = "Cancel selected subscriptions"
+
+    # TODO: TO FIX HOW TO DISPLAY DATA
+    actions = ["fetch_from_paystack"]
+
+    def fetch_from_paystack(self, request, queryset):
+        """Admin action to fetch latest subscription details from Paystack."""
+        if queryset.count() > 1:
+            self.message_user(
+                request,
+                "Please select only one subscription to fetch.",
+                messages.WARNING,
+            )
+            return
+
+        subscription = queryset.first()
+        try:
+            paystack_data = subscription_service.fetch_subscription_details(
+                subscription
+            )
+            # Store the pretty-printed data and the subscription ID in the session
+            request.session['paystack_fetch_data'] = json.dumps(paystack_data, indent=2)
+            request.session['paystack_fetch_sub_id'] = str(subscription.id)
+
+            self.message_user(request, f"Successfully fetched data for subscription {subscription.id}.", messages.SUCCESS)
+        except Exception as e:
+            self.message_user(
+                request, f"Failed to fetch details from Paystack: {e}", messages.ERROR
+            )
+
+    fetch_from_paystack.short_description = "Fetch latest details from Paystack"
+    
+    def changelist_view(self, request, extra_context=None):
+        """
+        Override to pass session data to the template context.
+        """
+        extra_context = extra_context or {}
+        
+        # Pass data from session to the template
+        if 'paystack_fetch_data' in request.session:
+            extra_context['paystack_fetch_data'] = request.session.pop('paystack_fetch_data')
+            extra_context['paystack_fetch_sub_id'] = request.session.pop('paystack_fetch_sub_id')
+        
+        return super().changelist_view(request, extra_context=extra_context)
 
 
 @admin.register(PaymentTransaction)
