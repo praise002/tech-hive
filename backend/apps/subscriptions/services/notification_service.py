@@ -1,5 +1,4 @@
 import logging
-from datetime import timezone
 from decimal import Decimal
 
 from apps.accounts.emails import EmailThread

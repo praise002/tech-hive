@@ -3,20 +3,15 @@ import math
 import re
 from typing import Dict
 
-from django.core.cache import caches
-from django.db import models
+from apps.accounts.utils import UserRoles
+from apps.content.choices import ArticleStatusChoices
+from apps.content.models import Article, ArticleReview, ArticleWorkflowHistory
+from django.conf import settings
+from django.contrib.auth import get_user_model
 
 logger = logging.getLogger(__name__)
 
-class ArticleStatusChoices(models.TextChoices):
-    DRAFT = "draft", "Draft"
-    SUBMITTED_FOR_REVIEW = "submitted_for_review", "Submitted for Review"
-    UNDER_REVIEW = "under_review", "Under Review"
-    CHANGES_REQUESTED = "changes_requested", "Changes Requested"
-    READY = "ready_for_publishing", "Ready for Publishing"
-    PUBLISHED = "published", "Published"
-    REJECTED = "rejected", "Rejected"
-    # ARCHIVED = "archived", "Archived"
+User = get_user_model()
 
 
 class ReadabilityMetrics:
@@ -147,16 +142,150 @@ class ReadabilityMetrics:
 
         return math.ceil(total_seconds)
 
-# Not needed because once article is published it can't be updated
-def invalidate_article_summary_cache(article_id: str):
+
+def assign_reviewer():
     """
-    Invalidate cached summary for an article
-    
-    Usage:
-        When article is updated
-        invalidate_article_summary_cache(str(article.id))
+    Auto-assign reviewer using least-busy algorithm
+    Returns: User object or None
     """
-    cache = caches['summaries']
-    cache_key = f"summary:{article_id}"
-    cache.delete(cache_key)
-    logger.info(f"Invalidated summary cache for article {article_id}")    
+    reviewers = User.objects.filter(groups__name=UserRoles.REVIEWER, is_active=True)
+
+    if not reviewers.exists():
+        return None
+
+    # Count active reviews per reviewer
+    reviewer_workload = []
+    for reviewer in reviewers:
+        active_count = ArticleReview.objects.filter(
+            reviewed_by=reviewer, is_active=True, status__in=["pending", "in_progress"]
+        ).count()
+        reviewer_workload.append((reviewer, active_count))
+
+    # Sort by workload (ascending)
+    reviewer_workload.sort(key=lambda x: x[1])
+
+    # Return reviewer with least workload
+    return reviewer_workload[0][0]
+
+
+def assign_editor():
+    """
+    Auto-assign editor using least-busy algorithm
+    Returns: User object or None
+    """
+    editors = User.objects.filter(groups__name=UserRoles.EDITOR, is_active=True)
+
+    if not editors.exists():
+        return None
+
+    # Count active assignments per editor
+    editor_workload = []
+    for editor in editors:
+        active_count = Article.objects.filter(
+            assigned_editor=editor, status=ArticleStatusChoices.READY
+        ).count()
+        editor_workload.append((editor, active_count))
+
+    # Sort by workload (ascending)
+    editor_workload.sort(key=lambda x: x[1])
+
+    # Return editor with least workload
+    return editor_workload[0][0]
+
+
+# TODO: STILL NEED TO UNDERSTAND WHAT IS GOING ON - READ DOCS
+def get_liveblocks_permissions(user, article):
+    """
+    Determine Liveblocks room access level
+    Returns: "WRITE", "READ", or "NONE"
+    """
+
+    # WRITE ACCESS - Can edit content
+    if article.status in [
+        ArticleStatusChoices.DRAFT,
+        ArticleStatusChoices.CHANGES_REQUESTED,
+    ]:
+        if article.author == user:
+            return "WRITE"
+
+    elif article.status == ArticleStatusChoices.UNDER_REVIEW:
+        if article.assigned_reviewer == user:
+            return "WRITE"
+
+    elif article.status == ArticleStatusChoices.READY:
+        if article.assigned_editor == user:
+            return "WRITE"
+
+    # READ ACCESS - Can view and comment
+    if article.status == ArticleStatusChoices.PUBLISHED:
+        # Published articles are read-only for everyone
+        return "READ"
+
+    # Allow read access to people in the workflow
+    if user in [article.author, article.assigned_reviewer, article.assigned_editor]:
+        return "READ"
+
+    # NO ACCESS
+    return "NONE"
+
+
+# TODO:
+def create_liveblocks_token(user, article, permission_level):
+    pass
+
+
+def sync_content_from_liveblocks(article):
+    """
+    Fetch latest content from Liveblocks and save to Django
+    Called before critical workflow transitions
+    """
+    import requests
+    from django.utils import timezone
+
+    room_id = f"article-{article.id}"
+
+    try:
+        # Fetch document from Liveblocks
+        response = requests.get(
+            f"https://api.liveblocks.io/v2/rooms/{room_id}/storage",
+            headers={"Authorization": f"Bearer {settings.LIVEBLOCKS_SECRET_KEY}"},
+            timeout=10,
+        )
+
+        if response.status_code == 200:
+            data = response.json()
+
+            # TODO: FIX LATER
+            # Extract content (format depends on Liveblocks storage structure)
+            # This will need adjustment based on actual Liveblocks data format
+            # Assume the frontend stores the article content under the key "articleBody".
+            # This key MUST match what your frontend code is using.
+            content = data.get("articleBody", "")
+
+            # Update article
+            article.content = content
+            article.content_last_synced_at = timezone.now()
+            article.save(update_fields=["content", "content_last_synced_at"])
+
+            return True
+        else:
+            print(f"Failed to fetch Liveblocks content: {response.status_code}")
+            return False
+
+    except Exception as e:
+        print(f"Error syncing from Liveblocks: {str(e)}")
+        return False
+
+
+def create_workflow_history(article, from_status, to_status, changed_by, notes=None):
+    """
+    Create workflow history entry
+    """
+
+    ArticleWorkflowHistory.objects.create(
+        article=article,
+        from_status=from_status,
+        to_status=to_status,
+        changed_by=changed_by,
+        notes=notes,
+    )

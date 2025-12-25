@@ -1,8 +1,10 @@
+import random
 import uuid
 from datetime import timedelta
 
-from apps.common.models import BaseModel, IsDeletedModel
+from apps.common.models import IsDeletedModel
 from apps.common.validators import validate_file_size
+from apps.content.choices import CURSOR_COLORS
 from autoslug import AutoSlugField
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
@@ -38,6 +40,12 @@ class User(AbstractBaseUser, IsDeletedModel, PermissionsMixin):
 
     avatar = models.ImageField(
         upload_to="avatars/", null=True, blank=True, validators=[validate_file_size]
+    )
+
+    cursor_color = models.CharField(
+        max_length=7,
+        default=random.choice(CURSOR_COLORS),
+        help_text="Hex color for Liveblocks cursor and mentions",
     )
 
     USERNAME_FIELD = "email"

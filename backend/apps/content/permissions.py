@@ -2,7 +2,9 @@ from apps.accounts.utils import UserRoles
 from rest_framework import permissions
 from rest_framework.permissions import BasePermission
 
-from .models import Article, ArticleReview, ArticleStatusChoices, Category
+from apps.content.choices import ArticleStatusChoices
+
+from .models import Article, ArticleReview, Category
 
 
 class CustomBasePermission(BasePermission):

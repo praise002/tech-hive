@@ -36,7 +36,6 @@ from apps.content.throttles import (
     ArticleSummaryRegenerateThrottle,
     ArticleSummaryThrottle,
 )
-from apps.content.utils import ArticleStatusChoices
 from django.contrib.auth.models import Group
 from django.db import transaction
 from django.db.models import Prefetch
@@ -49,6 +48,8 @@ from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+
+from apps.content.choices import ArticleStatusChoices
 
 article_tags = ["Articles"]
 onboarding_tags = ["Onboarding"]

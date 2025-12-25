@@ -1,5 +1,6 @@
 from apps.accounts.models import ContributorOnboarding, User
 from apps.content import models
+from apps.content.choices import ArticleStatusChoices
 from apps.content.CustomRelations import CustomHyperlinkedIdentityField
 from apps.content.models import (
     Article,
@@ -8,7 +9,6 @@ from apps.content.models import (
     CommentMention,
     CommentThread,
 )
-from apps.content.utils import ArticleStatusChoices
 from apps.notification.utils import create_notification
 from django.db.models import F
 from drf_spectacular.utils import extend_schema_field
@@ -643,9 +643,11 @@ class ArticleReactionStatusSerializer(serializers.Serializer):
 
 # TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH
 
+
 # Response serializer
 class ArticleSummaryResponseSerializer(serializers.Serializer):
     """Serializer for article summary response"""
+
     article_id = serializers.UUIDField(read_only=True)
     article_title = serializers.CharField(read_only=True)
     article_slug = serializers.CharField(read_only=True)
