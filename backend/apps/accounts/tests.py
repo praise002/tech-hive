@@ -268,7 +268,7 @@ class TestAccounts(APITestCase):
             response.json(),
             {
                 "status": SUCCESS_RESPONSE_STATUS,
-                "message": "Email address already verified. No OTP sent.",
+                "message": "Email address already verified.",
             },
         )
 

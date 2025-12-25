@@ -379,7 +379,6 @@ class ArticleRetrieveUpdateView(HeaderMixin, APIView):
                     ArticleStatusChoices.CHANGES_REQUESTED,
                     ArticleStatusChoices.SUBMITTED_FOR_REVIEW,
                     ArticleStatusChoices.UNDER_REVIEW,
-                    ArticleStatusChoices.REVIEW_COMPLETED,
                     ArticleStatusChoices.READY,
                     ArticleStatusChoices.REJECTED,
                 ],

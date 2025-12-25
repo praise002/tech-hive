@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
 
-from backend.apps.subscriptions.services import subscription_service
+from apps.subscriptions.services import subscription_service
 
 from .models import PaymentTransaction, Subscription, SubscriptionPlan, WebhookLog
 

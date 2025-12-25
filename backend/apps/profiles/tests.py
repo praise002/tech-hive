@@ -221,14 +221,6 @@ class TestProfiles(APITestCase):
             slug="under-review-article",
         )
 
-        review_completed_article = Article.objects.create(
-            title="Review Completed Article",
-            content="Review Completed content",
-            author=self.user1,
-            status=ArticleStatusChoices.REVIEW_COMPLETED,
-            slug="review-completed-article",
-        )
-
         ready_article = Article.objects.create(
             title="Ready Article",
             content="Ready content",
@@ -246,6 +238,7 @@ class TestProfiles(APITestCase):
         response = self.client.get(
             self.article_detail_url.replace("<slug:slug>", draft_article.slug)
         )
+
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["data"]["title"], "Draft Article")
 
@@ -271,15 +264,6 @@ class TestProfiles(APITestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["data"]["title"], "Changes Requested Article")
-
-        # Should be able to retrieve review completed article
-        response = self.client.get(
-            self.article_detail_url.replace(
-                "<slug:slug>", review_completed_article.slug
-            )
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data["data"]["title"], "Review Completed Article")
 
         # Should be able to retrieve ready article
         response = self.client.get(
@@ -382,14 +366,6 @@ class TestProfiles(APITestCase):
             slug="under-review-article",
         )
 
-        review_completed_article = Article.objects.create(
-            title="Review Completed Article",
-            content="Review Completed content",
-            author=self.user1,
-            status=ArticleStatusChoices.REVIEW_COMPLETED,
-            slug="review-completed-article",
-        )
-
         ready_article = Article.objects.create(
             title="Ready Article",
             content="Ready content",
@@ -448,15 +424,6 @@ class TestProfiles(APITestCase):
         # Should NOT be able to update under review article (permission denied)
         response = self.client.patch(
             self.article_detail_url.replace("<slug:slug>", under_review_article.slug),
-            update_data,
-        )
-        self.assertEqual(response.status_code, 403)
-
-        # Should NOT be able to update review completed article (permission denied)
-        response = self.client.patch(
-            self.article_detail_url.replace(
-                "<slug:slug>", review_completed_article.slug
-            ),
             update_data,
         )
         self.assertEqual(response.status_code, 403)

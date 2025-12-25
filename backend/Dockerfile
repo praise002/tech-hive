@@ -1,6 +1,6 @@
 # --- STAGE 1: Builder ---
 # Base image
-FROM python:3.12-slim as builder
+FROM python:3.12-slim AS builder
 
 # Create a virtual environment
 RUN python -m venv /opt/venv

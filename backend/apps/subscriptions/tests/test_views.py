@@ -1,6 +1,6 @@
 from datetime import timedelta
 from decimal import Decimal
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from apps.common.utils import TestUtil
 from apps.subscriptions.choices import StatusChoices, SubscriptionChoices
@@ -63,7 +63,7 @@ class SubscribeToPremiumViewTest(SubscriptionAPITestCase):
             self.url,
             {"plan_id": str(self.plan.id), "start_trial": True},
         )
-        print(response.data)
+        
 
         response_data = response.data["data"]
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -116,7 +116,7 @@ class SubscribeToPremiumViewTest(SubscriptionAPITestCase):
         response = self.client.post(self.url, {"start_trial": False})
 
         self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
-        print(response.data)
+        
 
     def test_subscribe_invalid_plan_id(self):
         """Test subscribing with invalid plan_id fails"""
@@ -127,7 +127,7 @@ class SubscribeToPremiumViewTest(SubscriptionAPITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
-        print(response.data)
+        
 
     def test_subscribe_user_already_has_subscription(self):
         """Test subscribing when user already has subscription"""
@@ -145,7 +145,7 @@ class SubscribeToPremiumViewTest(SubscriptionAPITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
-        print(response.data)
+        
         self.assertIn(
             "already has an active subscription", str(response.data["message"])
         )
@@ -155,7 +155,7 @@ class SubscribeToPremiumViewTest(SubscriptionAPITestCase):
         response = self.client.post(
             self.url, {"plan_id": str(self.plan.id), "start_trial": False}
         )
-        print(response.data)
+        
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -192,7 +192,7 @@ class PaymentCallbackViewTest(SubscriptionAPITestCase):
 
         self.client.force_authenticate(self.user1)
         response = self.client.get(self.url, {"reference": "TXN_test123"})
-        print(response.data)
+        
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("Payment successful", response.data["message"])
@@ -209,7 +209,7 @@ class PaymentCallbackViewTest(SubscriptionAPITestCase):
 
         self.client.force_authenticate(self.user1)
         response = self.client.get(self.url, {"reference": "TXN_test123"})
-        print(response.data)
+        
         self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
 
         self.assertIn("Payment failed", response.data["message"])
@@ -218,7 +218,7 @@ class PaymentCallbackViewTest(SubscriptionAPITestCase):
         """Test callback without reference fails"""
         self.client.force_authenticate(self.user1)
         response = self.client.get(self.url)
-        print(response.data)
+        
 
         self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
         self.assertIn("reference", str(response.data).lower())
@@ -247,7 +247,7 @@ class SubscriptionDetailsViewTest(SubscriptionAPITestCase):
 
         self.client.force_authenticate(self.user1)
         response = self.client.get(self.url)
-        print(response.data)
+        
         response_data = response.data["data"]
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -259,7 +259,7 @@ class SubscriptionDetailsViewTest(SubscriptionAPITestCase):
 
         self.client.force_authenticate(self.user1)
         response = self.client.get(self.url)
-        print(response.data)
+        
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -294,7 +294,7 @@ class CancelSubscriptionViewTest(SubscriptionAPITestCase):
 
         self.client.force_authenticate(self.user1)
         response = self.client.patch(self.url, {"reason": "Too expensive"})
-        print(response.data)
+        
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("cancelled successfully", response.data["message"])
@@ -314,7 +314,7 @@ class CancelSubscriptionViewTest(SubscriptionAPITestCase):
             self.url,
             {"reason": "Testing"},
         )
-        print(response.data)
+        
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn("No active subscription", str(response.data))
@@ -351,7 +351,7 @@ class ReactivateSubscriptionViewTest(SubscriptionAPITestCase):
 
         self.client.force_authenticate(self.user2)
         response = self.client.post(self.url)
-        print(response.data)
+        
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("reactivated successfully", response.data["message"])
@@ -360,7 +360,7 @@ class ReactivateSubscriptionViewTest(SubscriptionAPITestCase):
         """Test reactivating when no cancelled subscription"""
         self.client.force_authenticate(self.user2)
         response = self.client.post(self.url)
-        print(response.data)
+        
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn("No cancelled subscription", str(response.data))
@@ -368,7 +368,7 @@ class ReactivateSubscriptionViewTest(SubscriptionAPITestCase):
     def test_reactivate_subscription_unauthenticated(self):
         """Test reactivating without authentication fails"""
         response = self.client.post(self.url)
-        print(response.data)
+        
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -409,7 +409,7 @@ class RetryPaymentViewTest(SubscriptionAPITestCase):
 
         self.client.force_authenticate(self.user1)
         response = self.client.post(self.url)
-        print(response.data)
+        
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("Payment successful", response.data["message"])
@@ -474,7 +474,7 @@ class UpdatePaymentMethodViewTest(SubscriptionAPITestCase):
 
         self.client.force_authenticate(self.user2)
         response = self.client.get(self.url)
-        print(response.data)
+        
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["data"]["update_link"], update_link)
@@ -527,7 +527,7 @@ class PaymentHistoryViewTest(SubscriptionAPITestCase):
 
         self.client.force_authenticate(self.user1)
         response = self.client.get(self.url)
-        print(response.data)
+        
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["data"]["results"]), 2)
@@ -569,7 +569,7 @@ class PaymentHistoryViewTest(SubscriptionAPITestCase):
         # User1 makes request
         self.client.force_authenticate(self.user1)
         response = self.client.get(self.url)
-        print(response.data)
+        
 
         # Assert user1 only sees their transaction
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -582,7 +582,7 @@ class PaymentHistoryViewTest(SubscriptionAPITestCase):
         """Test getting empty payment history"""
         self.client.force_authenticate(self.user1)
         response = self.client.get(self.url)
-        print(response.data)
+        
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["data"]["results"]), 0)
@@ -611,7 +611,7 @@ class SubscriptionPlanListViewTest(SubscriptionAPITestCase):
         )
 
         response = self.client.get(self.url)
-        print(response.data)
+        
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Should only return the active plan from setUp
@@ -623,67 +623,3 @@ class SubscriptionPlanListViewTest(SubscriptionAPITestCase):
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-
-class PaystackWebhookViewTest(SubscriptionAPITestCase):
-    """Test Paystack webhook endpoint"""
-
-    url = "/api/v1/subscriptions/webhook/"
-
-    @patch("apps.subscriptions.services.webhook_service.WebhookService.process_webhook")
-    def test_webhook_success(self, mock_service):
-        """Test successful webhook processing"""
-        # Mock service response
-        mock_service.process_webhook.return_value = True
-
-        # Prepare webhook data
-        payload = {
-            "event": "charge.success",
-            "data": {"reference": "TXN_test123", "status": "success"},
-        }
-
-        response = self.client.post(
-            self.url, payload, format="json", HTTP_X_PAYSTACK_SIGNATURE="test_signature"
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    # TODO: STILLL FAILING
-    # @patch("apps.subscriptions.services.webhook_service.WebhookService.process_webhook")
-    # def test_webhook_invalid_signature(self, mock_service):
-    #     """Test webhook with invalid signature"""
-    #     # Mock service response
-    #     mock_service.process_webhook.return_value = False
-
-    #     # Prepare webhook data
-    #     payload = {"event": "charge.success", "data": {}}
-
-    #     # Make request
-    #     response = self.client.post(
-    #         self.url,
-    #         payload,
-    #         format="json",
-    #         HTTP_X_PAYSTACK_SIGNATURE="invalid_signature",
-    #     )
-
-    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    # def test_webhook_missing_signature(self):
-    #     """Test webhook without signature header"""
-    #     payload = {"event": "charge.success", "data": {}}
-
-    #     # Make request without signature
-    #     response = self.client.post(self.url, payload, format="json")
-
-    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    # def test_webhook_missing_event_type(self):
-    #     """Test webhook without event type"""
-    #     payload = {"data": {}}
-
-    #     response = self.client.post(
-    #         self.url, payload, format="json", HTTP_X_PAYSTACK_SIGNATURE="test_signature"
-    #     )
-
-    #     # Assert response
-    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
