@@ -295,7 +295,10 @@ API documentation will be available at:
 - [Django prometheus](https://pypi.org/project/django-prometheus/)
 - [Enhancing software quality through comprehensive testing stress tests and penetration tests](https://medium.com/@fadhilahazzah04/enhancing-software-quality-through-comprehensive-testing-stress-tests-and-penetration-tests-356a8d59e54b)
 - [Sentry](https://medium.com/@vinasllgn/monitoring-340ddb473ad9)
-- 
+- [Liveblock webhooks](https://liveblocks.io/docs/platform/webhooks)
+- [REST API Endpoints](https://liveblocks.io/docs/api-reference/rest-api-endpoints)
+- [Multi-player text editor](https://liveblocks.io/docs/ready-made-features/multiplayer/text-editor/tiptap)
+- [How to grant access to individual rooms](https://liveblocks.io/docs/guides/how-to-grant-access-to-individual-rooms-with-access-tokens)
 
 ## FIXES
 - The order of silk middleware matters in development, put it first for it to work.
