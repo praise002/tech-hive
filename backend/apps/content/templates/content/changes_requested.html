@@ -1,0 +1,55 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Changes Requested{% endblock %}
+
+{% block content %}
+<h1>📋 Changes Requested</h1>
+
+<p>Hi {{ author.first_name|default:author.full_name }},</p>
+
+<p><strong>{{ reviewer.full_name }}</strong> has reviewed your article and requested some changes.</p>
+
+<div class="warning-box">
+    <p style="margin: 0; font-weight: 600; color: #f58f29;">Action Required</p>
+    <p class="text-small" style="margin: 10px 0 0 0;">
+        <strong>Article:</strong> {{ article.title }}
+    </p>
+</div>
+
+<h2>Next Steps</h2>
+<table style="width: 100%; margin: 20px 0;">
+    <tr>
+        <td style="padding: 12px 0; border-bottom: 1px solid #eff1f1;">
+            <strong>1.</strong> Review the feedback in the editor
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 12px 0; border-bottom: 1px solid #eff1f1;">
+            <strong>2.</strong> Make necessary revisions
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 12px 0;">
+            <strong>3.</strong> Resubmit for another review
+        </td>
+    </tr>
+</table>
+
+<div style="text-align: center;">
+    <a href="{{ article_url }}" class="btn btn-primary">View Feedback & Edit →</a>
+</div>
+
+<div class="info-box">
+    <p style="margin: 0; font-weight: 600;">💡 Tips for Revisions</p>
+    <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+        <li>All feedback is available as comments in the editor</li>
+        <li>Address each point raised by the reviewer</li>
+        <li>Don't hesitate to ask for clarification</li>
+    </ul>
+</div>
+
+<p style="margin-top: 30px;">
+    Best regards,<br>
+    <strong>The Tech Hive Team</strong>
+</p>
+{% endblock %}

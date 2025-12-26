@@ -1,0 +1,46 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Article Approved{% endblock %}
+
+{% block content %}
+<h1>🎉 Great News! Your Article is Approved</h1>
+
+<p>Hi {{ author.first_name|default:author.full_name }},</p>
+
+<p>Congratulations! Your article has been approved by <strong>{{ reviewer.full_name }}</strong>.</p>
+
+<div class="success-box">
+    <p style="margin: 0; font-weight: 600; color: #2ea316;">✓ Approved for Publishing</p>
+    <p class="text-small" style="margin: 10px 0 0 0;">
+        <strong>Article:</strong> {{ article.title }}
+    </p>
+</div>
+
+<h2>What Happens Next?</h2>
+<table style="width: 100%; margin: 20px 0;">
+    <tr>
+        <td style="padding: 12px 0; border-bottom: 1px solid #eff1f1;">
+            <strong>Now:</strong> Your article is with an editor
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 12px 0; border-bottom: 1px solid #eff1f1;">
+            <strong>Next:</strong> Final touches (categories, tags, etc.)
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 12px 0;">
+            <strong>Soon:</strong> Your article will be published!
+        </td>
+    </tr>
+</table>
+
+<div style="text-align: center;">
+    <a href="{{ article_url }}" class="btn btn-primary">View Your Article →</a>
+</div>
+
+<p style="margin-top: 30px;">
+    Thank you for your excellent contribution!<br>
+    <strong>The Tech Hive Team</strong>
+</p>
+{% endblock %}

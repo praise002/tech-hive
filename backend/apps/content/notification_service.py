@@ -264,6 +264,6 @@ notification_service = NotificationService()
 
 # According to the Liveblocks documentation:
 
-"The event won't be triggered if the user has seen the thread..."
+# "The event won't be triggered if the user has seen the thread..."
 # TODO: MOST OF THE article_url are non-existent so fix that in the frontend
 # TODO: send_changes_requested_email(self, article) and the webhooks email events looks similar

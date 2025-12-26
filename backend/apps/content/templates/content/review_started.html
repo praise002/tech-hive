@@ -1,0 +1,29 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Review Started{% endblock %}
+
+{% block content %}
+<h1>✓ Review Process Started</h1>
+
+<p>Hi {{ author.first_name|default:author.full_name }},</p>
+
+<p>Good news! <strong>{{ reviewer.full_name }}</strong> has started reviewing your article.</p>
+
+<div class="success-box">
+    <p style="margin: 0; font-weight: 600; color: #2ea316;">Review in Progress</p>
+    <p class="text-small" style="margin: 10px 0 0 0;">
+        <strong>Article:</strong> {{ article.title }}
+    </p>
+</div>
+
+<p>The reviewer will provide feedback and let you know the next steps. You can monitor the progress from your dashboard.</p>
+
+<div style="text-align: center;">
+    <a href="{{ article_url }}" class="btn btn-secondary">View Article →</a>
+</div>
+
+<p style="margin-top: 30px;">
+    We'll notify you once the review is complete.<br>
+    <strong>The Tech Hive Team</strong>
+</p>
+{% endblock %}
