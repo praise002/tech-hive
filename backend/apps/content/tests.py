@@ -1360,3 +1360,210 @@ class TestArticleReactions(APITestCase):
 # python manage.py test apps.content.tests.TestContents.test_comment_like_toggle_unauthenticated
 # python manage.py test apps.content.tests.TestArticleReactions.test_toggle_reaction_unauthenticated
 # python manage.py test apps.content.tests.TestArticleReactions.test_toggle_reaction_unauthenticated
+
+# apps/content/tests/test_liveblocks_endpoints.py
+
+# from django.test import TestCase
+# from django.contrib.auth import get_user_model
+# from rest_framework.test import APIClient
+# from rest_framework import status
+# from apps.content.models import Article, ArticleStatusChoices, Category
+
+# User = get_user_model()
+
+
+# class UserSearchViewTestCase(TestCase):
+#     """Test user search endpoint"""
+
+#     def setUp(self):
+#         self.client = APIClient()
+        
+#         # Create users
+#         self.author = User.objects.create_user(
+#             username='author',
+#             email='author@example.com',
+#             first_name='John',
+#             last_name='Author'
+#         )
+#         self.reviewer = User.objects.create_user(
+#             username='reviewer',
+#             email='reviewer@example.com',
+#             first_name='Jane',
+#             last_name='Reviewer'
+#         )
+#         self.editor = User.objects.create_user(
+#             username='editor',
+#             email='editor@example.com',
+#             first_name='Mike',
+#             last_name='Editor'
+#         )
+#         self.random_user = User.objects.create_user(
+#             username='random',
+#             email='random@example.com',
+#             first_name='Random',
+#             last_name='User'
+#         )
+        
+#         # Create article
+#         self.article = Article.objects.create(
+#             title='Test Article',
+#             content='Test content',
+#             author=self.author,
+#             status=ArticleStatusChoices.UNDER_REVIEW,
+#             assigned_reviewer=self.reviewer
+#         )
+
+#     def test_search_requires_authentication(self):
+#         """Test that endpoint requires authentication"""
+#         response = self.client.get('/api/users/search/?q=john&room_id=article-1')
+#         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+#     def test_search_requires_query_param(self):
+#         """Test that query parameter is required"""
+#         self.client.force_authenticate(user=self.author)
+#         response = self.client.get('/api/users/search/?room_id=article-1')
+#         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+#     def test_search_requires_room_id_param(self):
+#         """Test that room_id parameter is required"""
+#         self.client.force_authenticate(user=self.author)
+#         response = self.client.get('/api/users/search/?q=john')
+#         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+#     def test_search_validates_room_id_format(self):
+#         """Test that room_id must start with 'article-'"""
+#         self.client.force_authenticate(user=self.author)
+#         response = self.client.get('/api/users/search/?q=john&room_id=invalid-123')
+#         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+#     def test_search_filters_by_article_access(self):
+#         """Test that search only returns users with article access"""
+#         self.client.force_authenticate(user=self.author)
+#         response = self.client.get(
+#             f'/api/users/search/?q=&room_id=article-{self.article.id}'
+#         )
+        
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         user_ids = [user['id'] for user in response.data]
+        
+#         # Should include author and reviewer
+#         self.assertIn(str(self.author.id), user_ids)
+#         self.assertIn(str(self.reviewer.id), user_ids)
+        
+#         # Should NOT include random user
+#         self.assertNotIn(str(self.random_user.id), user_ids)
+
+#     def test_search_matches_first_name(self):
+#         """Test search matches first name"""
+#         self.client.force_authenticate(user=self.author)
+#         response = self.client.get(
+#             f'/api/users/search/?q=jane&room_id=article-{self.article.id}'
+#         )
+        
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         self.assertEqual(len(response.data), 1)
+#         self.assertEqual(response.data[0]['name'], 'Jane Reviewer')
+
+#     def test_search_returns_empty_for_draft(self):
+#         """Test that draft articles return empty results"""
+#         self.article.status = ArticleStatusChoices.DRAFT
+#         self.article.save()
+        
+#         self.client.force_authenticate(user=self.author)
+#         response = self.client.get(
+#             f'/api/users/search/?q=john&room_id=article-{self.article.id}'
+#         )
+        
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         self.assertEqual(len(response.data), 0)
+
+#     def test_search_includes_editor_when_ready(self):
+#         """Test that editor is included when article is ready"""
+#         self.article.status = ArticleStatusChoices.READY
+#         self.article.assigned_editor = self.editor
+#         self.article.save()
+        
+#         self.client.force_authenticate(user=self.author)
+#         response = self.client.get(
+#             f'/api/users/search/?q=&room_id=article-{self.article.id}'
+#         )
+        
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         user_ids = [user['id'] for user in response.data]
+        
+#         # Should include author, reviewer, and editor
+#         self.assertIn(str(self.author.id), user_ids)
+#         self.assertIn(str(self.reviewer.id), user_ids)
+#         self.assertIn(str(self.editor.id), user_ids)
+
+
+# class UserBatchViewTestCase(TestCase):
+#     """Test user batch lookup endpoint"""
+
+#     def setUp(self):
+#         self.client = APIClient()
+        
+#         # Create users
+#         self.user1 = User.objects.create_user(
+#             username='user1',
+#             email='user1@example.com',
+#             first_name='John',
+#             last_name='Doe'
+#         )
+#         self.user2 = User.objects.create_user(
+#             username='user2',
+#             email='user2@example.com',
+#             first_name='Jane',
+#             last_name='Smith'
+#         )
+
+#     def test_batch_requires_authentication(self):
+#         """Test that endpoint requires authentication"""
+#         response = self.client.post('/api/users/batch/', {"userIds": ["1"]})
+#         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+#     def test_batch_requires_user_ids(self):
+#         """Test that userIds is required"""
+#         self.client.force_authenticate(user=self.user1)
+#         response = self.client.post('/api/users/batch/', {})
+#         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+#     def test_batch_fetches_multiple_users(self):
+#         """Test fetching multiple users"""
+#         self.client.force_authenticate(user=self.user1)
+#         response = self.client.post('/api/users/batch/', {
+#             "userIds": [str(self.user1.id), str(self.user2.id)]
+#         })
+        
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         self.assertEqual(len(response.data), 2)
+        
+#         names = [user['name'] for user in response.data]
+#         self.assertIn('John Doe', names)
+#         self.assertIn('Jane Smith', names)
+
+#     def test_batch_returns_user_info(self):
+#         """Test that response includes all user fields"""
+#         self.client.force_authenticate(user=self.user1)
+#         response = self.client.post('/api/users/batch/', {
+#             "userIds": [str(self.user1.id)]
+#         })
+        
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         user_data = response.data[0]
+        
+#         self.assertIn('id', user_data)
+#         self.assertIn('name', user_data)
+#         self.assertIn('avatar', user_data)
+#         self.assertIn('color', user_data)
+
+#     def test_batch_handles_nonexistent_users(self):
+#         """Test handling of non-existent user IDs"""
+#         self.client.force_authenticate(user=self.user1)
+#         response = self.client.post('/api/users/batch/', {
+#             "userIds": [str(self.user1.id), "99999"]
+#         })
+        
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         # Should only return existing user
+#         self.assertEqual(len(response.data), 1)

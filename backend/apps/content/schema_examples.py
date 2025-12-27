@@ -26,6 +26,7 @@ from apps.content.serializers import (
     TagSerializer,
     ThreadReplySerializer,
     ToolSerializer,
+    UserMentionSerializer,
 )
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse
 
@@ -847,3 +848,113 @@ ARTICLE_SUMMARY_RESPONSE_EXAMPLE = {
         ],
     ),
 }
+
+
+USER_SEARCH_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        response=UserMentionSerializer(many=True),
+        description="Users retrieved successfully",
+        examples=[
+            OpenApiExample(
+                name="Successful search",
+                value={
+                    "status": "success",
+                    "message": "Users retrieved successfully",
+                    "data": [
+                        {
+                            "id": "550e8400-e29b-41d4-a716-446655440000",
+                            "name": "John Doe",
+                            "avatar_url": "https://example.com/avatars/john.jpg",
+                            "cursor_color": "#FF5733",
+                        },
+                        {
+                            "id": "660e8400-e29b-41d4-a716-446655440001",
+                            "name": "Jane Smith",
+                            "avatar_url": "https://example.com/avatars/jane.jpg",
+                            "cursor_color": "#3357FF",
+                        },
+                    ],
+                },
+            ),
+            OpenApiExample(
+                name="No results found",
+                value={
+                    "status": "success",
+                    "message": "No users found matching your search",
+                    "data": [],
+                },
+            ),
+            OpenApiExample(
+                name="No users available for article status",
+                value={
+                    "status": "success",
+                    "message": "No users available for mentions in this article status",
+                    "data": [],
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    404: OpenApiResponse(
+        description="Not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Not found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Not found",
+                    "error_code": "non_existent",
+                },
+            )
+        ],
+    ),
+    422: ErrorDataResponseSerializer,
+}
+
+
+USER_BATCH_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        response=UserMentionSerializer,
+        description="Users retrieved successfully",
+        examples=[
+            OpenApiExample(
+                name="Successful batch fetch",
+                value={
+                    "status": "success",
+                    "message": "Users fetched",
+                    "data": [
+                        {
+                            "id": "550e8400-e29b-41d4-a716-446655440000",
+                            "name": "John Doe",
+                            "avatar_url": "https://example.com/avatars/john.jpg",
+                            "cursor_color": "#FF6B6B",
+                        },
+                        {
+                            "id": "660e8400-e29b-41d4-a716-446655440001",
+                            "name": "Jane Smith",
+                            "avatar_url": "https://example.com/avatars/jane.jpg",
+                            "cursor_color": "#4ECDC4",
+                        },
+                    ],
+                },
+                response_only=True,
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    422: ErrorDataResponseSerializer,
+}
+
+USER_BATCH_REQUEST_EXAMPLE = [
+    OpenApiExample(
+        name="Batch request",
+        value={
+            "user_ids": [
+                "550e8400-e29b-41d4-a716-446655440000",
+                "660e8400-e29b-41d4-a716-446655440001",
+            ]
+        },
+        request_only=True,
+    ),
+]

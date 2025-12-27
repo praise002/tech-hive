@@ -10,6 +10,8 @@ from .articles import (
     ThreadRepliesView,
     RSSFeedInfoView,
     ArticleSummaryView,
+    UserSearchView,
+    UserBatchView,
 )
 from .contents import (
     CategoryGenericView,
@@ -39,4 +41,6 @@ __all__ = [
     "ArticleReactionView",
     "RSSFeedInfoView",
     "ArticleSummaryView",
+    "UserSearchView",
+    "UserBatchView",
 ]

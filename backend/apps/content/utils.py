@@ -5,7 +5,6 @@ from typing import Dict
 
 from apps.accounts.utils import UserRoles
 from apps.content.choices import ArticleStatusChoices
-from apps.content.models import Article, ArticleReview, ArticleWorkflowHistory
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
@@ -148,6 +147,7 @@ def assign_reviewer():
     Auto-assign reviewer using least-busy algorithm
     Returns: User object or None
     """
+    from apps.content.models import ArticleReview
     reviewers = User.objects.filter(groups__name=UserRoles.REVIEWER, is_active=True)
 
     if not reviewers.exists():
@@ -173,6 +173,7 @@ def assign_editor():
     Auto-assign editor using least-busy algorithm
     Returns: User object or None
     """
+    from apps.content.models import Article
     editors = User.objects.filter(groups__name=UserRoles.EDITOR, is_active=True)
 
     if not editors.exists():
@@ -281,6 +282,7 @@ def create_workflow_history(article, from_status, to_status, changed_by, notes=N
     """
     Create workflow history entry
     """
+    from apps.content.models import ArticleWorkflowHistory
 
     ArticleWorkflowHistory.objects.create(
         article=article,

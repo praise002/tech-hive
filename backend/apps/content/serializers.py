@@ -10,10 +10,13 @@ from apps.content.models import (
     CommentThread,
 )
 from apps.notification.utils import create_notification
+from django.contrib.auth import get_user_model
 from django.db.models import F
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
+
+User = get_user_model()
 
 
 def process_tags(tag_names):
@@ -75,11 +78,11 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class ArticleSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
-    cover_image_url = serializers.SerializerMethodField(read_only=True)
-    read_time = serializers.SerializerMethodField(read_only=True)
-    author = serializers.SerializerMethodField(read_only=True)
-    total_reaction_counts = serializers.SerializerMethodField(read_only=True)
-    reaction_counts = serializers.SerializerMethodField(read_only=True)
+    cover_image_url = serializers.SerializerMethodField()
+    read_time = serializers.SerializerMethodField()
+    author = serializers.SerializerMethodField()
+    total_reaction_counts = serializers.SerializerMethodField()
+    reaction_counts = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Article
@@ -274,7 +277,6 @@ class CommentCreateSerializer(serializers.ModelSerializer):
 
         return data
 
-    # TODO: replying_to logic later
     def create(self, validated_data):
         """Create root comment or reply with proper thread handling"""
 
@@ -383,7 +385,7 @@ class CommentResponseSerializer(serializers.ModelSerializer):
     user_username = serializers.CharField(source="user.username", read_only=True)
     user_avatar = serializers.URLField(source="user.avatar_url", read_only=True)
     thread_id = serializers.UUIDField(source="thread.id", read_only=True)
-    is_root = serializers.SerializerMethodField(read_only=True)
+    is_root = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Comment
@@ -409,7 +411,7 @@ class ArticleCommentSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source="user.full_name", read_only=True)
     user_avatar = serializers.URLField(source="user.avatar_url", read_only=True)
     user_username = serializers.CharField(source="user.username", read_only=True)
-    total_replies = serializers.SerializerMethodField(read_only=True)
+    total_replies = serializers.SerializerMethodField()
     thread_id = serializers.UUIDField(source="thread.id", read_only=True)
 
     class Meta:
@@ -432,8 +434,8 @@ class ArticleCommentSerializer(serializers.ModelSerializer):
 
 
 class ArticleDetailSerializer(ArticleSerializer):
-    comments = serializers.SerializerMethodField(read_only=True)
-    comments_count = serializers.SerializerMethodField(read_only=True)
+    comments = serializers.SerializerMethodField()
+    comments_count = serializers.SerializerMethodField()
 
     class Meta(ArticleSerializer.Meta):
         fields = ArticleSerializer.Meta.fields + ["comments", "comments_count"]
@@ -523,7 +525,7 @@ class EventSerializer(serializers.ModelSerializer):
 
 class ResourceSerializer(serializers.ModelSerializer):
     category = serializers.CharField(source="category.name", read_only=True)
-    image_url = serializers.SerializerMethodField(read_only=True)
+    image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Resource
@@ -638,6 +640,59 @@ class ArticleReactionStatusSerializer(serializers.Serializer):
         read_only=True,
         allow_null=True,
         help_text="List of reaction types the current user has used (null if not authenticated or no reaction)",
+    )
+
+
+class UserMentionSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user mention data in Liveblocks
+    Used for both search results and batch lookup
+    """
+    name = serializers.CharField(read_only=True, source="full_name")
+    # SerializerMethodField is read-only by default
+    avatar_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = ["id", "name", "avatar_url", "cursor_color"]
+
+    @extend_schema_field(serializers.CharField)
+    def get_avatar_url(self, obj):
+        return obj.avatar_url
+
+    
+
+
+class UserSearchRequestSerializer(serializers.Serializer):
+    """Validate search query parameters"""
+
+    q = serializers.CharField(
+        required=True,
+        min_length=1,
+        max_length=100,
+        help_text="Search query for user names or emails",
+    )
+    room_id = serializers.CharField(
+        required=True, help_text="Liveblocks room ID (e.g., 'article-123')"
+    )
+
+    def validate_room_id(self, value):
+        """Validate room_id format"""
+        if not value.startswith("article-"):
+            raise serializers.ValidationError(
+                "Invalid room_id format. Expected format: 'article-{id}'"
+            )
+        return value
+
+
+class UserBatchRequestSerializer(serializers.Serializer):
+    """Validate batch user lookup request"""
+
+    user_ids = serializers.ListField(
+        child=serializers.CharField(),
+        allow_empty=False,
+        max_length=50,
+        help_text="List of user IDs to fetch",
     )
 
 

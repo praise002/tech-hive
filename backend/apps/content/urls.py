@@ -41,4 +41,8 @@ urlpatterns = [
         "comments/<uuid:comment_id>/likes/",
         views.CommentLikeStatusView.as_view(),
     ),
+    
+    # Liveblocks Integration
+    path('users/search/', views.UserSearchView.as_view()),
+    path('users/batch/', views.UserBatchView.as_view()),
 ]

@@ -1,22 +1,13 @@
 {% extends "emails/base_email.html" %}
 
-{% block title %}Article Assigned for Publishing{% endblock %}
+{% block title %}New Article Ready for Publishing{% endblock %}
 
 {% block content %}
-<h1>📰 New Publishing Assignment</h1>
+<h1>📰 New Article Ready for Publishing</h1>
 
-<p>Hi {{ new_editor.first_name|default:new_editor.full_name }},</p>
+<p>Hi {{ editor.first_name|default:editor.full_name }},</p>
 
-<p>The article "<strong>{{ article.title }}</strong>" has been assigned to you for final review and publishing.</p>
-
-{% if old_editor %}
-<div class="info-box">
-    <p style="margin: 0; font-weight: 600;">Reassignment</p>
-    <p class="text-small" style="margin: 10px 0 0 0;">
-        This was previously assigned to {{ old_editor.full_name }}
-    </p>
-</div>
-{% endif %}
+<p>A new article has been approved and is ready for publishing.</p>
 
 <div class="info-box">
     <p style="margin: 0; font-weight: 600;">Article Details</p>
@@ -26,6 +17,14 @@
         <strong>Reviewed by:</strong> {{ article.assigned_reviewer.full_name }}
     </p>
 </div>
+
+<h2>Your Tasks</h2>
+<ul style="margin: 20px 0; padding-left: 20px;">
+    <li>Review the final content</li>
+    <li>Add appropriate category and tags</li>
+    <li>Set SEO metadata</li>
+    <li>Publish the article</li>
+</ul>
 
 <div style="text-align: center;">
     <a href="{{ article_url }}" class="btn btn-primary">Prepare for Publishing →</a>

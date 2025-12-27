@@ -5,6 +5,7 @@ from apps.common.errors import ErrorCode
 from apps.common.exceptions import NotFoundError
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
+from apps.content.choices import ArticleStatusChoices
 from apps.content.models import Article, Comment, Tag
 from apps.content.schema_examples import (
     ACCEPT_GUIDELINES_RESPONSE_EXAMPLE,
@@ -17,6 +18,9 @@ from apps.content.schema_examples import (
     RSS_RESPONSE_EXAMPLE,
     TAG_RESPONSE_EXAMPLE,
     THREAD_REPLIES_RESPONSE_EXAMPLE,
+    USER_BATCH_REQUEST_EXAMPLE,
+    USER_BATCH_RESPONSE_EXAMPLE,
+    USER_SEARCH_RESPONSE_EXAMPLE,
 )
 from apps.content.serializers import (
     ArticleDetailSerializer,
@@ -29,6 +33,9 @@ from apps.content.serializers import (
     ContributorOnboardingSerializer,
     TagSerializer,
     ThreadReplySerializer,
+    UserBatchRequestSerializer,
+    UserMentionSerializer,
+    UserSearchRequestSerializer,
 )
 from apps.content.services import comment_like_service
 from apps.content.services.ai_service import groq_service
@@ -36,12 +43,17 @@ from apps.content.throttles import (
     ArticleSummaryRegenerateThrottle,
     ArticleSummaryThrottle,
 )
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.db import transaction
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
-from groq import RateLimitError
+from drf_spectacular.utils import (
+    OpenApiExample,
+    OpenApiParameter,
+    OpenApiTypes,
+    extend_schema,
+)
 from redis import RedisError
 from rest_framework import status
 from rest_framework.filters import SearchFilter
@@ -49,13 +61,13 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
-from apps.content.choices import ArticleStatusChoices
-
 article_tags = ["Articles"]
 onboarding_tags = ["Onboarding"]
+liveblock_tags = ["Liveblocks Integration"]
 
 logger = logging.getLogger(__name__)
 security_logger = logging.getLogger("security")
+User = get_user_model()
 
 
 class AcceptGuidelinesView(APIView):
@@ -639,3 +651,184 @@ class ArticleSummaryView(APIView):
         #         err_code=ErrorCode.SERVER_ERROR,
         #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         #     )
+
+
+class UserSearchView(APIView):
+    """
+    Search users for Liveblocks @mention suggestions.
+    Results are filtered based on article access permissions.
+    """
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserMentionSerializer
+
+    @extend_schema(
+        summary="Search users for mentions",
+        description="""
+        Search users by name or email for @mention suggestions in Liveblocks comments.
+        Results are filtered based on the article's current status to ensure users
+        can only mention people who have access to the article.
+        
+        Access rules:
+        - Draft/Changes Requested: No comments shown (empty results)
+        - Submitted/Under Review: Author + Assigned Reviewer
+        - Ready for Publishing: Author + Assigned Reviewer + Assigned Editor
+        - Published: Empty (comments disabled)
+        """,
+        parameters=[
+            OpenApiParameter(
+                name="q",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                required=True,
+                description="Search query (min 1 character)",
+                examples=[
+                    OpenApiExample("Search by first name", value="john"),
+                    OpenApiExample("Search by last name", value="doe"),
+                    OpenApiExample("Partial search", value="jo"),
+                ],
+            ),
+            OpenApiParameter(
+                name="room_id",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                required=True,
+                description="Liveblocks room ID",
+                examples=[
+                    OpenApiExample("Article room", value="article-123"),
+                ],
+            ),
+        ],
+        responses=USER_SEARCH_RESPONSE_EXAMPLE,
+        tags=liveblock_tags,
+    )
+    def get(self, request):
+        """Search users for @mention suggestions"""
+        serializer = UserSearchRequestSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+
+        query = serializer.validated_data["q"].strip().lower()
+        room_id = serializer.validated_data["room_id"]
+
+        try:
+            # Extract article ID and validate UUID format
+            article_id_str = room_id.replace("article-", "")
+
+            # Explicitly validate UUID format
+            from uuid import UUID
+
+            try:
+                article_id = UUID(article_id_str)
+            except ValueError:
+                return CustomResponse.error(
+                    message="Invalid article ID format. Expected a valid UUID.",
+                    err_code=ErrorCode.VALIDATION_ERROR,
+                )
+
+            # Fetch article
+            article = Article.objects.select_related(
+                "author", "assigned_reviewer", "assigned_editor"
+            ).get(id=article_id)
+
+        except Article.DoesNotExist:
+            raise NotFoundError()
+
+        # Determine allowed users based on article status
+        allowed_user_ids = self._get_allowed_users(article)
+
+        # If no users allowed, return empty
+        if not allowed_user_ids:
+            return CustomResponse.success(
+                message="No users available for mentions in this article status",  # ✅ Added
+                data=[],
+            )
+
+        # Search users
+        users = (
+            User.objects.filter(id__in=allowed_user_ids, is_active=True)
+            .filter(
+                Q(first_name__icontains=query)
+                | Q(last_name__icontains=query)
+                | Q(email__icontains=query)
+            )
+            .select_related("profile")[:10]
+        )  # Limit to 10 results
+
+        serializer = self.serializer_class(users, many=True)
+        return CustomResponse.success(
+            message=(
+                "Users retrieved successfully"
+                if users
+                else "No users found matching your search"
+            ),
+            data=serializer.data,
+        )
+
+    def _get_allowed_users(self, article):
+        """
+        Get list of user IDs who have access to the article
+        based on current status
+        """
+        allowed_users = []
+
+        if article.status in [
+            ArticleStatusChoices.CHANGES_REQUESTED,
+            ArticleStatusChoices.REJECTED,
+        ]:
+            if article.author:
+                allowed_users.append(article.author.id)
+            if article.assigned_reviewer:
+                allowed_users.append(article.assigned_reviewer.id)
+
+        # Comments not shown in UI
+        else:
+            return []
+
+        # Remove duplicates and None values
+        return list(set(filter(None, allowed_users)))
+
+
+class UserBatchView(APIView):
+    """
+    Batch fetch user information for Liveblocks.
+    Used to display user names, avatars, and colors in the UI.
+    """
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserMentionSerializer
+
+    @extend_schema(
+        summary="Batch fetch user information",
+        description="""
+        Fetch information for multiple users by their IDs.
+        Used by Liveblocks to display user names, avatars, and cursor colors
+        in the editor UI, comments, and presence indicators.
+        """,
+        request=UserBatchRequestSerializer,
+        responses=USER_BATCH_RESPONSE_EXAMPLE,
+        examples=USER_BATCH_REQUEST_EXAMPLE,
+        tags=liveblock_tags,
+    )
+    def post(self, request):
+        """Batch fetch user information"""
+        serializer = UserBatchRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user_ids = serializer.validated_data["user_ids"]
+
+        try:
+            users = User.objects.filter(id__in=user_ids, is_active=True).select_related(
+                "profile"
+            )
+
+            serializer = self.serializer_class(users, many=True)
+            return CustomResponse.success(
+                "Users fetched",
+                serializer.data)
+
+        except Exception as e:
+            logger.error(f"Error fetching users in batch: {str(e)}")
+            return CustomResponse.error(
+                message="Failed to fetch users",
+                err_code=ErrorCode.SERVER_ERROR,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
