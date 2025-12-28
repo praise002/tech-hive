@@ -513,6 +513,7 @@ class SavedArticlesView(APIView):
         serializer.is_valid(raise_exception=True)
 
         article = serializer.article
+        self.check_object_permissions(request, article)
         # Toggle save status
         saved_article, created = SavedArticle.objects.get_or_create(
             user=request.user, article=article

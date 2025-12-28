@@ -619,3 +619,27 @@ class TestProfiles(APITestCase):
 
 
 # python manage.py test apps.profiles.tests.TestProfiles
+
+# def test_saved_article_post_with_draft(self):
+#     """This test would FAIL without check_object_permissions"""
+    
+#     # Create a DRAFT article (not published)
+#     draft_article = Article.objects.create(
+#         title="Draft Article",
+#         content="Draft Content",
+#         author=self.user2,
+#         status=ArticleStatusChoices.DRAFT,  # ❌ Not published
+#         slug="draft-article",
+#     )
+    
+#     self.client.force_authenticate(user=self.user1)
+    
+#     # Try to save a draft article
+#     response = self.client.post(
+#         self.saved_articles_url, 
+#         {"article_id": str(draft_article.id)}
+#     )
+    
+#     # Without check_object_permissions, this returns 201 (BUG!)
+#     # With check_object_permissions, this returns 403 (CORRECT!)
+#     self.assertEqual(response.status_code, 403)  # ❌ Would FAIL without fix

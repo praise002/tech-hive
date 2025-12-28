@@ -42,7 +42,7 @@ class Category(BaseModel):
     class Meta:
         ordering = ["name"]
         indexes = [
-            models.Index(fields=["name"]),
+        models.Index(fields=["name"]),
         ]
         verbose_name_plural = "Categories"
 

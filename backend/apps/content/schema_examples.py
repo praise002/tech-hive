@@ -13,6 +13,7 @@ from apps.common.serializers import (
     SuccessResponseSerializer,
 )
 from apps.content.serializers import (
+    ArticleEditorSerializer,
     ArticleSerializer,
     ArticleSummaryResponseSerializer,
     CategorySerializer,
@@ -20,6 +21,7 @@ from apps.content.serializers import (
     CommentLikeStatusSerializer,
     CommentResponseSerializer,
     ContributorOnboardingSerializer,
+    CoverImageSerializer,
     EventSerializer,
     JobSerializer,
     ResourceSerializer,
@@ -956,5 +958,92 @@ USER_BATCH_REQUEST_EXAMPLE = [
             ]
         },
         request_only=True,
+    ),
+]
+
+COVER_IMAGE_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Cover image uploaded successfully",
+        response=CoverImageSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success",
+                value={
+                    "status": "success",
+                    "message": "Cover image uploaded successfully",
+                    "data": {
+                        "cover_image_url": "https://example.com/media/covers/article-123.jpg"
+                    },
+                },
+            )
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        response=ErrorResponseSerializer,
+        description="Permission Denied",
+    ),
+    422: ErrorDataResponseSerializer,
+}
+
+
+ARTICLE_EDITOR_RESPONSE_EXAMPLE = {
+    200: ArticleEditorSerializer,
+    403: OpenApiResponse(
+        response=ErrorResponseSerializer,
+        description="Permission Denied",
+    ),
+    404: OpenApiExample(
+        "Article Not Found",
+        value={
+            "status": "failure",
+            "message": "Article not found",
+            "code": "non_existent",
+        },
+    ),
+}
+
+ARTICLE_EDITOR_EXAMPLE = [
+    OpenApiExample(
+        "Success",
+        value={
+            "status": "success",
+            "message": "Article loaded successfully",
+            "data": {
+                "id": 123,
+                "title": "My Article Title",
+                "slug": "my-article-title",
+                "content": "<p>Article content here...</p>",
+                "status": "draft",
+                "liveblocks_room_id": "article-123",
+                "user_can_edit": True,
+                "is_published": False,
+                "author": {
+                    "id": 1,
+                    "name": "John Doe",
+                    "avatar": "https://example.com/avatars/john.jpg",
+                },
+                "assigned_reviewer": None,
+                "assigned_editor": None,
+                "category": None,
+                "tags": [],
+                "cover_image_url": "",
+                "created_at": "2024-01-01T12:00:00Z",
+                "updated_at": "2024-01-01T12:00:00Z",
+                "content_last_synced_at": None,
+            },
+        },
+        response_only=True,
+    ),
+    
+    OpenApiExample(
+        "Published - Redirect",
+        value={
+            "status": "info",
+            "message": "Article is published. Redirecting to public view.",
+            "data": {"redirect_url": "/articles/john-doe/my-article-title"},
+        },
+        response_only=True,
+        status_codes=["200"],
     ),
 ]

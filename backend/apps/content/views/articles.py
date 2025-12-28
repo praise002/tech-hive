@@ -7,6 +7,7 @@ from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
 from apps.content.choices import ArticleStatusChoices
 from apps.content.models import Article, Comment, Tag
+from apps.content.permissions import IsAuthorOrReadOnly, IsCommentAuthor
 from apps.content.schema_examples import (
     ACCEPT_GUIDELINES_RESPONSE_EXAMPLE,
     ARTICLE_DETAIL_RESPONSE_EXAMPLE,
@@ -24,6 +25,7 @@ from apps.content.schema_examples import (
 )
 from apps.content.serializers import (
     ArticleDetailSerializer,
+    ArticleEditorSerializer,
     ArticleSerializer,
     ArticleSummaryResponseSerializer,
     CommentCreateSerializer,
@@ -31,6 +33,7 @@ from apps.content.serializers import (
     CommentLikeStatusSerializer,
     CommentResponseSerializer,
     ContributorOnboardingSerializer,
+    CoverImageSerializer,
     TagSerializer,
     ThreadReplySerializer,
     UserBatchRequestSerializer,
@@ -43,6 +46,7 @@ from apps.content.throttles import (
     ArticleSummaryRegenerateThrottle,
     ArticleSummaryThrottle,
 )
+from apps.content.utils import get_liveblocks_permissions
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.db import transaction
@@ -361,7 +365,7 @@ class RSSFeedInfoView(APIView):
 
 
 class CommentDeleteView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsCommentAuthor)
 
     @extend_schema(
         summary="Delete a comment",
@@ -375,13 +379,8 @@ class CommentDeleteView(APIView):
             comment = Comment.objects.get(id=comment_id)
         except Comment.DoesNotExist:
             raise NotFoundError("Comment not found.")
-
-        if comment.user != request.user:
-            return CustomResponse.error(
-                message="You do not have permission to delete this comment.",
-                status_code=status.HTTP_403_FORBIDDEN,
-                err_code=ErrorCode.FORBIDDEN,
-            )
+        
+        self.check_object_permissions(request, comment)
 
         comment.delete()
 
@@ -653,6 +652,9 @@ class ArticleSummaryView(APIView):
         #     )
 
 
+# ==========LIVEBLOCKS===============
+
+
 class UserSearchView(APIView):
     """
     Search users for Liveblocks @mention suggestions.
@@ -821,9 +823,7 @@ class UserBatchView(APIView):
             )
 
             serializer = self.serializer_class(users, many=True)
-            return CustomResponse.success(
-                "Users fetched",
-                serializer.data)
+            return CustomResponse.success("Users fetched", serializer.data)
 
         except Exception as e:
             logger.error(f"Error fetching users in batch: {str(e)}")
@@ -832,3 +832,143 @@ class UserBatchView(APIView):
                 err_code=ErrorCode.SERVER_ERROR,
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class ArticleCoverImageUploadView(APIView):
+    """
+    Upload or update cover image for an article.
+    Only the author can upload cover images for their drafts.
+    """
+
+    permission_classes = (IsAuthorOrReadOnly,)
+    serializer_class = CoverImageSerializer
+
+    @extend_schema(
+        summary="Upload article cover image",
+        description="""
+        Upload or update the cover image for an article.
+        
+        **Requirements:**
+        - User must be the article author
+        - Article must be in DRAFT, CHANGES_REQUESTED or REJECTED status
+        - Image must be under 2MB
+        - Supported formats: JPG, PNG, WEBP
+        """,
+        request={
+            "multipart/form-data": CoverImageSerializer,
+        },
+        # responses=,
+        tags=article_tags,
+    )
+    def patch(self, request, article_id):
+        """Upload cover image for an article"""
+        try:
+            article = Article.objects.get(id=article_id)
+        except Article.DoesNotExist:
+            raise NotFoundError("Article not found")
+
+        self.check_object_permissions(request, article)
+
+        # Check article status
+        if article.status not in [
+            ArticleStatusChoices.DRAFT,
+            ArticleStatusChoices.CHANGES_REQUESTED,
+            ArticleStatusChoices.REJECTED,
+        ]:
+            return CustomResponse.error(
+                message="Can only upload cover images for draft or rejected or articles with requested changes",
+                err_code=ErrorCode.VALIDATION_ERROR,
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        serializer = self.serializer_class(article, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        article = serializer.save()
+
+        return CustomResponse.success(
+            message="Cover image uploaded successfully",
+            data={"cover_image_url": article.cover_image_url},
+        )
+
+
+class ArticleEditorView(APIView):
+    """
+    Load article data for Liveblocks editor.
+    Returns article content and metadata with appropriate permissions.
+    """
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ArticleEditorSerializer
+
+    @extend_schema(
+        summary="Load article for editor",
+        description="""
+        Fetch article data for the Liveblocks collaborative editor.
+        
+        **Access Rules:**
+        - Draft/Changes Requested: Only author can access
+        - Submitted/Under Review/Rejected: Author (read) + Assigned Reviewer (write)
+        - Ready for Publishing: Author/Reviewer (read) + Assigned Editor (write)
+        - Published: Author can view (read-only), others redirected
+        
+        
+        **Returns:**
+        - Complete article data
+        - Liveblocks room ID
+        - Edit permissions for current user
+        - User info for all assigned roles
+        """,
+        # responses=
+        # examples=
+        tags=["Article Editor"],
+    )
+    def get(self, request, id):
+        """Load article for Liveblocks editor"""
+        try:
+            article = (
+                Article.objects.select_related(
+                    "author", "assigned_reviewer", "assigned_editor", "category"
+                )
+                .prefetch_related("tags")
+                .get(id=id)
+            )
+        except Article.DoesNotExist:
+            raise NotFoundError("Article not found")
+
+        user = request.user
+        permission_level = get_liveblocks_permissions(user, article)
+
+        # NO ACCESS - Forbidden
+        if permission_level == "NONE":
+            return CustomResponse.error(
+                message="You don't have permission to access this article",
+                err_code=ErrorCode.FORBIDDEN,
+                status_code=status.HTTP_403_FORBIDDEN,
+            )
+
+        # PUBLISHED - Special handling
+        if article.status == ArticleStatusChoices.PUBLISHED:
+            # If user is the author, allow read-only access
+            if user == article.author:
+                serializer = self.serializer_class(
+                    article, context={"request": request}
+                )
+                return CustomResponse.info(
+                    message="Article is published. Read-only mode.",
+                    data=serializer.data,
+                )
+            else:
+                # Redirect others to public view
+                redirect_url = f"/articles/{article.author.username}/{article.slug}"
+                return CustomResponse.info(
+                    message="Article is published. Redirecting to public view.",
+                    data={"redirect_url": redirect_url},
+                )
+
+        # Return article data (WRITE or READ access)
+        serializer = self.serializer_class(article, context={"request": request})
+
+        return CustomResponse.success(
+            message="Article loaded successfully",
+            data=serializer.data,
+        )

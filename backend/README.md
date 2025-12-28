@@ -299,6 +299,8 @@ API documentation will be available at:
 - [REST API Endpoints](https://liveblocks.io/docs/api-reference/rest-api-endpoints)
 - [Multi-player text editor](https://liveblocks.io/docs/ready-made-features/multiplayer/text-editor/tiptap)
 - [How to grant access to individual rooms](https://liveblocks.io/docs/guides/how-to-grant-access-to-individual-rooms-with-access-tokens)
+- [Authentication with LIveblocks: Access token](https://liveblocks.io/docs/authentication/access-token)
+- [LIveblocks node: access token example](https://liveblocks.io/docs/api-reference/liveblocks-node#access-token-example)
 
 ## FIXES
 - The order of silk middleware matters in development, put it first for it to work.

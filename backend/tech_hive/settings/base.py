@@ -177,12 +177,7 @@ CLOUDINARY_STORAGE = {
         "jpg",
         "jpeg",
         "png",
-        "gif",
         "webp",
-        "bmp",
-        "tif",
-        "tiff",
-        "ico",
     ],
 }
 

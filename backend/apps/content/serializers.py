@@ -648,10 +648,11 @@ class UserMentionSerializer(serializers.ModelSerializer):
     Serializer for user mention data in Liveblocks
     Used for both search results and batch lookup
     """
+
     name = serializers.CharField(read_only=True, source="full_name")
     # SerializerMethodField is read-only by default
     avatar_url = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = User
         fields = ["id", "name", "avatar_url", "cursor_color"]
@@ -659,8 +660,6 @@ class UserMentionSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.CharField)
     def get_avatar_url(self, obj):
         return obj.avatar_url
-
-    
 
 
 class UserSearchRequestSerializer(serializers.Serializer):
@@ -695,6 +694,101 @@ class UserBatchRequestSerializer(serializers.Serializer):
         help_text="List of user IDs to fetch",
     )
 
+
+class EditorUserSerializer(serializers.ModelSerializer):
+    """Minimal user info for editor response"""
+
+    name = serializers.CharField(source="full_name", read_only=True)
+    avatar = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ["id", "name", "avatar_url"]
+
+    @extend_schema_field(serializers.URLField)
+    def get_avatar_url(self, obj):
+        return obj.avatar_url
+
+
+class ArticleEditorSerializer(serializers.ModelSerializer):
+    """
+    Complete article data for Liveblocks editor.
+    Includes all metadata needed for the editing interface.
+    """
+
+    liveblocks_room_id = serializers.SerializerMethodField()
+    user_can_edit = serializers.SerializerMethodField()
+    is_published = serializers.SerializerMethodField()
+
+    author = EditorUserSerializer(read_only=True)
+    assigned_reviewer = EditorUserSerializer(read_only=True)
+    assigned_editor = EditorUserSerializer(read_only=True)
+
+    category = CategorySerializer(read_only=True)
+
+    tags = TagSerializer(many=True, read_only=True)
+    cover_image_url = serializers.SerializerMethodField()
+
+    author = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.Article
+        fields = [
+            "id",
+            "category", # will be available if it is published
+            "title",
+            "slug",
+            "content",
+            "cover_image_url",
+            "status",
+            "liveblocks_room_id",
+            "user_can_edit",
+            "is_published",
+            "author",
+            "assigned_reviewer",
+            "assigned_editor",
+            "tags",  # will be available if it is published
+            "created_at",
+            "content_last_synced_at",
+            "updated_at",
+        ]
+        read_only_fields = fields
+
+    @extend_schema_field(serializers.URLField)
+    def get_cover_image_url(self, obj):
+        return obj.cover_image_url
+    
+    @extend_schema_field(serializers.CharField)
+    def get_liveblocks_room_id(self, obj):
+        """Generate Liveblocks room ID"""
+        return f"article-{obj.id}"
+    
+    @extend_schema_field(serializers.BooleanField)
+    def get_user_can_edit(self, obj):
+        """Determine if current user can edit"""
+        request = self.context.get('request')
+        if not request:
+            return False
+        
+        user = request.user
+        from apps.content.utils import get_liveblocks_permissions
+        
+        permission_level = get_liveblocks_permissions(user, obj)
+        return permission_level == "WRITE"
+    
+    @extend_schema_field(serializers.BooleanField)
+    def get_is_published(self, obj):
+        """Check if article is published"""
+        from apps.content.choices import ArticleStatusChoices
+        return obj.status == ArticleStatusChoices.PUBLISHED
+
+class CoverImageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = [
+            "cover_image",
+        ]
 
 # TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH
 

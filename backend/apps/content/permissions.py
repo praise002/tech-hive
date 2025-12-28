@@ -1,8 +1,7 @@
 from apps.accounts.utils import UserRoles
+from apps.content.choices import ArticleStatusChoices
 from rest_framework import permissions
 from rest_framework.permissions import BasePermission
-
-from apps.content.choices import ArticleStatusChoices
 
 from .models import Article, ArticleReview, Category
 
@@ -278,3 +277,8 @@ class CanPublishArticle(BasePermission):
             return obj.status == ArticleStatusChoices.READY
 
         return False
+
+
+class IsCommentAuthor(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.user == request.user

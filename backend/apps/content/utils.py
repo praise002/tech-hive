@@ -148,6 +148,7 @@ def assign_reviewer():
     Returns: User object or None
     """
     from apps.content.models import ArticleReview
+
     reviewers = User.objects.filter(groups__name=UserRoles.REVIEWER, is_active=True)
 
     if not reviewers.exists():
@@ -174,6 +175,7 @@ def assign_editor():
     Returns: User object or None
     """
     from apps.content.models import Article
+
     editors = User.objects.filter(groups__name=UserRoles.EDITOR, is_active=True)
 
     if not editors.exists():
@@ -194,7 +196,6 @@ def assign_editor():
     return editor_workload[0][0]
 
 
-# TODO: STILL NEED TO UNDERSTAND WHAT IS GOING ON - READ DOCS
 def get_liveblocks_permissions(user, article):
     """
     Determine Liveblocks room access level
@@ -205,6 +206,7 @@ def get_liveblocks_permissions(user, article):
     if article.status in [
         ArticleStatusChoices.DRAFT,
         ArticleStatusChoices.CHANGES_REQUESTED,
+        ArticleStatusChoices.REJECTED,
     ]:
         if article.author == user:
             return "WRITE"
