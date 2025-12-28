@@ -15,6 +15,7 @@ from apps.common.serializers import (
 from apps.content.serializers import (
     ArticleEditorSerializer,
     ArticleSerializer,
+    ArticleSubmitResponseSerializer,
     ArticleSummaryResponseSerializer,
     CategorySerializer,
     CommentLikeSerializer,
@@ -1114,118 +1115,87 @@ ARTICLE_EDITOR_EXAMPLE = [
 ]
 
 
-# ARTICLE_SUBMIT_RESPONSE_EXAMPLE = {
-#     201: OpenApiResponse(
-#         description="Article submitted successfully",
-#         response=ArticleSubmitResponseSerializer,
-#         examples=[
-#             OpenApiExample(
-#                 name="First Submission",
-#                 value={
-#                     "status": SUCCESS_RESPONSE_STATUS,
-#                     "message": "Article submitted for review successfully",
-#                     "data": {
-#                         "status": "submitted_for_review",
-#                         "assigned_reviewer": {
-#                             "id": UUID_EXAMPLE,
-#                             "name": "Jane Reviewer",
-#                             "username": "jane-reviewer",
-#                             "avatar_url": AVATAR_URL,
-#                         },
-#                         "is_resubmission": False,
-#                     },
-#                 },
-#             ),
-#             OpenApiExample(
-#                 name="Resubmission",
-#                 value={
-#                     "status": SUCCESS_RESPONSE_STATUS,
-#                     "message": "Article resubmitted successfully",
-#                     "data": {
-#                         "status": "submitted_for_review",
-#                         "assigned_reviewer": {
-#                             "id": UUID_EXAMPLE,
-#                             "name": "Jane Reviewer",
-#                             "username": "jane-reviewer",
-#                             "avatar_url": AVATAR_URL,
-#                         },
-#                         "is_resubmission": True,
-#                     },
-#                 },
-#             ),
-#         ],
-#     ),
-#     401: UNAUTHORIZED_USER_RESPONSE,
-#     403: OpenApiResponse(
-#         description="Permission denied",
-#         response=ErrorResponseSerializer,
-#         examples=[
-#             OpenApiExample(
-#                 name="Not the author",
-#                 value={
-#                     "status": ERR_RESPONSE_STATUS,
-#                     "message": "You don't have permission to submit this article",
-#                     "code": ErrorCode.FORBIDDEN,
-#                 },
-#             )
-#         ],
-#     ),
-#     404: OpenApiResponse(
-#         description="Article not found",
-#         response=ErrorResponseSerializer,
-#         examples=[
-#             OpenApiExample(
-#                 name="Article Not Found",
-#                 value={
-#                     "status": ERR_RESPONSE_STATUS,
-#                     "message": "Article not found",
-#                     "code": ErrorCode.NON_EXISTENT,
-#                 },
-#             )
-#         ],
-#     ),
-#     422: OpenApiResponse(
-#         description="Validation error",
-#         response=ErrorDataResponseSerializer,
-#         examples=[
-#             OpenApiExample(
-#                 name="Invalid Status",
-#                 value={
-#                     "status": ERR_RESPONSE_STATUS,
-#                     "message": "Cannot submit article with status: published",
-#                     "code": ErrorCode.VALIDATION_ERROR,
-#                 },
-#             ),
-#             OpenApiExample(
-#                 name="Content Too Short",
-#                 value={
-#                     "status": ERR_RESPONSE_STATUS,
-#                     "message": "Article content is too short (minimum 100 characters, found 45)",
-#                     "code": ErrorCode.VALIDATION_ERROR,
-#                 },
-#             ),
-#         ],
-#     ),
-#     503: OpenApiResponse(
-#         description="Service unavailable",
-#         response=ErrorResponseSerializer,
-#         examples=[
-#             OpenApiExample(
-#                 name="Liveblocks Sync Failed",
-#                 value={
-#                     "status": ERR_RESPONSE_STATUS,
-#                     "message": "Editor sync timeout. Please try again.",
-#                     "code": ErrorCode.SERVICE_UNAVAILABLE,
-#                 },
-#             ),
-#             OpenApiExample(
-#                 name="No Reviewers Available",
-#                 value={
-#                     "status": ERR_RESPONSE_STATUS,
-#                     "message": "No reviewers available. Please contact support.",
-#                     "code": ErrorCode.SERVICE_UNAVAILABLE,
-#                 },
-#             ),
-#         ],
-#     ),
-# }
+ARTICLE_SUBMIT_RESPONSE_EXAMPLE = {
+    201: OpenApiResponse(
+        description="Article submitted successfully",
+        response=ArticleSubmitResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="First Submission",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Article submitted for review successfully",
+                    "data": {
+                        "status": "submitted_for_review",
+                        "assigned_reviewer": {
+                            "id": UUID_EXAMPLE,
+                            "name": "Jane Reviewer",
+                            "username": "jane-reviewer",
+                            "avatar_url": AVATAR_URL,
+                        },
+                        "is_resubmission": False,
+                    },
+                },
+            ),
+            OpenApiExample(
+                name="Resubmission",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Article resubmitted successfully",
+                    "data": {
+                        "status": "submitted_for_review",
+                        "assigned_reviewer": {
+                            "id": UUID_EXAMPLE,
+                            "name": "Jane Reviewer",
+                            "username": "jane-reviewer",
+                            "avatar_url": AVATAR_URL,
+                        },
+                        "is_resubmission": True,
+                    },
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        response=ErrorResponseSerializer,
+        description="Permission Denied",
+    ),
+    404: OpenApiResponse(
+        description="Article not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Article Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Article not found",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            )
+        ],
+    ),
+    422: ErrorDataResponseSerializer,
+    503: OpenApiResponse(
+        description="Service unavailable",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Liveblocks Sync Failed",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Editor sync timeout. Please try again.",
+                    "code": ErrorCode.SERVICE_UNAVAILABLE,
+                },
+            ),
+            OpenApiExample(
+                name="No Reviewers Available",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "No reviewers available. Please contact support.",
+                    "code": ErrorCode.SERVICE_UNAVAILABLE,
+                },
+            ),
+        ],
+    ),
+}

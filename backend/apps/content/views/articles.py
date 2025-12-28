@@ -19,6 +19,7 @@ from apps.content.schema_examples import (
     ARTICLE_EDITOR_EXAMPLE,
     ARTICLE_EDITOR_RESPONSE_EXAMPLE,
     ARTICLE_LIST_RESPONSE_EXAMPLE,
+    ARTICLE_SUBMIT_RESPONSE_EXAMPLE,
     ARTICLE_SUMMARY_RESPONSE_EXAMPLE,
     COMMENT_CREATE_RESPONSE_EXAMPLE,
     COMMENT_LIKE_STATUS_RESPONSE_EXAMPLE,
@@ -79,7 +80,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
-from backend.apps.content import notification_service
+from apps.content import notification_service
 
 article_tags = ["Articles"]
 onboarding_tags = ["Onboarding"]
@@ -1014,7 +1015,7 @@ class ArticleSubmitView(APIView):
         the same reviewer will be assigned automatically.
         """,
         tags=article_tags,
-        # responses=ARTICLE_SUBMIT_RESPONSE_EXAMPLE,
+        responses=ARTICLE_SUBMIT_RESPONSE_EXAMPLE,
     )
     def post(self, request, article_id):
         """Submit article for review"""

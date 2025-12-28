@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 
-from backend.apps.content.models import Article
+from apps.content.models import Article
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
