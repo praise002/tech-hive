@@ -28,6 +28,10 @@ urlpatterns = [
         views.ArticleRetrieveView.as_view(),
         name="article_detail",
     ),
+    path(
+        "articles/<uuid:article_id>/submit/",
+        views.ArticleSubmitView.as_view(),
+    ),
     path("comments/<uuid:comment_id>/replies/", views.ThreadRepliesView.as_view()),
     path(
         "comments/<uuid:comment_id>/",

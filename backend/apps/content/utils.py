@@ -270,11 +270,18 @@ def sync_content_from_liveblocks(article):
             article.content_last_synced_at = timezone.now()
             article.save(update_fields=["content", "content_last_synced_at"])
 
-            return True
+            return True, None
         else:
             print(f"Failed to fetch Liveblocks content: {response.status_code}")
-            return False
-
+            return False, "Failed to fetch Liveblocks content"
+        
+    except requests.Timeout:
+        logger.error(f"Liveblocks sync timeout for article {article.id}")
+        return False, "Editor sync timeout. Please try again."
+    
+    except requests.RequestException as e:
+        logger.error(f"Liveblocks sync network error for article {article.id}: {str(e)}")
+        return False, "Network error while syncing editor content. Please try again."
     except Exception as e:
         print(f"Error syncing from Liveblocks: {str(e)}")
         return False

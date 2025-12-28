@@ -791,9 +791,6 @@ class CoverImageSerializer(serializers.ModelSerializer):
         ]
 
 
-# TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH
-
-
 # Response serializer
 class ArticleSummaryResponseSerializer(serializers.Serializer):
     """Serializer for article summary response"""
@@ -803,3 +800,28 @@ class ArticleSummaryResponseSerializer(serializers.Serializer):
     article_slug = serializers.CharField(read_only=True)
     summary = serializers.CharField(read_only=True)
     cached = serializers.BooleanField(read_only=True)
+
+
+class ArticleSubmitResponseSerializer(serializers.Serializer):
+    """Serializer for article submission response"""
+    status = serializers.CharField(read_only=True)
+    assigned_reviewer = serializers.SerializerMethodField()
+    is_resubmission = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        fields = ["status", "assigned_reviewer", "is_resubmission"]
+
+    @extend_schema_field(serializers.DictField)
+    def get_assigned_reviewer(self, obj):
+        """Return reviewer info"""
+        reviewer = obj.get("reviewer")
+        if reviewer:
+            return {
+                "id": str(reviewer.id),
+                "name": reviewer.full_name,
+                "username": reviewer.username,
+                "avatar_url": reviewer.avatar_url,
+            }
+        return None
+
+# TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH

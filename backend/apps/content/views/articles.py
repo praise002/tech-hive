@@ -5,9 +5,14 @@ from apps.common.errors import ErrorCode
 from apps.common.exceptions import NotFoundError
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
-from apps.content.choices import ArticleStatusChoices
+from apps.content.choices import ArticleReviewStatusChoices, ArticleStatusChoices
 from apps.content.models import Article, Comment, Tag
-from apps.content.permissions import IsAuthorOrReadOnly, IsCommentAuthor
+from apps.content.permissions import (
+    CanSubmitForReview,
+    IsAuthorOrReadOnly,
+    IsCommentAuthor,
+    IsContributor,
+)
 from apps.content.schema_examples import (
     ACCEPT_GUIDELINES_RESPONSE_EXAMPLE,
     ARTICLE_DETAIL_RESPONSE_EXAMPLE,
@@ -30,6 +35,7 @@ from apps.content.serializers import (
     ArticleDetailSerializer,
     ArticleEditorSerializer,
     ArticleSerializer,
+    ArticleSubmitResponseSerializer,
     ArticleSummaryResponseSerializer,
     CommentCreateSerializer,
     CommentLikeSerializer,
@@ -49,7 +55,12 @@ from apps.content.throttles import (
     ArticleSummaryRegenerateThrottle,
     ArticleSummaryThrottle,
 )
-from apps.content.utils import get_liveblocks_permissions
+from apps.content.utils import (
+    assign_reviewer,
+    create_workflow_history,
+    get_liveblocks_permissions,
+    sync_content_from_liveblocks,
+)
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.db import transaction
@@ -67,6 +78,8 @@ from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+
+from backend.apps.content import notification_service
 
 article_tags = ["Articles"]
 onboarding_tags = ["Onboarding"]
@@ -382,7 +395,7 @@ class CommentDeleteView(APIView):
             comment = Comment.objects.get(id=comment_id)
         except Comment.DoesNotExist:
             raise NotFoundError("Comment not found.")
-        
+
         self.check_object_permissions(request, comment)
 
         comment.delete()
@@ -975,3 +988,176 @@ class ArticleEditorView(APIView):
             message="Article loaded successfully",
             data=serializer.data,
         )
+
+
+class ArticleSubmitView(APIView):
+    """
+    Submit article for review.
+
+    Syncs content from Liveblocks, assigns reviewer, and initiates review workflow.
+    """
+
+    permission_classes = (IsContributor, CanSubmitForReview)
+    serializer_class = ArticleSubmitResponseSerializer
+
+    @extend_schema(
+        summary="Submit article for review",
+        description="""
+        Submit an article for review by syncing content from Liveblocks editor 
+        and assigning a reviewer.
+        
+        **Pre-conditions:**
+        - Article must be in DRAFT or REJECTED or CHANGES_REQUESTED status
+        - User must be the article author
+        
+        **Note:** For resubmissions (articles with CHANGES_REQUESTED status), 
+        the same reviewer will be assigned automatically.
+        """,
+        tags=article_tags,
+        # responses=ARTICLE_SUBMIT_RESPONSE_EXAMPLE,
+    )
+    def post(self, request, article_id):
+        """Submit article for review"""
+
+        try:
+            article = (
+                Article.objects.select_related("author", "assigned_reviewer")
+                .prefetch_related("reviews")
+                .get(id=article_id)
+            )
+        except Article.DoesNotExist:
+            raise NotFoundError("Article not found")
+
+        self.check_object_permissions(request, article)
+
+        success, error_msg = sync_content_from_liveblocks(article)
+        if not success:
+            return CustomResponse.error(
+                message=error_msg,
+                err_code=ErrorCode.SERVICE_UNAVAILABLE,
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        from apps.content.models import ArticleReview
+
+        is_resubmission = False
+        existing_review = (
+            ArticleReview.objects.filter(article=article)
+            .order_by("-created_at")
+            .first()
+        )
+
+        try:
+            with transaction.atomic():
+                if existing_review:
+                    # RESUBMISSION: Reactivate existing review
+                    is_resubmission = True
+
+                    existing_review.is_active = True
+                    existing_review.status = ArticleReviewStatusChoices.PENDING
+                    existing_review.started_at = None
+                    existing_review.completed_at = None
+                    existing_review.save(
+                        update_fields=[
+                            "is_active",
+                            "status",
+                            "started_at",
+                            "completed_at",
+                            "updated_at",
+                        ]
+                    )
+
+                    reviewer = existing_review.reviewed_by
+                    
+
+                    logger.info(
+                        f"Article {article.id} resubmitted by {request.user.id} "
+                        f"to reviewer {reviewer.id}"
+                    )
+                    
+                else:
+                    # NEW SUBMISSION: Assign new reviewer
+                    reviewer = assign_reviewer()
+
+                    if not reviewer:
+                        return CustomResponse.error(
+                            message="No reviewers available. Please contact support.",
+                            err_code=ErrorCode.SERVICE_UNAVAILABLE,
+                            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        )
+
+                    # Create new review record
+                    ArticleReview.objects.create(
+                        article=article,
+                        reviewed_by=reviewer,
+                        status=ArticleReviewStatusChoices.PENDING,
+                        
+                    )
+                    
+
+                    logger.info(
+                        f"Article {article.id} submitted by {request.user.id} "
+                        f"to reviewer {reviewer.id}"
+                    )
+
+                # Update article status and assigned reviewer
+                article.assigned_reviewer = reviewer
+                old_status = article.status
+                article.status = ArticleStatusChoices.SUBMITTED_FOR_REVIEW
+                
+                article.save(
+                    update_fields=["status", "assigned_reviewer", "updated_at"]
+                )
+
+                # Create workflow history
+                create_workflow_history(
+                    article=article,
+                    from_status=old_status,
+                    to_status=ArticleStatusChoices.SUBMITTED_FOR_REVIEW,
+                    changed_by=request.user,
+                    notes=f"{'Resubmitted' if is_resubmission else 'Submitted'} for review",
+                )
+
+                #  Send notification email
+                try:
+                    notification_service.send_article_submitted_email(
+                        article=article, reviewer=reviewer
+                    )
+                except Exception as e:
+                    # Log error but don't fail the submission
+                    logger.error(
+                        f"Failed to send submission email for article {article.id}: {str(e)}",
+                        exc_info=True,
+                    )
+
+                # Prepare response
+                response_data = {
+                    "status": article.status,
+                    "reviewer": reviewer,
+                    "is_resubmission": is_resubmission,
+                }
+
+                serializer = self.serializer_class(response_data)
+
+                message = (
+                    "Article resubmitted successfully"
+                    if is_resubmission
+                    else "Article submitted for review successfully"
+                )
+
+                return CustomResponse.success(
+                    message=message,
+                    data=serializer.data,
+                    status_code=status.HTTP_201_CREATED,
+                )
+
+        except Exception as e:
+            logger.error(
+                f"Error submitting article {article.id}: {str(e)}", exc_info=True
+            )
+            return CustomResponse.error(
+                message="An error occurred while submitting the article",
+                err_code=ErrorCode.SERVER_ERROR,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+               

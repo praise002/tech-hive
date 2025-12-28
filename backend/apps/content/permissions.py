@@ -218,7 +218,7 @@ class IsAuthorOrReadOnly(BasePermission):
 class CanSubmitForReview(BasePermission):
     """
     Permission to submit articles for review.
-    Only article authors can submit their own draft articles.
+    Only article authors can submit their own articles.
     """
 
     def has_permission(self, request, view):
@@ -229,6 +229,7 @@ class CanSubmitForReview(BasePermission):
             return obj.author == request.user and obj.status in [
                 ArticleStatusChoices.DRAFT,
                 ArticleStatusChoices.CHANGES_REQUESTED,
+                ArticleStatusChoices.REJECTED,
             ]
         return False
 
