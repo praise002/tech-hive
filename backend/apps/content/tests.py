@@ -1567,3 +1567,200 @@ class TestArticleReactions(APITestCase):
 #         self.assertEqual(response.status_code, status.HTTP_200_OK)
 #         # Should only return existing user
 #         self.assertEqual(len(response.data), 1)
+
+# apps/content/tests/test_article_editor.py
+
+# from django.test import TestCase
+# from django.contrib.auth import get_user_model
+# from rest_framework.test import APIClient
+# from rest_framework import status
+
+# from apps.content.models import Article
+# from apps.content.choices import ArticleStatusChoices
+# from apps.accounts.utils import UserRoles
+
+# User = get_user_model()
+
+
+# class ArticleEditorViewTestCase(TestCase):
+#     """Test article editor endpoint"""
+
+#     def setUp(self):
+#         self.client = APIClient()
+        
+#         # Create users
+#         self.author = User.objects.create_user(
+#             username='author',
+#             email='author@example.com',
+#             first_name='John',
+#             last_name='Author'
+#         )
+#         self.reviewer = User.objects.create_user(
+#             username='reviewer',
+#             email='reviewer@example.com',
+#             first_name='Jane',
+#             last_name='Reviewer'
+#         )
+#         self.editor = User.objects.create_user(
+#             username='editor',
+#             email='editor@example.com',
+#             first_name='Mike',
+#             last_name='Editor'
+#         )
+#         self.random_user = User.objects.create_user(
+#             username='random',
+#             email='random@example.com',
+#             first_name='Random',
+#             last_name='User'
+#         )
+        
+#         # Create draft article
+#         self.draft_article = Article.objects.create(
+#             title='Draft Article',
+#             content='<p>Draft content</p>',
+#             author=self.author,
+#             status=ArticleStatusChoices.DRAFT
+#         )
+        
+#         # Create article under review
+#         self.review_article = Article.objects.create(
+#             title='Review Article',
+#             content='<p>Review content</p>',
+#             author=self.author,
+#             status=ArticleStatusChoices.UNDER_REVIEW,
+#             assigned_reviewer=self.reviewer
+#         )
+        
+#         # Create published article
+#         self.published_article = Article.objects.create(
+#             title='Published Article',
+#             content='<p>Published content</p>',
+#             author=self.author,
+#             status=ArticleStatusChoices.PUBLISHED
+#         )
+
+#     def test_requires_authentication(self):
+#         """Test that endpoint requires authentication"""
+#         response = self.client.get(f'/api/articles/{self.draft_article.id}/editor/')
+#         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+#     def test_article_not_found(self):
+#         """Test 404 for non-existent article"""
+#         self.client.force_authenticate(user=self.author)
+#         response = self.client.get('/api/articles/99999/editor/')
+        
+#         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+#         self.assertEqual(response.data['status'], 'failure')
+#         self.assertEqual(response.data['code'], 'non_existent')
+
+#     def test_draft_author_can_access(self):
+#         """Test that author can access their draft"""
+#         self.client.force_authenticate(user=self.author)
+#         response = self.client.get(f'/api/articles/{self.draft_article.id}/editor/')
+        
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         self.assertEqual(response.data['status'], 'success')
+#         self.assertEqual(response.data['data']['id'], self.draft_article.id)
+#         self.assertEqual(response.data['data']['user_can_edit'], True)
+#         self.assertEqual(response.data['data']['liveblocks_room_id'], f'article-{self.draft_article.id}')
+
+#     def test_draft_non_author_cannot_access(self):
+#         """Test that non-author cannot access draft"""
+#         self.client.force_authenticate(user=self.random_user)
+#         response = self.client.get(f'/api/articles/{self.draft_article.id}/editor/')
+        
+#         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+#         self.assertEqual(response.data['status'], 'failure')
+#         self.assertEqual(response.data['code'], 'forbidden')
+
+#     def test_review_reviewer_can_edit(self):
+#         """Test that assigned reviewer can edit article under review"""
+#         self.client.force_authenticate(user=self.reviewer)
+#         response = self.client.get(f'/api/articles/{self.review_article.id}/editor/')
+        
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         self.assertEqual(response.data['data']['user_can_edit'], True)
+#         self.assertEqual(response.data['data']['status'], 'under_review')
+
+#     def test_review_author_can_view(self):
+#         """Test that author can view (but not edit) article under review"""
+#         self.client.force_authenticate(user=self.author)
+#         response = self.client.get(f'/api/articles/{self.review_article.id}/editor/')
+        
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         self.assertEqual(response.data['data']['user_can_edit'], False)
+#         self.assertEqual(response.data['data']['status'], 'under_review')
+
+#     def test_published_author_gets_readonly(self):
+#         """Test that author gets read-only access to published article"""
+#         self.client.force_authenticate(user=self.author)
+#         response = self.client.get(f'/api/articles/{self.published_article.id}/editor/')
+        
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         self.assertEqual(response.data['status'], 'info')
+#         self.assertIn('Read-only mode', response.data['message'])
+#         self.assertEqual(response.data['data']['user_can_edit'], False)
+#         self.assertEqual(response.data['data']['is_published'], True)
+
+#     def test_published_non_author_gets_redirect(self):
+#         """Test that non-author gets redirect info for published article"""
+#         self.client.force_authenticate(user=self.random_user)
+#         response = self.client.get(f'/api/articles/{self.published_article.id}/editor/')
+        
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         self.assertEqual(response.data['status'], 'info')
+#         self.assertIn('redirect_url', response.data['data'])
+#         self.assertIn(self.published_article.slug, response.data['data']['redirect_url'])
+
+#     def test_response_includes_all_fields(self):
+#         """Test that response includes all required fields"""
+#         self.client.force_authenticate(user=self.author)
+#         response = self.client.get(f'/api/articles/{self.draft_article.id}/editor/')
+        
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         data = response.data['data']
+        
+#         # Check required fields
+#         required_fields = [
+#             'id', 'title', 'content', 'status', 'liveblocks_room_id',
+#             'user_can_edit', 'is_published', 'author', 'assigned_reviewer',
+#             'assigned_editor', 'category', 'tags', 'cover_image_url',
+#             'created_at', 'updated_at'
+#         ]
+        
+#         for field in required_fields:
+#             self.assertIn(field, data)
+
+#     def test_response_includes_user_info(self):
+#         """Test that author info is properly serialized"""
+#         self.client.force_authenticate(user=self.author)
+#         response = self.client.get(f'/api/articles/{self.draft_article.id}/editor/')
+        
+#         author_data = response.data['data']['author']
+#         self.assertEqual(author_data['id'], self.author.id)
+#         self.assertEqual(author_data['name'], self.author.get_full_name())
+#         self.assertIn('avatar', author_data)
+
+#     def test_ready_status_editor_can_edit(self):
+#         """Test that assigned editor can edit article in ready status"""
+#         self.review_article.status = ArticleStatusChoices.READY
+#         self.review_article.assigned_editor = self.editor
+#         self.review_article.save()
+        
+#         self.client.force_authenticate(user=self.editor)
+#         response = self.client.get(f'/api/articles/{self.review_article.id}/editor/')
+        
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         self.assertEqual(response.data['data']['user_can_edit'], True)
+#         self.assertEqual(response.data['data']['status'], 'ready_for_publishing')
+
+#     def test_changes_requested_author_can_edit(self):
+#         """Test that author can edit article with changes requested"""
+#         self.review_article.status = ArticleStatusChoices.CHANGES_REQUESTED
+#         self.review_article.save()
+        
+#         self.client.force_authenticate(user=self.author)
+#         response = self.client.get(f'/api/articles/{self.review_article.id}/editor/')
+        
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         self.assertEqual(response.data['data']['user_can_edit'], True)

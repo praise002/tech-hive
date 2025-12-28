@@ -11,11 +11,14 @@ from apps.content.permissions import IsAuthorOrReadOnly, IsCommentAuthor
 from apps.content.schema_examples import (
     ACCEPT_GUIDELINES_RESPONSE_EXAMPLE,
     ARTICLE_DETAIL_RESPONSE_EXAMPLE,
+    ARTICLE_EDITOR_EXAMPLE,
+    ARTICLE_EDITOR_RESPONSE_EXAMPLE,
     ARTICLE_LIST_RESPONSE_EXAMPLE,
     ARTICLE_SUMMARY_RESPONSE_EXAMPLE,
     COMMENT_CREATE_RESPONSE_EXAMPLE,
     COMMENT_LIKE_STATUS_RESPONSE_EXAMPLE,
     COMMENT_LIKE_TOGGLE_RESPONSE_EXAMPLE,
+    COVER_IMAGE_RESPONSE_EXAMPLE,
     RSS_RESPONSE_EXAMPLE,
     TAG_RESPONSE_EXAMPLE,
     THREAD_REPLIES_RESPONSE_EXAMPLE,
@@ -857,7 +860,7 @@ class ArticleCoverImageUploadView(APIView):
         request={
             "multipart/form-data": CoverImageSerializer,
         },
-        # responses=,
+        responses=COVER_IMAGE_RESPONSE_EXAMPLE,
         tags=article_tags,
     )
     def patch(self, request, article_id):
@@ -918,11 +921,11 @@ class ArticleEditorView(APIView):
         - Edit permissions for current user
         - User info for all assigned roles
         """,
-        # responses=
-        # examples=
-        tags=["Article Editor"],
+        responses=ARTICLE_EDITOR_RESPONSE_EXAMPLE,
+        examples=ARTICLE_EDITOR_EXAMPLE,
+        tags=liveblock_tags,
     )
-    def get(self, request, id):
+    def get(self, request, article_id):
         """Load article for Liveblocks editor"""
         try:
             article = (

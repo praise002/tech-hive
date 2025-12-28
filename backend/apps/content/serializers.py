@@ -699,7 +699,7 @@ class EditorUserSerializer(serializers.ModelSerializer):
     """Minimal user info for editor response"""
 
     name = serializers.CharField(source="full_name", read_only=True)
-    avatar = serializers.SerializerMethodField()
+    avatar_url = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -729,13 +729,11 @@ class ArticleEditorSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     cover_image_url = serializers.SerializerMethodField()
 
-    author = serializers.SerializerMethodField()
-
     class Meta:
         model = models.Article
         fields = [
             "id",
-            "category", # will be available if it is published
+            "category",  # will be available if it is published
             "title",
             "slug",
             "content",
@@ -757,38 +755,41 @@ class ArticleEditorSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.URLField)
     def get_cover_image_url(self, obj):
         return obj.cover_image_url
-    
+
     @extend_schema_field(serializers.CharField)
     def get_liveblocks_room_id(self, obj):
         """Generate Liveblocks room ID"""
         return f"article-{obj.id}"
-    
+
     @extend_schema_field(serializers.BooleanField)
     def get_user_can_edit(self, obj):
         """Determine if current user can edit"""
-        request = self.context.get('request')
+        request = self.context.get("request")
         if not request:
             return False
-        
+
         user = request.user
         from apps.content.utils import get_liveblocks_permissions
-        
+
         permission_level = get_liveblocks_permissions(user, obj)
         return permission_level == "WRITE"
-    
+
     @extend_schema_field(serializers.BooleanField)
     def get_is_published(self, obj):
         """Check if article is published"""
         from apps.content.choices import ArticleStatusChoices
+
         return obj.status == ArticleStatusChoices.PUBLISHED
+
 
 class CoverImageSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = User
+        model = models.Article
         fields = [
             "cover_image",
         ]
+
 
 # TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH
 

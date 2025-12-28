@@ -989,61 +989,126 @@ COVER_IMAGE_RESPONSE_EXAMPLE = {
 
 ARTICLE_EDITOR_RESPONSE_EXAMPLE = {
     200: ArticleEditorSerializer,
+    401: UNAUTHORIZED_USER_RESPONSE,
     403: OpenApiResponse(
         response=ErrorResponseSerializer,
         description="Permission Denied",
     ),
-    404: OpenApiExample(
-        "Article Not Found",
-        value={
-            "status": "failure",
-            "message": "Article not found",
-            "code": "non_existent",
-        },
+    404: OpenApiResponse(
+        description="Article not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Article Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Article not found.",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
     ),
 }
 
+
 ARTICLE_EDITOR_EXAMPLE = [
     OpenApiExample(
-        "Success",
+        name="Success - Draft Article",
         value={
             "status": "success",
             "message": "Article loaded successfully",
             "data": {
-                "id": 123,
-                "title": "My Article Title",
-                "slug": "my-article-title",
-                "content": "<p>Article content here...</p>",
+                "id": "550e8400-e29b-41d4-a716-446655440000",
+                "category": None,
+                "title": "Getting Started with Django REST Framework",
+                "slug": "getting-started-with-django-rest-framework",
+                "content": "<p>Django REST Framework is a powerful toolkit...</p>",
+                "cover_image_url": None,
                 "status": "draft",
-                "liveblocks_room_id": "article-123",
+                "liveblocks_room_id": "article-550e8400-e29b-41d4-a716-446655440000",
                 "user_can_edit": True,
                 "is_published": False,
                 "author": {
-                    "id": 1,
+                    "id": "660e8400-e29b-41d4-a716-446655440001",
                     "name": "John Doe",
-                    "avatar": "https://example.com/avatars/john.jpg",
+                    "avatar_url": AVATAR_URL,
                 },
                 "assigned_reviewer": None,
                 "assigned_editor": None,
-                "category": None,
                 "tags": [],
-                "cover_image_url": "",
-                "created_at": "2024-01-01T12:00:00Z",
-                "updated_at": "2024-01-01T12:00:00Z",
+                "created_at": "2025-12-28T10:00:00Z",
                 "content_last_synced_at": None,
+                "updated_at": "2025-12-28T10:00:00Z",
             },
         },
         response_only=True,
     ),
-    
     OpenApiExample(
-        "Published - Redirect",
+        name="Success - Published Article",
+        value={
+            "status": "success",
+            "message": "Article loaded successfully",
+            "data": {
+                "id": "770e8400-e29b-41d4-a716-446655440002",
+                "category": {
+                    "id": "880e8400-e29b-41d4-a716-446655440003",
+                    "name": "Web Development",
+                    "desc": "Articles about web development, frameworks, and best practices",
+                    "slug": "web-development",
+                },
+                "title": "Advanced Django Patterns for Scalable Applications",
+                "slug": "advanced-django-patterns-for-scalable-applications",
+                "content": "<p>In this comprehensive guide, we'll explore advanced Django patterns...</p>",
+                "cover_image_url": COVER_IMAGE_URL,
+                "status": "published",
+                "liveblocks_room_id": "article-770e8400-e29b-41d4-a716-446655440002",
+                "user_can_edit": False,
+                "is_published": True,
+                "author": {
+                    "id": "660e8400-e29b-41d4-a716-446655440001",
+                    "name": "John Doe",
+                    "avatar_url": AVATAR_URL,
+                },
+                "assigned_reviewer": {
+                    "id": "990e8400-e29b-41d4-a716-446655440004",
+                    "name": "Jane Smith",
+                    "avatar_url": "https://example.com/avatars/jane.jpg",
+                },
+                "assigned_editor": {
+                    "id": "aa0e8400-e29b-41d4-a716-446655440005",
+                    "name": "Mike Wilson",
+                    "avatar_url": "https://example.com/avatars/mike.jpg",
+                },
+                "tags": [
+                    {
+                        "id": "bb0e8400-e29b-41d4-a716-446655440006",
+                        "name": "django",
+                    },
+                    {
+                        "id": "cc0e8400-e29b-41d4-a716-446655440007",
+                        "name": "python",
+                    },
+                    {
+                        "id": "dd0e8400-e29b-41d4-a716-446655440008",
+                        "name": "backend",
+                    },
+                ],
+                "created_at": "2025-12-15T09:30:00Z",
+                "content_last_synced_at": "2025-12-20T14:45:00Z",
+                "updated_at": "2025-12-20T14:45:00Z",
+            },
+        },
+        response_only=True,
+    ),
+    OpenApiExample(
+        name="Info - Published Article Redirect",
         value={
             "status": "info",
             "message": "Article is published. Redirecting to public view.",
-            "data": {"redirect_url": "/articles/john-doe/my-article-title"},
+            "data": {
+                "redirect_url": "/articles/john-doe/advanced-django-patterns-for-scalable-applications"
+            },
         },
         response_only=True,
-        status_codes=["200"],
     ),
 ]

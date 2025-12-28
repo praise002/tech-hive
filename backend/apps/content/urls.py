@@ -49,7 +49,7 @@ urlpatterns = [
         views.ArticleCoverImageUploadView.as_view(),
     ),
     path(
-        "articles/<uuid:id>/editor/",
+        "articles/<uuid:article_id>/editor/",
         views.ArticleEditorView.as_view(),
     ),
 ]
