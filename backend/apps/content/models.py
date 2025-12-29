@@ -26,7 +26,7 @@ class Tag(BaseModel):
             models.Index(fields=["name"]),
         ]
 
-    def clean(self):
+    def clean(self):  # called automatically when saving forms/admin
         if self.name:
             self.name = self.name.lower()
 

@@ -1,5 +1,6 @@
 import logging
 from datetime import timezone
+from xml.dom import NotFoundErr
 
 from apps.accounts.utils import UserRoles
 from apps.common.errors import ErrorCode
@@ -8,9 +9,10 @@ from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
 from apps.content import notification_service
 from apps.content.choices import ArticleReviewStatusChoices, ArticleStatusChoices
-from apps.content.models import Article, ArticleReview, Comment, Tag
+from apps.content.models import Article, ArticleReview, Category, Comment, Tag
 from apps.content.permissions import (
     CanManageReview,
+    CanPublishArticle,
     CanSubmitForReview,
     IsAuthorOrReadOnly,
     IsCommentAuthor,
@@ -40,6 +42,8 @@ from apps.content.serializers import (
     ArticleApproveResponseSerializer,
     ArticleDetailSerializer,
     ArticleEditorSerializer,
+    ArticlePublishRequestSerializer,
+    ArticlePublishResponseSerializer,
     ArticleSerializer,
     ArticleSubmitResponseSerializer,
     ArticleSummaryResponseSerializer,
@@ -1320,7 +1324,7 @@ class ReviewRequestChangesView(APIView):
                 review.status = ArticleReviewStatusChoices.COMPLETED
                 review.completed_at = timezone.now()
                 review.reviewer_notes = serializer.validated_data.get(
-                    "reviewer_notes", ""
+                    "reviewer_notes", None
                 )
                 review.save()
 
@@ -1430,7 +1434,7 @@ class ReviewApproveView(APIView):
                 review.completed_at = timezone.now()
                 review.is_active = False
                 review.reviewer_notes = serializer.validated_data.get(
-                    "reviewer_notes", ""
+                    "reviewer_notes", None
                 )
                 review.save()
 
@@ -1447,7 +1451,6 @@ class ReviewApproveView(APIView):
                 except Exception as e:
                     logger.error(f"Failed to send approval emails: {str(e)}")
 
-                
                 response_data = {
                     "article_status": article.status,
                     "assigned_editor": editor,
@@ -1469,6 +1472,218 @@ class ReviewApproveView(APIView):
             )
             return CustomResponse.error(
                 message="Failed to approve article. Please try again.",
+                err_code=ErrorCode.OPERATION_FAILED,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class ReviewRejectView(APIView):
+    """Reject article"""
+
+    permission_classes = [CanManageReview]
+
+    @extend_schema(
+        summary="Reject article",
+        description="""
+        Reviewer rejects article.
+        
+        **Pre-conditions:**
+        - Article status must be: under_review
+        - User must be the assigned reviewer
+        
+        **Note:** Author can resubmit after making changes.
+        """,
+        # request=ReviewActionRequestSerializer,
+        # responses={
+        #     200: ReviewActionResponseSerializer,
+        # },
+        tags=article_workflow,
+    )
+    def post(self, request, review_id):
+        """Reject article"""
+        try:
+            review = ArticleReview.objects.select_related(
+                "article", "article__author", "reviewed_by"
+            ).get(id=review_id, is_active=True)
+        except ArticleReview.DoesNotExist:
+            raise NotFoundError("Review not found")
+
+        article = review.article
+
+        self.check_object_permissions(request, review)
+
+        if article.status != ArticleStatusChoices.UNDER_REVIEW:
+            return CustomResponse.error(
+                message=f"Cannot reject. Article status is '{article.status}', must be 'under_review'.",
+                err_code=ErrorCode.INVALID_STATUS,
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        serializer = ReviewActionRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        reviewer_notes = serializer.validated_data.get("reviewer_notes", None)
+
+        try:
+            with transaction.atomic():
+                old_status = article.status
+
+                article.status = ArticleStatusChoices.REJECTED
+                article.save()
+
+                review.status = ArticleReviewStatusChoices.COMPLETED
+                review.completed_at = timezone.now()
+                if reviewer_notes:
+                    review.reviewer_notes = reviewer_notes
+                review.save()
+
+                create_workflow_history(
+                    article=article,
+                    from_status=old_status,
+                    to_status=article.status,
+                    changed_by=request.user,
+                    notes="Article rejected by reviewer",
+                )
+
+                try:
+                    notification_service.send_article_rejected_email(article)
+                except Exception as e:
+                    logger.error(f"Failed to send rejection email: {str(e)}")
+
+                response_data = {
+                    "article_status": article.status,
+                    "completed_at": review.completed_at,
+                }
+
+                response_serializer = ReviewActionResponseSerializer(response_data)
+
+                return CustomResponse.success(
+                    message="Article rejected. Author has been notified.",
+                    data=response_serializer.data,
+                    status_code=status.HTTP_200_OK,
+                )
+        except Exception as e:
+            logger.error(
+                f"Error rejecting article for review {review_id}: {str(e)}",
+                exc_info=True,
+            )
+            return CustomResponse.error(
+                message="Failed to reject article. Please try again.",
+                err_code=ErrorCode.OPERATION_FAILED,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class ArticlePublishView(APIView):
+    """Publish article"""
+
+    permission_classes = [CanPublishArticle]
+    serializer_class = ArticlePublishResponseSerializer
+
+    @extend_schema(
+        summary="Publish article",
+        description="""
+        Editor publishes article to the platform.
+        
+        **Pre-conditions:**
+        - Article status must be: ready_for_publishing
+        - User must have editor role
+        
+        """,
+        # request=ArticlePublishRequestSerializer,
+        # responses={
+        #     200: ArticlePublishResponseSerializer,
+        # },
+        tags=article_workflow,
+    )
+    def post(self, request, id):
+        """Publish article"""
+        try:
+            article = Article.objects.select_related(
+                "author", "assigned_reviewer", "assigned_editor"
+            ).get(id=id)
+        except Article.DoesNotExist:
+            raise NotFoundError("Article not found")
+
+        self.check_object_permissions(request, article)
+
+        if article.status != ArticleStatusChoices.READY:
+            return CustomResponse.error(
+                message=f"Cannot publish. Article status is '{article.status}', must be 'ready_for_publishing'.",
+                err_code=ErrorCode.INVALID_STATUS,
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        serializer = ArticlePublishRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            with transaction.atomic():
+                old_status = article.status
+
+                article.status = ArticleStatusChoices.PUBLISHED
+                article.published_at = timezone.now()
+
+                category_id = serializer.validated_data.get("category_id")
+                if category_id:
+                    try:
+                        category = Category.objects.get(id=category_id)
+                        article.category = category
+                    except Category.DoesNotExist:
+                        pass
+
+                tag_ids = serializer.validated_data.get("tag_ids", [])
+                # empty [] is falsy
+                if tag_ids:
+                    tags = Tag.objects.filter(id__in=tag_ids)
+                    article.tags.set(tags)
+
+                article.is_featured = serializer.validated_data.get(
+                    "is_featured", False
+                )
+
+                # Clear workflow assignments (workflow complete)
+                article.assigned_reviewer = None
+                article.assigned_editor = None
+
+                article.save()
+
+                # Create workflow history
+                create_workflow_history(
+                    article=article,
+                    from_status=old_status,
+                    to_status=article.status,
+                    changed_by=request.user,
+                    notes=f"Published by {request.user.full_name()}",
+                )
+
+                
+                try:
+                    notification_service.send_article_published_email(article)
+                except Exception as e:
+                    logger.error(f"Failed to send publication emails: {str(e)}")
+
+                
+                published_url = f"/articles/{article.author.username}/{article.slug}"
+
+                response_data = {
+                    "status": article.status,
+                    "published_at": article.published_at,
+                    "url": published_url,
+                }
+
+                response_serializer = self.serializer_class(response_data)
+
+                return CustomResponse.success(
+                    message="Article published successfully!",
+                    data=response_serializer.data,
+                    status_code=status.HTTP_200_OK,
+                )
+
+        except Exception as e:
+            logger.error(f"Error publishing article {id}: {str(e)}", exc_info=True)
+            return CustomResponse.error(
+                message="Failed to publish article. Please try again.",
                 err_code=ErrorCode.OPERATION_FAILED,
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

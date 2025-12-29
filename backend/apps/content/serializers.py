@@ -802,44 +802,51 @@ class ReviewActionRequestSerializer(serializers.Serializer):
         help_text="Private notes for reviewer's reference (not shown to author)",
     )
 
+
 class WorkflowUserSerializer(serializers.ModelSerializer):
     """User info for workflow responses"""
-    name = serializers.CharField(source='get_full_name', read_only=True)
+
+    name = serializers.CharField(source="get_full_name", read_only=True)
     avatar_url = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = User
-        fields = ['id', 'name', 'username', 'avatar_url']
-        
+        fields = ["id", "name", "username", "avatar_url"]
+
     @extend_schema_field(serializers.URLField)
     def get_avatar_url(self, obj):
         return obj.avatar_url
 
+
 class ArticlePublishRequestSerializer(serializers.Serializer):
     """Request body for publishing article"""
-    category_id = serializers.CharField(
+
+    category_id = serializers.UUIDField(
         required=False,
         allow_null=True,
-        help_text="Category ID to assign to the article"
+        help_text="Category ID to assign to the article",
     )
-    tag_ids = serializers.ListField(
+    tags = serializers.ListField(
         child=serializers.CharField(),
         required=False,
         allow_empty=True,
-        help_text="List of tag IDs to assign to the article (max 5)"
+        help_text="List of tag IDs to assign to the article (max 5)",
     )
     is_featured = serializers.BooleanField(
         required=False,
         default=False,
-        help_text="Whether to mark the article as featured"
+        help_text="Whether to mark the article as featured",
     )
-    
-    def validate_tag_ids(self, value):
-        """Validate tag count"""
-        if value and len(value) > 5:
-            raise serializers.ValidationError("Maximum 5 tags allowed per article")
+
+    def validate_tags(self, value):
+        """Validate and process tag names"""
+        if value:
+            if len(value) > 5:
+                raise serializers.ValidationError("Maximum 5 tags allowed per article")
+
+            self.tag_instances = process_tags(value)
         return value
-    
+
     def validate_category_id(self, value):
         """Validate category exists"""
         if value:
@@ -847,6 +854,48 @@ class ArticlePublishRequestSerializer(serializers.Serializer):
                 raise serializers.ValidationError("Category does not exist")
         return value
 
+class ReassignReviewerRequestSerializer(serializers.Serializer):
+    """Request body for reassigning reviewer"""
+    reviewer_id = serializers.CharField(
+        required=True,
+        help_text="ID of the new reviewer to assign"
+    )
+    
+    def validate_reviewer_id(self, value):
+        """Validate reviewer exists and has reviewer role"""
+        from apps.accounts.utils import UserRoles
+        
+        if not User.objects.filter(
+            id=value,
+            is_active=True,
+            groups__name=UserRoles.REVIEWER
+        ).exists():
+            raise serializers.ValidationError(
+                "User does not exist or does not have reviewer role"
+            )
+        return value
+    
+class ReassignEditorRequestSerializer(serializers.Serializer):
+    """Request body for reassigning editor"""
+    editor_id = serializers.CharField(
+        required=True,
+        help_text="ID of the new editor to assign"
+    )
+    
+    def validate_editor_id(self, value):
+        """Validate editor exists and has editor role"""
+        from apps.accounts.utils import UserRoles
+        
+        if not User.objects.filter(
+            id=value,
+            is_active=True,
+            groups__name=UserRoles.EDITOR
+        ).exists():
+            raise serializers.ValidationError(
+                "User does not exist or does not have editor role"
+            )
+        return value
+    
 # Response serializer
 class ArticleSummaryResponseSerializer(serializers.Serializer):
     """Serializer for article summary response"""
@@ -923,5 +972,37 @@ class ArticleApproveResponseSerializer(serializers.Serializer):
         read_only=True, help_text="Timestamp when review was completed"
     )
 
+class ArticlePublishResponseSerializer(serializers.Serializer):
+    """Response for article publication"""
+    status = serializers.CharField(
+        read_only=True,
+        help_text="Article status (should be 'published')"
+    )
+    published_at = serializers.DateTimeField(
+        read_only=True,
+        help_text="Timestamp when article was published"
+    )
+    url = serializers.CharField(
+        read_only=True,
+        help_text="Public URL of the published article"
+    )
+    
+class ReassignResponseSerializer(serializers.Serializer):
+    """Response for reviewer reassignment"""
+    assigned_reviewer = WorkflowUserSerializer(
+        read_only=True,
+        help_text="Newly assigned reviewer"
+    )
+    article_status = serializers.CharField(
+        read_only=True,
+        help_text="Article status after reassignment"
+    )
+    
+class ReassignEditorResponseSerializer(serializers.Serializer):
+    """Response for editor reassignment"""
+    assigned_editor = WorkflowUserSerializer(
+        read_only=True,
+        help_text="Newly assigned editor"
+    )
 
 # TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH
