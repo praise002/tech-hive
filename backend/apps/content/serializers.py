@@ -5,6 +5,7 @@ from apps.content.CustomRelations import CustomHyperlinkedIdentityField
 from apps.content.models import (
     Article,
     ArticleReaction,
+    Category,
     Comment,
     CommentMention,
     CommentThread,
@@ -801,6 +802,50 @@ class ReviewActionRequestSerializer(serializers.Serializer):
         help_text="Private notes for reviewer's reference (not shown to author)",
     )
 
+class WorkflowUserSerializer(serializers.ModelSerializer):
+    """User info for workflow responses"""
+    name = serializers.CharField(source='get_full_name', read_only=True)
+    avatar_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = ['id', 'name', 'username', 'avatar_url']
+        
+    @extend_schema_field(serializers.URLField)
+    def get_avatar_url(self, obj):
+        return obj.avatar_url
+
+class ArticlePublishRequestSerializer(serializers.Serializer):
+    """Request body for publishing article"""
+    category_id = serializers.CharField(
+        required=False,
+        allow_null=True,
+        help_text="Category ID to assign to the article"
+    )
+    tag_ids = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        allow_empty=True,
+        help_text="List of tag IDs to assign to the article (max 5)"
+    )
+    is_featured = serializers.BooleanField(
+        required=False,
+        default=False,
+        help_text="Whether to mark the article as featured"
+    )
+    
+    def validate_tag_ids(self, value):
+        """Validate tag count"""
+        if value and len(value) > 5:
+            raise serializers.ValidationError("Maximum 5 tags allowed per article")
+        return value
+    
+    def validate_category_id(self, value):
+        """Validate category exists"""
+        if value:
+            if not Category.objects.filter(id=value).exists():
+                raise serializers.ValidationError("Category does not exist")
+        return value
 
 # Response serializer
 class ArticleSummaryResponseSerializer(serializers.Serializer):
@@ -859,6 +904,20 @@ class ReviewActionResponseSerializer(serializers.Serializer):
 
     article_status = serializers.CharField(
         read_only=True, help_text="Article status after action"
+    )
+    completed_at = serializers.DateTimeField(
+        read_only=True, help_text="Timestamp when review was completed"
+    )
+
+
+class ArticleApproveResponseSerializer(serializers.Serializer):
+    """Response for article approval"""
+
+    article_status = serializers.CharField(
+        read_only=True, help_text="Article status (should be 'ready_for_publishing')"
+    )
+    assigned_editor = WorkflowUserSerializer(
+        read_only=True, help_text="Editor assigned to publish the article"
     )
     completed_at = serializers.DateTimeField(
         read_only=True, help_text="Timestamp when review was completed"

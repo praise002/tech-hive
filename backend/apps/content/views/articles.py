@@ -37,6 +37,7 @@ from apps.content.schema_examples import (
     USER_SEARCH_RESPONSE_EXAMPLE,
 )
 from apps.content.serializers import (
+    ArticleApproveResponseSerializer,
     ArticleDetailSerializer,
     ArticleEditorSerializer,
     ArticleSerializer,
@@ -64,6 +65,7 @@ from apps.content.throttles import (
     ArticleSummaryThrottle,
 )
 from apps.content.utils import (
+    assign_editor,
     assign_reviewer,
     create_workflow_history,
     get_liveblocks_permissions,
@@ -957,7 +959,7 @@ class ArticleEditorView(APIView):
             )
         except Article.DoesNotExist:
             raise NotFoundError("Article not found")
-        
+
         self.check_object_permissions(request, article)
 
         user = request.user
@@ -1362,7 +1364,118 @@ class ReviewRequestChangesView(APIView):
             )
 
 
+class ReviewApproveView(APIView):
+    """Approve article for publishing"""
+
+    permission_classes = [CanManageReview]
+    serializer_class = ArticleApproveResponseSerializer
+
+    @extend_schema(
+        summary="Approve article",
+        description="""
+        Reviewer approves article, marking it ready for publishing.
+        
+        **Pre-conditions:**
+        - Article status must be: under_review
+        - User must be the assigned reviewer
+        """,
+        # request=ReviewActionRequestSerializer,
+        # responses={
+        #     200: ArticleApproveResponseSerializer,
+        # },
+        tags=article_workflow,
+    )
+    def post(self, request, review_id):
+        """Approve article"""
+        try:
+            review = ArticleReview.objects.select_related(
+                "article", "article__author", "reviewed_by"
+            ).get(id=review_id, is_active=True)
+        except ArticleReview.DoesNotExist:
+            raise NotFoundError("Review not found")
+
+        article = review.article
+
+        self.check_object_permissions(request, review)
+
+        if article.status != ArticleStatusChoices.UNDER_REVIEW:
+            return CustomResponse.error(
+                message=f"Cannot approve. Article status is '{article.status}', must be 'under_review'.",
+                err_code=ErrorCode.INVALID_STATUS,
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        serializer = ReviewActionRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            with transaction.atomic():
+                old_status = article.status
+
+                # Auto-assign editor
+                editor = assign_editor()
+
+                if not editor:
+                    return CustomResponse.error(
+                        message="No editors available. Please contact support.",
+                        err_code=ErrorCode.SERVICE_UNAVAILABLE,
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    )
+
+                article.status = ArticleStatusChoices.READY
+                article.assigned_editor = editor
+                article.save()
+
+                review.status = ArticleReviewStatusChoices.COMPLETED
+                review.completed_at = timezone.now()
+                review.is_active = False
+                review.reviewer_notes = serializer.validated_data.get(
+                    "reviewer_notes", ""
+                )
+                review.save()
+
+                create_workflow_history(
+                    article=article,
+                    from_status=old_status,
+                    to_status=article.status,
+                    changed_by=request.user,
+                    notes=f"Approved by reviewer, assigned to editor {editor.full_name()}",
+                )
+
+                try:
+                    notification_service.send_article_approved_email(article)
+                except Exception as e:
+                    logger.error(f"Failed to send approval emails: {str(e)}")
+
+                
+                response_data = {
+                    "article_status": article.status,
+                    "assigned_editor": editor,
+                    "completed_at": review.completed_at,
+                }
+
+                response_serializer = self.serializer_class(response_data)
+
+                return CustomResponse.success(
+                    message="Article approved successfully. Editor has been assigned.",
+                    data=response_serializer.data,
+                    status_code=status.HTTP_200_OK,
+                )
+
+        except Exception as e:
+            logger.error(
+                f"Error approving article for review {review_id}: {str(e)}",
+                exc_info=True,
+            )
+            return CustomResponse.error(
+                message="Failed to approve article. Please try again.",
+                err_code=ErrorCode.OPERATION_FAILED,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
 # TODO:
+# Still deliberating on is_active in ArticleReview
 # Review Cycles Are Iterative
 # One review process can span multiple rounds: Submission → Review → Changes Requested → Resubmission → Review Again → Approval/Rejection
 # The same reviewer typically handles all rounds for continuity
@@ -1382,17 +1495,22 @@ class ReviewRequestChangesView(APIView):
 
 #     def handle(self, *args, **options):
 #         cutoff = timezone.now() - timezone.timedelta(days=30)
-        
+
 #         stale_reviews = ArticleReview.objects.filter(
 #             is_active=True,
 #             updated_at__lt=cutoff,
 #             article__status__in=['changes_requested', 'draft']
 #         )
-        
+
 #         for review in stale_reviews:
 #             review.is_active = False
 #             review.article.assigned_reviewer = None
 #             review.article.save()
 #             review.save()
-            
+
 #         self.stdout.write(f'Deactivated {stale_reviews.count()} stale reviews')
+
+# TODO:
+# Do more research on whetehr to put input or output serializer in the serializer_class
+# Should an error be returned when no assigned reviewer and editor or it should go through
+# and admin is alerted

@@ -38,7 +38,7 @@ urlpatterns = [
     ),
     path(
         "reviews/<uuid:review_id>/request-changes/",
-        views.ReviewRequestChanges.as_view(),
+        views.ReviewRequestChangesView.as_view(),
     ),
     
     path("comments/<uuid:comment_id>/replies/", views.ThreadRepliesView.as_view()),
