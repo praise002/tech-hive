@@ -200,35 +200,29 @@ def get_liveblocks_permissions(user, article):
     """
     Determine Liveblocks room access level
     Returns: "WRITE", "READ", or "NONE"
+
+    WRITE = Can edit content + comment
+    READ = Can comment + view (no editing)
+    NONE = No access
     """
 
-    # WRITE ACCESS - Can edit content
-    if article.status in [
-        ArticleStatusChoices.DRAFT,
-        ArticleStatusChoices.CHANGES_REQUESTED,
-        ArticleStatusChoices.REJECTED,
-    ]:
-        if article.author == user:
+    # Author: WRITE access only in draft-like statuses
+    if article.author == user:
+        if article.status in [
+            ArticleStatusChoices.DRAFT,
+            ArticleStatusChoices.CHANGES_REQUESTED,
+            ArticleStatusChoices.REJECTED,
+        ]:
             return "WRITE"
+        else:
+            # UNDER_REVIEW, READY, PUBLISHED: READ access
+            return "READ"
 
-    elif article.status == ArticleStatusChoices.UNDER_REVIEW:
-        if article.assigned_reviewer == user:
-            return "WRITE"
-
-    elif article.status == ArticleStatusChoices.READY:
-        if article.assigned_editor == user:
-            return "WRITE"
-
-    # READ ACCESS - Can view and comment
-    if article.status == ArticleStatusChoices.PUBLISHED:
-        # Published articles are read-only for everyone
+    # Always READ access
+    if article.assigned_reviewer == user or article.assigned_editor == user:
         return "READ"
 
-    # Allow read access to people in the workflow
-    if user in [article.author, article.assigned_reviewer, article.assigned_editor]:
-        return "READ"
-
-    # NO ACCESS
+    # NO ACCESS for anyone else
     return "NONE"
 
 
@@ -274,13 +268,15 @@ def sync_content_from_liveblocks(article):
         else:
             print(f"Failed to fetch Liveblocks content: {response.status_code}")
             return False, "Failed to fetch Liveblocks content"
-        
+
     except requests.Timeout:
         logger.error(f"Liveblocks sync timeout for article {article.id}")
         return False, "Editor sync timeout. Please try again."
-    
+
     except requests.RequestException as e:
-        logger.error(f"Liveblocks sync network error for article {article.id}: {str(e)}")
+        logger.error(
+            f"Liveblocks sync network error for article {article.id}: {str(e)}"
+        )
         return False, "Network error while syncing editor content. Please try again."
     except Exception as e:
         print(f"Error syncing from Liveblocks: {str(e)}")
@@ -300,3 +296,22 @@ def create_workflow_history(article, from_status, to_status, changed_by, notes=N
         changed_by=changed_by,
         notes=notes,
     )
+
+
+# TODO: CONFIRM IN THE DOCS
+# "WRITE" Permission:
+
+# ✅ Can edit article content (full collaborative editing)
+# ✅ Can view and add comments (including @mentions)
+# ✅ Can see other users' cursors/presence
+# ✅ Can participate in real-time collaboration
+# "READ" Permission:
+
+# ❌ Cannot edit article content
+# ✅ Can view the article
+# ✅ Can view and add comments (including @mentions)
+# ✅ Can see other users' cursors/presence (read-only presence)
+# "NONE" Permission:
+
+# ❌ No access to the room at all
+# ❌ Cannot see or interact with the article or comments

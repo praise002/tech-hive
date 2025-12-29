@@ -1,13 +1,16 @@
 import logging
+from datetime import timezone
 
 from apps.accounts.utils import UserRoles
 from apps.common.errors import ErrorCode
 from apps.common.exceptions import NotFoundError
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
+from apps.content import notification_service
 from apps.content.choices import ArticleReviewStatusChoices, ArticleStatusChoices
-from apps.content.models import Article, Comment, Tag
+from apps.content.models import Article, ArticleReview, Comment, Tag
 from apps.content.permissions import (
+    CanManageReview,
     CanSubmitForReview,
     IsAuthorOrReadOnly,
     IsCommentAuthor,
@@ -25,6 +28,7 @@ from apps.content.schema_examples import (
     COMMENT_LIKE_STATUS_RESPONSE_EXAMPLE,
     COMMENT_LIKE_TOGGLE_RESPONSE_EXAMPLE,
     COVER_IMAGE_RESPONSE_EXAMPLE,
+    REVIEW_START_RESPONSE_EXAMPLE,
     RSS_RESPONSE_EXAMPLE,
     TAG_RESPONSE_EXAMPLE,
     THREAD_REPLIES_RESPONSE_EXAMPLE,
@@ -44,6 +48,9 @@ from apps.content.serializers import (
     CommentResponseSerializer,
     ContributorOnboardingSerializer,
     CoverImageSerializer,
+    ReviewActionRequestSerializer,
+    ReviewActionResponseSerializer,
+    ReviewStartResponseSerializer,
     TagSerializer,
     ThreadReplySerializer,
     UserBatchRequestSerializer,
@@ -80,11 +87,10 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
-from apps.content import notification_service
-
 article_tags = ["Articles"]
 onboarding_tags = ["Onboarding"]
 liveblock_tags = ["Liveblocks Integration"]
+article_workflow = ["Article Workflow"]
 
 logger = logging.getLogger(__name__)
 security_logger = logging.getLogger("security")
@@ -914,7 +920,7 @@ class ArticleEditorView(APIView):
     Returns article content and metadata with appropriate permissions.
     """
 
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthorOrReadOnly,)
     serializer_class = ArticleEditorSerializer
 
     @extend_schema(
@@ -951,6 +957,8 @@ class ArticleEditorView(APIView):
             )
         except Article.DoesNotExist:
             raise NotFoundError("Article not found")
+        
+        self.check_object_permissions(request, article)
 
         user = request.user
         permission_level = get_liveblocks_permissions(user, article)
@@ -1014,7 +1022,7 @@ class ArticleSubmitView(APIView):
         **Note:** For resubmissions (articles with CHANGES_REQUESTED status), 
         the same reviewer will be assigned automatically.
         """,
-        tags=article_tags,
+        tags=article_workflow,
         responses=ARTICLE_SUBMIT_RESPONSE_EXAMPLE,
     )
     def post(self, request, article_id):
@@ -1030,6 +1038,17 @@ class ArticleSubmitView(APIView):
             raise NotFoundError("Article not found")
 
         self.check_object_permissions(request, article)
+
+        if article.status not in [
+            ArticleStatusChoices.DRAFT,
+            ArticleStatusChoices.CHANGES_REQUESTED,
+            ArticleStatusChoices.REJECTED,
+        ]:
+            return CustomResponse.error(
+                message=f"Cannot submit article with status '{article.status}'. Must be draft, changes_requested, or rejected.",
+                err_code=ErrorCode.INVALID_STATUS,
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
 
         success, error_msg = sync_content_from_liveblocks(article)
         if not success:
@@ -1054,13 +1073,11 @@ class ArticleSubmitView(APIView):
                     # RESUBMISSION: Reactivate existing review
                     is_resubmission = True
 
-                    existing_review.is_active = True
                     existing_review.status = ArticleReviewStatusChoices.PENDING
                     existing_review.started_at = None
                     existing_review.completed_at = None
                     existing_review.save(
                         update_fields=[
-                            "is_active",
                             "status",
                             "started_at",
                             "completed_at",
@@ -1068,14 +1085,11 @@ class ArticleSubmitView(APIView):
                         ]
                     )
 
-                    reviewer = existing_review.reviewed_by
-                    
-
                     logger.info(
                         f"Article {article.id} resubmitted by {request.user.id} "
                         f"to reviewer {reviewer.id}"
                     )
-                    
+
                 else:
                     # NEW SUBMISSION: Assign new reviewer
                     reviewer = assign_reviewer()
@@ -1092,20 +1106,18 @@ class ArticleSubmitView(APIView):
                         article=article,
                         reviewed_by=reviewer,
                         status=ArticleReviewStatusChoices.PENDING,
-                        
                     )
-                    
+                    article.assigned_reviewer = reviewer
 
                     logger.info(
                         f"Article {article.id} submitted by {request.user.id} "
                         f"to reviewer {reviewer.id}"
                     )
 
-                # Update article status and assigned reviewer
-                article.assigned_reviewer = reviewer
+                # Update article status
                 old_status = article.status
                 article.status = ArticleStatusChoices.SUBMITTED_FOR_REVIEW
-                
+
                 article.save(
                     update_fields=["status", "assigned_reviewer", "updated_at"]
                 )
@@ -1134,7 +1146,7 @@ class ArticleSubmitView(APIView):
                 # Prepare response
                 response_data = {
                     "status": article.status,
-                    "reviewer": reviewer,
+                    "assigned_reviewer": reviewer,
                     "is_resubmission": is_resubmission,
                 }
 
@@ -1161,4 +1173,226 @@ class ArticleSubmitView(APIView):
                 err_code=ErrorCode.SERVER_ERROR,
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-               
+
+
+class ReviewStartView(APIView):
+    """Start reviewing an article"""
+
+    permission_classes = [CanManageReview]
+    serializer_class = ReviewStartResponseSerializer
+
+    @extend_schema(
+        summary="Start reviewing article",
+        description="""
+        Mark that reviewer has started reviewing the article.
+        
+        **Pre-conditions:**
+        - Article status must be: submitted_for_review
+        - User must be the assigned reviewer
+        """,
+        # responses=REVIEW_START_RESPONSE_EXAMPLE,
+        tags=article_workflow,
+    )
+    def post(self, request, review_id):
+        """Start review"""
+
+        try:
+            review = ArticleReview.objects.select_related(
+                "article", "article__author", "reviewed_by"
+            ).get(id=review_id, is_active=True)
+        except ArticleReview.DoesNotExist:
+            raise NotFoundError("Review not found")
+
+        article = review.article
+
+        self.check_object_permissions(request, review)
+
+        if article.status != ArticleStatusChoices.SUBMITTED_FOR_REVIEW:
+            return CustomResponse.error(
+                message=f"Cannot start review. Article status is '{article.status}', must be 'submitted_for_review'.",
+                err_code=ErrorCode.INVALID_STATUS,
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        try:
+            with transaction.atomic():
+                old_status = article.status
+
+                article.status = ArticleStatusChoices.UNDER_REVIEW
+                article.save()
+
+                review.status = ArticleReviewStatusChoices.IN_PROGRESS
+                review.started_at = timezone.now()
+                review.save()
+
+                create_workflow_history(
+                    article=article,
+                    from_status=old_status,
+                    to_status=article.status,
+                    changed_by=request.user,
+                    notes=f"Review started by {request.user.full_name()}",
+                )
+
+                try:
+                    notification_service.send_review_started_email(article)
+                except Exception as e:
+                    logger.error(f"Failed to send review started email: {str(e)}")
+
+                response_data = {
+                    "review_status": review.status,
+                    "article_status": article.status,
+                    "started_at": review.started_at,
+                }
+
+                serializer = self.serializer_class(response_data)
+
+                return CustomResponse.success(
+                    message="Review started successfully",
+                    data=serializer.data,
+                    status_code=status.HTTP_200_OK,
+                )
+
+        except Exception as e:
+            logger.error(f"Error starting review {review_id}: {str(e)}", exc_info=True)
+            return CustomResponse.error(
+                message="Failed to start review. Please try again.",
+                err_code=ErrorCode.OPERATION_FAILED,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class ReviewRequestChangesView(APIView):
+    """Request changes to article"""
+
+    permission_classes = [CanManageReview]
+    serializer_class = ReviewActionResponseSerializer
+
+    @extend_schema(
+        summary="Request changes to article",
+        description="""
+        Reviewer requests changes from the contributor.
+        
+        **Pre-conditions:**
+        - Article status must be: under_review
+        - User must be the assigned reviewer
+        
+        **Note:** All feedback is provided via Liveblocks comments, not stored here.
+        """,
+        # request=ReviewActionRequestSerializer,
+        # responses={
+        #     200: ReviewActionResponseSerializer,
+        # },
+        tags=article_workflow,
+    )
+    def post(self, request, review_id):
+        """Request changes"""
+        try:
+            review = ArticleReview.objects.select_related(
+                "article", "article__author", "reviewed_by"
+            ).get(id=review_id, is_active=True)
+        except ArticleReview.DoesNotExist:
+            raise NotFoundError("Review not found")
+
+        article = review.article
+
+        self.check_object_permissions(request, review)
+
+        if article.status != ArticleStatusChoices.UNDER_REVIEW:
+            return CustomResponse.error(
+                message=f"Cannot request changes. Article status is '{article.status}', must be 'under_review'.",
+                err_code=ErrorCode.INVALID_STATUS,
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        serializer = ReviewActionRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            with transaction.atomic():
+                old_status = article.status
+
+                article.status = ArticleStatusChoices.CHANGES_REQUESTED
+                article.save()
+
+                # Update review
+                review.status = ArticleReviewStatusChoices.COMPLETED
+                review.completed_at = timezone.now()
+                review.reviewer_notes = serializer.validated_data.get(
+                    "reviewer_notes", ""
+                )
+                review.save()
+
+                # Create workflow history
+                create_workflow_history(
+                    article=article,
+                    from_status=old_status,
+                    to_status=article.status,
+                    changed_by=request.user,
+                    notes="Changes requested by reviewer",
+                )
+
+                # Send email notification
+                try:
+                    notification_service.send_changes_requested_email(article)
+                except Exception as e:
+                    logger.error(f"Failed to send changes requested email: {str(e)}")
+
+                response_data = {
+                    "article_status": article.status,
+                    "completed_at": review.completed_at,
+                }
+
+                response_serializer = self.serializer_class(response_data)
+
+                return CustomResponse.success(
+                    message="Changes requested successfully. Author has been notified.",
+                    data=response_serializer.data,
+                    status_code=status.HTTP_200_OK,
+                )
+
+        except Exception as e:
+            logger.error(
+                f"Error requesting changes for review {review_id}: {str(e)}",
+                exc_info=True,
+            )
+            return CustomResponse.error(
+                message="Failed to request changes. Please try again.",
+                err_code=ErrorCode.OPERATION_FAILED,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+# TODO:
+# Review Cycles Are Iterative
+# One review process can span multiple rounds: Submission → Review → Changes Requested → Resubmission → Review Again → Approval/Rejection
+# The same reviewer typically handles all rounds for continuity
+# Reviews stay "active" until the article is published or rejected
+# When Reviews Actually Become Inactive
+# Article published/rejected: Process complete
+# Timeout due to inactivity: No resubmission after 30-60 days
+# Manual intervention: Editor reassigns reviewer
+
+# Example management command
+# from django.core.management.base import BaseCommand
+# from django.utils import timezone
+# from apps.content.models import ArticleReview
+
+# class Command(BaseCommand):
+#     help = 'Deactivate stale reviews after 30 days of inactivity'
+
+#     def handle(self, *args, **options):
+#         cutoff = timezone.now() - timezone.timedelta(days=30)
+        
+#         stale_reviews = ArticleReview.objects.filter(
+#             is_active=True,
+#             updated_at__lt=cutoff,
+#             article__status__in=['changes_requested', 'draft']
+#         )
+        
+#         for review in stale_reviews:
+#             review.is_active = False
+#             review.article.assigned_reviewer = None
+#             review.article.save()
+#             review.save()
+            
+#         self.stdout.write(f'Deactivated {stale_reviews.count()} stale reviews')

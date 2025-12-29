@@ -56,8 +56,6 @@ class IsPublished(BasePermission):
 class IsContributor(BasePermission):
     """
     Permission for Contributors:
-    - Can create, edit, and view their own drafts
-    - Can view feedback on their own articles
     """
 
     def has_permission(self, request, view):
@@ -66,68 +64,68 @@ class IsContributor(BasePermission):
 
         return request.user.groups.filter(name=UserRoles.CONTRIBUTOR).exists()
 
-    def has_object_permission(self, request, view, obj):
-        if isinstance(obj, Article):
-            # Read permissions - contributors can view their own articles
-            if request.method in permissions.SAFE_METHODS:
-                return obj.author == request.user
+    # def has_object_permission(self, request, view, obj):
+    #     if isinstance(obj, Article):
+    #         # Read permissions - contributors can view their own articles
+    #         if request.method in permissions.SAFE_METHODS:
+    #             return obj.author == request.user
 
-            # Contributors can only edit their own drafts
-            return obj.author == request.user and obj.status in [
-                ArticleStatusChoices.DRAFT,
-                ArticleStatusChoices.CHANGES_REQUESTED,
-                ArticleStatusChoices.REJECTED,
-            ]
+    #         # Contributors can only edit their own drafts
+    #         return obj.author == request.user and obj.status in [
+    #             ArticleStatusChoices.DRAFT,
+    #             ArticleStatusChoices.CHANGES_REQUESTED,
+    #             ArticleStatusChoices.REJECTED,
+    #         ]
 
-        return False
+        # return False
 
+# TODO: CONFUSING
+# class IsReviewerOrReadOnly(CustomBasePermission):
+#     """
+#     Permission for Reviewers:
+#     - Can view articles assigned for review
+#     - Can change article status during review process
+#     - Can create and manage article reviews
+#     """
 
-class IsReviewerOrReadOnly(CustomBasePermission):
-    """
-    Permission for Reviewers:
-    - Can view articles assigned for review
-    - Can change article status during review process
-    - Can create and manage article reviews
-    """
+#     def has_object_permission(self, request, view, obj):
+#         # Read permissions
+#         if request.method in permissions.SAFE_METHODS:
+#             if isinstance(obj, Article):
+#                 # Can read published articles
+#                 if obj.status == ArticleStatusChoices.PUBLISHED:
+#                     return True
+#                 # Can read articles assigned for review
+#                 if obj.reviews.filter(
+#                     reviewed_by=request.user
+#                 ).exists():
+#                     return True
 
-    def has_object_permission(self, request, view, obj):
-        # Read permissions
-        if request.method in permissions.SAFE_METHODS:
-            if isinstance(obj, Article):
-                # Can read published articles
-                if obj.status == ArticleStatusChoices.PUBLISHED:
-                    return True
-                # Can read articles assigned for review
-                if obj.reviews.filter(
-                    reviewed_by=request.user, is_active=True
-                ).exists():
-                    return True
+#             if isinstance(obj, ArticleReview):
+#                 # Can read own reviews or if they're the article author
+#                 return (
+#                     obj.reviewed_by == request.user
+#                     or obj.article.author == request.user
+#                 )
 
-            if isinstance(obj, ArticleReview):
-                # Can read own reviews or if they're the article author
-                return (
-                    obj.reviewed_by == request.user
-                    or obj.article.author == request.user
-                )
+#             return True
 
-            return True
+#         # Write permissions
+#         if isinstance(obj, Article):
 
-        # Write permissions
-        if isinstance(obj, Article):
+#             # Articles assigned for review
+#             if obj.reviews.filter(reviewed_by=request.user, is_active=True).exists():
+#                 return obj.status in [
+#                     ArticleStatusChoices.SUBMITTED_FOR_REVIEW,
+#                     ArticleStatusChoices.UNDER_REVIEW,
+#                     ArticleStatusChoices.CHANGES_REQUESTED,
+#                 ]
 
-            # Articles assigned for review
-            if obj.reviews.filter(reviewed_by=request.user, is_active=True).exists():
-                return obj.status in [
-                    ArticleStatusChoices.SUBMITTED_FOR_REVIEW,
-                    ArticleStatusChoices.UNDER_REVIEW,
-                    ArticleStatusChoices.CHANGES_REQUESTED,
-                ]
+#         if isinstance(obj, ArticleReview):
+#             # Can modify own reviews
+#             return obj.reviewed_by == request.user
 
-        if isinstance(obj, ArticleReview):
-            # Can modify own reviews
-            return obj.reviewed_by == request.user
-
-        return False
+#         return False
 
 
 class IsEditorOrReadOnly(CustomBasePermission):  # Access to admin interface
@@ -221,16 +219,12 @@ class CanSubmitForReview(BasePermission):
     Only article authors can submit their own articles.
     """
 
-    def has_permission(self, request, view):
-        return request.user.is_authenticated
+    # def has_permission(self, request, view):
+    #     return request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
         if isinstance(obj, Article):
-            return obj.author == request.user and obj.status in [
-                ArticleStatusChoices.DRAFT,
-                ArticleStatusChoices.CHANGES_REQUESTED,
-                ArticleStatusChoices.REJECTED,
-            ]
+            return obj.author == request.user 
         return False
 
 

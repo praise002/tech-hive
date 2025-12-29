@@ -26,6 +26,7 @@ from apps.content.serializers import (
     EventSerializer,
     JobSerializer,
     ResourceSerializer,
+    ReviewStartResponseSerializer,
     TagSerializer,
     ThreadReplySerializer,
     ToolSerializer,
@@ -1198,4 +1199,54 @@ ARTICLE_SUBMIT_RESPONSE_EXAMPLE = {
             ),
         ],
     ),
+}
+
+
+REVIEW_START_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Review started successfully",
+        response=ReviewStartResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Review started successfully",
+                    "data": {
+                        "review_status": "in_progress",
+                        "article_status": "under_review",
+                        "started_at": "2025-12-29T12:34:56.789Z",
+                    },
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        description="Permission Denied",
+        examples=[
+            OpenApiExample(
+                name="Forbidden",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "You do not have permission to perform this action.",
+                    "code": ErrorCode.FORBIDDEN,
+                },
+            ),
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Review not found",
+        examples=[
+            OpenApiExample(
+                name="Review Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Review not found",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+    422: ErrorDataResponseSerializer,
 }

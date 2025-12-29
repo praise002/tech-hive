@@ -791,6 +791,17 @@ class CoverImageSerializer(serializers.ModelSerializer):
         ]
 
 
+class ReviewActionRequestSerializer(serializers.Serializer):
+    """Request body for review actions (request changes, approve, reject)"""
+
+    reviewer_notes = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=5000,
+        help_text="Private notes for reviewer's reference (not shown to author)",
+    )
+
+
 # Response serializer
 class ArticleSummaryResponseSerializer(serializers.Serializer):
     """Serializer for article summary response"""
@@ -804,12 +815,16 @@ class ArticleSummaryResponseSerializer(serializers.Serializer):
 
 class ArticleSubmitResponseSerializer(serializers.Serializer):
     """Serializer for article submission response"""
-    status = serializers.CharField(read_only=True)
-    assigned_reviewer = serializers.SerializerMethodField()
-    is_resubmission = serializers.BooleanField(read_only=True)
 
-    class Meta:
-        fields = ["status", "assigned_reviewer", "is_resubmission"]
+    status = serializers.CharField(
+        read_only=True, help_text="Article status after submission"
+    )
+    assigned_reviewer = serializers.SerializerMethodField(
+        help_text="Reviewer assigned to the article"
+    )
+    is_resubmission = serializers.BooleanField(
+        read_only=True, help_text="Whether this is a resubmission to the same reviewer"
+    )
 
     @extend_schema_field(serializers.DictField)
     def get_assigned_reviewer(self, obj):
@@ -823,5 +838,31 @@ class ArticleSubmitResponseSerializer(serializers.Serializer):
                 "avatar_url": reviewer.avatar_url,
             }
         return None
+
+
+class ReviewStartResponseSerializer(serializers.Serializer):
+    """Response for starting review"""
+
+    review_status = serializers.CharField(
+        read_only=True, help_text="Review status (e.g., 'in_progress')"
+    )
+    article_status = serializers.CharField(
+        read_only=True, help_text="Article status (e.g., 'under_review')"
+    )
+    started_at = serializers.DateTimeField(
+        read_only=True, help_text="Timestamp when review was started"
+    )
+
+
+class ReviewActionResponseSerializer(serializers.Serializer):
+    """Response for review actions (request changes, reject)"""
+
+    article_status = serializers.CharField(
+        read_only=True, help_text="Article status after action"
+    )
+    completed_at = serializers.DateTimeField(
+        read_only=True, help_text="Timestamp when review was completed"
+    )
+
 
 # TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH
