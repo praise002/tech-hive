@@ -13,6 +13,7 @@ urlpatterns = [
     path("contribute/", views.AcceptGuidelinesView.as_view()),
     path("articles/", views.ArticleListView.as_view()),
     path("comments/", views.CommentCreateView.as_view()),
+    path('liveblocks/auth/', views.LiveblocksAuthView.as_view()),
     path("articles/feed/", LatestArticlesFeed()),
     path("articles/rss/", views.RSSFeedInfoView.as_view()),
     path(

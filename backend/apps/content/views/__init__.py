@@ -20,6 +20,7 @@ from .articles import (
     ThreadRepliesView,
     UserBatchView,
     UserSearchView,
+    LiveblocksAuthView,
 )
 from .contents import (
     CategoryGenericView,
@@ -56,4 +57,5 @@ __all__ = [
     "ReviewRequestChangesView",
     "ReviewApproveView",
     "ReviewRejectView",
+    "LiveblocksAuthView",
 ]

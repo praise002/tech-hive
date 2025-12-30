@@ -49,6 +49,7 @@ from apps.content.serializers import (
     CommentResponseSerializer,
     ContributorOnboardingSerializer,
     CoverImageSerializer,
+    LiveblocksAuthRequestSerializer,
     ReviewActionRequestSerializer,
     ReviewActionResponseSerializer,
     ReviewStartResponseSerializer,
@@ -67,6 +68,7 @@ from apps.content.throttles import (
 from apps.content.utils import (
     assign_editor,
     assign_reviewer,
+    create_liveblocks_token,
     create_workflow_history,
     get_liveblocks_permissions,
     sync_content_from_liveblocks,
@@ -1566,6 +1568,193 @@ class ReviewRejectView(APIView):
             return CustomResponse.error(
                 message="Failed to reject article. Please try again.",
                 err_code=ErrorCode.OPERATION_FAILED,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class LiveblocksAuthView(APIView):
+    """
+    Authenticate users for Liveblocks room access.
+
+    This endpoint implements the authentication logic required by Liveblocks.
+    It generates JWT tokens with appropriate room permissions based on the
+    article's workflow state and the user's role.
+
+    Documentation: https://liveblocks.io/docs/authentication/access-token
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Authenticate for Liveblocks room",
+        description="""
+        Generate a JWT token for Liveblocks room access.
+        
+        **How it works:**
+        1. Client (React) calls this endpoint with a room ID
+        2. Server validates user's access to the article
+        3. Server generates JWT with appropriate permissions:
+           - WRITE: `["room:write"]` - Full editing access
+           - READ: `["room:read", "room:presence:write"]` - Read-only with comments
+           - NONE: Access denied
+        
+        **Access Rules:**
+        - Draft/Changes Requested: Only author has WRITE access
+        - Submitted/Under Review: Assigned reviewer has WRITE, author has READ
+        - Ready for Publishing: Assigned editor has WRITE, author/reviewer have READ
+        - Published: Everyone has READ access
+        - Rejected: No access (except author for viewing from article list)
+        
+        **Token includes:**
+        - User ID
+        - User info (name, avatar, cursor color)
+        - Room permissions
+        - Expiration (2 hours)
+        """,
+        # request=LiveblocksAuthRequestSerializer,
+        # responses={
+        #     200: LiveblocksAuthResponseSerializer,
+        #     400: OpenApiExample(
+        #         'Invalid Request',
+        #         value={
+        #             "status": "failure",
+        #             "message": "Invalid room format",
+        #             "code": "invalid_input"
+        #         }
+        #     ),
+        #     403: OpenApiExample(
+        #         'Access Denied',
+        #         value={
+        #             "status": "failure",
+        #             "message": "You don't have permission to access this room",
+        #             "code": "forbidden"
+        #         }
+        #     ),
+        #     404: OpenApiExample(
+        #         'Article Not Found',
+        #         value={
+        #             "status": "failure",
+        #             "message": "Article not found",
+        #             "code": "non_existent"
+        #         }
+        #     ),
+        #     500: OpenApiExample(
+        #         'Token Generation Failed',
+        #         value={
+        #             "status": "failure",
+        #             "message": "Failed to generate authentication token",
+        #             "code": "server_error"
+        #         }
+        #     )
+        # },
+        # examples=[
+        #     OpenApiExample(
+        #         'Request Example',
+        #         value={"room": "article-123"},
+        #         request_only=True
+        #     ),
+        #     OpenApiExample(
+        #         'Success Response - Write Access',
+        #         value={
+        #             "status": "success",
+        #             "message": "Authentication successful",
+        #             "data": {
+        #                 "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        #                 "userId": "5"
+        #             }
+        #         },
+        #         response_only=True
+        #     ),
+        #     OpenApiExample(
+        #         'Success Response - Read Access',
+        #         value={
+        #             "status": "success",
+        #             "message": "Authentication successful (read-only)",
+        #             "data": {
+        #                 "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        #                 "userId": "5"
+        #             }
+        #         },
+        #         response_only=True
+        #     )
+        # ],
+        tags=liveblock_tags,
+    )
+    def post(self, request):
+        """Generate Liveblocks authentication token"""
+
+        serializer = LiveblocksAuthRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        room_id = serializer.validated_data["room_id"]
+
+        # Extract article ID from room ID
+        try:
+            article_id = room_id.replace("article-", "")
+            article = Article.objects.select_related(
+                "author", "assigned_reviewer", "assigned_editor"
+            ).get(id=article_id)
+        except (ValueError, Article.DoesNotExist):
+            logger.warning(
+                f"Liveblocks auth failed: Article not found for room {room_id}",
+                extra={"user_id": request.user.id, "room_id": room_id},
+            )
+            return CustomResponse.error(
+                message="Article not found",
+                err_code=ErrorCode.UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        user = request.user
+        permission_level = get_liveblocks_permissions(user, article)
+
+        if permission_level == "NONE":
+            logger.warning(
+                f"Liveblocks auth denied: User {user.id} has no access to article {article.id}",
+                extra={
+                    "user_id": user.id,
+                    "article_id": article.id,
+                    "article_status": article.status,
+                },
+            )
+            return CustomResponse.error(
+                message="You don't have permission to access this room",
+                err_code=ErrorCode.FORBIDDEN,
+                status_code=status.HTTP_403_FORBIDDEN,
+            )
+
+        try:
+            token = create_liveblocks_token(user, article, permission_level)
+
+            logger.info(
+                f"Liveblocks auth successful: User {user.id} granted {permission_level} access to article {article.id}",
+                extra={
+                    "user_id": user.id,
+                    "article_id": article.id,
+                    "permission_level": permission_level,
+                },
+            )
+
+            
+            response_data = {"token": token, "user_id": str(user.id)}
+
+            message = "Authentication successful"
+            if permission_level == "READ":
+                message = "Authentication successful (read-only)"
+
+            return CustomResponse.success(
+                message=message, data=response_data, status_code=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            logger.error(
+                f"Failed to generate Liveblocks token for user {user.id}: {str(e)}",
+                extra={"user_id": user.id, "article_id": article.id},
+                exc_info=True,
+            )
+            return CustomResponse.error(
+                message="Failed to generate authentication token",
+                err_code=ErrorCode.SERVER_ERROR,
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 

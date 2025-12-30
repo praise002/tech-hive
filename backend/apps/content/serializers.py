@@ -895,4 +895,29 @@ class ArticleApproveResponseSerializer(serializers.Serializer):
     )
 
 
+class LiveblocksAuthRequestSerializer(serializers.Serializer):
+    """Validate Liveblocks authentication request"""
+
+    room_id = serializers.CharField(
+        required=True, help_text="Liveblocks room ID (e.g., 'article-123')"
+    )
+
+    def validate_room_id(self, value):
+        """Validate room format"""
+        if not value.startswith("article-"):
+            raise serializers.ValidationError(
+                "Invalid room format. Expected format: 'article-{id}'"
+            )
+        return value
+
+
+class LiveblocksAuthResponseSerializer(serializers.Serializer):
+    """Liveblocks authentication response"""
+
+    token = serializers.CharField(
+        read_only=True, help_text="JWT token for Liveblocks authentication"
+    )
+    user_id = serializers.CharField(read_only=True, help_text="User ID for Liveblocks")
+
+
 # TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH

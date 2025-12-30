@@ -1,8 +1,11 @@
 import logging
 import math
 import re
+from time import time
 from typing import Dict
 
+import jwt
+import requests
 from apps.accounts.utils import UserRoles
 from apps.content.choices import ArticleStatusChoices
 from django.conf import settings
@@ -226,9 +229,107 @@ def get_liveblocks_permissions(user, article):
     return "NONE"
 
 
-# TODO:
 def create_liveblocks_token(user, article, permission_level):
-    pass
+    """
+    Generate Liveblocks JWT token by calling Liveblocks REST API.
+
+    This follows the recommended approach for non-Node.js backends:
+    https://github.com/liveblocks/liveblocks/issues/12
+
+    Instead of manually creating JWT tokens, we call Liveblocks' API
+    which generates the token for us with proper validation.
+
+    Args:
+        user: Django User object
+        article: Article object
+        permission_level: "WRITE" or "READ"
+
+    Returns:
+        str: JWT token from Liveblocks
+
+    Raises:
+        Exception: If token generation fails
+    """
+
+    room_id = f"article-{article.id}"
+
+    # Map permission level to Liveblocks permissions
+    if permission_level == "WRITE":
+        room_permissions = ["room:write"]
+    elif permission_level == "READ":
+        room_permissions = ["room:read", "room:presence:write"]
+    else:
+        room_permissions = []  # No access
+
+    # Prepare user info for Liveblocks
+    user_info = {
+        "name": user.full_name(),
+        "avatar": user.avatar_url,
+        "color": user.cursor_color,
+    }
+
+    # Call Liveblocks REST API to generate token
+    # Documentation: https://liveblocks.io/docs/api-reference/rest-api-endpoints#post-authorize-user
+    liveblocks_url = "https://api.liveblocks.io/v2/authorize-user"
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {settings.LIVEBLOCKS_SECRET_KEY}",
+    }
+
+    payload = {
+        "userId": str(user.id),
+        "userInfo": user_info,
+        "permissions": {room_id: room_permissions},
+    }
+
+    try:
+        response = requests.post(
+            liveblocks_url,
+            headers=headers,
+            json=payload,
+            timeout=10,  # 10 second timeout
+        )
+
+        # Check if request was successful
+        response.raise_for_status()
+
+        # Extract token from response
+        response_data = response.json()
+        token = response_data.get("token")
+
+        if not token:
+            logger.error(
+                f"Liveblocks API returned no token. Response: {response_data}",
+                extra={"user_id": user.id, "article_id": article.id},
+            )
+            raise Exception("Liveblocks API did not return a token")
+
+        logger.info(
+            f"Successfully generated Liveblocks token via API for user {user.id}",
+            extra={
+                "user_id": user.id,
+                "article_id": article.id,
+                "permission_level": permission_level,
+            },
+        )
+
+        return token
+
+    except requests.exceptions.RequestException as e:
+        logger.error(
+            f"Failed to call Liveblocks API: {str(e)}",
+            extra={"user_id": user.id, "article_id": article.id},
+            exc_info=True,
+        )
+        raise Exception(f"Failed to generate Liveblocks token: {str(e)}")
+    except Exception as e:
+        logger.error(
+            f"Unexpected error generating Liveblocks token: {str(e)}",
+            extra={"user_id": user.id, "article_id": article.id},
+            exc_info=True,
+        )
+        raise
 
 
 def sync_content_from_liveblocks(article):
@@ -296,22 +397,3 @@ def create_workflow_history(article, from_status, to_status, changed_by, notes=N
         changed_by=changed_by,
         notes=notes,
     )
-
-
-# TODO: CONFIRM IN THE DOCS
-# "WRITE" Permission:
-
-# ✅ Can edit article content (full collaborative editing)
-# ✅ Can view and add comments (including @mentions)
-# ✅ Can see other users' cursors/presence
-# ✅ Can participate in real-time collaboration
-# "READ" Permission:
-
-# ❌ Cannot edit article content
-# ✅ Can view the article
-# ✅ Can view and add comments (including @mentions)
-# ✅ Can see other users' cursors/presence (read-only presence)
-# "NONE" Permission:
-
-# ❌ No access to the room at all
-# ❌ Cannot see or interact with the article or comments
