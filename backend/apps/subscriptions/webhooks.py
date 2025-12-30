@@ -20,15 +20,14 @@ def webhook(request):
             return HttpResponse(status=400)
 
         raw_body = request.body
-        # payload = request.data
-        # payload = raw_body.get("data", {})
-        
+
         try:
-            payload = json.loads(raw_body) if raw_body else {}
-        except json.JSONDecodeError:
+            payload = json.loads(raw_body.decode("utf-8"))
+        # except json.JSONDecodeError:  # subclass of ValueERror
+        except ValueError:  # more general
             logger.error("Webhook received with invalid JSON")
             return HttpResponse(status=400)
-            
+
         event_type = payload.get("event")
 
         if not event_type:

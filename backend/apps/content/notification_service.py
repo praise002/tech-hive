@@ -200,7 +200,7 @@ class NotificationService:
             context=context,
         )
 
-    # TODO: LISTEN TO THE WEBHOOK - ThreadNotification
+    # ThreadNotification
     def send_thread_notification_email(self, webhook_data):
         """
         Notify user about comment/reply activity
