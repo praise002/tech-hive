@@ -1,6 +1,5 @@
 import logging
 from datetime import timezone
-from xml.dom import NotFoundErr
 
 from apps.accounts.utils import UserRoles
 from apps.common.errors import ErrorCode
@@ -9,15 +8,13 @@ from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
 from apps.content import notification_service
 from apps.content.choices import ArticleReviewStatusChoices, ArticleStatusChoices
-from apps.content.models import Article, ArticleReview, Category, Comment, Tag
+from apps.content.models import Article, ArticleReview, Comment, Tag
 from apps.content.permissions import (
     CanManageReview,
-    CanPublishArticle,
     CanSubmitForReview,
     IsAuthorOrReadOnly,
     IsCommentAuthor,
     IsContributor,
-    IsEditorOrReadOnly,
 )
 from apps.content.schema_examples import (
     ACCEPT_GUIDELINES_RESPONSE_EXAMPLE,
@@ -43,8 +40,6 @@ from apps.content.serializers import (
     ArticleApproveResponseSerializer,
     ArticleDetailSerializer,
     ArticleEditorSerializer,
-    ArticlePublishRequestSerializer,
-    ArticlePublishResponseSerializer,
     ArticleSerializer,
     ArticleSubmitResponseSerializer,
     ArticleSummaryResponseSerializer,
@@ -1575,148 +1570,6 @@ class ReviewRejectView(APIView):
             )
 
 
-class ArticlePublishView(APIView):
-    """Publish article"""
-
-    permission_classes = [CanPublishArticle]
-    serializer_class = ArticlePublishResponseSerializer
-
-    @extend_schema(
-        summary="Publish article",
-        description="""
-        Editor publishes article to the platform.
-        
-        **Pre-conditions:**
-        - Article status must be: ready_for_publishing
-        - User must have editor role
-        
-        """,
-        # request=ArticlePublishRequestSerializer,
-        # responses={
-        #     200: ArticlePublishResponseSerializer,
-        # },
-        tags=article_workflow,
-    )
-    def post(self, request, article_id):
-        """Publish article"""
-        try:
-            article = Article.objects.select_related(
-                "author", "assigned_reviewer", "assigned_editor"
-            ).get(id=article_id)
-        except Article.DoesNotExist:
-            raise NotFoundError("Article not found")
-
-        self.check_object_permissions(request, article)
-
-        if article.status != ArticleStatusChoices.READY:
-            return CustomResponse.error(
-                message=f"Cannot publish. Article status is '{article.status}', must be 'ready_for_publishing'.",
-                err_code=ErrorCode.INVALID_STATUS,
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            )
-
-        serializer = ArticlePublishRequestSerializer(data=request.data, context={'article': article})
-        serializer.is_valid(raise_exception=True)
-
-        try:
-            with transaction.atomic():
-                old_status = article.status
-
-                article.status = ArticleStatusChoices.PUBLISHED
-                article.published_at = timezone.now()
-
-                category_id = serializer.validated_data.get("category_id")
-                if category_id:
-                    try:
-                        category = Category.objects.get(id=category_id)
-                        article.category = category
-                    except Category.DoesNotExist:
-                        pass
-
-                # tag_ids = serializer.validated_data.get("tag_ids", [])
-                # # empty [] is falsy
-                # if tag_ids:
-                #     tags = Tag.objects.filter(id__in=tag_ids)
-                #     article.tags.set(tags)
-                
-                tag_instances = serializer.validated_data.get('tags', [])
-                if tag_instances:
-                    article.tags.set(tag_instances)
-
-                article.is_featured = serializer.validated_data.get(
-                    "is_featured", False
-                )
-
-                # Clear workflow assignments (workflow complete)
-                article.assigned_reviewer = None
-                article.assigned_editor = None
-
-                article.save()
-
-                # Create workflow history
-                create_workflow_history(
-                    article=article,
-                    from_status=old_status,
-                    to_status=article.status,
-                    changed_by=request.user,
-                    notes=f"Published by {request.user.full_name()}",
-                )
-
-                
-                try:
-                    notification_service.send_article_published_email(article)
-                except Exception as e:
-                    logger.error(f"Failed to send publication emails: {str(e)}")
-
-                
-                published_url = f"/articles/{article.author.username}/{article.slug}"
-
-                response_data = {
-                    "status": article.status,
-                    "published_at": article.published_at,
-                    "url": published_url,
-                }
-
-                response_serializer = self.serializer_class(response_data)
-
-                return CustomResponse.success(
-                    message="Article published successfully!",
-                    data=response_serializer.data,
-                    status_code=status.HTTP_200_OK,
-                )
-
-        except Exception as e:
-            logger.error(f"Error publishing article {id}: {str(e)}", exc_info=True)
-            return CustomResponse.error(
-                message="Failed to publish article. Please try again.",
-                err_code=ErrorCode.OPERATION_FAILED,
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-class ArticleReassignReviewerView(APIView):
-    """Reassign reviewer to article"""
-    permission_classes = [IsAuthenticated, IsEditorOrReadOnly]
-
-    @extend_schema(
-        summary="Reassign reviewer",
-        description="""
-        Editor reassigns a different reviewer to the article.
-        
-        **Pre-conditions:**
-        - Article status must be: submitted_for_review OR under_review
-        - User must have editor role
-        
-        
-        """,
-        # request=ReassignReviewerRequestSerializer,
-        # responses={
-        #     200: ReassignResponseSerializer,
-        # },
-        tags=article_workflow
-    )
-    def post(self, request, id):
-        """Reassign reviewer"""
-        pass
 # TODO:
 # Still deliberating on is_active in ArticleReview
 # Review Cycles Are Iterative

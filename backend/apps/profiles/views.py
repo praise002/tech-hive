@@ -6,7 +6,7 @@ from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
 from apps.content.mixins import HeaderMixin
 from apps.content.models import Article, ArticleStatusChoices, Comment, SavedArticle
-from apps.content.permissions import IsContributor, IsPublished
+from apps.content.permissions import IsContributor
 from apps.content.serializers import (
     ArticleCreateSerializer,
     ArticleSerializer,
@@ -46,6 +46,8 @@ from rest_framework.generics import (
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+
+from backend.apps.common.errors import ErrorCode
 
 tags = ["Profiles"]
 
@@ -462,10 +464,7 @@ class ArticleRetrieveUpdateView(HeaderMixin, APIView):
 
 
 class SavedArticlesView(APIView):
-    def get_permissions(self):
-        if self.request.method == "POST":
-            return (IsPublished(),)
-        return (IsAuthenticated(),)
+    permission_classes = (IsAuthenticated,)
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -513,7 +512,12 @@ class SavedArticlesView(APIView):
         serializer.is_valid(raise_exception=True)
 
         article = serializer.article
-        self.check_object_permissions(request, article)
+        if article.status != ArticleStatusChoices.PUBLISHED:
+            return CustomResponse.error(
+                message="You can only save or unsave an article that is published.",
+                err_code=ErrorCode.UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
         # Toggle save status
         saved_article, created = SavedArticle.objects.get_or_create(
             user=request.user, article=article

@@ -12,8 +12,8 @@ admin.site.site_header = mark_safe(
 
 
 class UserAdmin(BaseUserAdmin):
-    list_display = ("first_name", "last_name", "is_email_verified", "created_at")
-    list_filter = list_display
+    list_display = ("first_name", "last_name", "email", "is_email_verified", "is_active", "user_active", "created_at")
+    list_filter = ("is_email_verified", "is_active", "user_active", "is_staff", "is_superuser", "created_at")
     ordering = ("first_name", "last_name", "email")
     list_per_page = 10
 
@@ -29,6 +29,15 @@ class UserAdmin(BaseUserAdmin):
                     "id",
                     "google_id",
                     "avatar",
+                )
+            },
+        ),
+        (
+            _("User Preferences"),
+            {
+                "fields": (
+                    "cursor_color",
+                    "mentions_disabled",
                 )
             },
         ),
@@ -79,13 +88,15 @@ class UserAdmin(BaseUserAdmin):
                     "is_active",
                     "user_active",
                     "avatar",
+                    "cursor_color",
+                    "mentions_disabled",
                 ),
             },
         ),
     )
 
     readonly_fields = ("created_at", "username", "updated_at", "id", "google_id")
-    search_fields = ("first_name", "last_name", "email")
+    search_fields = ("first_name", "last_name", "email", "username")
 
 
 admin.site.register(Otp)

@@ -24,6 +24,22 @@ POST /api/articles/review/{id}/reject/         # Reject
 
 ---
 
+"""
+Permission for Editors:
+- Can publish articles x
+- Can add tags to articles x
+- Can assign reviewers to articles x
+# - Can view articles ready for publishing x
+- Can view articles
+- Can add published articles to categories x
+ """
+
+"""
+Permission for Managers:
+- Create reviewer account
+- Create editor account
+- View platform statistics (only this will be handled in the views)
+"""
 ## ✏️ Editor Role
 
 **Publishing Management:**

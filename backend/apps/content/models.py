@@ -42,7 +42,7 @@ class Category(BaseModel):
     class Meta:
         ordering = ["name"]
         indexes = [
-        models.Index(fields=["name"]),
+            models.Index(fields=["name"]),
         ]
         verbose_name_plural = "Categories"
 
@@ -159,10 +159,6 @@ class Article(BaseModel):
             models.Index(fields=["status", "-created_at"]),
         ]
 
-        # permissions = [
-        #     ("publish_article", "Can publish article"),
-        # ]
-
 
 class ArticleReaction(BaseModel):
     EMOJI_CHOICES = [
@@ -254,6 +250,7 @@ class ArticleReview(BaseModel):
     def __str__(self):
         return f"Review of {self.article} by {self.reviewed_by}"
 
+
 # Submit Article for Review
 class ArticleWorkflowHistory(BaseModel):
     """Audit trail for article status changes"""
@@ -289,51 +286,44 @@ class ArticleWorkflowHistory(BaseModel):
     def __str__(self):
         return f"{self.article.title}: {self.from_status} → {self.to_status}"
 
+
 class LiveblocksWebhookEvent(BaseModel):
     """Log all Liveblocks webhook events for debugging"""
-    
+
     event_type = models.CharField(
         max_length=50,
-        help_text="Type of webhook event (storageUpdated, notificationEvent, etc.)"
+        help_text="Type of webhook event (storageUpdated, notificationEvent, etc.)",
     )
-    
+
     room_id = models.CharField(
-        max_length=100,
-        help_text="Liveblocks room ID (e.g., article-123)"
+        max_length=100, help_text="Liveblocks room ID (e.g., article-123)"
     )
-    
-    payload = models.JSONField(
-        help_text="Full webhook payload"
-    )
-    
+
+    payload = models.JSONField(help_text="Full webhook payload")
+
     processed = models.BooleanField(
-        default=False,
-        help_text="Whether the event was successfully processed"
+        default=False, help_text="Whether the event was successfully processed"
     )
-    
-    processed_at = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-    
+
+    processed_at = models.DateTimeField(null=True, blank=True)
+
     error_message = models.TextField(
-        null=True,
-        blank=True,
-        help_text="Error message if processing failed"
+        null=True, blank=True, help_text="Error message if processing failed"
     )
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
         indexes = [
-            models.Index(fields=['room_id', '-created_at']),
-            models.Index(fields=['processed', '-created_at']),
-            models.Index(fields=['event_type', '-created_at']),
+            models.Index(fields=["room_id", "-created_at"]),
+            models.Index(fields=["processed", "-created_at"]),
+            models.Index(fields=["event_type", "-created_at"]),
         ]
-    
+
     def __str__(self):
         return f"{self.event_type} - {self.room_id} at {self.created_at}"
+
 
 class CommentThread(BaseModel):
     """
