@@ -82,25 +82,6 @@ class CanManageReview(BasePermission):
         return False
 
 
-class CanPublishArticle(BasePermission):
-    """
-    Permission to publish articles.
-    """
-
-    def has_permission(self, request, view):
-        if not request.user.is_authenticated:
-            return False
-
-        # Must have editor role
-        return request.user.groups.filter(name=UserRoles.EDITOR).exists()
-
-    def has_object_permission(self, request, view, obj):
-        if isinstance(obj, Article):
-            return obj.assigned_editor == request.user
-
-        return False
-
-
 class IsCommentAuthor(BasePermission):
     def has_object_permission(self, request, view, obj):
         return obj.user == request.user
