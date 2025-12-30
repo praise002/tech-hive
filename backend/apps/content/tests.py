@@ -1764,3 +1764,233 @@ class TestArticleReactions(APITestCase):
         
 #         self.assertEqual(response.status_code, status.HTTP_200_OK)
 #         self.assertEqual(response.data['data']['user_can_edit'], True)
+
+
+# apps/content/tests/test_workflow_endpoints.py
+
+# class ArticlePublishTagsTestCase(TestCase):
+#     """Test tag handling during article publication"""
+
+#     def setUp(self):
+#         self.client = APIClient()
+        
+#         # Create groups
+#         self.editor_group = Group.objects.create(name=UserRoles.EDITOR)
+#         self.contributor_group = Group.objects.create(name=UserRoles.CONTRIBUTOR)
+        
+#         # Create users
+#         self.editor = User.objects.create_user(
+#             username='editor',
+#             email='editor@example.com',
+#             password='testpass123'
+#         )
+#         self.editor.groups.add(self.editor_group)
+        
+#         self.contributor = User.objects.create_user(
+#             username='contributor',
+#             email='contributor@example.com',
+#             password='testpass123'
+#         )
+#         self.contributor.groups.add(self.contributor_group)
+        
+#         # Create existing tags
+#         self.tag1 = Tag.objects.create(name='python')
+#         self.tag2 = Tag.objects.create(name='django')
+
+#     @patch('apps.content.notifications.notification_service.send_article_published_email')
+#     def test_publish_adds_tags_to_existing(self, mock_email):
+#         """Test that publishing adds new tags without removing existing ones"""
+        
+#         # Create article with existing tags
+#         article = Article.objects.create(
+#             title='Test Article',
+#             content='<p>Test content</p>',
+#             author=self.contributor,
+#             status=ArticleStatusChoices.READY,
+#             assigned_editor=self.editor
+#         )
+#         article.tags.add(self.tag1)  # Article already has 'python' tag
+        
+#         self.assertEqual(article.tags.count(), 1)
+        
+#         # Publish with new tags
+#         self.client.force_authenticate(user=self.editor)
+#         response = self.client.post(
+#             f'/api/articles/{article.id}/publish/',
+#             {
+#                 'tags': ['django', 'rest-framework']  # Adding new tags
+#             },
+#             format='json'
+#         )
+        
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+#         # Verify tags were added, not replaced
+#         article.refresh_from_db()
+#         self.assertEqual(article.tags.count(), 3)  # python + django + rest-framework
+        
+#         tag_names = [tag.name for tag in article.tags.all()]
+#         self.assertIn('python', tag_names)  # Original tag still there
+#         self.assertIn('django', tag_names)
+#         self.assertIn('rest-framework', tag_names)
+
+#     @patch('apps.content.notifications.notification_service.send_article_published_email')
+#     def test_publish_with_duplicate_tags(self, mock_email):
+#         """Test that duplicate tags are handled correctly"""
+        
+#         article = Article.objects.create(
+#             title='Test Article',
+#             content='<p>Test content</p>',
+#             author=self.contributor,
+#             status=ArticleStatusChoices.READY,
+#             assigned_editor=self.editor
+#         )
+#         article.tags.add(self.tag1)  # Article has 'python'
+        
+#         # Try to add 'python' again
+#         self.client.force_authenticate(user=self.editor)
+#         response = self.client.post(
+#             f'/api/articles/{article.id}/publish/',
+#             {
+#                 'tags': ['python', 'django']  # python is duplicate
+#             },
+#             format='json'
+#         )
+        
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+#         # Verify no duplicate tags
+#         article.refresh_from_db()
+#         self.assertEqual(article.tags.count(), 2)  # python + django (no duplicate)
+        
+#         tag_names = [tag.name for tag in article.tags.all()]
+#         self.assertEqual(tag_names.count('python'), 1)
+
+#     @patch('apps.content.notifications.notification_service.send_article_published_email')
+#     def test_publish_enforces_max_5_tags(self, mock_email):
+#         """Test that total tags cannot exceed 5"""
+        
+#         # Create article with 3 existing tags
+#         article = Article.objects.create(
+#             title='Test Article',
+#             content='<p>Test content</p>',
+#             author=self.contributor,
+#             status=ArticleStatusChoices.READY,
+#             assigned_editor=self.editor
+#         )
+#         tag3 = Tag.objects.create(name='api')
+#         article.tags.add(self.tag1, self.tag2, tag3)
+        
+#         self.assertEqual(article.tags.count(), 3)
+        
+#         # Try to add 3 more tags (would exceed limit)
+#         self.client.force_authenticate(user=self.editor)
+#         response = self.client.post(
+#             f'/api/articles/{article.id}/publish/',
+#             {
+#                 'tags': ['rest-framework', 'graphql', 'websockets']
+#             },
+#             format='json'
+#         )
+        
+#         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+#         self.assertIn('Maximum 5 tags', response.data['message'])
+        
+#         # Verify tags weren't added
+#         article.refresh_from_db()
+#         self.assertEqual(article.tags.count(), 3)
+
+#     @patch('apps.content.notifications.notification_service.send_article_published_email')
+#     def test_publish_creates_new_tags(self, mock_email):
+#         """Test that new tags are created via process_tags"""
+        
+#         article = Article.objects.create(
+#             title='Test Article',
+#             content='<p>Test content</p>',
+#             author=self.contributor,
+#             status=ArticleStatusChoices.READY,
+#             assigned_editor=self.editor
+#         )
+        
+#         initial_tag_count = Tag.objects.count()
+        
+#         # Publish with new tag names
+#         self.client.force_authenticate(user=self.editor)
+#         response = self.client.post(
+#             f'/api/articles/{article.id}/publish/',
+#             {
+#                 'tags': ['new-tag-1', 'new-tag-2']
+#             },
+#             format='json'
+#         )
+        
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+#         # Verify new tags were created
+#         self.assertEqual(Tag.objects.count(), initial_tag_count + 2)
+#         self.assertTrue(Tag.objects.filter(name='new-tag-1').exists())
+#         self.assertTrue(Tag.objects.filter(name='new-tag-2').exists())
+        
+#         # Verify tags added to article
+#         article.refresh_from_db()
+#         self.assertEqual(article.tags.count(), 2)
+
+#     @patch('apps.content.notifications.notification_service.send_article_published_email')
+#     def test_publish_without_tags(self, mock_email):
+#         """Test that publishing without tags works"""
+        
+#         article = Article.objects.create(
+#             title='Test Article',
+#             content='<p>Test content</p>',
+#             author=self.contributor,
+#             status=ArticleStatusChoices.READY,
+#             assigned_editor=self.editor
+#         )
+#         article.tags.add(self.tag1)
+        
+#         # Publish without specifying tags
+#         self.client.force_authenticate(user=self.editor)
+#         response = self.client.post(
+#             f'/api/articles/{article.id}/publish/',
+#             {},
+#             format='json'
+#         )
+        
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+#         # Verify existing tags remain
+#         article.refresh_from_db()
+#         self.assertEqual(article.tags.count(), 1)
+#         self.assertEqual(article.tags.first(), self.tag1)
+
+#     @patch('apps.content.notifications.notification_service.send_article_published_email')
+#     def test_publish_tag_case_normalization(self, mock_email):
+#         """Test that tag names are normalized (lowercase, trimmed)"""
+        
+#         article = Article.objects.create(
+#             title='Test Article',
+#             content='<p>Test content</p>',
+#             author=self.contributor,
+#             status=ArticleStatusChoices.READY,
+#             assigned_editor=self.editor
+#         )
+        
+#         # Publish with mixed case tags
+#         self.client.force_authenticate(user=self.editor)
+#         response = self.client.post(
+#             f'/api/articles/{article.id}/publish/',
+#             {
+#                 'tags': ['  Python  ', 'DJANGO', 'Rest-Framework']
+#             },
+#             format='json'
+#         )
+        
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+#         # Verify tags are normalized
+#         article.refresh_from_db()
+#         tag_names = [tag.name for tag in article.tags.all()]
+        
+#         self.assertIn('python', tag_names)
+#         self.assertIn('django', tag_names)
+#         self.assertIn('rest-framework', tag_names)

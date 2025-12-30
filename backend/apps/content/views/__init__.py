@@ -17,6 +17,11 @@ from .articles import (
     ArticleSubmitView,
     ReviewStartView,
     ReviewRequestChangesView,
+    ReviewApproveView,
+    ReviewRejectView,
+    ArticlePublishView,
+    ArticleReassignReviewerView,
+    ArticleReassignEditorView,
 )
 from .contents import (
     CategoryGenericView,
@@ -53,4 +58,9 @@ __all__ = [
     "ArticleSubmitView",
     "ReviewStartView",
     "ReviewRequestChangesView",
+    "ReviewApproveView",
+    "ReviewRejectView",
+    "ArticlePublishView",
+    "ArticleReassignReviewerView",
+    "ArticleReassignEditorView",
 ]

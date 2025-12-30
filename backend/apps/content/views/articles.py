@@ -17,6 +17,7 @@ from apps.content.permissions import (
     IsAuthorOrReadOnly,
     IsCommentAuthor,
     IsContributor,
+    IsEditorOrReadOnly,
 )
 from apps.content.schema_examples import (
     ACCEPT_GUIDELINES_RESPONSE_EXAMPLE,
@@ -1596,12 +1597,12 @@ class ArticlePublishView(APIView):
         # },
         tags=article_workflow,
     )
-    def post(self, request, id):
+    def post(self, request, article_id):
         """Publish article"""
         try:
             article = Article.objects.select_related(
                 "author", "assigned_reviewer", "assigned_editor"
-            ).get(id=id)
+            ).get(id=article_id)
         except Article.DoesNotExist:
             raise NotFoundError("Article not found")
 
@@ -1614,7 +1615,7 @@ class ArticlePublishView(APIView):
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             )
 
-        serializer = ArticlePublishRequestSerializer(data=request.data)
+        serializer = ArticlePublishRequestSerializer(data=request.data, context={'article': article})
         serializer.is_valid(raise_exception=True)
 
         try:
@@ -1632,11 +1633,15 @@ class ArticlePublishView(APIView):
                     except Category.DoesNotExist:
                         pass
 
-                tag_ids = serializer.validated_data.get("tag_ids", [])
-                # empty [] is falsy
-                if tag_ids:
-                    tags = Tag.objects.filter(id__in=tag_ids)
-                    article.tags.set(tags)
+                # tag_ids = serializer.validated_data.get("tag_ids", [])
+                # # empty [] is falsy
+                # if tag_ids:
+                #     tags = Tag.objects.filter(id__in=tag_ids)
+                #     article.tags.set(tags)
+                
+                tag_instances = serializer.validated_data.get('tags', [])
+                if tag_instances:
+                    article.tags.set(tag_instances)
 
                 article.is_featured = serializer.validated_data.get(
                     "is_featured", False
@@ -1688,7 +1693,30 @@ class ArticlePublishView(APIView):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+class ArticleReassignReviewerView(APIView):
+    """Reassign reviewer to article"""
+    permission_classes = [IsAuthenticated, IsEditorOrReadOnly]
 
+    @extend_schema(
+        summary="Reassign reviewer",
+        description="""
+        Editor reassigns a different reviewer to the article.
+        
+        **Pre-conditions:**
+        - Article status must be: submitted_for_review OR under_review
+        - User must have editor role
+        
+        
+        """,
+        # request=ReassignReviewerRequestSerializer,
+        # responses={
+        #     200: ReassignResponseSerializer,
+        # },
+        tags=article_workflow
+    )
+    def post(self, request, id):
+        """Reassign reviewer"""
+        pass
 # TODO:
 # Still deliberating on is_active in ArticleReview
 # Review Cycles Are Iterative

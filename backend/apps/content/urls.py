@@ -33,6 +33,18 @@ urlpatterns = [
         views.ArticleSubmitView.as_view(),
     ),
     path(
+        "articles/<uuid:article_id>/publish/",
+        views.ArticlePublishView.as_view(),
+    ),
+    path(
+        "articles/<uuid:id>/reassign-reviewer/",
+        views.ArticleReassignReviewerView.as_view(),
+    ),
+    path(
+        "articles/<uuid:id>/reassign-editor/",
+        views.ArticleReassignEditorView.as_view(),
+    ),
+    path(
         "reviews/<uuid:review_id>/start/",
         views.ReviewStartView.as_view(),
     ),
@@ -40,7 +52,14 @@ urlpatterns = [
         "reviews/<uuid:review_id>/request-changes/",
         views.ReviewRequestChangesView.as_view(),
     ),
-    
+    path(
+        "reviews/<uuid:review_id>/approve/",
+        views.ReviewApproveView.as_view(),
+    ),
+    path(
+        "reviews/<uuid:review_id>/reject/",
+        views.ReviewRejectView.as_view(),
+    ),
     path("comments/<uuid:comment_id>/replies/", views.ThreadRepliesView.as_view()),
     path(
         "comments/<uuid:comment_id>/",

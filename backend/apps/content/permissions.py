@@ -129,7 +129,8 @@ class IsContributor(BasePermission):
 #         return False
 
 
-class IsEditorOrReadOnly(CustomBasePermission):  # Access to admin interface
+# Do it in the admin interface
+class IsEditorOrReadOnly(CustomBasePermission):
     """
     Permission for Editors:
     - Can publish articles
@@ -138,6 +139,23 @@ class IsEditorOrReadOnly(CustomBasePermission):  # Access to admin interface
     - Can view articles ready for publishing
     - Can add published articles to categories
     """
+
+    def has_permission(self, request, view):
+        if not request.user.is_authenticated:
+            return False
+
+        return request.user.groups.filter(name=UserRoles.EDITOR).exists()
+
+    def has_object_permission(self, request, view, obj):
+        if isinstance(obj, Article):
+            # Must be assigned as reviewer for this article
+            return obj.reviews.filter(reviewed_by=request.user, is_active=True).exists()
+
+        if isinstance(obj, ArticleReview):
+            # Must be the assigned reviewer
+            return obj.reviewed_by == request.user
+
+        return False
 
     def has_object_permission(self, request, view, obj):
         # Read permissions

@@ -838,14 +838,40 @@ class ArticlePublishRequestSerializer(serializers.Serializer):
         help_text="Whether to mark the article as featured",
     )
 
+    # def validate_tags(self, value):
+    #     """Validate and process tag names"""
+    #     if value:
+    #         if len(value) > 5:
+    #             raise serializers.ValidationError("Maximum 5 tags allowed per article")
+
+    #         self.tag_instances = process_tags(value)
+    #     return value
+
     def validate_tags(self, value):
-        """Validate and process tag names"""
-        if value:
-            if len(value) > 5:
+        """Validate and process tag names, combining with existing tags"""
+        if value:  # [] evaluates to falsy
+            article = self.context.get("article")
+            if not article:
+                raise serializers.ValidationError(
+                    "Article context is required for tag validation"
+                )
+
+            new_tag_instances = process_tags(value)
+
+            current_tags = list(article.tags.all())
+
+            all_tags = current_tags + new_tag_instances
+
+            tags = set(all_tags)
+
+            # the frontend will limit it though but still need validation in the backend
+            if len(tags) > 5:
                 raise serializers.ValidationError("Maximum 5 tags allowed per article")
 
-            self.tag_instances = process_tags(value)
-        return value
+            return list(tags)
+
+        # If no tags provided, return empty list (don't modify existing)
+        return []
 
     def validate_category_id(self, value):
         """Validate category exists"""
@@ -854,48 +880,47 @@ class ArticlePublishRequestSerializer(serializers.Serializer):
                 raise serializers.ValidationError("Category does not exist")
         return value
 
+
 class ReassignReviewerRequestSerializer(serializers.Serializer):
     """Request body for reassigning reviewer"""
+
     reviewer_id = serializers.CharField(
-        required=True,
-        help_text="ID of the new reviewer to assign"
+        required=True, help_text="ID of the new reviewer to assign"
     )
-    
+
     def validate_reviewer_id(self, value):
         """Validate reviewer exists and has reviewer role"""
         from apps.accounts.utils import UserRoles
-        
+
         if not User.objects.filter(
-            id=value,
-            is_active=True,
-            groups__name=UserRoles.REVIEWER
+            id=value, is_active=True, groups__name=UserRoles.REVIEWER
         ).exists():
             raise serializers.ValidationError(
                 "User does not exist or does not have reviewer role"
             )
         return value
-    
+
+
 class ReassignEditorRequestSerializer(serializers.Serializer):
     """Request body for reassigning editor"""
+
     editor_id = serializers.CharField(
-        required=True,
-        help_text="ID of the new editor to assign"
+        required=True, help_text="ID of the new editor to assign"
     )
-    
+
     def validate_editor_id(self, value):
         """Validate editor exists and has editor role"""
         from apps.accounts.utils import UserRoles
-        
+
         if not User.objects.filter(
-            id=value,
-            is_active=True,
-            groups__name=UserRoles.EDITOR
+            id=value, is_active=True, groups__name=UserRoles.EDITOR
         ).exists():
             raise serializers.ValidationError(
                 "User does not exist or does not have editor role"
             )
         return value
-    
+
+
 # Response serializer
 class ArticleSummaryResponseSerializer(serializers.Serializer):
     """Serializer for article summary response"""
@@ -972,21 +997,60 @@ class ArticleApproveResponseSerializer(serializers.Serializer):
         read_only=True, help_text="Timestamp when review was completed"
     )
 
+
 class ArticlePublishResponseSerializer(serializers.Serializer):
     """Response for article publication"""
+
     status = serializers.CharField(
-        read_only=True,
-        help_text="Article status (should be 'published')"
+        read_only=True, help_text="Article status (should be 'published')"
     )
     published_at = serializers.DateTimeField(
-        read_only=True,
-        help_text="Timestamp when article was published"
+        read_only=True, help_text="Timestamp when article was published"
     )
     url = serializers.CharField(
-        read_only=True,
-        help_text="Public URL of the published article"
+        read_only=True, help_text="Public URL of the published article"
+    )
+
+
+class ReassignResponseSerializer(serializers.Serializer):
+    """Response for reviewer reassignment"""
+
+    assigned_reviewer = WorkflowUserSerializer(
+        read_only=True, help_text="Newly assigned reviewer"
+    )
+    article_status = serializers.CharField(
+        read_only=True, help_text="Article status after reassignment"
+    )
+
+
+class ReassignEditorResponseSerializer(serializers.Serializer):
+    """Response for editor reassignment"""
+
+    assigned_editor = WorkflowUserSerializer(
+        read_only=True, help_text="Newly assigned editor"
+    )
+
+class ReassignReviewerRequestSerializer(serializers.Serializer):
+    """Request body for reassigning reviewer"""
+    reviewer_id = serializers.IntegerField(
+        required=True,
+        help_text="ID of the new reviewer to assign"
     )
     
+    def validate_reviewer_id(self, value):
+        """Validate reviewer exists and has reviewer role"""
+        from apps.accounts.utils import UserRoles
+        
+        if not User.objects.filter(
+            id=value,
+            is_active=True,
+            groups__name=UserRoles.REVIEWER
+        ).exists():
+            raise serializers.ValidationError(
+                "User does not exist or does not have reviewer role"
+            )
+        return value
+
 class ReassignResponseSerializer(serializers.Serializer):
     """Response for reviewer reassignment"""
     assigned_reviewer = WorkflowUserSerializer(
@@ -998,11 +1062,32 @@ class ReassignResponseSerializer(serializers.Serializer):
         help_text="Article status after reassignment"
     )
     
+class ReassignEditorRequestSerializer(serializers.Serializer):
+    """Request body for reassigning editor"""
+    editor_id = serializers.IntegerField(
+        required=True,
+        help_text="ID of the new editor to assign"
+    )
+    
+    def validate_editor_id(self, value):
+        """Validate editor exists and has editor role"""
+        from apps.accounts.utils import UserRoles
+        
+        if not User.objects.filter(
+            id=value,
+            is_active=True,
+            groups__name=UserRoles.EDITOR
+        ).exists():
+            raise serializers.ValidationError(
+                "User does not exist or does not have editor role"
+            )
+        return value
+
+
 class ReassignEditorResponseSerializer(serializers.Serializer):
     """Response for editor reassignment"""
     assigned_editor = WorkflowUserSerializer(
         read_only=True,
         help_text="Newly assigned editor"
     )
-
 # TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH
