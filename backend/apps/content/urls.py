@@ -13,7 +13,7 @@ urlpatterns = [
     path("contribute/", views.AcceptGuidelinesView.as_view()),
     path("articles/", views.ArticleListView.as_view()),
     path("comments/", views.CommentCreateView.as_view()),
-    path('liveblocks/auth/', views.LiveblocksAuthView.as_view()),
+    path("liveblocks/auth/", views.LiveblocksAuthView.as_view()),
     path("articles/feed/", LatestArticlesFeed()),
     path("articles/rss/", views.RSSFeedInfoView.as_view()),
     path(
@@ -32,6 +32,14 @@ urlpatterns = [
     path(
         "articles/<uuid:article_id>/submit/",
         views.ArticleSubmitView.as_view(),
+    ),
+    path(
+        "reviews/assigned/",
+        views.AssignedReviewsListView.as_view(),
+    ),
+    path(
+        "reviews/<uuid:pk>/",
+        views.ReviewDetailView.as_view(),
     ),
     path(
         "reviews/<uuid:review_id>/start/",

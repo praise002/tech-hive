@@ -7,11 +7,14 @@ from .articles import (
     ArticleRetrieveView,
     ArticleSubmitView,
     ArticleSummaryView,
+    AssignedReviewsListView,
     CommentCreateView,
     CommentDeleteView,
     CommentLikeStatusView,
     CommentLikeToggleView,
+    LiveblocksAuthView,
     ReviewApproveView,
+    ReviewDetailView,
     ReviewRejectView,
     ReviewRequestChangesView,
     ReviewStartView,
@@ -20,7 +23,6 @@ from .articles import (
     ThreadRepliesView,
     UserBatchView,
     UserSearchView,
-    LiveblocksAuthView,
 )
 from .contents import (
     CategoryGenericView,
@@ -58,4 +60,6 @@ __all__ = [
     "ReviewApproveView",
     "ReviewRejectView",
     "LiveblocksAuthView",
+    "AssignedReviewsListView",
+    "ReviewDetailView",
 ]

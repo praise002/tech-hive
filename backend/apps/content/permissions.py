@@ -67,7 +67,6 @@ class CanManageReview(BasePermission):
         if not request.user.is_authenticated:
             return False
 
-        # Must have reviewer role
         return request.user.groups.filter(name=UserRoles.REVIEWER).exists()
 
     def has_object_permission(self, request, view, obj):
@@ -85,3 +84,58 @@ class CanManageReview(BasePermission):
 class IsCommentAuthor(BasePermission):
     def has_object_permission(self, request, view, obj):
         return obj.user == request.user
+
+
+class IsReviewer(BasePermission):
+    """
+    Permission to check if user has reviewer role.
+    Used for listing assigned reviews.
+    """
+
+    def has_permission(self, request, view):
+        if not request.user.is_authenticated:
+            return False
+        return request.user.groups.filter(name=UserRoles.REVIEWER).exists()
+
+
+class CanViewReview(BasePermission):
+    """
+    Permission to view review details.
+    - Reviewer can view their own reviews (including reviewer_notes)
+    - Article author can view reviews of their articles (without reviewer_notes)
+    """
+
+    def has_permission(self, request, view):
+        return request.user.is_authenticated
+
+    def has_object_permission(self, request, view, obj):
+        if isinstance(obj, ArticleReview):
+            if obj.reviewed_by == request.user:
+                return True
+
+            if obj.article.author == request.user:
+                return True
+
+        return False
+
+
+# IsReviewer
+
+# Checks if user has the Reviewer role
+# Used for: GET /api/reviews/assigned/ (listing reviews)
+# Returns True if user is in the Reviewer group
+
+
+# CanViewReview
+
+# Allows viewing review details
+# Used for: GET /api/reviews/{id}/ (review detail)
+# Reviewers: Can view their own reviews (including reviewer_notes)
+# Authors: Can view reviews of their articles (without reviewer_notes)
+
+
+# CanManageReview
+
+# Allows updating review status
+# Used for: Future endpoints like start/update review
+# Only the assigned reviewer can manage their reviews

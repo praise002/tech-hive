@@ -7,19 +7,17 @@ from apps.content.models import (
     ArticleReaction,
     ArticleReview,
     ArticleWorkflowHistory,
-    Category,
     Comment,
     CommentMention,
     CommentThread,
 )
 from apps.notification.utils import create_notification
+from apps.profiles.serializers import UserSerializer
 from django.contrib.auth import get_user_model
 from django.db.models import F
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
-
-from backend.apps.profiles.serializers import UserSerializer
 
 User = get_user_model()
 
@@ -923,130 +921,141 @@ class LiveblocksAuthResponseSerializer(serializers.Serializer):
     )
     user_id = serializers.CharField(read_only=True, help_text="User ID for Liveblocks")
 
+
 class ArticleForReviewSerializer(serializers.ModelSerializer):
     """Nested article data for review listings"""
+
     author = UserSerializer(read_only=True)
     liveblocks_room_id = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Article
         fields = [
-            'id',
-            'title',
-            'slug',
-            'status',
-            'author',
-            'category',
-            'created_at',
-            'updated_at',
-            'liveblocks_room_id',
+            "id",
+            "title",
+            "slug",
+            "status",
+            "author",
+            "category",
+            "created_at",
+            "updated_at",
+            "liveblocks_room_id",
         ]
-    
+
+    @extend_schema_field(serializers.CharField)
     def get_liveblocks_room_id(self, obj):
         return f"article-{obj.id}"
 
 
 class ReviewListSerializer(serializers.ModelSerializer):
     """Serializer for listing reviews (compact view)"""
+
     article = ArticleForReviewSerializer(read_only=True)
     reviewed_by = UserSerializer(read_only=True)
-    
+
     class Meta:
         model = ArticleReview
         fields = [
-            'id',
-            'article',
-            'reviewed_by',
-            'status',
-            'started_at',
-            'completed_at',
-            'created_at',
-            'updated_at',
+            "id",
+            "article",
+            "reviewed_by",
+            "status",
+            "started_at",
+            "completed_at",
+            "created_at",
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        read_only_fields = ["id", "created_at"]
+
 
 class ArticleDetailForReviewSerializer(serializers.ModelSerializer):
     """Full article data for review detail view"""
+
     author = UserSerializer(read_only=True)
     assigned_reviewer = UserSerializer(read_only=True)
     assigned_editor = UserSerializer(read_only=True)
     liveblocks_room_id = serializers.SerializerMethodField()
     tags = serializers.StringRelatedField(many=True)
     category = serializers.StringRelatedField()
-    
+
     class Meta:
         model = Article
         fields = [
-            'id',
-            'title',
-            'slug',
-            'content',
-            'cover_image_url',
-            'status',
-            'author',
-            'assigned_reviewer',
-            'assigned_editor',
-            'category',
-            'tags',
-            'is_featured',
-            'created_at',
-            'updated_at',
-            'published_at',
-            'liveblocks_room_id',
-            'content_last_synced_at',
+            "id",
+            "title",
+            "slug",
+            "content",
+            "cover_image_url",
+            "status",
+            "author",
+            "assigned_reviewer",
+            "assigned_editor",
+            "category",
+            "tags",
+            "is_featured",
+            "created_at",
+            "updated_at",
+            "published_at",
+            "liveblocks_room_id",
+            "content_last_synced_at",
         ]
-    
+
+    @extend_schema_field(serializers.CharField)
     def get_liveblocks_room_id(self, obj):
         return f"article-{obj.id}"
 
+
 class WorkflowHistorySerializer(serializers.ModelSerializer):
     """Serializer for workflow history entries"""
+
     changed_by = UserSerializer(read_only=True)
-    
+
     class Meta:
         model = ArticleWorkflowHistory
         fields = [
-            'id',
-            'from_status',
-            'to_status',
-            'changed_by',
-            'changed_at',
-            'notes',
+            "id",
+            "from_status",
+            "to_status",
+            "changed_by",
+            "changed_at",
+            "notes",
         ]
-        
+
+
 class ReviewDetailSerializer(serializers.ModelSerializer):
     """Detailed view of a review with full article data and history"""
+
     article = ArticleDetailForReviewSerializer(read_only=True)
     reviewed_by = UserSerializer(read_only=True)
     workflow_history = serializers.SerializerMethodField()
     reviewer_notes = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ArticleReview
         fields = [
-            'id',
-            'article',
-            'reviewed_by',
-            'status',
-            'started_at',
-            'completed_at',
-            'reviewer_notes',
-            'workflow_history',
-            'created_at',
-            'updated_at',
+            "id",
+            "article",
+            "reviewed_by",
+            "status",
+            "started_at",
+            "completed_at",
+            "reviewer_notes",
+            "workflow_history",
+            "created_at",
+            "updated_at",
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
-    
+        read_only_fields = ["id", "created_at", "updated_at"]
+
     def get_workflow_history(self, obj):
         """Get recent workflow history for the article"""
-        history = obj.article.workflow_history.all()[:10] 
+        history = obj.article.workflow_history.all()[:10]
         return WorkflowHistorySerializer(history, many=True).data
-    
+
     def get_reviewer_notes(self, obj):
         """Only show reviewer_notes to the reviewer themselves"""
-        request = self.context.get('request')
+        request = self.context.get("request")
         if request and request.user == obj.reviewed_by:
             return obj.reviewer_notes
         return None  # Hide from article author and others
-    
+
+
 # TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH

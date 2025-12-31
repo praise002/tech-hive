@@ -165,7 +165,6 @@ class ArticleWorkflowHistoryAdmin(admin.ModelAdmin):
         "changed_at",
         "notes",
         "created_at",
-        "updated_at",
     ]
 
 

@@ -249,6 +249,11 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "UPLOADED_FILES_USE_URL": False,
     "COMPONENT_SPLIT_REQUEST": True,
+    # TODO:
+    # "ENUM_NAME_OVERRIDES": {
+    #     ("content.Article.status", "ArticleStatusEnum"),
+    #     ("content.ArticleReview.status", "ArticleReviewStatusEnum"),
+    # },
 }
 
 
@@ -561,3 +566,5 @@ JWT_SECRET = config("JWT_SECRET")
 JWT_ALGORITHM = config("JWT_ALGORITHM")
 LIVEBLOCKS_SECRET_KEY = config("LIVEBLOCKS_SECRET_KEY")
 LIVEBLOCKS_WEBHOOK_SECRET = config("LIVEBLOCKS_WEBHOOK_SECRET")
+
+

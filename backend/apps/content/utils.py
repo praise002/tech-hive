@@ -1,7 +1,7 @@
-from datetime import timezone
 import logging
 import math
 import re
+from datetime import timezone
 from typing import Dict
 
 import requests
@@ -9,8 +9,6 @@ from apps.accounts.utils import UserRoles
 from apps.content.choices import ArticleStatusChoices
 from django.conf import settings
 from django.contrib.auth import get_user_model
-
-from backend.apps.content.models import Article
 
 logger = logging.getLogger(__name__)
 
@@ -399,36 +397,36 @@ def create_workflow_history(article, from_status, to_status, changed_by, notes=N
         notes=notes,
     )
 
+
 def handle_storage_updated(webhook_data, webhook_event):
     """
     Handle storageUpdated event - sync content to Django
     """
-    room_id = webhook_data['data']['roomId']
-    article_id = room_id.replace('article-', '')
-    
+    from apps.content.models import Article
+    room_id = webhook_data["data"]["roomId"]
+    article_id = room_id.replace("article-", "")
+
     try:
         article = Article.objects.get(id=article_id)
-        
+
         # Fetch latest content from Liveblocks API
         response = requests.get(
             f"https://api.liveblocks.io/v2/rooms/{room_id}/storage",
-            headers={
-                "Authorization": f"Bearer {settings.LIVEBLOCKS_SECRET_KEY}"
-            },
-            timeout=10
+            headers={"Authorization": f"Bearer {settings.LIVEBLOCKS_SECRET_KEY}"},
+            timeout=10,
         )
         # TODO: FIX LATER
         # REFACTOR INTO A FUNCTION LATER FOR DRY
         # def fetch_and_sync_liveblocks_content(article, room_id):
         if response.status_code == 200:
             data = response.json()
-            content = data.get('content', '')
-            
+            content = data.get("content", "")
+
             # Update article
             article.content = content
             article.content_last_synced_at = timezone.now()
-            article.save(update_fields=['content', 'content_last_synced_at'])
-            
+            article.save(update_fields=["content", "content_last_synced_at"])
+
     except Article.DoesNotExist:
         webhook_event.error_message = f"Article {article_id} not found"
         webhook_event.save()

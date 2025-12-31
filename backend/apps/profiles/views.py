@@ -1,9 +1,11 @@
 import logging
 
 from apps.accounts.models import User
+from apps.common.errors import ErrorCode
 from apps.common.exceptions import NotFoundError
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
+from apps.content.filters import UserArticleFilter
 from apps.content.mixins import HeaderMixin
 from apps.content.models import Article, ArticleStatusChoices, Comment, SavedArticle
 from apps.content.permissions import IsContributor
@@ -15,7 +17,6 @@ from apps.content.serializers import (
     SaveArticleCreateSerializer,
     SavedArticleSerializer,
 )
-from apps.content.views.filters import UserArticleFilter
 from apps.profiles.schema_examples import (
     ARTICLE_CREATE_RESPONSE_EXAMPLE,
     ARTICLE_DETAIL_RESPONSE_EXAMPLE,
@@ -46,8 +47,6 @@ from rest_framework.generics import (
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-
-from backend.apps.common.errors import ErrorCode
 
 tags = ["Profiles"]
 
