@@ -94,6 +94,10 @@ class ArticleAdmin(admin.ModelAdmin):
         has_perm = super().has_change_permission(request, obj)
         if not has_perm:
             return False
+        
+        # Superusers should have full access
+        if request.user.is_superuser:
+            return True
 
         # Only allow editors to edit
         if not request.user.groups.filter(name=UserRoles.EDITOR).exists():
