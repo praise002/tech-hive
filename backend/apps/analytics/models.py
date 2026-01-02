@@ -64,6 +64,7 @@ class SessionMetrics(models.Model):
 
 class UserActivity(BaseModel):
     """Raw activity events for tracking user interactions"""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     session = models.ForeignKey(
         SessionMetrics,
@@ -126,8 +127,10 @@ class ContentView(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     content_type = models.CharField(max_length=50, choices=ContentTypeChoices.choices)
-    content_id = models.PositiveIntegerField()
-
+    content_id = models.CharField(
+        help_text="UUID of the content being tracked (e.g., Article, Job, or Event ID)"
+    )
+    # TODO: MIGHT REMOVE LATER BECAUSE IT IS REDUNDANT
     # Generic Foreign Key for flexible content relationship
     content_type_model = models.ForeignKey(
         ContentType, on_delete=models.CASCADE, null=True, blank=True
@@ -184,7 +187,10 @@ class ArticleAnalytics(BaseModel):
         related_name="analytics",
     )
     total_views = models.PositiveIntegerField(default=0)
-    unique_visitors = models.PositiveIntegerField(default=0)
+    unique_visitors = models.PositiveIntegerField(
+        default=0,
+        help_text="Number of distinct users who viewed this article (counted once per user, regardless of multiple visits)",
+    )
     avg_read_time = models.FloatField(
         default=0.0, help_text="Average read time in minutes"
     )
