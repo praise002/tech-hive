@@ -104,6 +104,11 @@ class UserActivity(BaseModel):
         blank=True,
         help_text="Additional event-specific data (scroll_depth, article_id, etc.)",
     )
+    load_time_ms = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text="Page load time in milliseconds (measured on frontend)"
+    )
 
     class Meta:
         ordering = ["-timestamp"]
@@ -178,69 +183,69 @@ class ContentView(models.Model):
         return f"{self.content_type} {self.content_id} - {self.timestamp}"
 
 
-class ArticleAnalytics(BaseModel):
-    """Article-specific aggregated metrics"""
+# class ArticleAnalytics(BaseModel):
+#     """Article-specific aggregated metrics"""
 
-    article = models.OneToOneField(
-        Article,
-        on_delete=models.CASCADE,
-        related_name="analytics",
-    )
-    total_views = models.PositiveIntegerField(default=0)
-    unique_visitors = models.PositiveIntegerField(
-        default=0,
-        help_text="Number of distinct users who viewed this article (counted once per user, regardless of multiple visits)",
-    )
-    avg_read_time = models.FloatField(
-        default=0.0, help_text="Average read time in minutes"
-    )
-    completion_rate = models.FloatField(
-        default=0.0,
-        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)],
-        help_text="Percentage of users who completed reading",
-    )
-    shares_count = models.PositiveIntegerField(default=0)
-    reactions_count = models.PositiveIntegerField(default=0)
-    comments_count = models.PositiveIntegerField(default=0)
-    saves_count = models.PositiveIntegerField(default=0)
+#     article = models.OneToOneField(
+#         Article,
+#         on_delete=models.CASCADE,
+#         related_name="analytics",
+#     )
+#     total_views = models.PositiveIntegerField(default=0)
+#     unique_visitors = models.PositiveIntegerField(
+#         default=0,
+#         help_text="Number of distinct users who viewed this article (counted once per user, regardless of multiple visits)",
+#     )
+#     avg_read_time = models.FloatField(
+#         default=0.0, help_text="Average read time in minutes"
+#     )
+#     completion_rate = models.FloatField(
+#         default=0.0,
+#         validators=[MinValueValidator(0.0), MaxValueValidator(100.0)],
+#         help_text="Percentage of users who completed reading",
+#     )
+#     shares_count = models.PositiveIntegerField(default=0)
+#     reactions_count = models.PositiveIntegerField(default=0)
+#     comments_count = models.PositiveIntegerField(default=0)
+#     saves_count = models.PositiveIntegerField(default=0)
 
-    # Engagement rate calculation
-    engagement_rate = models.FloatField(
-        default=0.0, help_text="Calculated as (total_engagements / views) * 100"
-    )
+#     # Engagement rate calculation
+#     engagement_rate = models.FloatField(
+#         default=0.0, help_text="Calculated as (total_engagements / views) * 100"
+#     )
 
-    last_updated = models.DateTimeField(auto_now=True)
+#     last_updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        ordering = ["-total_views"]
-        indexes = [
-            models.Index(fields=["article"]),  # Index on article_id
-            models.Index(fields=["total_views"]),
-            models.Index(fields=["last_updated"]),
-            models.Index(fields=["engagement_rate"]),
-        ]
-        verbose_name_plural = "Article Analytics"
+#     class Meta:
+#         ordering = ["-total_views"]
+#         indexes = [
+#             models.Index(fields=["article"]),  # Index on article_id
+#             models.Index(fields=["total_views"]),
+#             models.Index(fields=["last_updated"]),
+#             models.Index(fields=["engagement_rate"]),
+#         ]
+#         verbose_name_plural = "Article Analytics"
 
-    def __str__(self):
-        return f"Analytics for {self.article.title}"
+#     def __str__(self):
+#         return f"Analytics for {self.article.title}"
 
-    def calculate_engagement_rate(self):
-        """Calculate engagement rate based on formula"""
-        if self.total_views == 0:
-            return 0.0
+#     def calculate_engagement_rate(self):
+#         """Calculate engagement rate based on formula"""
+#         if self.total_views == 0:
+#             return 0.0
 
-        total_engagements = (
-            self.shares_count
-            + self.reactions_count
-            + self.comments_count
-            + self.saves_count
-        )
-        return round((total_engagements / self.total_views) * 100, 1)
+#         total_engagements = (
+#             self.shares_count
+#             + self.reactions_count
+#             + self.comments_count
+#             + self.saves_count
+#         )
+#         return round((total_engagements / self.total_views) * 100, 1)
 
-    def save(self, *args, **kwargs):
-        """Auto-calculate engagement rate on save"""
-        self.engagement_rate = self.calculate_engagement_rate()
-        super().save(*args, **kwargs)
+#     def save(self, *args, **kwargs):
+#         """Auto-calculate engagement rate on save"""
+#         self.engagement_rate = self.calculate_engagement_rate()
+#         super().save(*args, **kwargs)
 
 
 class DailyMetrics(BaseModel):

@@ -233,7 +233,8 @@ SUPERUSER_PASSWORD = config("SUPERUSER_PASSWORD")
 SPECTACULAR_SETTINGS = {
     "TITLE": "TECH HIVE API",
     "DESCRIPTION": """
-        Tech Hive API provides a comprehensive backend service for a modern content management platform.
+        Tech Hive API provides a comprehensive backend service for 
+        Tech Hive platform - powering the tech community hub with robust APIs for articles, jobs, resources, and collaboration.
         
         This RESTful API enables:
         • User authentication and profile management
