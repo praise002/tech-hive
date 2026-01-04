@@ -80,7 +80,10 @@ class UserActivity(BaseModel):
         related_name="activities",  # Access all activities via user.activities.all()
     )
     event_type = models.CharField(max_length=50, choices=EventTypeChoices.choices)
-    page_url = models.URLField(max_length=500)
+    page_url = models.URLField(
+    max_length=500,
+    help_text="Full URL of the page where the activity occurred (e.g., 'https://techhive.com/articles/intro-to-react')"
+)
     referrer = models.URLField(
         max_length=500,
         null=True,

@@ -435,3 +435,5 @@ class AnalyticsService:
             "active_users": cls.get_active_users_timeline(period),
             "top_performing_posts": cls.get_top_performing_posts(period),
         }
+
+analytics_service = AnalyticsService()
