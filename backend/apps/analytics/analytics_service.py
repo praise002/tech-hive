@@ -1,14 +1,8 @@
 import logging
 from datetime import timedelta
 
-from apps.analytics.models import (
-    ArticleAnalytics,
-    DailyMetrics,
-    SessionMetrics,
-    UserActivity,
-)
-from apps.content.models import Article
-from django.db.models import Avg, Count, F, Q, Sum
+from apps.analytics.models import SessionMetrics, UserActivity
+from django.db.models import Avg, Count
 from django.utils import timezone
 
 from backend.apps.analytics.choices import EventTypeChoices
@@ -234,32 +228,6 @@ class AnalyticsService:
         current_date = date_range["current_start"].date()
         end_date = date_range["current_end"].date()
 
-        expected_days = (
-            end_date - current_date
-        ).days + 1  # +1 to include both endpoints
-
-        # Use DailyMetrics if available, otherwise calculate from UserActivity
-        daily_data = DailyMetrics.objects.filter(
-            date__gte=current_date,
-            date__lte=end_date,
-        ).order_by("date")
-
-        if daily_data.count() == expected_days:
-            result = []
-            for day in daily_data:
-                result.append(
-                    {
-                        "date": day.date.isoformat(),
-                        # Abbreviated weekday name e.g "Mon"
-                        "day": day.date.strftime("%a"),
-                        "registered_users": day.registered_users_count,
-                        "visitors": day.visitors_count,
-                        "total_active_users": day.total_active_users,
-                    }
-                )
-            return result
-
-        # Fallback: Calculate from UserActivity
         result = []
 
         while current_date <= end_date:
@@ -296,6 +264,154 @@ class AnalyticsService:
             current_date = next_date
 
         return result
+
+    @classmethod
+    def get_top_performing_posts(cls, period="weekly"):
+        """
+        Get THE top performing post from each content category
+        (Articles, Jobs, Events)
+
+        Returns the SINGLE best post by views for each category.
+        """
+
+        date_range = cls.get_date_range(period)
+        start_date = date_range["current_start"]
+        end_date = date_range["current_end"]
+
+        categories_data = []
+
+        article_views = (
+            UserActivity.objects.filter(
+                event_type=EventTypeChoices.PAGE_VIEW,
+                timestamp__gte=start_date,
+                timestamp__lte=end_date,
+                metadata__content_type="article",  # Filter by content type
+            )
+            .values("metadata__content_id")  # Group by article ID
+            .annotate(total_views=Count("id"))
+            .order_by("-total_views")
+            .first()  # Get only THE top one
+        )
+
+        if article_views:
+            article_id = article_views["metadata__content_id"]
+
+            try:
+                from apps.content.models import Article
+
+                article = Article.objects.get(id=article_id)
+
+                # Count shares for this specific article
+                shares_count = UserActivity.objects.filter(
+                    event_type=EventTypeChoices.SHARE,
+                    timestamp__gte=start_date,
+                    timestamp__lte=end_date,
+                    metadata__content_type="article",
+                    metadata__content_id=article_id,
+                ).count()
+
+                categories_data.append(
+                    {
+                        "category": "Articles",
+                        "views": article_views["total_views"],
+                        "shares": shares_count,
+                        "title": article.title,
+                        "id": str(article_id),
+                    }
+                )
+            except Article.DoesNotExist:
+                pass
+
+        job_views = (
+            UserActivity.objects.filter(
+                event_type=EventTypeChoices.PAGE_VIEW,
+                timestamp__gte=start_date,
+                timestamp__lte=end_date,
+                metadata__content_type="job",
+            )
+            .values("metadata__content_id")
+            .annotate(total_views=Count("id"))
+            .order_by("-total_views")
+            .first()
+        )
+
+        if job_views:
+            job_id = job_views["metadata__content_id"]
+
+            try:
+                from apps.content.models import Job
+
+                job = Job.active.get(id=job_id)
+
+                shares_count = UserActivity.objects.filter(
+                    event_type=EventTypeChoices.SHARE,
+                    timestamp__gte=start_date,
+                    timestamp__lte=end_date,
+                    metadata__content_type="job",
+                    metadata__content_id=job_id,
+                ).count()
+
+                categories_data.append(
+                    {
+                        "category": "Jobs",
+                        "views": job_views["total_views"],
+                        "shares": shares_count,
+                        "title": job.title,
+                        "id": str(job_id),
+                    }
+                )
+            except Job.DoesNotExist:
+                pass
+
+        event_views = (
+            UserActivity.objects.filter(
+                event_type=EventTypeChoices.PAGE_VIEW,
+                timestamp__gte=start_date,
+                timestamp__lte=end_date,
+                metadata__content_type="event",
+            )
+            .values("metadata__content_id")
+            .annotate(total_views=Count("id"))
+            .order_by("-total_views")
+            .first()
+        )
+
+        if event_views:
+            event_id = event_views["metadata__content_id"]
+
+            try:
+                from apps.content.models import Event
+
+                event = Event.objects.get(id=event_id)
+
+                shares_count = UserActivity.objects.filter(
+                    event_type=EventTypeChoices.SHARE,
+                    timestamp__gte=start_date,
+                    timestamp__lte=end_date,
+                    metadata__content_type="event",
+                    metadata__content_id=event_id,
+                ).count()
+
+                categories_data.append(
+                    {
+                        "category": "Events",
+                        "views": event_views["total_views"],
+                        "shares": shares_count,
+                        "title": event.title,
+                        "id": str(event_id),
+                    }
+                )
+            except Event.DoesNotExist:
+                pass
+
+        return {
+            "period": period,
+            "date_range": {
+                "start": start_date.isoformat(),
+                "end": end_date.isoformat(),
+            },
+            "categories": categories_data,
+        }
 
     @classmethod
     def get_dashboard_metrics(cls, period="weekly"):
