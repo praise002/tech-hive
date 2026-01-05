@@ -1,5 +1,8 @@
 from apps.accounts.schema_examples import UNAUTHORIZED_USER_RESPONSE
-from apps.analytics.serializers import DashboardMetricsSerializer, SuccessResponseDataSerializer
+from apps.analytics.serializers import (
+    DashboardMetricsSerializer,
+    SuccessResponseDataSerializer,
+)
 from apps.common.errors import ErrorCode
 from apps.common.schema_examples import (
     ERR_RESPONSE_STATUS,
@@ -433,6 +436,101 @@ ARTICLE_ANALYTICS_RESPONSE_EXAMPLE = {
                 },
             ),
         ],
+    ),
+    404: OpenApiResponse(
+        response=ErrorResponseSerializer,
+        description="Article not found",
+        examples=[
+            OpenApiExample(
+                name="Article Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Article not found",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+}
+
+
+DASHBOARD_EXPORT_RESPONSE = {
+    200: OpenApiResponse(
+        description="File download - Returns CSV or Excel file as attachment",
+    ),
+    400: OpenApiResponse(
+        response=ErrorResponseSerializer,
+        description="Invalid parameters",
+        examples=[
+            OpenApiExample(
+                name="Invalid Period",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": 'Invalid period. Must be "weekly" or "monthly"',
+                    "code": ErrorCode.BAD_REQUEST,
+                },
+            ),
+            OpenApiExample(
+                name="Invalid Format",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": 'Invalid format. Must be "csv" or "excel"',
+                    "code": ErrorCode.BAD_REQUEST,
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    # 403: OpenApiResponse(
+    #     response=ErrorResponseSerializer,
+    #     description="Admin only",
+    # ),
+    403: OpenApiResponse(
+        response=ErrorResponseSerializer,
+        description="Permission denied - Admin only",
+        examples=[
+            OpenApiExample(
+                name="Not Admin",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "You do not have permission to perform this action.",
+                    "code": ErrorCode.FORBIDDEN,
+                },
+            ),
+        ],
+    ),
+}
+
+ARICLE_ANALYTICS_EXPORT_RESPONSE = {
+    200: OpenApiResponse(
+        description="CSV file download - Returns article analytics as CSV attachment",
+    ),
+    400: OpenApiResponse(
+        response=ErrorResponseSerializer,
+        description="Invalid parameters",
+        examples=[
+            OpenApiExample(
+                name="Invalid Period",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": 'Invalid period. Must be "weekly" or "monthly"',
+                    "code": ErrorCode.BAD_REQUEST,
+                },
+            ),
+            OpenApiExample(
+                name="Invalid Format",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": 'Invalid format. Must be "csv"',
+                    "code": ErrorCode.BAD_REQUEST,
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        response=ErrorResponseSerializer,
+        description="Not author or admin",
     ),
     404: OpenApiResponse(
         response=ErrorResponseSerializer,

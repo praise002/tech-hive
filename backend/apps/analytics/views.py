@@ -4,11 +4,14 @@ from apps.analytics import analytics_service
 from apps.analytics.choices import EventTypeChoices
 from apps.analytics.permissions import IsAuthorOrAdmin
 from apps.analytics.schema_examples import (
+    ARICLE_ANALYTICS_EXPORT_RESPONSE,
     ARTICLE_ANALYTICS_RESPONSE_EXAMPLE,
+    DASHBOARD_EXPORT_RESPONSE,
     DASHBOARD_METRICS_RESPONSE_EXAMPLE,
     TRACK_ACTIVITY_REQUEST_EXAMPLE,
     TRACK_ACTIVITY_RESPONSE_EXAMPLE,
 )
+from apps.analytics.utils import analytics_exporter
 from apps.common.errors import ErrorCode
 from apps.common.exceptions import NotFoundError
 from apps.common.responses import CustomResponse
@@ -286,6 +289,8 @@ class ArticlePerformanceView(APIView):
         except Article.DoesNotExist:
             return NotFoundError("Article not found")
 
+        self.check_object_permissions(request, article)
+
         date_range = analytics_service.get_date_range(period)
         start_date = date_range["current_start"]
         end_date = date_range["current_end"]
@@ -363,3 +368,177 @@ class ArticlePerformanceView(APIView):
                 "cached": False,
             },
         )
+
+
+class DashboardExportView(APIView):
+    """
+    GET /api/analytics/dashboard/export/?period=weekly&format=csv
+
+    Export dashboard metrics to CSV or Excel
+    """
+
+    permission_classes = (IsAdminUser,)
+    serializer_class = None
+
+    @extend_schema(
+        summary="Export dashboard metrics",
+        description=(
+            "Export comprehensive dashboard analytics to CSV or Excel format. "
+            "Includes all metrics, device distribution, active users timeline, and top posts."
+        ),
+        parameters=[
+            OpenApiParameter(
+                name="period",
+                description="Time period for analytics",
+                enum=["weekly", "monthly"],
+                default="weekly",
+                required=False,
+            ),
+            OpenApiParameter(
+                name="format",
+                description="Export file format",
+                enum=["csv", "excel"],
+                default="csv",
+                required=False,
+            ),
+        ],
+        tags=tags,
+        responses=DASHBOARD_EXPORT_RESPONSE,
+    )
+    def get(self, request):
+        period = request.query_params.get("period", "weekly").lower()
+        export_format = request.query_params.get("format", "csv").lower()
+
+        if period not in ["weekly", "monthly"]:
+            return CustomResponse.error(
+                message='Invalid period. Must be "weekly" or "monthly"',
+                err_code=ErrorCode.BAD_REQUEST,
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if export_format not in ["csv", "excel"]:
+            return CustomResponse.error(
+                message='Invalid format. Must be "csv" or "excel"',
+                err_code=ErrorCode.BAD_REQUEST,
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+
+        data = analytics_service.get_dashboard_metrics(period)
+
+        if export_format == "csv":
+            return analytics_exporter.export_dashboard_to_csv(data)
+        else:
+            return analytics_exporter.export_dashboard_to_excel(data)
+
+
+class ArticleAnalyticsExportView(APIView):
+    """
+    GET /api/analytics/articles/{article_id}/export/?period=weekly&format=csv
+
+    Export article analytics to CSV
+    """
+
+    permission_classes = (IsAuthorOrAdmin,)
+    serializer_class = None
+
+    @extend_schema(
+        summary="Export article analytics",
+        description=(
+            "Export detailed analytics for a specific article to CSV format. "
+            "Includes views, visitors, shares, time on page, and bounce rate."
+        ),
+        parameters=[
+            OpenApiParameter(
+                name="period",
+                description="Time period for analytics",
+                enum=["weekly", "monthly"],
+                default="weekly",
+                required=False,
+            ),
+            OpenApiParameter(
+                name="format",
+                description="Export file format",
+                enum=["csv"],
+                default="csv",
+                required=False,
+            ),
+        ],
+        tags=tags,
+        responses=ARICLE_ANALYTICS_EXPORT_RESPONSE,
+    )
+    def get(self, request, article_id):
+        period = request.query_params.get("period", "weekly").lower()
+        export_format = request.query_params.get("format", "csv").lower()
+
+        if period not in ["weekly", "monthly"]:
+            return CustomResponse.error(
+                message='Invalid period. Must be "weekly" or "monthly"',
+                err_code=ErrorCode.BAD_REQUEST,
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if export_format != "csv":
+            return CustomResponse.error(
+                message='Invalid format. Must be "csv"',
+                err_code=ErrorCode.BAD_REQUEST,
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            article = Article.objects.get(id=article_id)
+        except Article.DoesNotExist:
+            raise NotFoundError("Article not found")
+
+        self.check_object_permissions(request, article)
+
+        date_range = analytics_service.get_date_range(period)
+        start_date = date_range["current_start"]
+        end_date = date_range["current_end"]
+
+        views_data = UserActivity.objects.filter(
+            event_type=EventTypeChoices.PAGE_VIEW,
+            timestamp__gte=start_date,
+            timestamp__lte=end_date,
+            metadata__content_type="article",
+            metadata__content_id=str(article_id),
+        )
+
+        total_views = views_data.count()
+        unique_visitors = views_data.values("session").distinct().count()
+        avg_time = views_data.aggregate(avg=Avg("duration_seconds"))["avg"] or 0
+
+        total_shares = UserActivity.objects.filter(
+            event_type=EventTypeChoices.SHARE,
+            timestamp__gte=start_date,
+            timestamp__lte=end_date,
+            metadata__content_type="article",
+            metadata__content_id=str(article_id),
+        ).count()
+
+        sessions_with_views = views_data.values_list("session_id", flat=True).distinct()
+        bounced_sessions = SessionMetrics.objects.filter(
+            id__in=sessions_with_views, is_bounce=True
+        ).count()
+
+        bounce_rate = (
+            (bounced_sessions / len(sessions_with_views) * 100)
+            if sessions_with_views
+            else 0
+        )
+
+        data = {
+            "article_id": str(article_id),
+            "title": article.title,
+            "total_views": total_views,
+            "unique_visitors": unique_visitors,
+            "total_shares": total_shares,
+            "avg_time_on_page": round(avg_time / 60, 1),
+            "bounce_rate": round(bounce_rate, 0),
+            "period": period,
+            "date_range": {
+                "start": start_date.isoformat(),
+                "end": end_date.isoformat(),
+            },
+        }
+
+        return analytics_exporter.export_article_analytics_to_csv(data)
