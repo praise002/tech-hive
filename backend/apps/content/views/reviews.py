@@ -4,6 +4,7 @@ from apps.common.responses import CustomResponse
 from apps.content.filters import ReviewListFilter
 from apps.content.models import ArticleReview
 from apps.content.permissions import CanViewReview, IsReviewer
+from apps.content.schema_examples import ASSIGNED_REVIEWS_LIST_RESPONSE_EXAMPLE
 from apps.content.serializers import ReviewDetailSerializer, ReviewListSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
@@ -47,16 +48,6 @@ class AssignedReviewsListView(ListAPIView):
             .order_by("-created_at")
         )
 
-        # Optional filter by review status
-        # review_status = self.request.query_params.get("status")
-        # if review_status:
-        #     queryset = queryset.filter(status=review_status)
-
-        # # Optional filter by article status
-        # article_status = self.request.query_params.get("article_status")
-        # if article_status:
-        #     queryset = queryset.filter(article__status=article_status)
-
         return queryset
 
     def list(self, request, *args, **kwargs):
@@ -93,77 +84,7 @@ class AssignedReviewsListView(ListAPIView):
         - Use `?article_status=under_review` to filter by article status
         - Combine filters: `?status=pending&article_status=submitted_for_review`
         """,
-        # parameters=[
-        #     OpenApiParameter(
-        #         name="status",
-        #         description="Filter by review status",
-        #         enum=[
-        #             "pending",
-        #             "in_progress",
-        #             "completed",
-        #         ],
-        #     ),
-        # OpenApiParameter(
-        #     name="article_status",
-        #     description="Filter by article status",
-        #     enum=[
-        #         "submitted_for_review",
-        #         "under_review",
-        #         "changes_requested",
-        #         "ready_for_publishing",
-        #     ],
-        # ),
-        # ],
-        # responses={
-        #     200: OpenApiExample(
-        #         'Success Response',
-        #         value={
-        #             "status": "success",
-        #             "message": "Reviews retrieved successfully",
-        #             "data": {
-        #                 "count": 5,
-        #                 "results": [
-        #                     {
-        #                         "id": 1,
-        #                         "article": {
-        #                             "id": 123,
-        #                             "title": "Introduction to Django Signals",
-        #                             "slug": "introduction-to-django-signals",
-        #                             "status": "under_review",
-        #                             "author": {
-        #                                 "id": 5,
-        #                                 "username": "john_doe",
-        #                                 "full_name": "John Doe"
-        #                             },
-        #                             "category": "Backend Development",
-        #                             "created_at": "2024-01-01T10:00:00Z",
-        #                             "updated_at": "2024-01-05T14:30:00Z",
-        #                             "liveblocks_room_id": "article-123"
-        #                         },
-        #                         "reviewed_by": {
-        #                             "id": 8,
-        #                             "username": "jane_reviewer",
-        #                             "full_name": "Jane Reviewer"
-        #                         },
-        #                         "status": "in_progress",
-        #                         "started_at": "2024-01-05T09:00:00Z",
-        #                         "completed_at": None,
-        #                         "created_at": "2024-01-05T08:00:00Z",
-        #                         "updated_at": "2024-01-05T09:00:00Z"
-        #                     }
-        #                 ]
-        #             }
-        #         }
-        #     ),
-        #     403: OpenApiExample(
-        #         'Not a Reviewer',
-        #         value={
-        #             "status": "failure",
-        #             "message": "You don't have reviewer permissions",
-        #             "code": "forbidden"
-        #         }
-        #     )
-        # },
+        # responses=ASSIGNED_REVIEWS_LIST_RESPONSE_EXAMPLE,
         tags=tags,
     )
     def get(self, request, *args, **kwargs):

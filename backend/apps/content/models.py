@@ -1,3 +1,4 @@
+import uuid
 from apps.common.models import BaseModel
 from apps.common.validators import validate_file_size
 from apps.content.choices import ArticleReviewStatusChoices, ArticleStatusChoices
@@ -206,7 +207,10 @@ class SavedArticle(BaseModel):
         return self.article.title
 
 
-class ArticleReview(BaseModel):
+class ArticleReview(models.Model):
+    id = models.UUIDField(
+        default=uuid.uuid4, unique=True, primary_key=True, editable=False
+    )
     article = models.ForeignKey(
         Article, on_delete=models.CASCADE, related_name="reviews"
     )

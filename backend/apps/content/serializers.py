@@ -962,9 +962,8 @@ class ReviewListSerializer(serializers.ModelSerializer):
             "status",
             "started_at",
             "completed_at",
-            "created_at",
         ]
-        read_only_fields = ["id", "created_at"]
+        read_only_fields = ["id"]
 
 
 class ArticleDetailForReviewSerializer(serializers.ModelSerializer):
@@ -1046,9 +1045,8 @@ class ReviewDetailSerializer(serializers.ModelSerializer):
             "completed_at",
             "reviewer_notes",
             "workflow_history",
-            "created_at",
         ]
-        read_only_fields = ["id", "created_at"]
+        read_only_fields = ["id"]
 
     @extend_schema_field(WorkflowHistorySerializer(many=True))
     def get_workflow_history(self, obj):

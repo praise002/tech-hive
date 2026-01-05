@@ -1287,3 +1287,21 @@ COMMENT_DELETE_RESPONSE_EXAMPLE = {
         ],
     ),
 }
+
+ASSIGNED_REVIEWS_LIST_RESPONSE_EXAMPLE = {
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        description="Permission Denied - Only reviewers can access",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Not a Reviewer",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "You do not have permission to perform this action.",
+                    "code": ErrorCode.FORBIDDEN,
+                },
+            ),
+        ],
+    ),
+}
