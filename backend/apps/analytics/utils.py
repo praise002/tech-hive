@@ -96,7 +96,6 @@ class AnalyticsExporter:
                 ]
             )
 
-        # Prepare response
         response = HttpResponse(output.getvalue(), content_type="text/csv")
         filename = f"techhive_dashboard_{data['period']}_{datetime.now().strftime('%Y%m%d')}.csv"
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
@@ -118,7 +117,6 @@ class AnalyticsExporter:
         ws = wb.active
         ws.title = "Dashboard Metrics"
 
-        # Define styles
         header_fill = PatternFill(
             start_color="366092", end_color="366092", fill_type="solid"
         )
@@ -250,7 +248,6 @@ class AnalyticsExporter:
         wb.save(output)
         output.seek(0)
 
-        # Prepare response
         response = HttpResponse(
             output.read(),
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -288,7 +285,6 @@ class AnalyticsExporter:
         writer.writerow(["Avg Time on Page (min)", data["avg_time_on_page"]])
         writer.writerow(["Bounce Rate (%)", data["bounce_rate"]])
 
-        # Prepare response
         response = HttpResponse(output.getvalue(), content_type="text/csv")
         filename = f"article_{data['article_id']}_{data['period']}_{datetime.now().strftime('%Y%m%d')}.csv"
         response["Content-Disposition"] = f'attachment; filename="{filename}"'

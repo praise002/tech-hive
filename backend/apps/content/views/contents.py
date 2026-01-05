@@ -91,8 +91,8 @@ class ResourceListView(CustomListView):
         SearchFilter,
     )
 
-    filterset_fields = ("is_featured",)
-    filterset_fields = ["category"]
+    filterset_fields = ("is_featured", "category")
+
     search_fields = ["name"]
 
     queryset = Resource.objects.all()

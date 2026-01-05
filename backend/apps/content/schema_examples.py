@@ -14,6 +14,7 @@ from apps.common.serializers import (
 )
 from apps.content.serializers import (
     ArticleEditorSerializer,
+    ArticleReactionStatusSerializer,
     ArticleSerializer,
     ArticleSubmitResponseSerializer,
     ArticleSummaryResponseSerializer,
@@ -509,6 +510,7 @@ COMMENT_LIKE_TOGGLE_RESPONSE_EXAMPLE = {
             ),
         ],
     ),
+    401: UNAUTHORIZED_USER_RESPONSE,
     404: OpenApiResponse(
         description="Comment not found",
         response=ErrorResponseSerializer,
@@ -605,6 +607,7 @@ COMMENT_LIKE_STATUS_RESPONSE_EXAMPLE = {
 
 ARTICLE_REACTION_TOGGLE_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(
+        response=ArticleReactionStatusSerializer,
         description="Reaction toggled successfully. The 'action' field indicates whether the reaction was 'added' or 'removed'.",
         examples=[
             OpenApiExample(
@@ -684,6 +687,7 @@ ARTICLE_REACTION_TOGGLE_RESPONSE_EXAMPLE = {
 
 ARTICLE_REACTION_STATUS_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(
+        response=ArticleReactionStatusSerializer,
         description="Reaction status retrieved successfully. `user_reactions` will be `null` for unauthenticated users.",
         examples=[
             OpenApiExample(
@@ -1249,4 +1253,37 @@ REVIEW_START_RESPONSE_EXAMPLE = {
         ],
     ),
     422: ErrorDataResponseSerializer,
+}
+
+COMMENT_DELETE_RESPONSE_EXAMPLE = {
+    204: None,
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        description="Permission Denied - Only comment author can delete",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Not Comment Author",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "You do not have permission to perform this action.",
+                    "code": ErrorCode.FORBIDDEN,
+                },
+            ),
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Comment not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Comment Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Comment not found.",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
 }

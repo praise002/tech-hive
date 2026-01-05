@@ -2,27 +2,16 @@ from .article_reaction import ArticleReactionView
 from .articles import (
     AcceptGuidelinesView,
     ArticleCoverImageUploadView,
-    ArticleEditorView,
     ArticleListView,
     ArticleRetrieveView,
-    ArticleSubmitView,
     ArticleSummaryView,
-    AssignedReviewsListView,
     CommentCreateView,
     CommentDeleteView,
     CommentLikeStatusView,
     CommentLikeToggleView,
-    LiveblocksAuthView,
-    ReviewApproveView,
-    ReviewDetailView,
-    ReviewRejectView,
-    ReviewRequestChangesView,
-    ReviewStartView,
     RSSFeedInfoView,
     TagGenericView,
     ThreadRepliesView,
-    UserBatchView,
-    UserSearchView,
 )
 from .contents import (
     CategoryGenericView,
@@ -30,6 +19,20 @@ from .contents import (
     JobListView,
     ResourceListView,
     ToolListView,
+)
+from .liveblocks import (
+    ArticleEditorView,
+    LiveblocksAuthView,
+    UserBatchView,
+    UserSearchView,
+)
+from .reviews import AssignedReviewsListView, ReviewDetailView
+from .workflow import (
+    ArticleSubmitView,
+    ReviewApproveView,
+    ReviewRejectView,
+    ReviewRequestChangesView,
+    ReviewStartView,
 )
 
 __all__ = [
