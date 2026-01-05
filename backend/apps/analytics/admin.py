@@ -33,5 +33,5 @@ class UserActivityAdmin(admin.ModelAdmin):
     ]
     list_filter = ["event_type", "device_type", "timestamp"]
     search_fields = ["user__username", "user__email", "page_url", "session__session_id"]
-    readonly_fields = ["id", "timestamp", "created_at"]
+    readonly_fields = ["id", "timestamp"]
     date_hierarchy = "timestamp"

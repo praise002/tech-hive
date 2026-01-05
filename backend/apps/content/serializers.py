@@ -976,6 +976,7 @@ class ArticleDetailForReviewSerializer(serializers.ModelSerializer):
     liveblocks_room_id = serializers.SerializerMethodField()
     tags = serializers.StringRelatedField(many=True)
     category = serializers.StringRelatedField()
+    cover_image_url = serializers.SerializerMethodField()  
 
     class Meta:
         model = Article
@@ -1002,6 +1003,11 @@ class ArticleDetailForReviewSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.CharField)
     def get_liveblocks_room_id(self, obj):
         return f"article-{obj.id}"
+
+    @extend_schema_field(serializers.URLField)
+    def get_cover_image_url(self, obj):
+        """Get article cover image URL"""
+        return obj.cover_image_url
 
 
 class WorkflowHistorySerializer(serializers.ModelSerializer):
@@ -1041,15 +1047,16 @@ class ReviewDetailSerializer(serializers.ModelSerializer):
             "reviewer_notes",
             "workflow_history",
             "created_at",
-            "updated_at",
         ]
-        read_only_fields = ["id", "created_at", "updated_at"]
+        read_only_fields = ["id", "created_at"]
 
+    @extend_schema_field(WorkflowHistorySerializer(many=True))
     def get_workflow_history(self, obj):
         """Get recent workflow history for the article"""
         history = obj.article.workflow_history.all()[:10]
         return WorkflowHistorySerializer(history, many=True).data
 
+    @extend_schema_field(serializers.CharField(allow_null=True))
     def get_reviewer_notes(self, obj):
         """Only show reviewer_notes to the reviewer themselves"""
         request = self.context.get("request")

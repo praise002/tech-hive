@@ -1,11 +1,10 @@
 import logging
 from datetime import timedelta
 
+from apps.analytics.choices import EventTypeChoices
 from apps.analytics.models import SessionMetrics, UserActivity
 from django.db.models import Avg, Count
 from django.utils import timezone
-
-from backend.apps.analytics.choices import EventTypeChoices
 
 logger = logging.getLogger(__name__)
 
@@ -404,14 +403,7 @@ class AnalyticsService:
             except Event.DoesNotExist:
                 pass
 
-        return {
-            "period": period,
-            "date_range": {
-                "start": start_date.isoformat(),
-                "end": end_date.isoformat(),
-            },
-            "categories": categories_data,
-        }
+        return categories_data
 
     @classmethod
     def get_dashboard_metrics(cls, period="weekly"):
@@ -435,5 +427,6 @@ class AnalyticsService:
             "active_users": cls.get_active_users_timeline(period),
             "top_performing_posts": cls.get_top_performing_posts(period),
         }
+
 
 analytics_service = AnalyticsService()

@@ -57,7 +57,7 @@ class SessionMetrics(models.Model):
         return f"Session {self.session_id} - {self.start_time}"
 
 
-class UserActivity(BaseModel):
+class UserActivity(models.Model):
     """
     Raw activity events for tracking user interactions
     All tracked by frontend
