@@ -545,14 +545,14 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(hour=10, minute=0),  # 10:00 AM daily
     },
     # Send upcoming charge reminders daily at 9 AM
-    'upcoming-charge-reminders': {
-        'task': 'apps.subscriptions.tasks.send_upcoming_charge_reminders',
-        'schedule': crontab(hour=9, minute=0),
+    "upcoming-charge-reminders": {
+        "task": "apps.subscriptions.tasks.send_upcoming_charge_reminders",
+        "schedule": crontab(hour=9, minute=0),
     },
     # Send final grace warnings daily at 6 PM
-    'final-grace-warnings': {
-        'task': 'apps.subscriptions.tasks.send_final_grace_warnings',
-        'schedule': crontab(hour=18, minute=0),
+    "final-grace-warnings": {
+        "task": "apps.subscriptions.tasks.send_final_grace_warnings",
+        "schedule": crontab(hour=18, minute=0),
     },
     # Content workflow tasks
     "process-stale-workflows": {
@@ -560,6 +560,14 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(hour=8, minute=0),  # 8:00 AM daily
         "options": {
             "description": "Daily task to handle inactive articles, remind reviewers/editors, and escalate stale reviews"
+        },
+    },
+    # Cleanup expired JWT tokens daily at 3 AM
+    "cleanup-expired-tokens": {
+        "task": "apps.accounts.tasks.cleanup_expired_tokens",
+        "schedule": crontab(hour=3, minute=0, day_of_week=0),  # Sunday 3:00 AM weekly
+        "options": {
+            "description": "Remove expired outstanding and blacklisted JWT tokens from database"
         },
     },
 }
@@ -576,5 +584,3 @@ JWT_SECRET = config("JWT_SECRET")
 JWT_ALGORITHM = config("JWT_ALGORITHM")
 LIVEBLOCKS_SECRET_KEY = config("LIVEBLOCKS_SECRET_KEY")
 LIVEBLOCKS_WEBHOOK_SECRET = config("LIVEBLOCKS_WEBHOOK_SECRET")
-
-

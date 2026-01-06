@@ -596,3 +596,67 @@ def build_avatar_request_schema():
             "required": ["avatar"],
         }
     }
+
+
+ACCOUNT_DEACTIVATE_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Account deactivated successfully",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Your account has been deactivated successfully",
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    422: OpenApiResponse(
+        description="Account already deactivated",
+        response=ErrorDataResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Already Deactivated",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Your account is already deactivated.",
+                    "code": ErrorCode.UNPROCESSABLE_ENTITY,
+                },
+            ),
+        ],
+    ),
+}
+
+
+ACCOUNT_REACTIVATE_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Account reactivated successfully",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Welcome back! Your account has been reactivated successfully.",
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    422: OpenApiResponse(
+        description="Account already active",
+        response=ErrorDataResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Already Active",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Your account is already active.",
+                    "code": ErrorCode.UNPROCESSABLE_ENTITY,
+                },
+            ),
+        ],
+    ),
+}

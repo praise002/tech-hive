@@ -297,6 +297,7 @@ API documentation will be available at:
 - [How to grant access to individual rooms](https://liveblocks.io/docs/guides/how-to-grant-access-to-individual-rooms-with-access-tokens)
 - [Authentication with LIveblocks: Access token](https://liveblocks.io/docs/authentication/access-token)
 - [LIveblocks node: access token example](https://liveblocks.io/docs/api-reference/liveblocks-node#access-token-example)
+- [Django docs on is_active flag](https://docs.djangoproject.com/en/6.0/ref/contrib/auth/#django.contrib.auth.models.User.is_active)
 
 ## FIXES
 - The order of silk middleware matters in development, put it first for it to work.

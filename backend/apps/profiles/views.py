@@ -18,6 +18,8 @@ from apps.content.serializers import (
     SavedArticleSerializer,
 )
 from apps.profiles.schema_examples import (
+    ACCOUNT_DEACTIVATE_RESPONSE_EXAMPLE,
+    ACCOUNT_REACTIVATE_RESPONSE_EXAMPLE,
     ARTICLE_CREATE_RESPONSE_EXAMPLE,
     ARTICLE_DETAIL_RESPONSE_EXAMPLE,
     ARTICLE_LIST_EXAMPLE,
@@ -36,6 +38,7 @@ from apps.profiles.serializers import (
     UsernameSerializer,
     UserSerializer,
 )
+from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status

@@ -7,7 +7,7 @@ from django.utils import timezone
 from . import notification_service
 
 
-@shared_task(name="process_stale_workflows")
+@shared_task
 def process_stale_workflows():
     """
     A daily task to handle inactive articles in the review and publishing pipeline.

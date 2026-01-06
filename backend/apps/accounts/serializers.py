@@ -62,11 +62,17 @@ class PasswordChangeSerializer(serializers.Serializer):
     new_password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)
 
-    def validate(self, attrs):
+    def validate(self, attrs):  # object-level, runs after field-level validate
         if attrs["new_password"] != attrs["confirm_password"]:
             raise serializers.ValidationError(
                 {"error": "New password and confirm password do not match."}
             )
+
+        if attrs["old_password"] == attrs["new_password"]:
+            raise serializers.ValidationError(
+                {"error": "New password must be different from your current password."}
+            )
+
         return attrs
 
     def validate_old_password(self, value):

@@ -18,7 +18,7 @@ def slugify_two_fields(self):
     return f"{self.first_name}-{self.last_name}"
 
 
-class User(AbstractBaseUser, IsDeletedModel, PermissionsMixin):
+class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -29,11 +29,34 @@ class User(AbstractBaseUser, IsDeletedModel, PermissionsMixin):
     google_id = models.CharField(max_length=255, unique=True, null=True)
 
     is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(
+        default=True,
+        help_text=(
+            "Django's authentication gate. Keep True to allow custom account status "
+            "checks in views. If False, Django blocks authentication before our custom "
+            "logic runs, preventing granular error messages. We manage account access "
+            "through is_email_verified, user_active, and is_suspended instead."
+        ),
+    )
     is_superuser = models.BooleanField(default=False)
     is_email_verified = models.BooleanField(default=False)
-    user_active = models.BooleanField(default=True)
+
+    is_suspended = models.BooleanField(
+        default=False,
+        help_text=(
+            "Admin suspension flag. When True, account is suspended by staff for "
+            "policy violations. Takes priority over user_active. User cannot self-reactivate. "
+            "Check this AFTER email verification but BEFORE user_active. "
+            "If True, show suspension reason and support contact."
+        ),
+    )
     mentions_disabled = models.BooleanField(default=False)
+
+    suspended_at = models.DateTimeField(null=True, blank=True)
+    suspended_by = models.ForeignKey(
+        "self", on_delete=models.SET_NULL, null=True, related_name="suspended_users"
+    )
+    suspension_reason = models.TextField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
