@@ -1,0 +1,54 @@
+{% extends 'emails/base_email.html' %}
+
+{% block title %}
+  Reminder: Article Ready for Publishing
+{% endblock %}
+
+{% block content %}
+  <h1>📝 Article Ready for Publishing</h1>
+
+  <p>Hi {{ editor.first_name }},</p>
+
+  <p>
+    Just a friendly reminder that the article "<strong>{{ article.title }}</strong>" has been approved and is ready for you to publish.
+  </p>
+
+  <div class="success-box">
+    <p style="margin: 0; font-weight: 600; color: #2ea316;">✅ Review Completed</p>
+    <p class="text-small" style="margin: 10px 0 0 0; color: #262a2a;">
+      This article has been waiting for <strong>{{ days_waiting }} days</strong> since approval.
+    </p>
+  </div>
+
+  <h2>Article Details</h2>
+
+  <table class="details-table">
+    <tr>
+      <td>Title:</td>
+      <td>{{ article.title }}</td>
+    </tr>
+    <tr>
+      <td>Author:</td>
+      <td>{{ author.full_name }}</td>
+    </tr>
+    <tr>
+      <td>Approved by:</td>
+      <td>{{ reviewer.full_name }}</td>
+    </tr>
+    <tr>
+      <td>Approved on:</td>
+      <td>{{ article.updated_at|date:'F d, Y' }}</td>
+    </tr>
+  </table>
+
+  <div style="text-align: center;">
+    <a href="{{ admin_dashboard_url }}" class="btn btn-primary">Publish Article →</a>
+  </div>
+
+  <p style="margin-top: 30px; color: #889392; font-size: 14px;">Publishing approved articles promptly helps maintain author satisfaction and keeps our content fresh!</p>
+
+  <p style="margin-top: 20px;">
+    Thanks for keeping our content pipeline moving!<br />
+    <strong>The Tech Hive Team</strong>
+  </p>
+{% endblock %}

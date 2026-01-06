@@ -1,12 +1,11 @@
 import logging
 
 from apps.accounts.emails import EmailThread
+from apps.content.models import Article
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
-
-from apps.content.models import Article
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -56,7 +55,7 @@ class NotificationService:
         return self.send_email(
             subject=f"New article assigned for review: {article.title}",
             recipient=reviewer.email,
-            template_name="article_submitted.html",
+            template_name="content/article_submitted.html",
             context=context,
         )
 
@@ -71,7 +70,7 @@ class NotificationService:
         self.send_email(
             subject=f"Review started for: {article.title}",
             recipient=article.author.email,
-            template_name="review_started.html",
+            template_name="content/review_started.html",
             context=context,
         )
 
@@ -86,7 +85,7 @@ class NotificationService:
         self.send_email(
             subject=f"Changes requested for: {article.title}",
             recipient=article.author.email,
-            template_name="changes_requested.html",
+            template_name="content/changes_requested.html",
             context=context,
         )
 
@@ -103,7 +102,7 @@ class NotificationService:
         self.send_email(
             subject=f"Great news! Your article has been approved: {article.title}",
             recipient=article.author.email,
-            template_name="article_approved_author.html",
+            template_name="content/article_approved_author.html",
             context=author_context,
         )
 
@@ -117,7 +116,7 @@ class NotificationService:
             self.send_email(
                 subject=f"New article ready for publishing: {article.title}",
                 recipient=article.assigned_editor.email,
-                template_name="article_approved_editor.html",
+                template_name="content/article_approved_editor.html",
                 context=editor_context,
             )
         else:
@@ -134,7 +133,7 @@ class NotificationService:
         self.send_email(
             subject=f"Article not approved: {article.title}",
             recipient=article.author.email,
-            template_name="article_rejected.html",
+            template_name="content/article_rejected.html",
             context=context,
         )
 
@@ -149,7 +148,7 @@ class NotificationService:
         self.send_email(
             subject=f"🎉 Your article is now published: {article.title}",
             recipient=article.author.email,
-            template_name="article_published_author.html",
+            template_name="content/article_published_author.html",
             context=author_context,
         )
 
@@ -164,7 +163,7 @@ class NotificationService:
             self.send_email(
                 subject=f"Article you reviewed is now published: {article.title}",
                 recipient=review.reviewed_by.email,
-                template_name="article_published_reviewer.html",
+                template_name="content/article_published_reviewer.html",
                 context=reviewer_context,
             )
 
@@ -180,7 +179,7 @@ class NotificationService:
         self.send_email(
             subject=f"Article assigned to you for review: {article.title}",
             recipient=new_reviewer.email,
-            template_name="reviewer_reassigned.html",
+            template_name="content/reviewer_reassigned.html",
             context=context,
         )
 
@@ -196,7 +195,7 @@ class NotificationService:
         self.send_email(
             subject=f"Article assigned to you for publishing: {article.title}",
             recipient=new_editor.email,
-            template_name="editor_reassigned.html",
+            template_name="content/editor_reassigned.html",
             context=context,
         )
 
@@ -235,7 +234,7 @@ class NotificationService:
             self.send_email(
                 subject=f'New activity on "{article.title}"',
                 recipient=notified_user.email,
-                template_name="thread_notification.html",
+                template_name="content/thread_notification.html",
                 context=context,
             )
 
@@ -251,8 +250,233 @@ class NotificationService:
             logger.error(f"Error sending thread notification: {str(e)}")
             return False
 
+    def send_assignment_failure_alert(
+        self, article, is_reviewer_missing=False, is_editor_missing=False
+    ):
+        """
+        Alert admins when article submission doesn't have a reviewer or editor assigned.
+
+        Args:
+            article: The Article instance
+            is_reviewer_missing: True if no reviewer was available
+            is_editor_missing: True if no editor was available
+        """
+        missing_roles = []
+        if is_reviewer_missing:
+            missing_roles.append("Reviewer")
+        if is_editor_missing:
+            missing_roles.append("Editor")
+
+        missing_text = " and ".join(missing_roles)
+
+        admin_emails = list(
+            User.objects.filter(groups__name="Admin")
+            .values_list("email", flat=True)
+            .distinct()
+        )
+
+        if not admin_emails:
+            logger.error(
+                f"CRITICAL: No admins found to alert about article {article.id} assignment failure!"
+            )
+            return False
+
+        context = {
+            "article": article,
+            "author": article.author,
+            "missing_roles": missing_text,
+            "is_reviewer_missing": is_reviewer_missing,
+            "is_editor_missing": is_editor_missing,
+            "admin_dashboard_url": f"{self.frontend_url}/admin/content/article/{article.id}/change/",
+            "article_url": f"{self.frontend_url}/articles/{article.id}/editor",
+        }
+
+        subject = f"🚨 URGENT: Article Awaiting Manual Assignment - {article.title}"
+
+        for admin_email in admin_emails:
+            try:
+                self.send_email(
+                    subject=subject,
+                    recipient=admin_email,
+                    template_name="content/assignment_failure_alert.html",
+                    context=context,
+                )
+            except Exception as e:
+                logger.error(
+                    f"Failed to send assignment alert to {admin_email}: {str(e)}"
+                )
+                return False
+
+        logger.info(
+            f"Sent assignment failure alert for article {article.id} to {len(admin_emails)} admins"
+        )
+        return True
+
+    def send_author_first_reminder_email(self, article):
+        """
+        Send first reminder to author about pending revisions.
+        Triggered when article is in changes_requested for 20 days.
+        """
+        context = {
+            "article": article,
+            "author": article.author,
+            "article_url": f"{self.frontend_url}/articles/{article.id}/editor",
+        }
+
+        return self.send_email(
+            subject=f"Reminder: Your Article Awaiting Revisions - {article.title}",
+            recipient=article.author.email,
+            template_name="content/author_first_reminder.html",
+            context=context,
+        )
+
+    def send_author_final_warning_email(self, article):
+        """
+        Send final warning to author before auto-archiving article.
+        Triggered when article is in changes_requested for 45 days.
+        """
+        context = {
+            "article": article,
+            "author": article.author,
+            "days_remaining": 15,  # 60 - 45 = 15 days left
+            "article_url": f"{self.frontend_url}/articles/{article.id}/editor",
+        }
+
+        return self.send_email(
+            subject=f"Action Required: Your TechHive Article - {article.title}",
+            recipient=article.author.email,
+            template_name="content/author_final_warning.html",
+            context=context,
+        )
+
+    def send_author_archived_email(self, article):
+        """
+        Notify author that their article has been auto-archived due to inactivity.
+        Triggered when article is in changes_requested for 60 days.
+        """
+        context = {
+            "article": article,
+            "author": article.author,
+            "dashboard_url": f"{self.frontend_url}/dashboard/articles",
+        }
+
+        return self.send_email(
+            subject=f"Article Archived Due to Inactivity - {article.title}",
+            recipient=article.author.email,
+            template_name="content/author_archived.html",
+            context=context,
+        )
+
+    def send_reviewer_reminder_email(self, article):
+        """
+        Send reminder to reviewer about pending review.
+        Triggered when article is in submitted_for_review/under_review for 5 days.
+        """
+        context = {
+            "article": article,
+            "reviewer": article.assigned_reviewer,
+            "author": article.author,
+            "review_url": f"{self.frontend_url}/reviews/{article.reviews.filter(completed_at__isnull=True).first().id}",
+        }
+
+        return self.send_email(
+            subject=f"Reminder: Article Awaiting Your Review - {article.title}",
+            recipient=article.assigned_reviewer.email,
+            template_name="content/reviewer_reminder.html",
+            context=context,
+        )
+
+    def send_editor_reminder_email(self, article):
+        """
+        Send reminder to editor about article ready for publishing.
+        Triggered when article is in ready_for_publishing for 7 days.
+        """
+        context = {
+            "article": article,
+            "editor": article.assigned_editor,
+            "author": article.author,
+            "reviewer": article.assigned_reviewer,
+            "days_waiting": 7,
+            "admin_dashboard_url": f"{self.frontend_url}/admin/content/article/{article.id}/change/",
+        }
+
+        return self.send_email(
+            subject=f"Reminder: Article Ready for Publishing - {article.title}",
+            recipient=article.assigned_editor.email,
+            template_name="content/editor_reminder.html",
+            context=context,
+        )
+
+    def send_editor_escalation_for_stale_review(self, article):
+        """
+        Alert editor about stale review that needs attention.
+        Triggered when article is in submitted_for_review/under_review for 10 days.
+        """
+        context = {
+            "article": article,
+            "editor": article.assigned_editor,
+            "reviewer": article.assigned_reviewer,
+            "days_overdue": 10,
+            "admin_dashboard_url": f"{self.frontend_url}/admin/content/article/{article.id}/change/",
+            "article_url": f"{self.frontend_url}/articles/{article.id}/editor",
+        }
+
+        return self.send_email(
+            subject=f"ACTION NEEDED: Stale Review for '{article.title}'",
+            recipient=article.assigned_editor.email,
+            template_name="content/editor_escalation_stale_review.html",
+            context=context,
+        )
+
+    def send_admin_escalation_for_stale_publication(self, article):
+        """
+        Alert admins about article stuck in ready_for_publishing.
+        Triggered when article is in ready_for_publishing for 14 days.
+        """
+
+        admin_emails = list(
+            User.objects.filter(groups__name="Admin")
+            .values_list("email", flat=True)
+            .distinct()
+        )
+
+        if not admin_emails:
+            logger.error(
+                f"CRITICAL: No admins found to alert about stale publication for article {article.id}!"
+            )
+            return False
+
+        context = {
+            "article": article,
+            "editor": article.assigned_editor,
+            "days_waiting": 14,
+            "admin_dashboard_url": f"{self.frontend_url}/admin/content/article/{article.id}/change/",
+            "article_url": f"{self.frontend_url}/articles/{article.id}/editor",
+        }
+
+        subject = f"ESCALATION: Stale Article Ready for Publishing - {article.title}"
+
+        for admin_email in admin_emails:
+            try:
+                self.send_email(
+                    subject=subject,
+                    recipient=admin_email,
+                    template_name="content/admin_escalation_stale_publication.html",
+                    context=context,
+                )
+            except Exception as e:
+                logger.error(
+                    f"Failed to send stale publication escalation to {admin_email}: {str(e)}"
+                )
+
+        logger.info(
+            f"Sent stale publication escalation for article {article.id} to {len(admin_emails)} admins"
+        )
+        return True
+
 
 notification_service = NotificationService()
+
 
 # Can This Scenario Even Happen?
 # The good news: Liveblocks is smart enough to prevent this scenario on their end.
@@ -266,4 +490,3 @@ notification_service = NotificationService()
 
 # "The event won't be triggered if the user has seen the thread..."
 # TODO: MOST OF THE article_url are non-existent so fix that in the frontend
-# TODO: send_changes_requested_email(self, article) and the webhooks email events looks similar

@@ -1,0 +1,62 @@
+{% extends 'emails/base_email.html' %}
+
+{% block title %}
+  ACTION NEEDED: Stale Review
+{% endblock %}
+
+{% block content %}
+  <h1>🚨 Action Required: Stale Review</h1>
+
+  <p>Hi {{ editor.first_name }},</p>
+
+  <p>
+    The review for the article "<strong>{{ article.title }}</strong>" requires your attention.
+  </p>
+
+  <div class="error-box">
+    <p style="margin: 0; font-weight: 600; color: #a32816;">⚠️ Review Overdue</p>
+    <p class="text-small" style="margin: 10px 0 0 0; color: #a32816;">
+      This review has been inactive for <strong>{{ days_overdue }} days</strong> without progress.
+    </p>
+  </div>
+
+  <h2>Article Details</h2>
+
+  <table class="details-table">
+    <tr>
+      <td>Title:</td>
+      <td>{{ article.title }}</td>
+    </tr>
+    <tr>
+      <td>Assigned Reviewer:</td>
+      <td>{{ reviewer.full_name }}</td>
+    </tr>
+    <tr>
+      <td>Status:</td>
+      <td>{{ article.get_status_display }}</td>
+    </tr>
+    <tr>
+      <td>Days Waiting:</td>
+      <td>{{ days_overdue }} days</td>
+    </tr>
+  </table>
+
+  <h2>Recommended Actions</h2>
+
+  <div class="warning-box">
+    <ol style="margin: 0; padding-left: 20px; color: #262a2a;">
+      <li style="margin-bottom: 10px;">Check in with {{ reviewer.first_name }} about their availability</li>
+      <li style="margin-bottom: 10px;">Consider contacting the manager or admin if the reviewer is unavailable</li>
+    </ol>
+  </div>
+
+  <div class="info-box" style="margin-top: 30px;">
+    <p style="margin: 0; font-size: 14px;">
+      <strong>Note:</strong> Taking action on stale reviews helps maintain author confidence and keeps our content pipeline healthy.
+    </p>
+  </div>
+
+  <p style="margin-top: 30px;">
+    <strong>Tech Hive System</strong>
+  </p>
+{% endblock %}

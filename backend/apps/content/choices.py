@@ -14,6 +14,7 @@ CURSOR_COLORS = [
     "#0000FF",
 ]
 
+
 class ArticleStatusChoices(models.TextChoices):
     DRAFT = "draft", "Draft"
     SUBMITTED_FOR_REVIEW = "submitted_for_review", "Submitted for Review"
@@ -24,14 +25,8 @@ class ArticleStatusChoices(models.TextChoices):
     REJECTED = "rejected", "Rejected"
     # ARCHIVED = "archived", "Archived"
 
-class ArticleStatusReviewChoices(models.TextChoices):
-    SUBMITTED_FOR_REVIEW = "submitted_for_review", "Submitted for Review"
-    UNDER_REVIEW = "under_review", "Under Review"
-    CHANGES_REQUESTED = "changes_requested", "Changes Requested"
-    READY = "ready_for_publishing", "Ready for Publishing"
-    REJECTED = "rejected", "Rejected"
-    
+
 class ArticleReviewStatusChoices(models.TextChoices):
-    PENDING = 'pending', 'Pending Assignment'
-    IN_PROGRESS = 'in_progress', 'In Progress'
-    COMPLETED = 'completed', 'Completed'
+    PENDING = "pending", "Pending Assignment"
+    IN_PROGRESS = "in_progress", "In Progress"
+    COMPLETED = "completed", "Completed"

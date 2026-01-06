@@ -15,7 +15,10 @@ class CategoryAdmin(admin.ModelAdmin):
 
     articles_count.short_description = "Articles"
 
-
+# TODO: When there is a reassignment resend it automatically
+# notification_service.send_article_submitted_email(
+#                             article=article, reviewer=reviewer
+#                         )
 class UnassignedFilter(admin.SimpleListFilter):
     title = "Unassigned Reviewer/Editor"
     parameter_name = "unassigned"
@@ -133,8 +136,8 @@ class ArticleReactionAdmin(admin.ModelAdmin):
 
 @admin.register(models.ArticleReview)
 class ArticleReviewAdmin(admin.ModelAdmin):
-    list_display = ["article", "reviewed_by", "is_active", "started_at"]
-    list_filter = ["is_active", "started_at"]
+    list_display = ["article", "reviewed_by", "started_at"]
+    list_filter = ["started_at"]
     search_fields = ["article__title", "reviewed_by__email"]
     readonly_fields = ["id", "started_at", "completed_at"]
 

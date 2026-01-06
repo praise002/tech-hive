@@ -1,5 +1,5 @@
 import django_filters
-from apps.content.choices import ArticleReviewStatusChoices, ArticleStatusReviewChoices
+from apps.content.choices import ArticleReviewStatusChoices
 from apps.content.models import Article, ArticleReview, ArticleStatusChoices, Event, Job
 from django_filters import rest_framework as filters
 
@@ -108,11 +108,11 @@ class ReviewListFilter(filters.FilterSet):
         help_text="Filter reviews by their current status",
     )
 
-    article_status = filters.ChoiceFilter(
-        field_name="article__status",
-        choices=ArticleStatusReviewChoices.choices,
-        help_text="Filter by the status of the article being reviewed",
-    )
+    # article_status = filters.ChoiceFilter(
+    #     field_name="article__status",
+    #     choices=ArticleStatusReviewChoices.choices,
+    #     help_text="Filter by the status of the article being reviewed",
+    # )
 
     class Meta:
         model = ArticleReview

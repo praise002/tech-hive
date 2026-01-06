@@ -840,6 +840,9 @@ class ArticleSubmitResponseSerializer(serializers.Serializer):
     assigned_reviewer = serializers.SerializerMethodField(
         help_text="Reviewer assigned to the article"
     )
+    assigned_editor = serializers.SerializerMethodField(
+        help_text="Editor assigned to the article"
+    )
     is_resubmission = serializers.BooleanField(
         read_only=True, help_text="Whether this is a resubmission to the same reviewer"
     )
@@ -854,6 +857,19 @@ class ArticleSubmitResponseSerializer(serializers.Serializer):
                 "name": reviewer.full_name,
                 "username": reviewer.username,
                 "avatar_url": reviewer.avatar_url,
+            }
+        return None
+    
+    @extend_schema_field(serializers.DictField)
+    def get_assigned_editor(self, obj):
+        """Return editor info"""
+        editor = obj.get("editor")
+        if editor:
+            return {
+                "id": str(editor.id),
+                "name": editor.full_name,
+                "username": editor.username,
+                "avatar_url": editor.avatar_url,
             }
         return None
 
@@ -933,10 +949,8 @@ class ArticleForReviewSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "title",
-            "slug",
             "status",
             "author",
-            "category",
             "created_at",
             "updated_at",
             "liveblocks_room_id",
@@ -973,8 +987,6 @@ class ArticleDetailForReviewSerializer(serializers.ModelSerializer):
     assigned_reviewer = UserSerializer(read_only=True)
     assigned_editor = UserSerializer(read_only=True)
     liveblocks_room_id = serializers.SerializerMethodField()
-    tags = serializers.StringRelatedField(many=True)
-    category = serializers.StringRelatedField()
     cover_image_url = serializers.SerializerMethodField()  
 
     class Meta:
@@ -982,19 +994,14 @@ class ArticleDetailForReviewSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "title",
-            "slug",
             "content",
             "cover_image_url",
             "status",
             "author",
             "assigned_reviewer",
             "assigned_editor",
-            "category",
-            "tags",
-            "is_featured",
             "created_at",
             "updated_at",
-            "published_at",
             "liveblocks_room_id",
             "content_last_synced_at",
         ]

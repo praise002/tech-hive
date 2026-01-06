@@ -1,0 +1,44 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Action Required: Your TechHive Article{% endblock %}
+
+{% block content %}
+<h1>⚠️ Action Required: Your Article Needs Attention</h1>
+
+<p>Hi {{ author.first_name }},</p>
+
+<p>This is a final reminder about your article "<strong>{{ article.title }}</strong>". It has been awaiting your revisions for over 45 days.</p>
+
+<div class="warning-box">
+    <p style="margin: 0; font-weight: 600; color: #d67917;">⏰ Time Sensitive</p>
+    <p class="text-small" style="margin: 10px 0 0 0; color: #262a2a;">
+        You have <strong>{{ days_remaining }} days remaining</strong> before this article is automatically moved back to your drafts.
+    </p>
+</div>
+
+<h2>What Happens Next?</h2>
+
+<p>To keep our content pipeline moving efficiently, articles without updates after 60 days of inactivity are automatically returned to draft status.</p>
+
+<p><strong>If you still plan to work on this article:</strong></p>
+<ul style="color: #262a2a; line-height: 1.8;">
+    <li>Review the feedback from your reviewer</li>
+    <li>Make the requested changes</li>
+    <li>Resubmit your article for review</li>
+</ul>
+
+<div style="text-align: center;">
+    <a href="{{ article_url }}" class="btn btn-primary">Edit & Resubmit Article →</a>
+</div>
+
+<div class="info-box" style="margin-top: 30px;">
+    <p style="margin: 0; font-size: 14px;">
+        <strong>Need help?</strong> If you're stuck or have questions about the feedback, feel free to reach out to our support team.
+    </p>
+</div>
+
+<p style="margin-top: 30px;">
+    Best regards,<br>
+    <strong>The Tech Hive Team</strong>
+</p>
+{% endblock %}

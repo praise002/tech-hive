@@ -484,4 +484,3 @@ class UserSearchView(APIView):
 
         # Remove duplicates and None values
         return list(set(filter(None, allowed_users)))
-        return list(set(filter(None, allowed_users)))

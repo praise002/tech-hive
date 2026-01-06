@@ -1,0 +1,67 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}🚨 Urgent: Manual Assignment Required{% endblock %}
+
+{% block content %}
+<h1>🚨 Urgent: Manual Assignment Required</h1>
+
+<p>Hi Admin,</p>
+
+<p>An article submission requires immediate attention due to missing assignments.</p>
+
+<div class="error-box">
+    <p style="margin: 0; font-weight: 600; color: #a32816;">⚠️ Missing Assignment{% if is_reviewer_missing and is_editor_missing %}s{% endif %}</p>
+    <p class="text-small" style="margin: 10px 0 0 0; color: #a32816;">
+        No <strong>{{ missing_roles }}</strong> available for assignment.
+    </p>
+</div>
+
+<h2>Article Details</h2>
+
+<table class="details-table">
+    <tr>
+        <td>Title:</td>
+        <td>{{ article.title }}</td>
+    </tr>
+    <tr>
+        <td>Author:</td>
+        <td>{{ author.full_name }} ({{ author.email }})</td>
+    </tr>
+    <tr>
+        <td>Submitted:</td>
+        <td>{{ article.updated_at|date:"F d, Y g:i A" }}</td>
+    </tr>
+    <tr>
+        <td>Status:</td>
+        <td>{{ article.get_status_display }}</td>
+    </tr>
+</table>
+
+<h2>Required Action</h2>
+
+<div class="warning-box">
+    <ol style="margin: 0; padding-left: 20px; color: #262a2a;">
+        <li style="margin-bottom: 10px;">Review the article in the admin dashboard</li>
+        <li style="margin-bottom: 10px;">
+            Manually assign 
+            {% if is_reviewer_missing %}a reviewer{% endif %}{% if is_reviewer_missing and is_editor_missing %} and {% endif %}{% if is_editor_missing %}an editor{% endif %}
+        </li>
+        <li style="margin-bottom: 0;">Ensure the author is notified once assignments are complete</li>
+    </ol>
+</div>
+
+<div style="text-align: center;">
+    <a href="{{ admin_dashboard_url }}" class="btn btn-primary">Assign Now in Admin Dashboard →</a>
+</div>
+
+<div class="info-box" style="margin-top: 30px;">
+    <p style="margin: 0; font-size: 14px;">
+        <strong>Note:</strong> The author has been informed that their submission was successful and that assignments are in progress. Please act on this within 24 hours to maintain a good user experience.
+    </p>
+</div>
+
+<p style="margin-top: 30px;">
+    This is an automated alert from the TechHive content management system.<br>
+    <strong>The Tech Hive System</strong>
+</p>
+{% endblock %}

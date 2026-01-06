@@ -554,6 +554,14 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'apps.subscriptions.tasks.send_final_grace_warnings',
         'schedule': crontab(hour=18, minute=0),
     },
+    # Content workflow tasks
+    "process-stale-workflows": {
+        "task": "apps.content.tasks.process_stale_workflows",
+        "schedule": crontab(hour=8, minute=0),  # 8:00 AM daily
+        "options": {
+            "description": "Daily task to handle inactive articles, remind reviewers/editors, and escalate stale reviews"
+        },
+    },
 }
 
 

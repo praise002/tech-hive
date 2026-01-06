@@ -8,7 +8,13 @@ from apps.content import notification_service
 from apps.content.choices import ArticleReviewStatusChoices, ArticleStatusChoices
 from apps.content.models import Article, ArticleReview
 from apps.content.permissions import CanManageReview, CanSubmitForReview, IsContributor
-from apps.content.schema_examples import ARTICLE_SUBMIT_RESPONSE_EXAMPLE
+from apps.content.schema_examples import (
+    ARTICLE_SUBMIT_RESPONSE_EXAMPLE,
+    REVIEW_APPROVE_RESPONSE_EXAMPLE,
+    REVIEW_REJECT_RESPONSE_EXAMPLE,
+    REVIEW_REQUEST_CHANGES_RESPONSE_EXAMPLE,
+    REVIEW_START_RESPONSE_EXAMPLE,
+)
 from apps.content.serializers import (
     ArticleApproveResponseSerializer,
     ArticleSubmitResponseSerializer,
@@ -126,26 +132,45 @@ class ArticleSubmitView(APIView):
                 else:
                     # NEW SUBMISSION: Assign new reviewer
                     reviewer = assign_reviewer()
+                    editor = assign_editor()
 
-                    if not reviewer:
-                        return CustomResponse.error(
-                            message="No reviewers available. Please contact support.",
-                            err_code=ErrorCode.SERVICE_UNAVAILABLE,
-                            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    if not reviewer or not editor:
+                        try:
+                            notification_service.send_assignment_failure_alert(
+                                article=article,
+                                is_reviewer_missing=(not reviewer),
+                                is_editor_missing=(not editor),
+                            )
+                            logger.warning(
+                                f"Article {article.id} submitted but missing assignments. "
+                                f"Reviewer: {reviewer}, Editor: {editor}. Admin alerted."
+                            )
+                        except Exception as e:
+                            logger.error(
+                                f"CRITICAL: Failed to send assignment failure alert for article {article.id}: {str(e)}",
+                                exc_info=True,
+                            )
+
+                        article.assigned_reviewer = reviewer
+                        article.assigned_editor = editor
+
+                        logger.info(
+                            f"Article {article.id} submitted by {request.user.id} "
+                            f"without complete assignments (awaiting admin intervention)"
                         )
+                    else:
+                        # Create new review record
+                        ArticleReview.objects.create(
+                            article=article,
+                            reviewed_by=reviewer,
+                        )
+                        article.assigned_reviewer = reviewer
+                        article.assigned_editor = editor
 
-                    # Create new review record
-                    ArticleReview.objects.create(
-                        article=article,
-                        reviewed_by=reviewer,
-                        status=ArticleReviewStatusChoices.PENDING,
-                    )
-                    article.assigned_reviewer = reviewer
-
-                    logger.info(
-                        f"Article {article.id} submitted by {request.user.id} "
-                        f"to reviewer {reviewer.id}"
-                    )
+                        logger.info(
+                            f"Article {article.id} submitted by {request.user.id} "
+                            f"to reviewer {reviewer.id}"
+                        )
 
                 # Update article status
                 old_status = article.status
@@ -165,23 +190,31 @@ class ArticleSubmitView(APIView):
                 )
 
                 #  Send notification email
-                try:
-                    notification_service.send_article_submitted_email(
-                        article=article, reviewer=reviewer
-                    )
-                except Exception as e:
-                    # Log error but don't fail the submission
-                    logger.error(
-                        f"Failed to send submission email for article {article.id}: {str(e)}",
-                        exc_info=True,
-                    )
+                if reviewer:
+                    try:
+                        notification_service.send_article_submitted_email(
+                            article=article, reviewer=reviewer
+                        )
+                    except Exception as e:
+                        # Log error but don't fail the submission
+                        logger.error(
+                            f"Failed to send submission email for article {article.id}: {str(e)}",
+                            exc_info=True,
+                        )
 
-                # Prepare response
-                response_data = {
-                    "status": article.status,
-                    "assigned_reviewer": reviewer,
-                    "is_resubmission": is_resubmission,
-                }
+                if is_resubmission:
+                    response_data = {
+                        "status": article.status,
+                        "assigned_reviewer": existing_review.reviewed_by,
+                        "is_resubmission": is_resubmission,
+                    }
+                else:
+                    response_data = {
+                        "status": article.status,
+                        "assigned_reviewer": reviewer,
+                        "assigned_editor": editor,
+                        "is_resubmission": is_resubmission,
+                    }
 
                 serializer = self.serializer_class(response_data)
 
@@ -223,7 +256,7 @@ class ReviewStartView(APIView):
         - Article status must be: submitted_for_review
         - User must be the assigned reviewer
         """,
-        # responses=REVIEW_START_RESPONSE_EXAMPLE,
+        responses=REVIEW_START_RESPONSE_EXAMPLE,
         tags=tags,
     )
     def post(self, request, review_id):
@@ -232,7 +265,7 @@ class ReviewStartView(APIView):
         try:
             review = ArticleReview.objects.select_related(
                 "article", "article__author", "reviewed_by"
-            ).get(id=review_id, is_active=True)
+            ).get(id=review_id)
         except ArticleReview.DoesNotExist:
             raise NotFoundError("Review not found")
 
@@ -311,10 +344,8 @@ class ReviewRequestChangesView(APIView):
         
         **Note:** All feedback is provided via Liveblocks comments, not stored here.
         """,
-        # request=ReviewActionRequestSerializer,
-        # responses={
-        #     200: ReviewActionResponseSerializer,
-        # },
+        request=ReviewActionRequestSerializer,
+        responses=REVIEW_REQUEST_CHANGES_RESPONSE_EXAMPLE,
         tags=tags,
     )
     def post(self, request, review_id):
@@ -322,7 +353,7 @@ class ReviewRequestChangesView(APIView):
         try:
             review = ArticleReview.objects.select_related(
                 "article", "article__author", "reviewed_by"
-            ).get(id=review_id, is_active=True)
+            ).get(id=review_id)
         except ArticleReview.DoesNotExist:
             raise NotFoundError("Review not found")
 
@@ -410,10 +441,8 @@ class ReviewApproveView(APIView):
         - Article status must be: under_review
         - User must be the assigned reviewer
         """,
-        # request=ReviewActionRequestSerializer,
-        # responses={
-        #     200: ArticleApproveResponseSerializer,
-        # },
+        request=ReviewActionRequestSerializer,
+        responses=REVIEW_APPROVE_RESPONSE_EXAMPLE,
         tags=tags,
     )
     def post(self, request, review_id):
@@ -421,7 +450,7 @@ class ReviewApproveView(APIView):
         try:
             review = ArticleReview.objects.select_related(
                 "article", "article__author", "reviewed_by"
-            ).get(id=review_id, is_active=True)
+            ).get(id=review_id)
         except ArticleReview.DoesNotExist:
             raise NotFoundError("Review not found")
 
@@ -443,23 +472,12 @@ class ReviewApproveView(APIView):
             with transaction.atomic():
                 old_status = article.status
 
-                # Auto-assign editor
-                editor = assign_editor()
-
-                if not editor:
-                    return CustomResponse.error(
-                        message="No editors available. Please contact support.",
-                        err_code=ErrorCode.SERVICE_UNAVAILABLE,
-                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                    )
-
                 article.status = ArticleStatusChoices.READY
-                article.assigned_editor = editor
+
                 article.save()
 
                 review.status = ArticleReviewStatusChoices.COMPLETED
                 review.completed_at = timezone.now()
-                review.is_active = False
                 review.reviewer_notes = serializer.validated_data.get(
                     "reviewer_notes", None
                 )
@@ -470,7 +488,7 @@ class ReviewApproveView(APIView):
                     from_status=old_status,
                     to_status=article.status,
                     changed_by=request.user,
-                    notes=f"Approved by reviewer, assigned to editor {editor.full_name()}",
+                    notes="Approved by reviewer",
                 )
 
                 try:
@@ -480,14 +498,13 @@ class ReviewApproveView(APIView):
 
                 response_data = {
                     "article_status": article.status,
-                    "assigned_editor": editor,
                     "completed_at": review.completed_at,
                 }
 
                 response_serializer = self.serializer_class(response_data)
 
                 return CustomResponse.success(
-                    message="Article approved successfully. Editor has been assigned.",
+                    message="Article approved successfully",
                     data=response_serializer.data,
                     status_code=status.HTTP_200_OK,
                 )
@@ -521,10 +538,8 @@ class ReviewRejectView(APIView):
         
         **Note:** Author can resubmit after making changes.
         """,
-        # request=ReviewActionRequestSerializer,
-        # responses={
-        #     200: ReviewActionResponseSerializer,
-        # },
+        request=ReviewActionRequestSerializer,
+        responses=REVIEW_REJECT_RESPONSE_EXAMPLE,
         tags=tags,
     )
     def post(self, request, review_id):
@@ -532,7 +547,7 @@ class ReviewRejectView(APIView):
         try:
             review = ArticleReview.objects.select_related(
                 "article", "article__author", "reviewed_by"
-            ).get(id=review_id, is_active=True)
+            ).get(id=review_id)
         except ArticleReview.DoesNotExist:
             raise NotFoundError("Review not found")
 

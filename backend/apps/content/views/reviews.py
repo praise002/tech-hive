@@ -4,7 +4,10 @@ from apps.common.responses import CustomResponse
 from apps.content.filters import ReviewListFilter
 from apps.content.models import ArticleReview
 from apps.content.permissions import CanViewReview, IsReviewer
-from apps.content.schema_examples import ASSIGNED_REVIEWS_LIST_RESPONSE_EXAMPLE
+from apps.content.schema_examples import (
+    ASSIGNED_REVIEWS_LIST_RESPONSE_EXAMPLE,
+    REVIEW_DETAIL_RESPONSE_EXAMPLE,
+)
 from apps.content.serializers import ReviewDetailSerializer, ReviewListSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
@@ -23,7 +26,6 @@ class AssignedReviewsListView(ListAPIView):
 
     Query Parameters:
     - status: Filter by review status (pending, in_progress, approved, etc.)
-    - article_status: Filter by article status (submitted_for_review, under_review, etc.)
     """
 
     serializer_class = ReviewListSerializer
@@ -84,7 +86,7 @@ class AssignedReviewsListView(ListAPIView):
         - Use `?article_status=under_review` to filter by article status
         - Combine filters: `?status=pending&article_status=submitted_for_review`
         """,
-        # responses=ASSIGNED_REVIEWS_LIST_RESPONSE_EXAMPLE,
+        responses=ASSIGNED_REVIEWS_LIST_RESPONSE_EXAMPLE,
         tags=tags,
     )
     def get(self, request, *args, **kwargs):
@@ -117,86 +119,7 @@ class ReviewDetailView(APIView):
         - Reviewers can see their own reviews (including `reviewer_notes`)
         - Article authors can see reviews of their articles (no `reviewer_notes`)
         """,
-        # responses={
-        #     200: OpenApiExample(
-        #         'Success Response',
-        #         value={
-        #             "status": "success",
-        #             "message": "Review retrieved successfully",
-        #             "data": {
-        #                 "id": 1,
-        #                 "article": {
-        #                     "id": 123,
-        #                     "title": "Introduction to Django Signals",
-        #                     "slug": "introduction-to-django-signals",
-        #                     "content": "<p>Django signals allow...</p>",
-        #                     "cover_image_url": "https://example.com/media/articles/cover.jpg",
-        #                     "status": "under_review",
-        #                     "author": {
-        #                         "id": 5,
-        #                         "username": "john_doe",
-        #                         "full_name": "John Doe"
-        #                     },
-        #                     "assigned_reviewer": {
-        #                         "id": 8,
-        #                         "username": "jane_reviewer",
-        #                         "full_name": "Jane Reviewer"
-        #                     },
-        #                     "assigned_editor": None,
-        #                     "category": "Backend Development",
-        #                     "tags": ["django", "python", "signals"],
-        #                     "is_featured": False,
-        #                     "created_at": "2024-01-01T10:00:00Z",
-        #                     "updated_at": "2024-01-05T14:30:00Z",
-        #                     "published_at": None,
-        #                     "liveblocks_room_id": "article-123",
-        #                     "content_last_synced_at": "2024-01-05T14:30:00Z"
-        #                 },
-        #                 "reviewed_by": {
-        #                     "id": 8,
-        #                     "username": "jane_reviewer",
-        #                     "full_name": "Jane Reviewer"
-        #                 },
-        #                 "status": "in_progress",
-        #                 "started_at": "2024-01-05T09:00:00Z",
-        #                 "completed_at": None,
-        #                 "reviewer_notes": "Checking technical accuracy and code examples",
-        #                 "workflow_history": [
-        #                     {
-        #                         "id": 45,
-        #                         "from_status": "draft",
-        #                         "to_status": "submitted_for_review",
-        #                         "changed_by": {
-        #                             "id": 5,
-        #                             "username": "john_doe",
-        #                             "full_name": "John Doe"
-        #                         },
-        #                         "changed_at": "2024-01-05T08:00:00Z",
-        #                         "notes": "Ready for review"
-        #                     }
-        #                 ],
-        #                 "created_at": "2024-01-05T08:00:00Z",
-        #                 "updated_at": "2024-01-05T09:00:00Z"
-        #             }
-        #         }
-        #     ),
-        #     403: OpenApiExample(
-        #         'Access Denied',
-        #         value={
-        #             "status": "failure",
-        #             "message": "You don't have permission to view this review",
-        #             "code": "forbidden"
-        #         }
-        #     ),
-        #     404: OpenApiExample(
-        #         'Not Found',
-        #         value={
-        #             "status": "failure",
-        #             "message": "Review not found",
-        #             "code": "non_existent"
-        #         }
-        #     )
-        # },
+        responses=REVIEW_DETAIL_RESPONSE_EXAMPLE,
         tags=tags,
     )
     def get(self, request, review_id):
@@ -231,15 +154,7 @@ class ReviewDetailView(APIView):
             status_code=status.HTTP_200_OK,
         )
 
-
-# TODO:
-# Still deliberating on is_active in ArticleReview
-# Review Cycles Are Iterative
-# One review process can span multiple rounds: Submission → Review → Changes Requested → Resubmission → Review Again → Approval/Rejection
-# The same reviewer typically handles all rounds for continuity
-# Reviews stay "active" until the article is published or rejected
-# When Reviews Actually Become Inactive
-# Article published/rejected: Process complete
+# FIX PERMISSION LOGIC COS NOW WE HAVE EDITOR ASSIGNED
 # Timeout due to inactivity: No resubmission after 30-60 days
 # Manual intervention: Editor reassigns reviewer
 
@@ -255,9 +170,8 @@ class ReviewDetailView(APIView):
 #         cutoff = timezone.now() - timezone.timedelta(days=30)
 
 #         stale_reviews = ArticleReview.objects.filter(
-#             is_active=True,
 #             updated_at__lt=cutoff,
-#             article__status__in=['changes_requested', 'draft']
+#             article__status__in=['changes_requested']
 #         )
 
 #         for review in stale_reviews:
@@ -272,4 +186,7 @@ class ReviewDetailView(APIView):
 # Do more research on whetehr to put input or output serializer in the serializer_class
 # Should an error be returned when no assigned reviewer and editor or it should go through
 # and admin is alerted
+
+# Should an error be returned when no assigned reviewer and editor or it should go through
 # and admin is alerted
+

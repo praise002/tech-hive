@@ -1,4 +1,5 @@
 import uuid
+
 from apps.common.models import BaseModel
 from apps.common.validators import validate_file_size
 from apps.content.choices import ArticleReviewStatusChoices, ArticleStatusChoices
@@ -219,13 +220,14 @@ class ArticleReview(models.Model):
         related_name="article_reviews",
         on_delete=models.CASCADE,
     )
-    is_active = models.BooleanField(default=True)
 
     status = models.CharField(
         max_length=20,
         choices=ArticleReviewStatusChoices.choices,
         default=ArticleReviewStatusChoices.PENDING,
     )
+
+    updated_at = models.DateTimeField(auto_now=True)
 
     started_at = models.DateTimeField(
         null=True, blank=True, help_text="When reviewer started the review"
@@ -242,13 +244,13 @@ class ArticleReview(models.Model):
     )
 
     objects = models.Manager()
-    active = ActiveManager()
 
     class Meta:
-        unique_together = ("article", "is_active")
+        #NOTE: NO UNIQUE CONSTRIANT
+        # unique_together = ("article", "is_active")
         indexes = [
             models.Index(fields=["article", "status"]),
-            models.Index(fields=["reviewed_by", "status", "is_active"]),
+            models.Index(fields=["reviewed_by", "status"]),
         ]
 
     def __str__(self):
@@ -543,4 +545,5 @@ class Tool(BaseModel):
         ordering = ["-created_at"]
 
     def __str__(self):
+        return self.name
         return self.name
