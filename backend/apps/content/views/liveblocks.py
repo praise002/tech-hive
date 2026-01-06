@@ -9,6 +9,7 @@ from apps.content.permissions import IsAuthorOrReadOnly
 from apps.content.schema_examples import (
     ARTICLE_EDITOR_EXAMPLE,
     ARTICLE_EDITOR_RESPONSE_EXAMPLE,
+    LIVEBLOCK_AUTH_RESPONSE_EX,
     USER_BATCH_REQUEST_EXAMPLE,
     USER_BATCH_RESPONSE_EXAMPLE,
     USER_SEARCH_RESPONSE_EXAMPLE,
@@ -16,6 +17,7 @@ from apps.content.schema_examples import (
 from apps.content.serializers import (
     ArticleEditorSerializer,
     LiveblocksAuthRequestSerializer,
+    LiveblocksAuthResponseSerializer,
     UserBatchRequestSerializer,
     UserMentionSerializer,
     UserSearchRequestSerializer,
@@ -47,7 +49,7 @@ class LiveblocksAuthView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
-    serializer_class = None
+    serializer_class = LiveblocksAuthResponseSerializer
 
     @extend_schema(
         summary="Authenticate for Liveblocks room",
@@ -75,73 +77,8 @@ class LiveblocksAuthView(APIView):
         - Room permissions
         - Expiration (2 hours)
         """,
-        # request=LiveblocksAuthRequestSerializer,
-        # responses={
-        #     200: LiveblocksAuthResponseSerializer,
-        #     400: OpenApiExample(
-        #         'Invalid Request',
-        #         value={
-        #             "status": "failure",
-        #             "message": "Invalid room format",
-        #             "code": "invalid_input"
-        #         }
-        #     ),
-        #     403: OpenApiExample(
-        #         'Access Denied',
-        #         value={
-        #             "status": "failure",
-        #             "message": "You don't have permission to access this room",
-        #             "code": "forbidden"
-        #         }
-        #     ),
-        #     404: OpenApiExample(
-        #         'Article Not Found',
-        #         value={
-        #             "status": "failure",
-        #             "message": "Article not found",
-        #             "code": "non_existent"
-        #         }
-        #     ),
-        #     500: OpenApiExample(
-        #         'Token Generation Failed',
-        #         value={
-        #             "status": "failure",
-        #             "message": "Failed to generate authentication token",
-        #             "code": "server_error"
-        #         }
-        #     )
-        # },
-        # examples=[
-        #     OpenApiExample(
-        #         'Request Example',
-        #         value={"room": "article-123"},
-        #         request_only=True
-        #     ),
-        #     OpenApiExample(
-        #         'Success Response - Write Access',
-        #         value={
-        #             "status": "success",
-        #             "message": "Authentication successful",
-        #             "data": {
-        #                 "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-        #                 "userId": "5"
-        #             }
-        #         },
-        #         response_only=True
-        #     ),
-        #     OpenApiExample(
-        #         'Success Response - Read Access',
-        #         value={
-        #             "status": "success",
-        #             "message": "Authentication successful (read-only)",
-        #             "data": {
-        #                 "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-        #                 "userId": "5"
-        #             }
-        #         },
-        #         response_only=True
-        #     )
-        # ],
+        request=LiveblocksAuthRequestSerializer,
+        responses=LIVEBLOCK_AUTH_RESPONSE_EX,
         tags=tags,
     )
     def post(self, request):

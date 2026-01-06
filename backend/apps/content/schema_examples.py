@@ -27,6 +27,7 @@ from apps.content.serializers import (
     CoverImageSerializer,
     EventSerializer,
     JobSerializer,
+    LiveblocksAuthResponseSerializer,
     ResourceSerializer,
     ReviewActionResponseSerializer,
     ReviewDetailSerializer,
@@ -1625,5 +1626,34 @@ REVIEW_DETAIL_RESPONSE_EXAMPLE = {
                 },
             )
         ],
+    ),
+}
+
+LIVEBLOCK_AUTH_RESPONSE_EX = {
+    200: OpenApiResponse(
+        response=LiveblocksAuthResponseSerializer,
+        description="Success Response",
+    ),
+    400: OpenApiResponse(
+        response=ErrorDataResponseSerializer,
+        description="Invalid Request",
+    ),
+    403: OpenApiResponse(
+        description="Permission Denied",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Access Denied",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "You do not have permission to view this review.",
+                    "code": ErrorCode.FORBIDDEN,
+                },
+            )
+        ],
+    ),
+    422: OpenApiResponse(
+        response=ErrorDataResponseSerializer,
+        description="Unprocessable Entity",
     ),
 }
