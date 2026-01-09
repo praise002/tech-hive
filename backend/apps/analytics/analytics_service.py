@@ -26,7 +26,7 @@ class AnalyticsService:
             start_date = end_date - timedelta(days=6)
             previous_start = start_date - timedelta(days=6)
         elif period == "monthly":
-            start_date = end_date - timedelta(days=30)
+            start_date = end_date - timedelta(days=29)
             previous_start = start_date - timedelta(days=29)
         else:
             start_date = end_date - timedelta(days=6)
@@ -74,8 +74,8 @@ class AnalyticsService:
         # Current period - average session duration in seconds
         current_avg = (
             UserActivity.objects.filter(
-                timestamp__gte=date_range["current_start"],
-                timestamp__lte=date_range["current_end"],
+                timestamp__date__gte=date_range["current_start"],
+                timestamp__date__lte=date_range["current_end"],
                 duration_seconds__isnull=False,
                 duration_seconds__gt=0,  # Exclude zero/invalid durations
             ).aggregate(avg_duration=Avg("duration_seconds"))["avg_duration"]
@@ -85,8 +85,8 @@ class AnalyticsService:
         # Previous period
         previous_avg = (
             UserActivity.objects.filter(
-                timestamp__gte=date_range["previous_start"],
-                timestamp__lt=date_range["previous_end"],
+                timestamp__date__gte=date_range["previous_start"],
+                timestamp__date__lt=date_range["previous_end"],
                 duration_seconds__isnull=False,
                 duration_seconds__gt=0,
             ).aggregate(avg_duration=Avg("duration_seconds"))["avg_duration"]
@@ -110,25 +110,25 @@ class AnalyticsService:
 
         # Current period
         current_total = SessionMetrics.objects.filter(
-            start_time__gte=date_range["current_start"],
-            start_time__lte=date_range["current_end"],
+            start_time__date__gte=date_range["current_start"],
+            start_time__date__lte=date_range["current_end"],
         ).count()
 
         current_bounces = SessionMetrics.objects.filter(
-            start_time__gte=date_range["current_start"],
-            start_time__lte=date_range["current_end"],
+            start_time__date__gte=date_range["current_start"],
+            start_time__date__lte=date_range["current_end"],
             is_bounce=True,
         ).count()
 
         # Previous period
         previous_total = SessionMetrics.objects.filter(
-            start_time__gte=date_range["previous_start"],
-            start_time__lt=date_range["previous_end"],
+            start_time__date__gte=date_range["previous_start"],
+            start_time__date__lt=date_range["previous_end"],
         ).count()
 
         previous_bounces = SessionMetrics.objects.filter(
-            start_time__gte=date_range["previous_start"],
-            start_time__lt=date_range["previous_end"],
+            start_time__date__gte=date_range["previous_start"],
+            start_time__date__lt=date_range["previous_end"],
             is_bounce=True,
         ).count()
 
@@ -155,8 +155,8 @@ class AnalyticsService:
         current_avg_ms = (
             UserActivity.objects.filter(
                 event_type=EventTypeChoices.PAGE_LOAD,
-                timestamp__gte=date_range["current_start"],
-                timestamp__lte=date_range["current_end"],
+                timestamp__date__gte=date_range["current_start"],
+                timestamp__date__lte=date_range["current_end"],
                 load_time_ms__isnull=False,
                 load_time_ms__gt=0,
             ).aggregate(avg_load=Avg("load_time_ms"))["avg_load"]
@@ -167,8 +167,8 @@ class AnalyticsService:
         previous_avg_ms = (
             UserActivity.objects.filter(
                 event_type="page_load",
-                timestamp__gte=date_range["previous_start"],
-                timestamp__lt=date_range["previous_end"],
+                timestamp__date__gte=date_range["previous_start"],
+                timestamp__date__lt=date_range["previous_end"],
                 load_time_ms__isnull=False,
                 load_time_ms__gt=0,
             ).aggregate(avg_load=Avg("load_time_ms"))["avg_load"]
@@ -192,8 +192,8 @@ class AnalyticsService:
 
         device_counts = (
             UserActivity.objects.filter(
-                timestamp__gte=date_range["current_start"],
-                timestamp__lte=date_range["current_end"],
+                timestamp__date__gte=date_range["current_start"],
+                timestamp__date__lte=date_range["current_end"],
             )
             .values("device_type")
             .annotate(count=Count("id"))
@@ -224,8 +224,8 @@ class AnalyticsService:
         Get daily breakdown of active users (registered vs visitors)
         """
         date_range = cls.get_date_range(period)
-        current_date = date_range["current_start"].date()
-        end_date = date_range["current_end"].date()
+        current_date = date_range["current_start"]
+        end_date = date_range["current_end"]
 
         result = []
 
@@ -282,8 +282,8 @@ class AnalyticsService:
         article_views = (
             UserActivity.objects.filter(
                 event_type=EventTypeChoices.PAGE_VIEW,
-                timestamp__gte=start_date,
-                timestamp__lte=end_date,
+                timestamp__date__gte=start_date,
+                timestamp__date__lte=end_date,
                 metadata__content_type="article",  # Filter by content type
             )
             .values("metadata__content_id")  # Group by article ID
@@ -303,8 +303,8 @@ class AnalyticsService:
                 # Count shares for this specific article
                 shares_count = UserActivity.objects.filter(
                     event_type=EventTypeChoices.SHARE,
-                    timestamp__gte=start_date,
-                    timestamp__lte=end_date,
+                    timestamp__date__gte=start_date,
+                    timestamp__date__lte=end_date,
                     metadata__content_type="article",
                     metadata__content_id=article_id,
                 ).count()
@@ -324,8 +324,8 @@ class AnalyticsService:
         job_views = (
             UserActivity.objects.filter(
                 event_type=EventTypeChoices.PAGE_VIEW,
-                timestamp__gte=start_date,
-                timestamp__lte=end_date,
+                timestamp__date__gte=start_date,
+                timestamp__date__lte=end_date,
                 metadata__content_type="job",
             )
             .values("metadata__content_id")
@@ -344,8 +344,8 @@ class AnalyticsService:
 
                 shares_count = UserActivity.objects.filter(
                     event_type=EventTypeChoices.SHARE,
-                    timestamp__gte=start_date,
-                    timestamp__lte=end_date,
+                    timestamp__date__gte=start_date,
+                    timestamp__date__lte=end_date,
                     metadata__content_type="job",
                     metadata__content_id=job_id,
                 ).count()
@@ -365,8 +365,8 @@ class AnalyticsService:
         event_views = (
             UserActivity.objects.filter(
                 event_type=EventTypeChoices.PAGE_VIEW,
-                timestamp__gte=start_date,
-                timestamp__lte=end_date,
+                timestamp__date__gte=start_date,
+                timestamp__date__lte=end_date,
                 metadata__content_type="event",
             )
             .values("metadata__content_id")
@@ -385,8 +385,8 @@ class AnalyticsService:
 
                 shares_count = UserActivity.objects.filter(
                     event_type=EventTypeChoices.SHARE,
-                    timestamp__gte=start_date,
-                    timestamp__lte=end_date,
+                    timestamp__date__gte=start_date,
+                    timestamp__date__lte=end_date,
                     metadata__content_type="event",
                     metadata__content_id=event_id,
                 ).count()
@@ -427,6 +427,3 @@ class AnalyticsService:
             "active_users": cls.get_active_users_timeline(period),
             "top_performing_posts": cls.get_top_performing_posts(period),
         }
-
-
-analytics_service = AnalyticsService()

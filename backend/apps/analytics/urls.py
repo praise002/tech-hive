@@ -8,8 +8,6 @@ from .views import (
     TrackActivityView,
 )
 
-app_name = "analytics"
-
 urlpatterns = [
     path("dashboard/", DashboardMetricsView.as_view()),
     path(

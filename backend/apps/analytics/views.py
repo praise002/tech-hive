@@ -1,6 +1,6 @@
 from datetime import datetime, time, timedelta
 
-from apps.analytics import analytics_service
+from apps.analytics.analytics_service import AnalyticsService
 from apps.analytics.choices import EventTypeChoices
 from apps.analytics.permissions import IsAuthorOrAdmin
 from apps.analytics.schema_examples import (
@@ -18,6 +18,7 @@ from apps.common.responses import CustomResponse
 from apps.content.models import Article
 from django.core.cache import cache
 from django.db.models import Avg
+from django.http import HttpResponse
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
 from rest_framework import status
@@ -95,7 +96,7 @@ class DashboardMetricsView(APIView):
                 },
             )
 
-        data = analytics_service.get_dashboard_metrics(period)
+        data = AnalyticsService.get_dashboard_metrics(period)
 
         now = timezone.now()
         midnight = datetime.combine(
@@ -287,18 +288,18 @@ class ArticlePerformanceView(APIView):
         try:
             article = Article.objects.get(id=article_id)
         except Article.DoesNotExist:
-            return NotFoundError("Article not found")
+            raise NotFoundError("Article not found")
 
         self.check_object_permissions(request, article)
 
-        date_range = analytics_service.get_date_range(period)
+        date_range = AnalyticsService.get_date_range(period)
         start_date = date_range["current_start"]
         end_date = date_range["current_end"]
 
         views_data = UserActivity.objects.filter(
             event_type=EventTypeChoices.PAGE_VIEW,
-            timestamp__gte=start_date,
-            timestamp__lte=end_date,
+            timestamp__date__gte=start_date,
+            timestamp__date__lte=end_date,
             metadata__content_type="article",
             metadata__content_id=str(article_id),
         )
@@ -308,8 +309,8 @@ class ArticlePerformanceView(APIView):
 
         total_shares = UserActivity.objects.filter(
             event_type=EventTypeChoices.SHARE,
-            timestamp__gte=start_date,
-            timestamp__lte=end_date,
+            timestamp__date__gte=start_date,
+            timestamp__date__lte=end_date,
             metadata__content_type="article",
             metadata__content_id=str(article_id),
         ).count()
@@ -376,9 +377,20 @@ class DashboardExportView(APIView):
 
     Export dashboard metrics to CSV or Excel
     """
+    # from rest_framework.renderers import JSONRenderer
 
     permission_classes = (IsAdminUser,)
     serializer_class = None
+    # renderer_classes = [JSONRenderer]
+    
+    
+    
+    # def finalize_response(self, request, response, *args, **kwargs):
+    #     # For file downloads (HttpResponse), return as-is
+    #     if isinstance(response, HttpResponse):
+    #         return response
+    #     # For DRF Response objects (errors), process normally
+    #     return super().finalize_response(request, response, *args, **kwargs)
 
     @extend_schema(
         summary="Export dashboard metrics",
@@ -410,20 +422,22 @@ class DashboardExportView(APIView):
         export_format = request.query_params.get("format", "csv").lower()
 
         if period not in ["weekly", "monthly"]:
-            return CustomResponse.error(
-                message='Invalid period. Must be "weekly" or "monthly"',
-                err_code=ErrorCode.BAD_REQUEST,
-                status_code=status.HTTP_400_BAD_REQUEST,
-            )
+            # return CustomResponse.error(
+            #     message='Invalid period. Must be "weekly" or "monthly"',
+            #     err_code=ErrorCode.BAD_REQUEST,
+            #     status_code=status.HTTP_400_BAD_REQUEST,
+            # )
+            pass
 
         if export_format not in ["csv", "excel"]:
-            return CustomResponse.error(
-                message='Invalid format. Must be "csv" or "excel"',
-                err_code=ErrorCode.BAD_REQUEST,
-                status_code=status.HTTP_400_BAD_REQUEST,
-            )
+            # return CustomResponse.error(
+            #     message='Invalid format. Must be "csv" or "excel"',
+            #     err_code=ErrorCode.BAD_REQUEST,
+            #     status_code=status.HTTP_400_BAD_REQUEST,
+            # )
+            pass
 
-        data = analytics_service.get_dashboard_metrics(period)
+        data = AnalyticsService.get_dashboard_metrics(period)
 
         if export_format == "csv":
             return analytics_exporter.export_dashboard_to_csv(data)
@@ -491,7 +505,7 @@ class ArticleAnalyticsExportView(APIView):
 
         self.check_object_permissions(request, article)
 
-        date_range = analytics_service.get_date_range(period)
+        date_range = AnalyticsService.get_date_range(period)
         start_date = date_range["current_start"]
         end_date = date_range["current_end"]
 

@@ -1,9 +1,6 @@
-"""
-Test utilities and helper functions for analytics tests
-"""
-
 from datetime import timedelta
 
+from apps.accounts.models import User
 from apps.analytics.choices import DeviceTypeChoices, EventTypeChoices
 from apps.analytics.models import SessionMetrics, UserActivity
 from apps.common.utils import TestUtil
@@ -68,6 +65,7 @@ class AnalyticsTestHelper:
             "metadata": {},
         }
         defaults.update(kwargs)
+
         return UserActivity.objects.create(**defaults)
 
     @staticmethod
@@ -87,7 +85,10 @@ class AnalyticsTestHelper:
             Article instance with analytics data
         """
         if not author:
-            author = TestUtil.verified_user()
+            try:
+                author = User.objects.get(email="testverifieduser@example.com")
+            except User.DoesNotExist:
+                author = TestUtil.verified_user()
 
         category, _ = Category.objects.get_or_create(
             name="Technology", defaults={"desc": "Tech articles"}
@@ -169,8 +170,23 @@ class AnalyticsTestHelper:
             work_mode="REMOTE",
         )
 
-        user1 = TestUtil.verified_user()
-        user2 = TestUtil.another_verified_user()
+        user1, _ = User.objects.get_or_create(
+            email="testverifieduser@example.com",
+            defaults={
+                "username": "testuser",
+                "password": "Testpassword@123",
+                "is_email_verified": True,
+            },
+        )
+
+        user2, _ = User.objects.get_or_create(
+            email="testotheruser@example.com",
+            defaults={
+                "username": "testotheruser",
+                "password": "Testpassword@123",
+                "is_email_verified": True,
+            },
+        )
 
         # Create page view activities
         for i in range(views):
@@ -233,7 +249,14 @@ class AnalyticsTestHelper:
             end_date=timezone.now() + timedelta(days=8),
         )
 
-        user = TestUtil.another_verified_user()
+        user, _ = User.objects.get_or_create(
+            email="testverifieduser@example.com",
+            defaults={
+                "username": "testuser",
+                "password": "Testpassword@123",
+                "is_email_verified": True,
+            },
+        )
 
         # Create page view activities
         for i in range(views):

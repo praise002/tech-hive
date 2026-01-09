@@ -102,7 +102,9 @@ class UserActivity(models.Model):
     duration_seconds = models.PositiveIntegerField(
         default=0, help_text="Duration of activity in seconds"
     )
-    timestamp = models.DateTimeField(auto_now_add=True)
+    # timestamp = models.DateTimeField(auto_now_add=True)
+    # using timezone.now cos in test cases it can be overided
+    timestamp = models.DateTimeField(default=timezone.now)
     metadata = models.JSONField(
         default=dict,
         blank=True,
