@@ -1,7 +1,6 @@
 import uuid
 
 from apps.analytics.choices import DeviceTypeChoices, EventTypeChoices
-from apps.common.models import BaseModel
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
@@ -12,7 +11,6 @@ User = get_user_model()
 class SessionMetrics(models.Model):
     """
     Aggregated session data for bounce rate and duration calculations
-    For bounce rate, time on page
     """
 
     id = models.UUIDField(
@@ -81,9 +79,9 @@ class UserActivity(models.Model):
     )
     event_type = models.CharField(max_length=50, choices=EventTypeChoices.choices)
     page_url = models.URLField(
-    max_length=500,
-    help_text="Full URL of the page where the activity occurred (e.g., 'https://techhive.com/articles/intro-to-react')"
-)
+        max_length=500,
+        help_text="Full URL of the page where the activity occurred (e.g., 'https://techhive.com/articles/intro-to-react')",
+    )
     referrer = models.URLField(
         max_length=500,
         null=True,
