@@ -17,6 +17,21 @@ class IsContributor(BasePermission):
         return request.user.groups.filter(name=UserRoles.CONTRIBUTOR).exists()
 
 
+class IsAuthor(BasePermission):
+    """
+    Permission that allows authors to edit their own articles and others to read only.
+    """
+
+    def has_permission(self, request, view):
+        return request.user.is_authenticated
+
+    def has_object_permission(self, request, view, obj):
+        if isinstance(obj, Article):
+            return obj.author == request.user
+
+        return False
+
+
 class IsAuthorOrReadOnly(BasePermission):
     """
     Permission that allows authors to edit their own articles and others to read only.

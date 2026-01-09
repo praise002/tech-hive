@@ -5,7 +5,6 @@ from apps.common.exceptions import NotFoundError
 from apps.common.responses import CustomResponse
 from apps.content.choices import ArticleStatusChoices
 from apps.content.models import Article
-from apps.content.permissions import IsAuthorOrReadOnly
 from apps.content.schema_examples import (
     ARTICLE_EDITOR_EXAMPLE,
     ARTICLE_EDITOR_RESPONSE_EXAMPLE,
@@ -24,6 +23,7 @@ from apps.content.serializers import (
 )
 from apps.content.utils import create_liveblocks_token, get_liveblocks_permissions
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
 from rest_framework import status
@@ -105,6 +105,16 @@ class LiveblocksAuthView(APIView):
                 err_code=ErrorCode.UNPROCESSABLE_ENTITY,
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             )
+        except ValidationError:
+            logger.warning(
+                f"Liveblocks auth failed: Invalid UUID format in room {room_id}",
+                extra={"user_id": request.user.id, "room_id": room_id},
+            )
+            return CustomResponse.error(
+                message="Invalid article ID format",
+                err_code=ErrorCode.UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
 
         user = request.user
         permission_level = get_liveblocks_permissions(user, article)
@@ -165,7 +175,7 @@ class ArticleEditorView(APIView):
     Returns article content and metadata with appropriate permissions.
     """
 
-    permission_classes = (IsAuthorOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = ArticleEditorSerializer
 
     @extend_schema(
@@ -175,8 +185,8 @@ class ArticleEditorView(APIView):
         
         **Access Rules:**
         - Draft/Changes Requested: Only author can access
-        - Submitted/Under Review/Rejected: Author (read) + Assigned Reviewer (write)
-        - Ready for Publishing: Author/Reviewer (read) + Assigned Editor (write)
+        - Submitted/Under Review/Rejected: Author (read + comment) + Assigned Reviewer (comment)
+        - Ready for Publishing: Author/Reviewer (read + comment) + Assigned Editor (write)
         - Published: Author can view (read-only), others redirected
         
         
@@ -198,7 +208,7 @@ class ArticleEditorView(APIView):
                     "author", "assigned_reviewer", "assigned_editor", "category"
                 )
                 .prefetch_related("tags")
-                .get(id=id)
+                .get(id=article_id)
             )
         except Article.DoesNotExist:
             raise NotFoundError("Article not found")
@@ -208,6 +218,15 @@ class ArticleEditorView(APIView):
         user = request.user
         permission_level = get_liveblocks_permissions(user, article)
 
+        # PUBLISHED - Special handling
+        if article.status == ArticleStatusChoices.PUBLISHED:
+            # Redirect others to public view
+            redirect_url = f"/articles/{article.author.username}/{article.slug}"
+            return CustomResponse.info(
+                message="Article is published. Redirecting to public view.",
+                data={"redirect_url": redirect_url},
+            )
+
         # NO ACCESS - Forbidden
         if permission_level == "NONE":
             return CustomResponse.error(
@@ -215,25 +234,6 @@ class ArticleEditorView(APIView):
                 err_code=ErrorCode.FORBIDDEN,
                 status_code=status.HTTP_403_FORBIDDEN,
             )
-
-        # PUBLISHED - Special handling
-        if article.status == ArticleStatusChoices.PUBLISHED:
-            # If user is the author, allow read-only access
-            if user == article.author:
-                serializer = self.serializer_class(
-                    article, context={"request": request}
-                )
-                return CustomResponse.info(
-                    message="Article is published. Read-only mode.",
-                    data=serializer.data,
-                )
-            else:
-                # Redirect others to public view
-                redirect_url = f"/articles/{article.author.username}/{article.slug}"
-                return CustomResponse.info(
-                    message="Article is published. Redirecting to public view.",
-                    data={"redirect_url": redirect_url},
-                )
 
         # Return article data (WRITE or READ access)
         serializer = self.serializer_class(article, context={"request": request})
@@ -272,8 +272,8 @@ class UserBatchView(APIView):
         user_ids = serializer.validated_data["user_ids"]
 
         try:
-            users = User.objects.filter(id__in=user_ids, is_active=True).select_related(
-                "profile"
+            users = User.objects.filter(
+                id__in=user_ids, is_active=True, is_suspended=False
             )
 
             serializer = self.serializer_class(users, many=True)
@@ -282,7 +282,8 @@ class UserBatchView(APIView):
         except Exception as e:
             logger.error(f"Error fetching users in batch: {str(e)}")
             return CustomResponse.error(
-                message="Failed to fetch users",
+                # message="Failed to fetch users",
+                message=f"Error fetching users in batch: {str(e)}",
                 err_code=ErrorCode.SERVER_ERROR,
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -304,11 +305,7 @@ class UserSearchView(APIView):
         Results are filtered based on the article's current status to ensure users
         can only mention people who have access to the article.
         
-        Access rules:
-        - Draft/Changes Requested: No comments shown (empty results)
-        - Submitted/Under Review: Author + Assigned Reviewer
-        - Ready for Publishing: Author + Assigned Reviewer + Assigned Editor
-        - Published: Empty (comments disabled)
+        
         """,
         parameters=[
             OpenApiParameter(
@@ -379,15 +376,15 @@ class UserSearchView(APIView):
             )
 
         # Search users
-        users = (
-            User.objects.filter(id__in=allowed_user_ids, is_active=True)
-            .filter(
-                Q(first_name__icontains=query)
-                | Q(last_name__icontains=query)
-                | Q(email__icontains=query)
-            )
-            .select_related("profile")[:10]
-        )  # Limit to 10 results
+        users = User.objects.filter(
+            id__in=allowed_user_ids, is_active=True, is_suspended=False
+        ).filter(
+            Q(first_name__icontains=query)
+            | Q(last_name__icontains=query)
+            | Q(email__icontains=query)
+        )[
+            :10
+        ]  # Limit to 10 results
 
         serializer = self.serializer_class(users, many=True)
         return CustomResponse.success(
@@ -409,15 +406,21 @@ class UserSearchView(APIView):
         if article.status in [
             ArticleStatusChoices.CHANGES_REQUESTED,
             ArticleStatusChoices.REJECTED,
+            ArticleStatusChoices.SUBMITTED_FOR_REVIEW,
+            ArticleStatusChoices.UNDER_REVIEW,
+            ArticleStatusChoices.READY,
         ]:
             if article.author:
                 allowed_users.append(article.author.id)
             if article.assigned_reviewer:
                 allowed_users.append(article.assigned_reviewer.id)
+            if article.assigned_editor:
+                allowed_users.append(article.assigned_editor.id)
 
         # Comments not shown in UI
         else:
             return []
 
         # Remove duplicates and None values
+        return list(set(filter(None, allowed_users)))
         return list(set(filter(None, allowed_users)))

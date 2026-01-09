@@ -4,18 +4,41 @@ from . import views
 from .feeds import LatestArticlesFeed
 
 urlpatterns = [
+    # SECTION 1: Static paths (no parameters)
     path("categories/", views.CategoryGenericView.as_view()),
+    path("tags/", views.TagGenericView.as_view()),
+    path("contribute/", views.AcceptGuidelinesView.as_view()),
     path("jobs/", views.JobListView.as_view()),
     path("events/", views.EventListView.as_view()),
     path("resources/", views.ResourceListView.as_view()),
     path("tools/", views.ToolListView.as_view()),
-    path("tags/", views.TagGenericView.as_view()),
-    path("contribute/", views.AcceptGuidelinesView.as_view()),
     path("articles/", views.ArticleListView.as_view()),
+    path(
+        "articles/feed/",
+        LatestArticlesFeed(),
+    ),
+    path(
+        "articles/rss/",
+        views.RSSFeedInfoView.as_view(),
+    ),
     path("comments/", views.CommentCreateView.as_view()),
-    path("liveblocks/auth/", views.LiveblocksAuthView.as_view()),
-    path("articles/feed/", LatestArticlesFeed()),
-    path("articles/rss/", views.RSSFeedInfoView.as_view()),
+    path(
+        "reviews/assigned/",
+        views.AssignedReviewsListView.as_view(),
+    ),
+    path(
+        "liveblocks/auth/",
+        views.LiveblocksAuthView.as_view(),
+    ),
+    path(
+        "users/search/",
+        views.UserSearchView.as_view(),
+    ),
+    path(
+        "users/batch/",
+        views.UserBatchView.as_view(),
+    ),
+    # SECTION 2: UUID-based paths (specific)
     path(
         "articles/<uuid:article_id>/summarize/",
         views.ArticleSummaryView.as_view(),
@@ -25,17 +48,16 @@ urlpatterns = [
         views.ArticleReactionView.as_view(),
     ),
     path(
-        "articles/<str:username>/<slug:slug>/",
-        views.ArticleRetrieveView.as_view(),
-        name="article_detail",
+        "articles/<uuid:article_id>/cover-image/",
+        views.ArticleCoverImageUploadView.as_view(),
+    ),
+    path(
+        "articles/<uuid:article_id>/editor/",
+        views.ArticleEditorView.as_view(),
     ),
     path(
         "articles/<uuid:article_id>/submit/",
         views.ArticleSubmitView.as_view(),
-    ),
-    path(
-        "reviews/assigned/",
-        views.AssignedReviewsListView.as_view(),
     ),
     path(
         "reviews/<uuid:pk>/",
@@ -57,7 +79,10 @@ urlpatterns = [
         "reviews/<uuid:review_id>/reject/",
         views.ReviewRejectView.as_view(),
     ),
-    path("comments/<uuid:comment_id>/replies/", views.ThreadRepliesView.as_view()),
+    path(
+        "comments/<uuid:comment_id>/replies/",
+        views.ThreadRepliesView.as_view(),
+    ),
     path(
         "comments/<uuid:comment_id>/",
         views.CommentDeleteView.as_view(),
@@ -70,15 +95,10 @@ urlpatterns = [
         "comments/<uuid:comment_id>/likes/",
         views.CommentLikeStatusView.as_view(),
     ),
-    # Liveblocks Integration
-    path("users/search/", views.UserSearchView.as_view()),
-    path("users/batch/", views.UserBatchView.as_view()),
+    # SECTION 3: Slug-based paths (LAST!)
+    # ⚠️ IMPORTANT: This MUST be last because it's a catch-all pattern
     path(
-        "articles/<uuid:article_id>/cover-image/",
-        views.ArticleCoverImageUploadView.as_view(),
-    ),
-    path(
-        "articles/<uuid:article_id>/editor/",
-        views.ArticleEditorView.as_view(),
+        "articles/<str:username>/<slug:slug>/",
+        views.ArticleRetrieveView.as_view(),
     ),
 ]
