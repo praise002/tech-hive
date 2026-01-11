@@ -102,6 +102,7 @@ class ArticleSubmitView(APIView):
         # Check for existing review (resubmission case)
         existing_review = (
             ArticleReview.objects.filter(article=article)
+            .select_related("reviewed_by", "article")
             .order_by("-created_at")
             .first()
         )

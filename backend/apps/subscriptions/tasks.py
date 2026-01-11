@@ -37,7 +37,7 @@ def retry_failed_payments(self):
             status=SubscriptionChoices.PAST_DUE,
             retry_count__lt=3,  # Max 3 retries
             payment_failed_at__isnull=False,
-        )
+        ).select_related("user", "plan")
 
         retry_schedule = {
             0: 3,  # First retry on day 3
@@ -136,7 +136,7 @@ def expire_trials():
             status=SubscriptionChoices.TRIALING,
             trial_end__lt=now - timedelta(hours=24),  # Ended >24h ago
             paystack_subscription_code__isnull=True,  # Never got Paystack code
-        )
+        ).select_related("user", "plan")
 
         expired_count = 0
         for subscription in expired_trials:
@@ -244,7 +244,7 @@ def send_upcoming_charge_reminders():
         upcoming_renewals = Subscription.objects.filter(
             status=SubscriptionChoices.ACTIVE,
             next_billing_date__date=reminder_date.date(),
-        )
+        ).select_related("user", "plan")
 
         reminders_sent = 0
         for subscription in upcoming_renewals:

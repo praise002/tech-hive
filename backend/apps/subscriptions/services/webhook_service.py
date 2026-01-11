@@ -121,6 +121,7 @@ class WebhookService:
                 Subscription.objects.filter(
                     user__email=customer_email, paystack_subscription_code__isnull=True
                 )
+                .select_related("user", "plan")
                 .order_by("-created_at")
                 .first()
             )
@@ -225,18 +226,22 @@ class WebhookService:
             subscription = None
 
             if customer_code:
-                subscription = Subscription.objects.filter(
-                    paystack_customer_code=customer_code
-                ).first()
+                subscription = (
+                    Subscription.objects.filter(paystack_customer_code=customer_code)
+                    .select_related("user", "plan")
+                    .first()
+                )
 
             if not subscription:
                 logger.warning(f"No subscription found for charge: {customer_code}")
                 return
 
             # Process as successful payment
-            has_previous_payments = subscription.payment_transactions.filter(
-                status=StatusChoices.SUCCESS
-            ).exists()
+            has_previous_payments = (
+                subscription.payment_transactions.filter(status=StatusChoices.SUCCESS)
+                .only("id")
+                .exists()
+            )
 
             if has_previous_payments:
                 # This is a RENEWAL (subscription already had successful payments)
@@ -335,9 +340,13 @@ class WebhookService:
             subscription = None
 
             if subscription_code:
-                subscription = Subscription.objects.filter(
-                    paystack_subscription_code=subscription_code
-                ).first()
+                subscription = (
+                    Subscription.objects.filter(
+                        paystack_subscription_code=subscription_code
+                    )
+                    .select_related("user", "plan")
+                    .first()
+                )
 
             if not subscription:
                 logger.warning(
@@ -345,7 +354,7 @@ class WebhookService:
                     f"(sub: {subscription_code}, email: {customer_email})"
                 )
                 return
-            
+
             if email_token and not subscription.paystack_email_token:
                 subscription.paystack_email_token = email_token
                 subscription.save(update_fields=["paystack_email_token"])
@@ -413,16 +422,23 @@ class WebhookService:
             # Find the subscription using multiple strategies
             subscription = None
             if subscription_code:
-                subscription = Subscription.objects.filter(
-                    paystack_subscription_code=subscription_code
-                ).first()
+                subscription = (
+                    Subscription.objects.filter(
+                        paystack_subscription_code=subscription_code
+                    )
+                    .select_related("user", "plan")
+                    .first()
+                )
             if not subscription and customer_code:
-                subscription = Subscription.objects.filter(
-                    paystack_customer_code=customer_code
-                ).first()
+                subscription = (
+                    Subscription.objects.filter(paystack_customer_code=customer_code)
+                    .select_related("user", "plan")
+                    .first()
+                )
             if not subscription and customer_email:
                 subscription = (
                     Subscription.objects.filter(user__email=customer_email)
+                    .select_related("user", "plan")
                     .order_by("-created_at")
                     .first()
                 )
@@ -611,9 +627,13 @@ class WebhookService:
             subscription = None
 
             if subscription_code:
-                subscription = Subscription.objects.filter(
-                    paystack_subscription_code=subscription_code
-                ).first()
+                subscription = (
+                    Subscription.objects.filter(
+                        paystack_subscription_code=subscription_code
+                    )
+                    .select_related("user", "plan")
+                    .first()
+                )
 
             if not subscription:
                 logger.warning(

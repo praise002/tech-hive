@@ -49,7 +49,7 @@ class JobListView(CustomListView):
     filterset_class = JobFilter
     search_fields = ["title"]
 
-    queryset = Job.active.all()
+    queryset = Job.active.select_related("category").all()
 
     @extend_schema(
         summary="List all jobs",
@@ -71,7 +71,7 @@ class EventListView(CustomListView):
     filterset_class = EventFilter
     search_fields = ["title"]
 
-    queryset = Event.objects.all()
+    queryset = Event.objects.select_related("category").all()
 
     @extend_schema(
         summary="List all events",
@@ -95,7 +95,7 @@ class ResourceListView(CustomListView):
 
     search_fields = ["name"]
 
-    queryset = Resource.objects.all()
+    queryset = Resource.objects.select_related("category").all()
 
     @extend_schema(
         summary="List all resources",
@@ -118,7 +118,7 @@ class ToolListView(CustomListView):
     filterset_fields = ["category"]
     search_fields = ["name"]
 
-    queryset = Tool.objects.all()
+    queryset = Tool.objects.select_related("category").prefetch_related("tags").all()
 
     @extend_schema(
         summary="List all tools",

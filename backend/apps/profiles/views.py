@@ -269,7 +269,9 @@ class AvatarUpdateView(APIView):
 
 
 class UserArticleListCreateView(ListCreateAPIView):
-    queryset = Article.objects.select_related("author").prefetch_related("tags")
+    queryset = Article.objects.select_related("author", "category").prefetch_related(
+        "tags"
+    )
 
     filter_backends = (DjangoFilterBackend,)
     filterset_class = UserArticleFilter
@@ -382,16 +384,20 @@ class ArticleRetrieveUpdateView(HeaderMixin, APIView):
         """Get object for GET requests - filtering logic"""
         try:
             # permission takes care of getting the specific user
-            obj = Article.objects.select_related("author").get(
-                slug=slug,
-                status__in=[
-                    ArticleStatusChoices.DRAFT,
-                    ArticleStatusChoices.CHANGES_REQUESTED,
-                    ArticleStatusChoices.SUBMITTED_FOR_REVIEW,
-                    ArticleStatusChoices.UNDER_REVIEW,
-                    ArticleStatusChoices.READY,
-                    ArticleStatusChoices.REJECTED,
-                ],
+            obj = (
+                Article.objects.select_related("author", "category")
+                .prefetch_related("tags")
+                .get(
+                    slug=slug,
+                    status__in=[
+                        ArticleStatusChoices.DRAFT,
+                        ArticleStatusChoices.CHANGES_REQUESTED,
+                        ArticleStatusChoices.SUBMITTED_FOR_REVIEW,
+                        ArticleStatusChoices.UNDER_REVIEW,
+                        ArticleStatusChoices.READY,
+                        ArticleStatusChoices.REJECTED,
+                    ],
+                )
             )
 
             self.check_object_permissions(self.request, obj)
@@ -402,8 +408,12 @@ class ArticleRetrieveUpdateView(HeaderMixin, APIView):
     def get_object_for_write(self, slug):
         """Get object for PATCH requests - permissions will handle edit restrictions"""
         try:
-            obj = Article.objects.select_related("author").get(
-                slug=slug,
+            obj = (
+                Article.objects.select_related("author", "category")
+                .prefetch_related("tags")
+                .get(
+                    slug=slug,
+                )
             )
             self.check_object_permissions(self.request, obj)
 
@@ -503,8 +513,10 @@ class SavedArticlesView(APIView):
 
     def get_queryset(self):
         """Filter saved articles to only return those belonging to the authenticated user."""
-        return SavedArticle.published.filter(user=self.request.user).select_related(
-            "article", "user"
+        return (
+            SavedArticle.published.filter(user=self.request.user)
+            .select_related("article__author", "article__category", "user")
+            .prefetch_related("article__tags")
         )
 
     @extend_schema(
@@ -566,7 +578,7 @@ class UserCommentsView(APIView):
         """Filter saved articles to only return those belonging to the authenticated user."""
         return Comment.objects.filter(
             user=self.request.user, is_active=True
-        ).select_related("article", "user")
+        ).select_related("article", "article__author", "user", "thread")
 
     @extend_schema(
         summary="Retrieve user's comments",
@@ -594,7 +606,7 @@ class UserCommentsGenericView(ListAPIView):
         """Filter saved articles to only return those belonging to the authenticated user."""
         return Comment.objects.filter(
             user=self.request.user, is_active=True
-        ).select_related("article", "user")
+        ).select_related("article", "article__author", "user", "thread")
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())

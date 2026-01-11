@@ -151,7 +151,7 @@ class PaymentHistoryListView(CustomListView):
         Returns all payment transactions for the currently authenticated user,
         ordered by the most recent first.
         """
-        return PaymentTransaction.objects.filter(user=self.request.user).order_by(
+        return PaymentTransaction.objects.filter(user=self.request.user).select_related("user", "subscription", "subscription__plan").order_by(
             "-initiated_at"
         )
 
@@ -365,6 +365,7 @@ class ReactivateSubscriptionView(APIView):
 
         subscription = (
             user.subscriptions.filter(status=SubscriptionChoices.CANCELLED)
+            .select_related("plan", "user")
             .order_by("-created_at")
             .first()
         )
@@ -420,7 +421,7 @@ class RetryPaymentView(APIView):
         responses=RETRY_PAYMENT_RESPONSE_EXAMPLE,
     )
     def post(self, request, *args, **kwargs):
-        subscription = Subscription.objects.past_due().first()
+        subscription = Subscription.objects.past_due().select_related("user", "plan").first()
 
         if not subscription:
             raise NotFoundError("No past due subscription found")
@@ -472,6 +473,9 @@ class UpdatePaymentMethodView(APIView):
         user = request.user
 
         subscription = Subscription.objects.get_active_subscription(user)
+        
+        if subscription:
+            subscription = Subscription.objects.filter(id=subscription.id).select_related("user", "plan").first()
 
         if not subscription:
             raise NotFoundError("No active subscription found")

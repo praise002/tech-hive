@@ -240,7 +240,11 @@ class CommentCreateSerializer(serializers.ModelSerializer):
 
         # Validate article exists and is published
         try:
-            article = Article.objects.get(id=data["article_id"])
+            article = (
+                Article.objects.select_related("author", "category")
+                .prefetch_related("tags")
+                .get(id=data["article_id"])
+            )
         except Article.DoesNotExist:
             raise serializers.ValidationError("Article not found")
 
@@ -320,7 +324,9 @@ class CommentCreateSerializer(serializers.ModelSerializer):
 
                 for username in mentions:
                     try:
-                        recipient = User.objects.get(username=username)
+                        recipient = User.objects.only(
+                            "id", "username", "mentions_disabled"
+                        ).get(username=username)
                         if self.can_be_mentioned(recipient, comment):
                             mention = CommentMention.objects.create(
                                 comment=comment, mentioned_user=recipient
@@ -1051,7 +1057,9 @@ class ReviewDetailSerializer(serializers.ModelSerializer):
     @extend_schema_field(WorkflowHistorySerializer(many=True))
     def get_workflow_history(self, obj):
         """Get recent workflow history for the article"""
-        history = obj.article.workflow_history.all()[:10]
+        history = obj.article.workflow_history.select_related(
+            "changed_by", "article"
+        ).all()[:10]
         return WorkflowHistorySerializer(history, many=True).data
 
     @extend_schema_field(serializers.CharField(allow_null=True))

@@ -282,7 +282,7 @@ class ArticlePerformanceView(APIView):
             )
 
         try:
-            article = Article.objects.get(id=article_id)
+            article = Article.objects.select_related("author", "category").prefetch_related("tags").get(id=article_id)
         except Article.DoesNotExist:
             raise NotFoundError("Article not found")
 
@@ -298,7 +298,7 @@ class ArticlePerformanceView(APIView):
             timestamp__date__lte=end_date,
             metadata__content_type="article",
             metadata__content_id=str(article_id),
-        )
+        ).select_related("session", "user")
         total_views = views_data.count()
         unique_visitors = views_data.values("session").distinct().count()
         avg_time = views_data.aggregate(avg=Avg("duration_seconds"))["avg"] or 0

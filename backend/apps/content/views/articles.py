@@ -106,7 +106,7 @@ class AcceptGuidelinesView(APIView):
 
 class ArticleListView(ListAPIView):
     # List all published article
-    queryset = Article.published.select_related("category", "author").all()
+    queryset = Article.published.select_related("category", "author").prefetch_related("tags").all()
     serializer_class = ArticleSerializer
     # serializer_class = ArticleCommentWithLikesSerializer
     filter_backends = (DjangoFilterBackend, SearchFilter)
@@ -169,10 +169,11 @@ class ArticleRetrieveView(APIView):
                 Article.published.prefetch_related(
                     Prefetch(
                         "comments",
-                        queryset=Comment.objects.filter(is_active=True),
-                    )
+                        queryset=Comment.objects.filter(is_active=True).select_related("user", "thread"),
+                    ),
+                    "tags",
                 )
-                .select_related("author")
+                .select_related("author", "category")
                 .get(author__username=kwargs["username"], slug=kwargs["slug"])
             )
 
@@ -211,7 +212,7 @@ class ThreadRepliesView(APIView):
             comment_id: UUID of the ROOT comment (not a reply)
         """
         try:
-            comment = Comment.active.select_related("thread", "user").get(
+            comment = Comment.active.select_related("thread", "user", "article").get(
                 id=comment_id,
             )
         except Comment.DoesNotExist:
@@ -229,7 +230,7 @@ class ThreadRepliesView(APIView):
                 thread=comment.thread,
             )
             .exclude(id=comment.id)  # Don't include root in replies list
-            .select_related("user")
+            .select_related("user", "article")
             .order_by("created_at")
         )  # Oldest first
 
@@ -366,7 +367,7 @@ class CommentDeleteView(APIView):
     def delete(self, request, *args, **kwargs):
         comment_id = self.kwargs.get("comment_id")
         try:
-            comment = Comment.objects.get(id=comment_id)
+            comment = Comment.objects.select_related("user", "article").get(id=comment_id)
         except Comment.DoesNotExist:
             raise NotFoundError("Comment not found.")
 
@@ -410,7 +411,7 @@ class CommentLikeToggleView(APIView):
         """
         try:
 
-            comment = Comment.active.select_related("user").get(id=comment_id)
+            comment = Comment.active.select_related("user", "article").get(id=comment_id)
 
             user_id = request.user.id
 
@@ -470,7 +471,7 @@ class CommentLikeStatusView(APIView):
         """
         try:
 
-            comment = Comment.active.get(id=comment_id)
+            comment = Comment.active.select_related("article", "user").get(id=comment_id)
 
             user_id = request.user.id if request.user.is_authenticated else None
 
@@ -553,7 +554,7 @@ class ArticleSummaryView(APIView):
         )
 
         try:
-            article = Article.objects.get(id=article_id)
+            article = Article.objects.select_related("author", "category").prefetch_related("tags").get(id=article_id)
 
             if article.status != ArticleStatusChoices.PUBLISHED:
                 return CustomResponse.error(

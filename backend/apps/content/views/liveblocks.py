@@ -275,7 +275,7 @@ class UserBatchView(APIView):
         try:
             users = User.objects.filter(
                 id__in=user_ids, is_active=True, is_suspended=False
-            )
+            ).only('id', 'first_name', 'last_name', 'avatar', 'cursor_color')
 
             serializer = self.serializer_class(users, many=True)
             return CustomResponse.success("Users fetched", serializer.data)
@@ -383,7 +383,7 @@ class UserSearchView(APIView):
             Q(first_name__icontains=query)
             | Q(last_name__icontains=query)
             | Q(email__icontains=query)
-        )[
+        ).only('id', 'first_name', 'last_name', 'avatar', 'cursor_color')[
             :10
         ]  # Limit to 10 results
 
