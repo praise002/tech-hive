@@ -1,0 +1,47 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Reminder: Your Article Awaiting Revisions{% endblock %}
+
+{% block content %}
+<h1>📝 Friendly Reminder: Your Article Needs Attention</h1>
+
+<p>Hi {{ author.first_name }},</p>
+
+<p>We wanted to check in about your article "<strong>{{ article.title }}</strong>". Your reviewer has provided feedback, and we're excited to see your revisions!</p>
+
+<div class="info-box">
+    <p style="margin: 0; font-weight: 600; color: #262a2a;">📌 Quick Reminder</p>
+    <p class="text-small" style="margin: 10px 0 0 0; color: #262a2a;">
+        Your article has been awaiting revisions for about 20 days. We know life gets busy, but we'd love to see your work move forward!
+    </p>
+</div>
+
+<h2>What's Next?</h2>
+
+<p>To continue the review process:</p>
+
+<ul style="color: #262a2a; line-height: 1.8;">
+    <li>Review the feedback from your reviewer</li>
+    <li>Make the suggested improvements</li>
+    <li>Resubmit your article when you're ready</li>
+</ul>
+
+<div style="text-align: center;">
+    <a href="{{ article_url }}" class="btn btn-primary">View Feedback & Edit Article →</a>
+</div>
+
+<div class="info-box" style="margin-top: 30px; background: #fff8e6; border: 1px solid #ffd966;">
+    <p style="margin: 0; font-size: 14px; color: #262a2a;">
+        <strong>💡 Need Help?</strong> If you're stuck or have questions about the feedback, our community is here to help. Don't hesitate to reach out!
+    </p>
+</div>
+
+<p style="margin-top: 30px; color: #889392; font-size: 14px;">
+    <strong>Note:</strong> Articles awaiting revisions for 60 days without updates will be automatically moved back to drafts. You'll still be able to access and edit them anytime from your dashboard.
+</p>
+
+<p style="margin-top: 30px;">
+    Looking forward to seeing your revised article!<br>
+    <strong>The Tech Hive Team</strong>
+</p>
+{% endblock %}

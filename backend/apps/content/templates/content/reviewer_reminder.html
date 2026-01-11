@@ -1,0 +1,43 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Reminder: Article Awaiting Your Review{% endblock %}
+
+{% block content %}
+<h1>📝 Gentle Reminder: Article Awaiting Review</h1>
+
+<p>Hi {{ reviewer.first_name }},</p>
+
+<p>Just a friendly reminder that the article "<strong>{{ article.title }}</strong>" by <strong>{{ author.full_name }}</strong> is in your review queue and awaiting your feedback.</p>
+
+<h2>Article Details</h2>
+
+<table class="details-table">
+    <tr>
+        <td>Title:</td>
+        <td>{{ article.title }}</td>
+    </tr>
+    <tr>
+        <td>Author:</td>
+        <td>{{ author.full_name }}</td>
+    </tr>
+    <tr>
+        <td>Submitted:</td>
+        <td>{{ article.created_at|date:"F d, Y" }}</td>
+    </tr>
+</table>
+
+<div class="info-box">
+    <p style="margin: 0; font-size: 14px;">
+        The author is waiting for your expert feedback to improve their work. Your review helps maintain the quality of our community content.
+    </p>
+</div>
+
+<div style="text-align: center;">
+    <a href="{{ review_url }}" class="btn btn-primary">Start Review →</a>
+</div>
+
+<p style="margin-top: 30px;">
+    Thanks for your contribution to our community!<br>
+    <strong>The Tech Hive Team</strong>
+</p>
+{% endblock %}

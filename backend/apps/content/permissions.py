@@ -2,61 +2,12 @@ from apps.accounts.utils import UserRoles
 from rest_framework import permissions
 from rest_framework.permissions import BasePermission
 
-from .models import Article, ArticleReview, ArticleStatusChoices, Category
-
-
-class CustomBasePermission(BasePermission):
-    """
-    Base permission class for Tech Hive role-based access control.
-
-    - Allows read access to everyone
-    - Restricts write operations to authenticated users with platform roles
-    - Should be inherited by specific role permission classes
-
-    Returns:
-        bool: Permission granted/denied
-    """
-
-    def has_permission(self, request, view):
-        # Allow read access to everyone for published articles
-        if request.method in permissions.SAFE_METHODS:
-            return True
-
-        # For write operations, user must be authenticated and have these roles
-        if not request.user.is_authenticated:
-            return False
-
-        return request.user.groups.filter(
-            name__in=[
-                UserRoles.CONTRIBUTOR,
-                UserRoles.REVIEWER,
-                UserRoles.EDITOR,
-                UserRoles.MANAGER,
-            ]
-        ).exists()
-
-
-class IsPublished(BasePermission):
-    def has_permission(self, request, view):
-        if not request.user.is_authenticated:
-            return False
-
-        return True
-
-    def has_object_permission(self, request, view, obj):
-        if isinstance(obj, Article):
-            return obj.status in [
-                ArticleStatusChoices.PUBLISHED,
-            ]
-
-        return False
+from .models import Article, ArticleReview
 
 
 class IsContributor(BasePermission):
     """
     Permission for Contributors:
-    - Can create, edit, and view their own drafts
-    - Can view feedback on their own articles
     """
 
     def has_permission(self, request, view):
@@ -65,128 +16,23 @@ class IsContributor(BasePermission):
 
         return request.user.groups.filter(name=UserRoles.CONTRIBUTOR).exists()
 
+
+class IsAuthor(BasePermission):
+    """
+    Permission that allows authors to edit their own articles and others to read only.
+    """
+
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and request.user.groups.filter(name=UserRoles.CONTRIBUTOR).exists()
+        )
+
     def has_object_permission(self, request, view, obj):
         if isinstance(obj, Article):
-            # Read permissions - contributors can view their own articles
-            if request.method in permissions.SAFE_METHODS:
-                return obj.author == request.user
-
-            # Contributors can only edit their own drafts
-            return obj.author == request.user and obj.status in [
-                ArticleStatusChoices.DRAFT,
-                ArticleStatusChoices.CHANGES_REQUESTED,
-                ArticleStatusChoices.REJECTED,
-            ]
+            return obj.author == request.user
 
         return False
-
-
-class IsReviewerOrReadOnly(CustomBasePermission):
-    """
-    Permission for Reviewers:
-    - Can view articles assigned for review
-    - Can change article status during review process
-    - Can create and manage article reviews
-    """
-
-    def has_object_permission(self, request, view, obj):
-        # Read permissions
-        if request.method in permissions.SAFE_METHODS:
-            if isinstance(obj, Article):
-                # Can read published articles
-                if obj.status == ArticleStatusChoices.PUBLISHED:
-                    return True
-                # Can read articles assigned for review
-                if obj.reviews.filter(
-                    reviewed_by=request.user, is_active=True
-                ).exists():
-                    return True
-
-            if isinstance(obj, ArticleReview):
-                # Can read own reviews or if they're the article author
-                return (
-                    obj.reviewed_by == request.user
-                    or obj.article.author == request.user
-                )
-
-            return True
-
-        # Write permissions
-        if isinstance(obj, Article):
-
-            # Articles assigned for review
-            if obj.reviews.filter(reviewed_by=request.user, is_active=True).exists():
-                return obj.status in [
-                    ArticleStatusChoices.SUBMITTED_FOR_REVIEW,
-                    ArticleStatusChoices.UNDER_REVIEW,
-                    ArticleStatusChoices.CHANGES_REQUESTED,
-                ]
-
-        if isinstance(obj, ArticleReview):
-            # Can modify own reviews
-            return obj.reviewed_by == request.user
-
-        return False
-
-
-class IsEditorOrReadOnly(CustomBasePermission):  # Access to admin interface
-    """
-    Permission for Editors:
-    - Can publish articles
-    - Can add tags to articles
-    - Can assign reviewers to articles
-    - Can view articles ready for publishing
-    - Can add published articles to categories
-    """
-
-    def has_object_permission(self, request, view, obj):
-        # Read permissions
-        if request.method in permissions.SAFE_METHODS:
-            if isinstance(obj, Article):
-                # Can read all articles for editorial purposes
-                return True
-
-            if isinstance(obj, ArticleReview):
-                return True
-
-            return True
-
-        # Write permissions
-        if isinstance(obj, Article):
-
-            # Can publish articles that are ready
-            # Can add tags to articles ready for publishing or published
-            if obj.status in [
-                ArticleStatusChoices.READY,
-                ArticleStatusChoices.PUBLISHED,
-            ]:
-                return True
-
-            # Can assign reviewers and manage editorial workflow
-            # Can add articles to categories (modify category field)
-            return True
-
-        if isinstance(obj, ArticleReview):
-            # Can create and manage all reviews
-            return True
-
-        if isinstance(obj, Category):
-            # Editors can manage categories for all articles
-            return True
-
-        return False
-
-
-class IsManagerOrReadOnly(CustomBasePermission):
-    """
-    Permission for Managers:
-    - Full access to user management through views (handled in views)
-    - Access to platform statistics
-    """
-
-    def has_object_permission(self, request, view, obj):
-        # Managers have full access to content management
-        return True
 
 
 class IsAuthorOrReadOnly(BasePermission):
@@ -217,18 +63,15 @@ class IsAuthorOrReadOnly(BasePermission):
 class CanSubmitForReview(BasePermission):
     """
     Permission to submit articles for review.
-    Only article authors can submit their own draft articles.
+    Only article authors can submit their own articles.
     """
 
-    def has_permission(self, request, view):
-        return request.user.is_authenticated
+    # def has_permission(self, request, view):
+    #     return request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
         if isinstance(obj, Article):
-            return obj.author == request.user and obj.status in [
-                ArticleStatusChoices.DRAFT,
-                ArticleStatusChoices.CHANGES_REQUESTED,
-            ]
+            return obj.author == request.user
         return False
 
 
@@ -242,7 +85,6 @@ class CanManageReview(BasePermission):
         if not request.user.is_authenticated:
             return False
 
-        # Must have reviewer role
         return request.user.groups.filter(name=UserRoles.REVIEWER).exists()
 
     def has_object_permission(self, request, view, obj):
@@ -257,22 +99,62 @@ class CanManageReview(BasePermission):
         return False
 
 
-class CanPublishArticle(BasePermission):
+class IsCommentAuthor(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.user == request.user
+
+
+class IsReviewer(BasePermission):
     """
-    Permission to publish articles.
-    Only editors and above can publish articles that are ready for publishing.
+    Permission to check if user has reviewer role.
+    Used for listing assigned reviews.
     """
 
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
             return False
+        return request.user.groups.filter(name=UserRoles.REVIEWER).exists()
 
-        # Must have editor role or higher
-        return request.user.groups.filter(name=UserRoles.EDITOR).exists()
+
+class CanViewReview(BasePermission):
+    """
+    Permission to view review details.
+    - Reviewer can view their own reviews (including reviewer_notes)
+    - Article author can view reviews of their articles (without reviewer_notes)
+    """
+
+    def has_permission(self, request, view):
+        return request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        if isinstance(obj, Article):
-            # Can only publish articles that are ready
-            return obj.status == ArticleStatusChoices.READY
+        if isinstance(obj, ArticleReview):
+            if obj.reviewed_by == request.user:
+                return True
+
+            if obj.article.author == request.user:
+                return True
 
         return False
+
+
+# IsReviewer
+
+# Checks if user has the Reviewer role
+# Used for: GET /api/reviews/assigned/ (listing reviews)
+# Returns True if user is in the Reviewer group
+
+
+# CanViewReview
+
+# Allows viewing review details
+# Used for: GET /api/reviews/{id}/ (review detail)
+# Reviewers: Can view their own reviews (including reviewer_notes)
+# Authors: Can view reviews of their articles (without reviewer_notes)
+
+
+# CanManageReview
+
+# Allows updating review status
+# Used for: Future endpoints like start/update review
+# Only the assigned reviewer can manage their reviews
+# Only the assigned reviewer can manage their reviews

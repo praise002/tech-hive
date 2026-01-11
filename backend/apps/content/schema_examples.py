@@ -13,19 +13,30 @@ from apps.common.serializers import (
     SuccessResponseSerializer,
 )
 from apps.content.serializers import (
+    ArticleApproveResponseSerializer,
+    ArticleEditorSerializer,
+    ArticleReactionStatusSerializer,
     ArticleSerializer,
+    ArticleSubmitResponseSerializer,
     ArticleSummaryResponseSerializer,
     CategorySerializer,
     CommentLikeSerializer,
     CommentLikeStatusSerializer,
     CommentResponseSerializer,
     ContributorOnboardingSerializer,
+    # CoverImageSerializer,
     EventSerializer,
     JobSerializer,
+    LiveblocksAuthResponseSerializer,
     ResourceSerializer,
+    ReviewActionResponseSerializer,
+    ReviewDetailSerializer,
+    ReviewListSerializer,
+    ReviewStartResponseSerializer,
     TagSerializer,
     ThreadReplySerializer,
     ToolSerializer,
+    UserMentionSerializer,
 )
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse
 
@@ -123,13 +134,6 @@ EVENT_EXAMPLE = {
     "category": "Conference",
 }
 
-EVENTS_DATA_EXAMPLE = {
-    "count": 1,
-    "next": None,
-    "previous": None,
-    "results": [EVENT_EXAMPLE],
-}
-
 RESOURCE_EXAMPLE = {
     "id": "f8e7c6b5-4a3f-4c2e-9b8f-7a6d5e4c3b2a",
     "name": "Awesome Django Tutorial",
@@ -139,12 +143,6 @@ RESOURCE_EXAMPLE = {
     "category": "Tutorial",
 }
 
-RESOURCES_DATA_EXAMPLE = {
-    "count": 1,
-    "next": None,
-    "previous": None,
-    "results": [RESOURCE_EXAMPLE],
-}
 
 TOOL_TAG_EXAMPLE = {"id": "b1d6e859-df99-4842-b1d6-e859df99bc93", "name": "AI"}
 
@@ -159,12 +157,6 @@ TOOL_EXAMPLE = {
     "category": "AI",
 }
 
-TOOLS_DATA_EXAMPLE = {
-    "count": 1,
-    "next": None,
-    "previous": None,
-    "results": [TOOL_EXAMPLE],
-}
 
 JOB_EXAMPLE = {
     "id": "2c9e2a3b-f7a8-4a9b-b3a1-d7c8e9f0a1b2",
@@ -181,12 +173,6 @@ JOB_EXAMPLE = {
     "category": "Engineering",
 }
 
-JOBS_DATA_EXAMPLE = {
-    "count": 1,
-    "next": None,
-    "previous": None,
-    "results": [JOB_EXAMPLE],
-}
 
 REPLIES_DATA_EXAMPLE = [
     {
@@ -221,6 +207,41 @@ COMMENT_CREATE_EXAMPLE = {
     "user_avatar": AVATAR_URL,
     "is_root": False,
 }
+
+REVIEW_EXAMPLE = [
+    {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "article": {
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "title": "Getting Started with Django REST Framework",
+            "status": "under_review",
+            "author": {
+                "id": "660e8400-e29b-41d4-a716-446655440001",
+                "first_name": "John",
+                "last_name": "Doe",
+                "username": "john-doe",
+                "email": "john.doe@example.com",
+                "created_at": "2025-12-15T10:00:00Z",
+                "avatar_url": AVATAR_URL,
+            },
+            "created_at": "2025-12-20T10:00:00Z",
+            "updated_at": "2025-12-28T14:30:00Z",
+            "liveblocks_room_id": "article-550e8400-e29b-41d4-a716-446655440000",
+        },
+        "reviewed_by": {
+            "id": "880e8400-e29b-41d4-a716-446655440003",
+            "first_name": "Jane",
+            "last_name": "Reviewer",
+            "username": "jane-reviewer",
+            "email": "jane.reviewer@example.com",
+            "created_at": "2025-11-10T09:00:00Z",
+            "avatar_url": "https://i.pravatar.cc/150?u=jane-reviewer",
+        },
+        "status": "in_progress",
+        "started_at": "2025-12-28T09:00:00Z",
+        "completed_at": None,
+    }
+]
 
 ACCEPT_GUIDELINES_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(
@@ -504,6 +525,7 @@ COMMENT_LIKE_TOGGLE_RESPONSE_EXAMPLE = {
             ),
         ],
     ),
+    401: UNAUTHORIZED_USER_RESPONSE,
     404: OpenApiResponse(
         description="Comment not found",
         response=ErrorResponseSerializer,
@@ -600,6 +622,7 @@ COMMENT_LIKE_STATUS_RESPONSE_EXAMPLE = {
 
 ARTICLE_REACTION_TOGGLE_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(
+        response=ArticleReactionStatusSerializer,
         description="Reaction toggled successfully. The 'action' field indicates whether the reaction was 'added' or 'removed'.",
         examples=[
             OpenApiExample(
@@ -679,6 +702,7 @@ ARTICLE_REACTION_TOGGLE_RESPONSE_EXAMPLE = {
 
 ARTICLE_REACTION_STATUS_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(
+        response=ArticleReactionStatusSerializer,
         description="Reaction status retrieved successfully. `user_reactions` will be `null` for unauthenticated users.",
         examples=[
             OpenApiExample(
@@ -845,5 +869,791 @@ ARTICLE_SUMMARY_RESPONSE_EXAMPLE = {
                 },
             ),
         ],
+    ),
+}
+
+
+USER_SEARCH_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        response=UserMentionSerializer(many=True),
+        description="Users retrieved successfully",
+        examples=[
+            OpenApiExample(
+                name="Successful search",
+                value={
+                    "status": "success",
+                    "message": "Users retrieved successfully",
+                    "data": [
+                        {
+                            "id": "550e8400-e29b-41d4-a716-446655440000",
+                            "name": "John Doe",
+                            "avatar_url": "https://example.com/avatars/john.jpg",
+                            "cursor_color": "#FF5733",
+                        },
+                        {
+                            "id": "660e8400-e29b-41d4-a716-446655440001",
+                            "name": "Jane Smith",
+                            "avatar_url": "https://example.com/avatars/jane.jpg",
+                            "cursor_color": "#3357FF",
+                        },
+                    ],
+                },
+            ),
+            OpenApiExample(
+                name="No results found",
+                value={
+                    "status": "success",
+                    "message": "No users found matching your search",
+                    "data": [],
+                },
+            ),
+            OpenApiExample(
+                name="No users available for article status",
+                value={
+                    "status": "success",
+                    "message": "No users available for mentions in this article status",
+                    "data": [],
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    404: OpenApiResponse(
+        description="Not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Not found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Not found",
+                    "error_code": "non_existent",
+                },
+            )
+        ],
+    ),
+    422: ErrorDataResponseSerializer,
+}
+
+
+USER_BATCH_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        response=UserMentionSerializer,
+        description="Users retrieved successfully",
+        examples=[
+            OpenApiExample(
+                name="Successful batch fetch",
+                value={
+                    "status": "success",
+                    "message": "Users fetched",
+                    "data": [
+                        {
+                            "id": "550e8400-e29b-41d4-a716-446655440000",
+                            "name": "John Doe",
+                            "avatar_url": "https://example.com/avatars/john.jpg",
+                            "cursor_color": "#FF6B6B",
+                        },
+                        {
+                            "id": "660e8400-e29b-41d4-a716-446655440001",
+                            "name": "Jane Smith",
+                            "avatar_url": "https://example.com/avatars/jane.jpg",
+                            "cursor_color": "#4ECDC4",
+                        },
+                    ],
+                },
+                response_only=True,
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    422: ErrorDataResponseSerializer,
+}
+
+USER_BATCH_REQUEST_EXAMPLE = [
+    OpenApiExample(
+        name="Batch request",
+        value={
+            "user_ids": [
+                "550e8400-e29b-41d4-a716-446655440000",
+                "660e8400-e29b-41d4-a716-446655440001",
+            ]
+        },
+        request_only=True,
+    ),
+]
+
+# COVER_IMAGE_RESPONSE_EXAMPLE = {
+#     200: OpenApiResponse(
+#         description="Cover image uploaded successfully",
+#         response=CoverImageSerializer,
+#         examples=[
+#             OpenApiExample(
+#                 name="Success",
+#                 value={
+#                     "status": "success",
+#                     "message": "Cover image uploaded successfully",
+#                     "data": {
+#                         "cover_image_url": "https://example.com/media/covers/article-123.jpg"
+#                     },
+#                 },
+#             )
+#         ],
+#     ),
+#     401: UNAUTHORIZED_USER_RESPONSE,
+#     403: OpenApiResponse(
+#         response=ErrorResponseSerializer,
+#         description="Permission Denied",
+#     ),
+#     422: ErrorDataResponseSerializer,
+# }
+
+
+ARTICLE_EDITOR_RESPONSE_EXAMPLE = {
+    200: ArticleEditorSerializer,
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        response=ErrorResponseSerializer,
+        description="Permission Denied",
+    ),
+    404: OpenApiResponse(
+        description="Article not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Article Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Article not found.",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+}
+
+
+ARTICLE_EDITOR_EXAMPLE = [
+    OpenApiExample(
+        name="Success - Draft Article",
+        value={
+            "status": "success",
+            "message": "Article loaded successfully",
+            "data": {
+                "id": "550e8400-e29b-41d4-a716-446655440000",
+                "category": None,
+                "title": "Getting Started with Django REST Framework",
+                "slug": "getting-started-with-django-rest-framework",
+                "content": "<p>Django REST Framework is a powerful toolkit...</p>",
+                "cover_image_url": None,
+                "status": "draft",
+                "liveblocks_room_id": "article-550e8400-e29b-41d4-a716-446655440000",
+                "user_can_edit": True,
+                "is_published": False,
+                "author": {
+                    "id": "660e8400-e29b-41d4-a716-446655440001",
+                    "name": "John Doe",
+                    "avatar_url": AVATAR_URL,
+                },
+                "assigned_reviewer": None,
+                "assigned_editor": None,
+                "tags": [],
+                "created_at": "2025-12-28T10:00:00Z",
+                "content_last_synced_at": None,
+                "updated_at": "2025-12-28T10:00:00Z",
+            },
+        },
+        response_only=True,
+    ),
+    OpenApiExample(
+        name="Success - Published Article",
+        value={
+            "status": "success",
+            "message": "Article loaded successfully",
+            "data": {
+                "id": "770e8400-e29b-41d4-a716-446655440002",
+                "category": {
+                    "id": "880e8400-e29b-41d4-a716-446655440003",
+                    "name": "Web Development",
+                    "desc": "Articles about web development, frameworks, and best practices",
+                    "slug": "web-development",
+                },
+                "title": "Advanced Django Patterns for Scalable Applications",
+                "slug": "advanced-django-patterns-for-scalable-applications",
+                "content": "<p>In this comprehensive guide, we'll explore advanced Django patterns...</p>",
+                "cover_image_url": COVER_IMAGE_URL,
+                "status": "published",
+                "liveblocks_room_id": "article-770e8400-e29b-41d4-a716-446655440002",
+                "user_can_edit": False,
+                "is_published": True,
+                "author": {
+                    "id": "660e8400-e29b-41d4-a716-446655440001",
+                    "name": "John Doe",
+                    "avatar_url": AVATAR_URL,
+                },
+                "assigned_reviewer": {
+                    "id": "990e8400-e29b-41d4-a716-446655440004",
+                    "name": "Jane Smith",
+                    "avatar_url": "https://example.com/avatars/jane.jpg",
+                },
+                "assigned_editor": {
+                    "id": "aa0e8400-e29b-41d4-a716-446655440005",
+                    "name": "Mike Wilson",
+                    "avatar_url": "https://example.com/avatars/mike.jpg",
+                },
+                "tags": [
+                    {
+                        "id": "bb0e8400-e29b-41d4-a716-446655440006",
+                        "name": "django",
+                    },
+                    {
+                        "id": "cc0e8400-e29b-41d4-a716-446655440007",
+                        "name": "python",
+                    },
+                    {
+                        "id": "dd0e8400-e29b-41d4-a716-446655440008",
+                        "name": "backend",
+                    },
+                ],
+                "created_at": "2025-12-15T09:30:00Z",
+                "content_last_synced_at": "2025-12-20T14:45:00Z",
+                "updated_at": "2025-12-20T14:45:00Z",
+            },
+        },
+        response_only=True,
+    ),
+    OpenApiExample(
+        name="Info - Published Article Redirect",
+        value={
+            "status": "info",
+            "message": "Article is published. Redirecting to public view.",
+            "data": {
+                "redirect_url": "/articles/john-doe/advanced-django-patterns-for-scalable-applications"
+            },
+        },
+        response_only=True,
+    ),
+]
+
+
+ARTICLE_SUBMIT_RESPONSE_EXAMPLE = {
+    201: OpenApiResponse(
+        description="Article submitted successfully",
+        response=ArticleSubmitResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="First Submission",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Article submitted for review successfully",
+                    "data": {
+                        "status": "submitted_for_review",
+                        "is_resubmission": False,
+                    },
+                },
+            ),
+            OpenApiExample(
+                name="Resubmission",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Article resubmitted successfully",
+                    "data": {
+                        "status": "submitted_for_review",
+                        # "assigned_reviewer": {
+                        #     "id": UUID_EXAMPLE,
+                        #     "name": "Jane Reviewer",
+                        #     "username": "jane-reviewer",
+                        #     "avatar_url": AVATAR_URL,
+                        # },
+                        # "assigned_editor": {
+                        #     "id": UUID_EXAMPLE,
+                        #     "name": "Jane Editor",
+                        #     "username": "jane-editor",
+                        #     "avatar_url": AVATAR_URL,
+                        # },
+                        "is_resubmission": True,
+                    },
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        response=ErrorResponseSerializer,
+        description="Permission Denied",
+    ),
+    404: OpenApiResponse(
+        description="Article not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Article Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Article not found",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            )
+        ],
+    ),
+    422: OpenApiResponse(
+        response=ErrorDataResponseSerializer,
+        description="Unprocessable Entity",
+    ),
+    503: OpenApiResponse(
+        description="Service unavailable",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Liveblocks Sync Failed",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Editor sync timeout. Please try again.",
+                    "code": ErrorCode.SERVICE_UNAVAILABLE,
+                },
+            ),
+            OpenApiExample(
+                name="No Reviewers Available",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "No reviewers available. Please contact support.",
+                    "code": ErrorCode.SERVICE_UNAVAILABLE,
+                },
+            ),
+        ],
+    ),
+}
+
+REVIEW_START_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Review started successfully",
+        response=ReviewStartResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Review started successfully",
+                    "data": {
+                        "review_status": "in_progress",
+                        "article_status": "under_review",
+                        "started_at": "2025-12-29T12:34:56.789Z",
+                    },
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        description="Permission Denied",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Forbidden",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "You do not have permission to perform this action.",
+                    "code": ErrorCode.FORBIDDEN,
+                },
+            ),
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Review not found",
+        response=ErrorDataResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Review Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Review not found",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+    422: OpenApiResponse(
+        response=ErrorDataResponseSerializer,
+        description="Unprocessable Entity",
+    ),
+}
+
+
+REVIEW_DETAIL_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Detailed information about a specific review.",
+        response=ReviewDetailSerializer,
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        description="Permission Denied - User is not the reviewer or author.",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Access Denied",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "You do not have permission to view this review.",
+                    "code": ErrorCode.FORBIDDEN,
+                },
+            )
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Review not found.",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Review not found",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            )
+        ],
+    ),
+}
+
+
+REVIEW_REQUEST_CHANGES_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Changes requested successfully",
+        response=ReviewActionResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Changes requested successfully. Author has been notified.",
+                    "data": {
+                        "article_status": "changes_requested",
+                        "completed_at": "2025-12-29T14:30:00.123Z",
+                    },
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        description="Permission Denied",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Not Assigned Reviewer",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "You do not have permission to perform this action.",
+                    "code": ErrorCode.FORBIDDEN,
+                },
+            ),
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Review not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Review Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Review not found",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+    422: OpenApiResponse(
+        response=ErrorDataResponseSerializer,
+        description="Unprocessable Entity",
+    ),
+}
+
+
+REVIEW_REQUEST_CHANGES_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Changes requested successfully",
+        response=ReviewActionResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Changes requested successfully. Author has been notified.",
+                    "data": {
+                        "article_status": "changes_requested",
+                        "completed_at": "2025-12-29T14:30:00.123Z",
+                    },
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        description="Permission Denied",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Not Assigned Reviewer",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "You do not have permission to perform this action.",
+                    "code": ErrorCode.FORBIDDEN,
+                },
+            ),
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Review not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Review Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Review not found",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+    422: OpenApiResponse(
+        response=ErrorDataResponseSerializer,
+        description="Unprocessable Entity",
+    ),
+}
+
+
+REVIEW_APPROVE_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Article approved successfully",
+        response=ArticleApproveResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Article approved successfully",
+                    "data": {
+                        "article_status": "ready_for_publishing",
+                        "completed_at": "2025-12-29T15:45:00.789Z",
+                    },
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        description="Permission Denied",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Not Assigned Reviewer",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "You do not have permission to perform this action.",
+                    "code": ErrorCode.FORBIDDEN,
+                },
+            ),
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Review not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Review Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Review not found",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+    422: OpenApiResponse(
+        response=ErrorDataResponseSerializer,
+        description="Unprocessable Entity",
+    ),
+}
+
+
+REVIEW_REJECT_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Article rejected successfully",
+        response=ReviewActionResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Article rejected. Author has been notified.",
+                    "data": {
+                        "article_status": "rejected",
+                        "completed_at": "2025-12-29T16:20:00.456Z",
+                    },
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        description="Permission Denied",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Not Assigned Reviewer",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "You do not have permission to perform this action.",
+                    "code": ErrorCode.FORBIDDEN,
+                },
+            ),
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Review not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Review Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Review not found",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+    422: OpenApiResponse(
+        response=ErrorDataResponseSerializer,
+        description="Unprocessable Entity",
+    ),
+}
+
+
+COMMENT_DELETE_RESPONSE_EXAMPLE = {
+    204: None,
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        description="Permission Denied - Only comment author can delete",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Not Comment Author",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "You do not have permission to perform this action.",
+                    "code": ErrorCode.FORBIDDEN,
+                },
+            ),
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Comment not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Comment Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Comment not found.",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+}
+
+ASSIGNED_REVIEWS_LIST_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="A paginated list of reviews assigned to the current user.",
+        response=ReviewListSerializer,
+        # examples=[
+        #     OpenApiExample(
+        #         name="Success Response",
+        #         # value=REVIEW_EXAMPLE,
+        #     ),
+        # ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        description="Permission Denied - Only reviewers can access",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Not a Reviewer",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "You do not have permission to perform this action.",
+                    "code": ErrorCode.FORBIDDEN,
+                },
+            ),
+        ],
+    ),
+}
+
+
+REVIEW_DETAIL_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Detailed information about a specific review.",
+        response=ReviewDetailSerializer,
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        description="Permission Denied - User is not the reviewer or author.",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Access Denied",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "You do not have permission to view this review.",
+                    "code": ErrorCode.FORBIDDEN,
+                },
+            )
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Review not found.",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Review not found",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            )
+        ],
+    ),
+}
+
+LIVEBLOCK_AUTH_RESPONSE_EX = {
+    200: OpenApiResponse(
+        response=LiveblocksAuthResponseSerializer,
+        description="Success Response",
+    ),
+    400: OpenApiResponse(
+        response=ErrorDataResponseSerializer,
+        description="Invalid Request",
+    ),
+    403: OpenApiResponse(
+        description="Permission Denied",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Access Denied",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "You do not have permission to view this review.",
+                    "code": ErrorCode.FORBIDDEN,
+                },
+            )
+        ],
+    ),
+    422: OpenApiResponse(
+        response=ErrorDataResponseSerializer,
+        description="Unprocessable Entity",
     ),
 }

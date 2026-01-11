@@ -1,19 +1,24 @@
 from apps.accounts.models import ContributorOnboarding, User
 from apps.content import models
-from apps.content.CustomRelations import CustomHyperlinkedIdentityField
+from apps.content.choices import ArticleStatusChoices
 from apps.content.models import (
     Article,
     ArticleReaction,
+    ArticleReview,
+    ArticleWorkflowHistory,
     Comment,
     CommentMention,
     CommentThread,
 )
-from apps.content.utils import ArticleStatusChoices
 from apps.notification.utils import create_notification
+from apps.profiles.serializers import UserSerializer
+from django.contrib.auth import get_user_model
 from django.db.models import F
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
+
+User = get_user_model()
 
 
 def process_tags(tag_names):
@@ -75,11 +80,11 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class ArticleSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
-    cover_image_url = serializers.SerializerMethodField(read_only=True)
-    read_time = serializers.SerializerMethodField(read_only=True)
-    author = serializers.SerializerMethodField(read_only=True)
-    total_reaction_counts = serializers.SerializerMethodField(read_only=True)
-    reaction_counts = serializers.SerializerMethodField(read_only=True)
+    cover_image_url = serializers.SerializerMethodField()
+    read_time = serializers.SerializerMethodField()
+    author = serializers.SerializerMethodField()
+    total_reaction_counts = serializers.SerializerMethodField()
+    reaction_counts = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Article
@@ -121,15 +126,18 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 
 class ArticleCreateSerializer(serializers.ModelSerializer):
-    url = CustomHyperlinkedIdentityField(
-        view_name="article_detail",
-        lookup_fields=[
-            (
-                "author.username",
-                "username",
-            ),  # Get username from article.author.username
-            ("slug", "slug"),  # Get slug from article.slug
-        ],
+    # url = CustomHyperlinkedIdentityField(
+    #     view_name="article_detail",
+    #     lookup_fields=[
+    #         (
+    #             "author.username",
+    #             "username",
+    #         ),  # Get username from article.author.username
+    #         ("slug", "slug"),  # Get slug from article.slug
+    #     ],
+    # )
+    url = serializers.HyperlinkedIdentityField(
+        view_name="article_detail", lookup_field="slug"
     )
 
     class Meta:
@@ -139,7 +147,6 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
             "content",
             "url",
         ]
-        # TODO: Editor will add it to the right category
 
     def create(self, validated_data):
         # Get the authenticated user's profile
@@ -156,14 +163,6 @@ class ArticleUpdateSerializer(serializers.ModelSerializer):
         model = models.Article
         fields = [
             "title",
-            "content",
-        ]
-
-
-class ArticleAvatarSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Article
-        fields = [
             "cover_image",
         ]
 
@@ -241,7 +240,11 @@ class CommentCreateSerializer(serializers.ModelSerializer):
 
         # Validate article exists and is published
         try:
-            article = Article.objects.get(id=data["article_id"])
+            article = (
+                Article.objects.select_related("author", "category")
+                .prefetch_related("tags")
+                .get(id=data["article_id"])
+            )
         except Article.DoesNotExist:
             raise serializers.ValidationError("Article not found")
 
@@ -274,7 +277,6 @@ class CommentCreateSerializer(serializers.ModelSerializer):
 
         return data
 
-    # TODO: replying_to logic later
     def create(self, validated_data):
         """Create root comment or reply with proper thread handling"""
 
@@ -322,7 +324,9 @@ class CommentCreateSerializer(serializers.ModelSerializer):
 
                 for username in mentions:
                     try:
-                        recipient = User.objects.get(username=username)
+                        recipient = User.objects.only(
+                            "id", "username", "mentions_disabled"
+                        ).get(username=username)
                         if self.can_be_mentioned(recipient, comment):
                             mention = CommentMention.objects.create(
                                 comment=comment, mentioned_user=recipient
@@ -383,7 +387,7 @@ class CommentResponseSerializer(serializers.ModelSerializer):
     user_username = serializers.CharField(source="user.username", read_only=True)
     user_avatar = serializers.URLField(source="user.avatar_url", read_only=True)
     thread_id = serializers.UUIDField(source="thread.id", read_only=True)
-    is_root = serializers.SerializerMethodField(read_only=True)
+    is_root = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Comment
@@ -409,7 +413,7 @@ class ArticleCommentSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source="user.full_name", read_only=True)
     user_avatar = serializers.URLField(source="user.avatar_url", read_only=True)
     user_username = serializers.CharField(source="user.username", read_only=True)
-    total_replies = serializers.SerializerMethodField(read_only=True)
+    total_replies = serializers.SerializerMethodField()
     thread_id = serializers.UUIDField(source="thread.id", read_only=True)
 
     class Meta:
@@ -432,8 +436,8 @@ class ArticleCommentSerializer(serializers.ModelSerializer):
 
 
 class ArticleDetailSerializer(ArticleSerializer):
-    comments = serializers.SerializerMethodField(read_only=True)
-    comments_count = serializers.SerializerMethodField(read_only=True)
+    comments = serializers.SerializerMethodField()
+    comments_count = serializers.SerializerMethodField()
 
     class Meta(ArticleSerializer.Meta):
         fields = ArticleSerializer.Meta.fields + ["comments", "comments_count"]
@@ -523,7 +527,7 @@ class EventSerializer(serializers.ModelSerializer):
 
 class ResourceSerializer(serializers.ModelSerializer):
     category = serializers.CharField(source="category.name", read_only=True)
-    image_url = serializers.SerializerMethodField(read_only=True)
+    image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Resource
@@ -641,13 +645,430 @@ class ArticleReactionStatusSerializer(serializers.Serializer):
     )
 
 
-# TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH
+class UserMentionSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user mention data in Liveblocks
+    Used for both search results and batch lookup
+    """
+
+    name = serializers.CharField(read_only=True, source="full_name")
+    # SerializerMethodField is read-only by default
+    avatar_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ["id", "name", "avatar_url", "cursor_color"]
+
+    @extend_schema_field(serializers.CharField)
+    def get_avatar_url(self, obj):
+        return obj.avatar_url
+
+
+class UserSearchRequestSerializer(serializers.Serializer):
+    """Validate search query parameters"""
+
+    q = serializers.CharField(
+        required=True,
+        min_length=1,
+        max_length=100,
+        help_text="Search query for user names or emails",
+    )
+    room_id = serializers.CharField(
+        required=True, help_text="Liveblocks room ID (e.g., 'article-123')"
+    )
+
+    def validate_room_id(self, value):
+        """Validate room_id format"""
+        if not value.startswith("article-"):
+            raise serializers.ValidationError(
+                "Invalid room_id format. Expected format: 'article-{id}'"
+            )
+        return value
+
+
+class UserBatchRequestSerializer(serializers.Serializer):
+    """Validate batch user lookup request"""
+
+    user_ids = serializers.ListField(
+        child=serializers.CharField(),
+        allow_empty=False,
+        max_length=50,
+        help_text="List of user IDs to fetch",
+    )
+
+
+class EditorUserSerializer(serializers.ModelSerializer):
+    """Minimal user info for editor response"""
+
+    name = serializers.CharField(source="full_name", read_only=True)
+    avatar_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ["id", "name", "avatar_url"]
+
+    @extend_schema_field(serializers.URLField)
+    def get_avatar_url(self, obj):
+        return obj.avatar_url
+
+
+class ArticleEditorSerializer(serializers.ModelSerializer):
+    """
+    Complete article data for Liveblocks editor.
+    Includes all metadata needed for the editing interface.
+    """
+
+    liveblocks_room_id = serializers.SerializerMethodField()
+    user_can_edit = serializers.SerializerMethodField()
+    is_published = serializers.SerializerMethodField()
+
+    author = EditorUserSerializer(read_only=True)
+    assigned_reviewer = EditorUserSerializer(read_only=True)
+    assigned_editor = EditorUserSerializer(read_only=True)
+
+    category = CategorySerializer(read_only=True)
+
+    tags = TagSerializer(many=True, read_only=True)
+    cover_image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.Article
+        fields = [
+            "id",
+            "category",  # will be available if it is published
+            "title",
+            "slug",
+            "content",
+            "cover_image_url",
+            "status",
+            "liveblocks_room_id",
+            "user_can_edit",
+            "is_published",
+            "author",
+            "assigned_reviewer",
+            "assigned_editor",
+            "tags",  # will be available if it is published
+            "created_at",
+            "content_last_synced_at",
+            "updated_at",
+        ]
+        read_only_fields = fields
+
+    @extend_schema_field(serializers.URLField)
+    def get_cover_image_url(self, obj):
+        return obj.cover_image_url
+
+    @extend_schema_field(serializers.CharField)
+    def get_liveblocks_room_id(self, obj):
+        """Generate Liveblocks room ID"""
+        return f"article-{obj.id}"
+
+    @extend_schema_field(serializers.BooleanField)
+    def get_user_can_edit(self, obj):
+        """Determine if current user can edit"""
+        request = self.context.get("request")
+        if not request:
+            return False
+
+        user = request.user
+        from apps.content.utils import get_liveblocks_permissions
+
+        permission_level = get_liveblocks_permissions(user, obj)
+        return permission_level == "WRITE"
+
+    @extend_schema_field(serializers.BooleanField)
+    def get_is_published(self, obj):
+        """Check if article is published"""
+        from apps.content.choices import ArticleStatusChoices
+
+        return obj.status == ArticleStatusChoices.PUBLISHED
+
+
+# class CoverImageSerializer(serializers.ModelSerializer):
+
+#     class Meta:
+#         model = models.Article
+#         fields = [
+#             "cover_image",
+#         ]
+
+
+class ReviewActionRequestSerializer(serializers.Serializer):
+    """Request body for review actions (request changes, approve, reject)"""
+
+    reviewer_notes = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=5000,
+        help_text="Private notes for reviewer's reference (not shown to author)",
+    )
+
+
+class WorkflowUserSerializer(serializers.ModelSerializer):
+    """User info for workflow responses"""
+
+    name = serializers.CharField(source="get_full_name", read_only=True)
+    avatar_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ["id", "name", "username", "avatar_url"]
+
+    @extend_schema_field(serializers.URLField)
+    def get_avatar_url(self, obj):
+        return obj.avatar_url
+
 
 # Response serializer
 class ArticleSummaryResponseSerializer(serializers.Serializer):
     """Serializer for article summary response"""
+
     article_id = serializers.UUIDField(read_only=True)
     article_title = serializers.CharField(read_only=True)
     article_slug = serializers.CharField(read_only=True)
     summary = serializers.CharField(read_only=True)
     cached = serializers.BooleanField(read_only=True)
+
+
+class ArticleSubmitResponseSerializer(serializers.Serializer):
+    """Serializer for article submission response"""
+
+    status = serializers.CharField(
+        read_only=True, help_text="Article status after submission"
+    )
+    # assigned_reviewer = serializers.SerializerMethodField(
+    #     help_text="Reviewer assigned to the article"
+    # )
+    # assigned_editor = serializers.SerializerMethodField(
+    #     help_text="Editor assigned to the article"
+    # )
+    is_resubmission = serializers.BooleanField(
+        read_only=True, help_text="Whether this is a resubmission to the same reviewer"
+    )
+
+    # @extend_schema_field(serializers.DictField)
+    # def get_assigned_reviewer(self, obj):
+    #     """Return reviewer info"""
+    #     reviewer = obj.get("assigned_reviewer")
+    #     if reviewer:
+    #         return {
+    #             "id": str(reviewer.id),
+    #             "name": reviewer.full_name,
+    #             "username": reviewer.username,
+    #             "avatar_url": reviewer.avatar_url,
+    #         }
+    #     return None
+
+    # @extend_schema_field(serializers.DictField)
+    # def get_assigned_editor(self, obj):
+    #     """Return editor info"""
+    #     editor = obj.get("assigned_editor")
+    #     if editor:
+    #         return {
+    #             "id": str(editor.id),
+    #             "name": editor.full_name,
+    #             "username": editor.username,
+    #             "avatar_url": editor.avatar_url,
+    #         }
+    #     return None
+
+
+class ReviewStartResponseSerializer(serializers.Serializer):
+    """Response for starting review"""
+
+    review_status = serializers.CharField(
+        read_only=True, help_text="Review status (e.g., 'in_progress')"
+    )
+    article_status = serializers.CharField(
+        read_only=True, help_text="Article status (e.g., 'under_review')"
+    )
+    started_at = serializers.DateTimeField(
+        read_only=True, help_text="Timestamp when review was started"
+    )
+
+
+class ReviewActionResponseSerializer(serializers.Serializer):
+    """Response for review actions (request changes, reject)"""
+
+    article_status = serializers.CharField(
+        read_only=True, help_text="Article status after action"
+    )
+    completed_at = serializers.DateTimeField(
+        read_only=True, help_text="Timestamp when review was completed"
+    )
+
+
+class ArticleApproveResponseSerializer(serializers.Serializer):
+    """Response for article approval"""
+
+    article_status = serializers.CharField(
+        read_only=True, help_text="Article status (should be 'ready_for_publishing')"
+    )
+    assigned_editor = WorkflowUserSerializer(
+        read_only=True, help_text="Editor assigned to publish the article"
+    )
+    completed_at = serializers.DateTimeField(
+        read_only=True, help_text="Timestamp when review was completed"
+    )
+
+
+class LiveblocksAuthRequestSerializer(serializers.Serializer):
+    """Validate Liveblocks authentication request"""
+
+    room_id = serializers.CharField(
+        required=True, help_text="Liveblocks room ID (e.g., 'article-123')"
+    )
+
+    def validate_room_id(self, value):
+        """Validate room format"""
+        if not value.startswith("article-"):
+            raise serializers.ValidationError(
+                "Invalid room format. Expected format: 'article-{id}'"
+            )
+        return value
+
+
+class LiveblocksAuthResponseSerializer(serializers.Serializer):
+    """Liveblocks authentication response"""
+
+    token = serializers.CharField(
+        read_only=True, help_text="JWT token for Liveblocks authentication"
+    )
+    user_id = serializers.CharField(read_only=True, help_text="User ID for Liveblocks")
+
+
+class ArticleForReviewSerializer(serializers.ModelSerializer):
+    """Nested article data for review listings"""
+
+    author = UserSerializer(read_only=True)
+    liveblocks_room_id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Article
+        fields = [
+            "id",
+            "title",
+            "status",
+            "author",
+            "created_at",
+            "updated_at",
+            "liveblocks_room_id",
+        ]
+
+    @extend_schema_field(serializers.CharField)
+    def get_liveblocks_room_id(self, obj):
+        return f"article-{obj.id}"
+
+
+class ReviewListSerializer(serializers.ModelSerializer):
+    """Serializer for listing reviews (compact view)"""
+
+    article = ArticleForReviewSerializer(read_only=True)
+    reviewed_by = UserSerializer(read_only=True)
+
+    class Meta:
+        model = ArticleReview
+        fields = [
+            "id",
+            "article",
+            "reviewed_by",
+            "status",
+            "started_at",
+            "completed_at",
+        ]
+        read_only_fields = ["id"]
+
+
+class ArticleDetailForReviewSerializer(serializers.ModelSerializer):
+    """Full article data for review detail view"""
+
+    author = UserSerializer(read_only=True)
+    assigned_reviewer = UserSerializer(read_only=True)
+    assigned_editor = UserSerializer(read_only=True)
+    liveblocks_room_id = serializers.SerializerMethodField()
+    cover_image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Article
+        fields = [
+            "id",
+            "title",
+            "content",
+            "cover_image_url",
+            "status",
+            "author",
+            "assigned_reviewer",
+            "assigned_editor",
+            "created_at",
+            "updated_at",
+            "liveblocks_room_id",
+            "content_last_synced_at",
+        ]
+
+    @extend_schema_field(serializers.CharField)
+    def get_liveblocks_room_id(self, obj):
+        return f"article-{obj.id}"
+
+    @extend_schema_field(serializers.URLField)
+    def get_cover_image_url(self, obj):
+        """Get article cover image URL"""
+        return obj.cover_image_url
+
+
+class WorkflowHistorySerializer(serializers.ModelSerializer):
+    """Serializer for workflow history entries"""
+
+    changed_by = UserSerializer(read_only=True)
+
+    class Meta:
+        model = ArticleWorkflowHistory
+        fields = [
+            "id",
+            "from_status",
+            "to_status",
+            "changed_by",
+            "changed_at",
+            "notes",
+        ]
+
+
+class ReviewDetailSerializer(serializers.ModelSerializer):
+    """Detailed view of a review with full article data and history"""
+
+    article = ArticleDetailForReviewSerializer(read_only=True)
+    reviewed_by = UserSerializer(read_only=True)
+    workflow_history = serializers.SerializerMethodField()
+    reviewer_notes = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ArticleReview
+        fields = [
+            "id",
+            "article",
+            "reviewed_by",
+            "status",
+            "started_at",
+            "completed_at",
+            "reviewer_notes",
+            "workflow_history",
+        ]
+        read_only_fields = ["id"]
+
+    @extend_schema_field(WorkflowHistorySerializer(many=True))
+    def get_workflow_history(self, obj):
+        """Get recent workflow history for the article"""
+        history = obj.article.workflow_history.select_related(
+            "changed_by", "article"
+        ).all()[:10]
+        return WorkflowHistorySerializer(history, many=True).data
+
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_reviewer_notes(self, obj):
+        """Only show reviewer_notes to the reviewer themselves"""
+        request = self.context.get("request")
+        if request and request.user == obj.reviewed_by:
+            return obj.reviewer_notes
+        return None  # Hide from article author and others
+
+
+# NOTE: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH

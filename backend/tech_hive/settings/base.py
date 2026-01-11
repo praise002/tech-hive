@@ -71,6 +71,7 @@ LOCAL_APPS = [
     "apps.content",
     "apps.notification",
     "apps.subscriptions",
+    "apps.analytics",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -177,12 +178,7 @@ CLOUDINARY_STORAGE = {
         "jpg",
         "jpeg",
         "png",
-        "gif",
         "webp",
-        "bmp",
-        "tif",
-        "tiff",
-        "ico",
     ],
 }
 
@@ -237,7 +233,8 @@ SUPERUSER_PASSWORD = config("SUPERUSER_PASSWORD")
 SPECTACULAR_SETTINGS = {
     "TITLE": "TECH HIVE API",
     "DESCRIPTION": """
-        Tech Hive API provides a comprehensive backend service for a modern content management platform.
+        Tech Hive API provides a comprehensive backend service for 
+        Tech Hive platform - powering the tech community hub with robust APIs for articles, jobs, resources, and collaboration.
         
         This RESTful API enables:
         • User authentication and profile management
@@ -254,6 +251,11 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "UPLOADED_FILES_USE_URL": False,
     "COMPONENT_SPLIT_REQUEST": True,
+    # TODO:
+    # "ENUM_NAME_OVERRIDES": {
+    #     ("content.Article.status", "ArticleStatusEnum"),
+    #     ("content.ArticleReview.status", "ArticleReviewStatusEnum"),
+    # },
 }
 
 
@@ -543,14 +545,30 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(hour=10, minute=0),  # 10:00 AM daily
     },
     # Send upcoming charge reminders daily at 9 AM
-    'upcoming-charge-reminders': {
-        'task': 'apps.subscriptions.tasks.send_upcoming_charge_reminders',
-        'schedule': crontab(hour=9, minute=0),
+    "upcoming-charge-reminders": {
+        "task": "apps.subscriptions.tasks.send_upcoming_charge_reminders",
+        "schedule": crontab(hour=9, minute=0),
     },
     # Send final grace warnings daily at 6 PM
-    'final-grace-warnings': {
-        'task': 'apps.subscriptions.tasks.send_final_grace_warnings',
-        'schedule': crontab(hour=18, minute=0),
+    "final-grace-warnings": {
+        "task": "apps.subscriptions.tasks.send_final_grace_warnings",
+        "schedule": crontab(hour=18, minute=0),
+    },
+    # Content workflow tasks
+    "process-stale-workflows": {
+        "task": "apps.content.tasks.process_stale_workflows",
+        "schedule": crontab(hour=8, minute=0),  # 8:00 AM daily
+        "options": {
+            "description": "Daily task to handle inactive articles, remind reviewers/editors, and escalate stale reviews"
+        },
+    },
+    # Cleanup expired JWT tokens daily at 3 AM
+    "cleanup-expired-tokens": {
+        "task": "apps.accounts.tasks.cleanup_expired_tokens",
+        "schedule": crontab(hour=3, minute=0, day_of_week=0),  # Sunday 3:00 AM weekly
+        "options": {
+            "description": "Remove expired outstanding and blacklisted JWT tokens from database"
+        },
     },
 }
 
@@ -562,4 +580,7 @@ GRACE_PERIOD_DAYS = 7
 RETRY_SCHEDULE = [3, 5, 7]  # Days after failure
 FINAL_GRACE_DAYS = 3
 
-
+JWT_SECRET = config("JWT_SECRET")
+JWT_ALGORITHM = config("JWT_ALGORITHM")
+LIVEBLOCKS_SECRET_KEY = config("LIVEBLOCKS_SECRET_KEY")
+LIVEBLOCKS_WEBHOOK_SECRET = config("LIVEBLOCKS_WEBHOOK_SECRET")

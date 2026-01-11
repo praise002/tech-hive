@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from apps.accounts.models import User
 from apps.accounts.utils import UserRoles
 from apps.common.utils import TestUtil
@@ -154,6 +156,7 @@ class TestProfiles(APITestCase):
         }
 
         response = self.client.post(self.article_list_url, article_data)
+
         self.assertEqual(response.status_code, 201)
 
         # Verify article was created
@@ -405,35 +408,36 @@ class TestProfiles(APITestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-        # Should NOT be able to update published article (permission denied)
+        # Should NOT be able to update published article (business logic 422)
         response = self.client.patch(
             self.article_detail_url.replace("<slug:slug>", published_article.slug),
             update_data,
         )
-        self.assertEqual(response.status_code, 403)
 
-        # Should NOT be able to update submitted for review article (permission denied)
+        self.assertEqual(response.status_code, 422)
+
+        # Should NOT be able to update submitted for review article (business logic 422)
         response = self.client.patch(
             self.article_detail_url.replace(
                 "<slug:slug>", submitted_for_review_article.slug
             ),
             update_data,
         )
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 422)
 
-        # Should NOT be able to update under review article (permission denied)
+        # Should NOT be able to update under review article (business logic 422)
         response = self.client.patch(
             self.article_detail_url.replace("<slug:slug>", under_review_article.slug),
             update_data,
         )
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 422)
 
-        # Should NOT be able to update ready article (permission denied)
+        # Should NOT be able to update ready article (business logic 422)
         response = self.client.patch(
             self.article_detail_url.replace("<slug:slug>", ready_article.slug),
             update_data,
         )
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 422)
 
         # Test: 401 for unauthenticated users
         self.client.force_authenticate(user=None)
@@ -565,6 +569,165 @@ class TestProfiles(APITestCase):
         response = self.client.post(self.saved_articles_url, {})
         self.assertEqual(response.status_code, 422)
 
+    def test_saved_article_post_with_draft(self):
+        """This test would FAIL without check_object_permissions"""
+
+        # Create a DRAFT article (not published)
+        draft_article = Article.objects.create(
+            title="Draft Article",
+            content="Draft Content",
+            author=self.user2,
+            status=ArticleStatusChoices.DRAFT,  # ❌ Not published
+        )
+
+        self.client.force_authenticate(user=self.user1)
+
+        # Try to save a draft article
+        response = self.client.post(
+            self.saved_articles_url, {"article_id": str(draft_article.id)}
+        )
+
+        self.assertEqual(response.status_code, 422)
+
+    def test_saved_article_post_with_under_review_article(self):
+        under_review_article = Article.objects.create(
+            title="Under Review",
+            content="Content",
+            author=self.user2,
+            status=ArticleStatusChoices.UNDER_REVIEW,
+        )
+
+        self.client.force_authenticate(user=self.user1)
+        response = self.client.post(
+            self.saved_articles_url, {"article_id": str(under_review_article.id)}
+        )
+
+        self.assertEqual(response.status_code, 422)
+
+    def test_saved_article_idempotency(self):
+        """Saving same article twice should toggle (save → unsave → save)"""
+        article = Article.objects.create(
+            title="Test",
+            content="Content",
+            author=self.user2,
+            status=ArticleStatusChoices.PUBLISHED,
+        )
+
+        self.client.force_authenticate(user=self.user1)
+
+        # First save - 201
+        response = self.client.post(
+            self.saved_articles_url, {"article_id": str(article.id)}
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        # Second save (unsave) - 200
+        response = self.client.post(
+            self.saved_articles_url, {"article_id": str(article.id)}
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        # Third save (save again) - 201
+        response = self.client.post(
+            self.saved_articles_url, {"article_id": str(article.id)}
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+    def test_article_list_filter_by_status(self):
+        """Should filter articles by status query parameter"""
+        contributor_group = Group.objects.get(name=UserRoles.CONTRIBUTOR)
+        self.user1.groups.add(contributor_group)
+
+        Article.objects.create(
+            title="Draft 1",
+            content="Content",
+            author=self.user1,
+            status=ArticleStatusChoices.DRAFT,
+        )
+        Article.objects.create(
+            title="Published 1",
+            content="Content",
+            author=self.user1,
+            status=ArticleStatusChoices.PUBLISHED,
+        )
+        Article.objects.create(
+            title="Rejected 1",
+            content="Content",
+            author=self.user1,
+            status=ArticleStatusChoices.REJECTED,
+        )
+
+        self.client.force_authenticate(user=self.user1)
+
+        # Test: Filter by draft status
+        response = self.client.get(f"{self.article_list_url}?status=draft")
+        self.assertEqual(response.status_code, 200)
+        articles = response.data["data"]["results"]
+        self.assertEqual(len(articles), 1)
+        self.assertEqual(articles[0]["title"], "Draft 1")
+
+        # Test: Filter by published status
+        response = self.client.get(f"{self.article_list_url}?status=published")
+        articles = response.data["data"]["results"]
+        self.assertEqual(len(articles), 1)
+
+        # Test: Invalid status returns error
+        response = self.client.get(f"{self.article_list_url}?status=invalid")
+
+        self.assertEqual(response.status_code, 422)
+
+    def test_article_list_returns_empty_for_new_user(self):
+        """New user with no articles should get empty list"""
+
+        contributor_group = Group.objects.get(name=UserRoles.CONTRIBUTOR)
+        self.user2.groups.add(contributor_group)
+
+        self.client.force_authenticate(user=self.user2)
+        response = self.client.get(self.article_list_url)
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.data["data"]["results"]), 0)
+
+    def test_article_update_with_empty_title(self):
+        """Should reject update with empty title"""
+        article = Article.objects.create(
+            title="Original Title",
+            content="Content",
+            author=self.user1,
+            status=ArticleStatusChoices.DRAFT,
+        )
+
+        contributor_group = Group.objects.get(name=UserRoles.CONTRIBUTOR)
+        self.user1.groups.add(contributor_group)
+        self.client.force_authenticate(user=self.user1)
+
+        response = self.client.patch(
+            self.article_detail_url.replace("<slug:slug>", article.slug),
+            {"title": ""},
+        )
+
+        self.assertEqual(response.status_code, 422)
+
+    @patch("apps.content.serializers.Article.objects.create")
+    def test_article_create_handles_database_error(self, mock_create):
+        """Should return 500 when database error occurs"""
+        mock_create.side_effect = Exception("Database connection failed")
+
+        contributor_group = Group.objects.get(name=UserRoles.CONTRIBUTOR)
+        self.user1.groups.add(contributor_group)
+        self.client.force_authenticate(user=self.user1)
+
+        response = self.client.post(
+            self.article_list_url, {"title": "Test", "content": "Content"}
+        )
+
+        self.assertEqual(response.status_code, 500)
+        self.assertIn("Failed to create article", response.data["message"])
+
     def test_comments_get(self):
         article1 = Article.objects.create(
             title="Article 1",
@@ -617,5 +780,22 @@ class TestProfiles(APITestCase):
         self.assertEqual(len(comments), 1)
         self.assertEqual(comments[0]["body"], "Comment by User 2")
 
+
+class TestUsernameListView(APITestCase):
+    url = "/api/v1/profiles/usernames/"
+
+    def setUp(self):
+        self.user1 = TestUtil.verified_user()
+        self.user2 = TestUtil.other_verified_user()
+
+    def test_retrieve_usernames_list(self):
+        """Should return paginated list of usernames from active comments"""
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("results", response.data["data"])
+
+
+# python manage.py test apps.profiles.tests.TestProfiles
 
 # python manage.py test apps.profiles.tests.TestProfiles

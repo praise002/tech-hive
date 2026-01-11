@@ -1,0 +1,27 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}New Activity on Article{% endblock %}
+
+{% block content %}
+<h1>💬 New Comment Activity</h1>
+
+<p>Hi {{ notified_user.first_name|default:notified_user.full_name }},</p>
+
+<p>There's new activity on the article "<strong>{{ article.title }}</strong>".</p>
+
+<div class="info-box">
+    <p style="margin: 0; font-weight: 600;">Comment Activity</p>
+    <p class="text-small" style="margin: 10px 0 0 0;">
+        Someone mentioned you or replied to a thread you're following
+    </p>
+</div>
+
+<div style="text-align: center;">
+    <a href="{{ article_url }}" class="btn btn-primary">View Comment Thread →</a>
+</div>
+
+<p style="margin-top: 30px;">
+    You are receiving this because you are participating in the discussion for this article.<br>
+    <strong>The Tech Hive Team</strong>
+</p>
+{% endblock %}

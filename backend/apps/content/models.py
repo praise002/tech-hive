@@ -1,11 +1,14 @@
+import uuid
+
 from apps.common.models import BaseModel
 from apps.common.validators import validate_file_size
+from apps.content.choices import ArticleReviewStatusChoices, ArticleStatusChoices
 from apps.content.manager import (
     ActiveManager,
     PublishedManager,
     SavedPublishedArticlesManager,
 )
-from apps.content.utils import ArticleStatusChoices, ReadabilityMetrics
+from apps.content.utils import ReadabilityMetrics
 from autoslug import AutoSlugField
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -25,7 +28,7 @@ class Tag(BaseModel):
             models.Index(fields=["name"]),
         ]
 
-    def clean(self):
+    def clean(self):  # called automatically when saving forms/admin
         if self.name:
             self.name = self.name.lower()
 
@@ -64,7 +67,7 @@ class Article(BaseModel):
     cover_image = models.ImageField(
         upload_to="articles/", null=True, blank=True, validators=[validate_file_size]
     )
-    tags = models.ManyToManyField(Tag, blank=True, related_name='articles')
+    tags = models.ManyToManyField(Tag, blank=True, related_name="articles")
     status = models.CharField(
         max_length=20,
         choices=ArticleStatusChoices.choices,
@@ -77,6 +80,27 @@ class Article(BaseModel):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="authored_articles",
+    )
+    # Workflow Assignment
+    assigned_reviewer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assigned_reviews",
+    )
+
+    assigned_editor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assigned_edits",
+    )
+
+    # Liveblocks Sync Tracking
+    content_last_synced_at = models.DateTimeField(
+        null=True, blank=True, help_text="Last time content was synced from Liveblocks"
     )
 
     objects = models.Manager()
@@ -132,9 +156,9 @@ class Article(BaseModel):
         ordering = ["-created_at"]
         indexes = [
             models.Index(fields=["-title"]),
-        ]
-        permissions = [
-            ("publish_article", "Can publish article"),
+            models.Index(fields=["assigned_reviewer", "status"]),
+            models.Index(fields=["assigned_editor", "status"]),
+            models.Index(fields=["status", "-created_at"]),
         ]
 
 
@@ -185,6 +209,7 @@ class SavedArticle(BaseModel):
 
 
 class ArticleReview(BaseModel):
+
     article = models.ForeignKey(
         Article, on_delete=models.CASCADE, related_name="reviews"
     )
@@ -193,16 +218,115 @@ class ArticleReview(BaseModel):
         related_name="article_reviews",
         on_delete=models.CASCADE,
     )
-    is_active = models.BooleanField(default=True)
-    
+
+    status = models.CharField(
+        max_length=20,
+        choices=ArticleReviewStatusChoices.choices,
+        default=ArticleReviewStatusChoices.PENDING,
+    )
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    started_at = models.DateTimeField(
+        null=True, blank=True, help_text="When reviewer started the review"
+    )
+
+    completed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When review was completed (approved/rejected/changes requested)",
+    )
+
+    reviewer_notes = models.TextField(
+        null=True, blank=True, help_text="Private notes for reviewer's reference only"
+    )
+
     objects = models.Manager()
-    active = ActiveManager()
 
     class Meta:
-        unique_together = ("article", "is_active")
+        # NOTE: NO UNIQUE CONSTRIANT
+        # unique_together = ("article", "is_active")
+        indexes = [
+            models.Index(fields=["article", "status"]),
+            models.Index(fields=["reviewed_by", "status"]),
+        ]
 
     def __str__(self):
         return f"Review of {self.article} by {self.reviewed_by}"
+
+
+# Submit Article for Review
+class ArticleWorkflowHistory(BaseModel):
+    """Audit trail for article status changes"""
+
+    article = models.ForeignKey(
+        Article, on_delete=models.CASCADE, related_name="workflow_history"
+    )
+
+    from_status = models.CharField(max_length=20, choices=ArticleStatusChoices.choices)
+
+    to_status = models.CharField(max_length=20, choices=ArticleStatusChoices.choices)
+
+    changed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="status_changes",
+    )
+
+    changed_at = models.DateTimeField(auto_now_add=True)
+
+    notes = models.TextField(
+        null=True, blank=True, help_text="Optional notes about the status change"
+    )
+
+    class Meta:
+        ordering = ["-changed_at"]
+        indexes = [
+            models.Index(fields=["article", "-changed_at"]),
+        ]
+        verbose_name_plural = "Article Workflow Histories"
+
+    def __str__(self):
+        return f"{self.article.title}: {self.from_status} → {self.to_status}"
+
+
+class LiveblocksWebhookEvent(BaseModel):
+    """Log all Liveblocks webhook events for debugging"""
+
+    event_type = models.CharField(
+        max_length=50,
+        help_text="Type of webhook event (storageUpdated, notificationEvent, etc.)",
+    )
+
+    room_id = models.CharField(
+        max_length=100, help_text="Liveblocks room ID (e.g., article-123)"
+    )
+
+    payload = models.JSONField(help_text="Full webhook payload")
+
+    processed = models.BooleanField(
+        default=False, help_text="Whether the event was successfully processed"
+    )
+
+    processed_at = models.DateTimeField(null=True, blank=True)
+
+    error_message = models.TextField(
+        null=True, blank=True, help_text="Error message if processing failed"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["room_id", "-created_at"]),
+            models.Index(fields=["processed", "-created_at"]),
+            models.Index(fields=["event_type", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.event_type} - {self.room_id} at {self.created_at}"
 
 
 class CommentThread(BaseModel):
@@ -254,7 +378,6 @@ class Comment(BaseModel):
     body = models.CharField(max_length=250)
     is_active = models.BooleanField(default=True)  # for moderation purposes
 
-    
     updated_at = models.DateTimeField(auto_now=True)
 
     objects = models.Manager()
@@ -285,18 +408,28 @@ class Comment(BaseModel):
             return self.thread.reply_count
         return 0
 
+
 class CommentMention(BaseModel):
     """Track who was mentioned in a comment"""
-    comment = models.ForeignKey(Comment, related_name='mentions', on_delete=models.CASCADE)
-    mentioned_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_mentions', on_delete=models.SET_NULL, null=True)
+
+    comment = models.ForeignKey(
+        Comment, related_name="mentions", on_delete=models.CASCADE
+    )
+    mentioned_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="received_mentions",
+        on_delete=models.SET_NULL,
+        null=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
-        unique_together = ('comment', 'mentioned_user')
+        unique_together = ("comment", "mentioned_user")
         indexes = [
-            models.Index(fields=['mentioned_user']),
+            models.Index(fields=["mentioned_user"]),
         ]
-        
+
+
 class Job(BaseModel):
     JOB_TYPE_CHOICES = [
         ("FULL_TIME", "Full-time"),
@@ -410,4 +543,5 @@ class Tool(BaseModel):
         ordering = ["-created_at"]
 
     def __str__(self):
+        return self.name
         return self.name

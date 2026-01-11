@@ -1,0 +1,38 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Article Assigned for Publishing{% endblock %}
+
+{% block content %}
+<h1>📰 New Publishing Assignment</h1>
+
+<p>Hi {{ new_editor.first_name|default:new_editor.full_name }},</p>
+
+<p>The article "<strong>{{ article.title }}</strong>" has been assigned to you for final review and publishing.</p>
+
+{% if old_editor %}
+<div class="info-box">
+    <p style="margin: 0; font-weight: 600;">Reassignment</p>
+    <p class="text-small" style="margin: 10px 0 0 0;">
+        This was previously assigned to {{ old_editor.full_name }}
+    </p>
+</div>
+{% endif %}
+
+<div class="info-box">
+    <p style="margin: 0; font-weight: 600;">Article Details</p>
+    <p class="text-small" style="margin: 10px 0 0 0;">
+        <strong>Title:</strong> {{ article.title }}<br>
+        <strong>Author:</strong> {{ article.author.full_name }}<br>
+        <strong>Reviewed by:</strong> {{ article.assigned_reviewer.full_name }}
+    </p>
+</div>
+
+<div style="text-align: center;">
+    <a href="{{ article_url }}" class="btn btn-primary">Prepare for Publishing →</a>
+</div>
+
+<p style="margin-top: 30px;">
+    Thank you for your editorial work!<br>
+    <strong>The Tech Hive Team</strong>
+</p>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Article Archived Due to Inactivity{% endblock %}
+
+{% block content %}
+<h1>📦 Article Moved to Drafts</h1>
+
+<p>Hi {{ author.first_name }},</p>
+
+<p>Your article "<strong>{{ article.title }}</strong>" has been automatically moved back to your drafts due to inactivity.</p>
+
+<div class="info-box">
+    <p style="margin: 0; font-weight: 600; color: #262a2a;">What This Means</p>
+    <p class="text-small" style="margin: 10px 0 0 0; color: #262a2a;">
+        Your article has been awaiting revisions for over 60 days without updates. To keep our review pipeline active, it has been returned to draft status.
+    </p>
+</div>
+
+<h2>Want to Continue Working on It?</h2>
+
+<p>No problem! Your article and all its content are still safe in your dashboard. You can:</p>
+
+<ul style="color: #262a2a; line-height: 1.8;">
+    <li>Access it anytime from your drafts</li>
+    <li>Make the requested revisions</li>
+    <li>Resubmit it for review when you're ready</li>
+</ul>
+
+<div style="text-align: center;">
+    <a href="{{ dashboard_url }}" class="btn btn-primary">View My Drafts →</a>
+</div>
+
+<p style="margin-top: 30px; color: #889392; font-size: 14px;">
+    <strong>Note:</strong> This is an automated process to help keep our content pipeline moving. We look forward to seeing your revised article when you're ready to resubmit!
+</p>
+
+<p style="margin-top: 30px;">
+    Best regards,<br>
+    <strong>The Tech Hive Team</strong>
+</p>
+{% endblock %}

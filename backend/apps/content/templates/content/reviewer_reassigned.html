@@ -1,0 +1,37 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Article Assigned for Review{% endblock %}
+
+{% block content %}
+<h1>📝 New Review Assignment</h1>
+
+<p>Hi {{ new_reviewer.first_name|default:new_reviewer.full_name }},</p>
+
+<p>The article "<strong>{{ article.title }}</strong>" has been assigned to you for review.</p>
+
+{% if old_reviewer %}
+<div class="info-box">
+    <p style="margin: 0; font-weight: 600;">Reassignment</p>
+    <p class="text-small" style="margin: 10px 0 0 0;">
+        This was previously assigned to {{ old_reviewer.full_name }}
+    </p>
+</div>
+{% endif %}
+
+<div class="info-box">
+    <p style="margin: 0; font-weight: 600;">Article Details</p>
+    <p class="text-small" style="margin: 10px 0 0 0;">
+        <strong>Title:</strong> {{ article.title }}<br>
+        <strong>Author:</strong> {{ article.author.full_name }}
+    </p>
+</div>
+
+<div style="text-align: center;">
+    <a href="{{ article_url }}" class="btn btn-primary">Start Review →</a>
+</div>
+
+<p style="margin-top: 30px;">
+    Thank you for your contribution!<br>
+    <strong>The Tech Hive Team</strong>
+</p>
+{% endblock %}

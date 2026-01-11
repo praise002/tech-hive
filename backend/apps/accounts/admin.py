@@ -12,8 +12,23 @@ admin.site.site_header = mark_safe(
 
 
 class UserAdmin(BaseUserAdmin):
-    list_display = ("first_name", "last_name", "is_email_verified", "created_at")
-    list_filter = list_display
+    list_display = (
+        "first_name",
+        "last_name",
+        "email",
+        "is_email_verified",
+        "is_active",
+        "is_suspended",
+        "created_at",
+    )
+    list_filter = (
+        "is_email_verified",
+        "is_active",
+        "is_suspended",
+        "is_staff",
+        "is_superuser",
+        "created_at",
+    )
     ordering = ("first_name", "last_name", "email")
     list_per_page = 10
 
@@ -33,12 +48,22 @@ class UserAdmin(BaseUserAdmin):
             },
         ),
         (
+            _("User Preferences"),
+            {
+                "fields": (
+                    "cursor_color",
+                    "mentions_disabled",
+                )
+            },
+        ),
+        (
             _("Permissions and Groups"),
             {
                 "fields": (
                     "is_email_verified",
                     "is_active",
-                    "user_active",
+                    "is_suspended",
+                    "suspension_reason",
                     "is_staff",
                     "is_superuser",
                     "groups",
@@ -53,8 +78,8 @@ class UserAdmin(BaseUserAdmin):
                     "created_at",
                     "updated_at",
                     "last_login",
-                    "is_deleted",
-                    "deleted_at",
+                    "suspended_at",
+                    "suspended_by",
                 )
             },
         ),
@@ -77,15 +102,25 @@ class UserAdmin(BaseUserAdmin):
                     "is_staff",
                     "is_superuser",
                     "is_active",
-                    "user_active",
+                    "is_suspended",
                     "avatar",
+                    "cursor_color",
+                    "mentions_disabled",
                 ),
             },
         ),
     )
 
-    readonly_fields = ("created_at", "username", "updated_at", "id", "google_id")
-    search_fields = ("first_name", "last_name", "email")
+    readonly_fields = (
+        "created_at",
+        "username",
+        "updated_at",
+        "id",
+        "google_id",
+        "suspended_at",
+        "suspended_by",
+    )
+    search_fields = ("first_name", "last_name", "email", "username")
 
 
 admin.site.register(Otp)

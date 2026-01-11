@@ -5,13 +5,16 @@ from apps.common.errors import ErrorCode
 from apps.common.exceptions import NotFoundError
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
+from apps.content.choices import ArticleStatusChoices
 from apps.content.models import Article, Comment, Tag
+from apps.content.permissions import IsCommentAuthor
 from apps.content.schema_examples import (
     ACCEPT_GUIDELINES_RESPONSE_EXAMPLE,
     ARTICLE_DETAIL_RESPONSE_EXAMPLE,
     ARTICLE_LIST_RESPONSE_EXAMPLE,
     ARTICLE_SUMMARY_RESPONSE_EXAMPLE,
     COMMENT_CREATE_RESPONSE_EXAMPLE,
+    COMMENT_DELETE_RESPONSE_EXAMPLE,
     COMMENT_LIKE_STATUS_RESPONSE_EXAMPLE,
     COMMENT_LIKE_TOGGLE_RESPONSE_EXAMPLE,
     RSS_RESPONSE_EXAMPLE,
@@ -36,13 +39,12 @@ from apps.content.throttles import (
     ArticleSummaryRegenerateThrottle,
     ArticleSummaryThrottle,
 )
-from apps.content.utils import ArticleStatusChoices
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.db import transaction
 from django.db.models import Prefetch
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
-from groq import RateLimitError
 from redis import RedisError
 from rest_framework import status
 from rest_framework.filters import SearchFilter
@@ -53,8 +55,12 @@ from rest_framework.views import APIView
 article_tags = ["Articles"]
 onboarding_tags = ["Onboarding"]
 
+
+review_tags = ["Reviews"]
+
 logger = logging.getLogger(__name__)
 security_logger = logging.getLogger("security")
+User = get_user_model()
 
 
 class AcceptGuidelinesView(APIView):
@@ -100,7 +106,7 @@ class AcceptGuidelinesView(APIView):
 
 class ArticleListView(ListAPIView):
     # List all published article
-    queryset = Article.published.select_related("category", "author").all()
+    queryset = Article.published.select_related("category", "author").prefetch_related("tags").all()
     serializer_class = ArticleSerializer
     # serializer_class = ArticleCommentWithLikesSerializer
     filter_backends = (DjangoFilterBackend, SearchFilter)
@@ -163,10 +169,11 @@ class ArticleRetrieveView(APIView):
                 Article.published.prefetch_related(
                     Prefetch(
                         "comments",
-                        queryset=Comment.objects.filter(is_active=True),
-                    )
+                        queryset=Comment.objects.filter(is_active=True).select_related("user", "thread"),
+                    ),
+                    "tags",
                 )
-                .select_related("author")
+                .select_related("author", "category")
                 .get(author__username=kwargs["username"], slug=kwargs["slug"])
             )
 
@@ -194,6 +201,7 @@ class ThreadRepliesView(APIView):
             "Only works for root comments - returns error if called on a reply."
         ),
         tags=article_tags,
+        auth=[],
         responses=THREAD_REPLIES_RESPONSE_EXAMPLE,
     )
     def get(self, request, comment_id):
@@ -204,7 +212,7 @@ class ThreadRepliesView(APIView):
             comment_id: UUID of the ROOT comment (not a reply)
         """
         try:
-            comment = Comment.active.select_related("thread", "user").get(
+            comment = Comment.active.select_related("thread", "user", "article").get(
                 id=comment_id,
             )
         except Comment.DoesNotExist:
@@ -222,7 +230,7 @@ class ThreadRepliesView(APIView):
                 thread=comment.thread,
             )
             .exclude(id=comment.id)  # Don't include root in replies list
-            .select_related("user")
+            .select_related("user", "article")
             .order_by("created_at")
         )  # Oldest first
 
@@ -348,27 +356,22 @@ class RSSFeedInfoView(APIView):
 
 
 class CommentDeleteView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsCommentAuthor)
 
     @extend_schema(
         summary="Delete a comment",
         description="Deletes a specific comment. Only the author of the comment can perform this action.",
         tags=article_tags,
-        responses={204: None},
+        responses=COMMENT_DELETE_RESPONSE_EXAMPLE,
     )
     def delete(self, request, *args, **kwargs):
         comment_id = self.kwargs.get("comment_id")
         try:
-            comment = Comment.objects.get(id=comment_id)
+            comment = Comment.objects.select_related("user", "article").get(id=comment_id)
         except Comment.DoesNotExist:
             raise NotFoundError("Comment not found.")
 
-        if comment.user != request.user:
-            return CustomResponse.error(
-                message="You do not have permission to delete this comment.",
-                status_code=status.HTTP_403_FORBIDDEN,
-                err_code=ErrorCode.FORBIDDEN,
-            )
+        self.check_object_permissions(request, comment)
 
         comment.delete()
 
@@ -408,7 +411,7 @@ class CommentLikeToggleView(APIView):
         """
         try:
 
-            comment = Comment.active.select_related("user").get(id=comment_id)
+            comment = Comment.active.select_related("user", "article").get(id=comment_id)
 
             user_id = request.user.id
 
@@ -468,7 +471,7 @@ class CommentLikeStatusView(APIView):
         """
         try:
 
-            comment = Comment.active.get(id=comment_id)
+            comment = Comment.active.select_related("article", "user").get(id=comment_id)
 
             user_id = request.user.id if request.user.is_authenticated else None
 
@@ -551,7 +554,7 @@ class ArticleSummaryView(APIView):
         )
 
         try:
-            article = Article.objects.get(id=article_id)
+            article = Article.objects.select_related("author", "category").prefetch_related("tags").get(id=article_id)
 
             if article.status != ArticleStatusChoices.PUBLISHED:
                 return CustomResponse.error(
@@ -638,3 +641,60 @@ class ArticleSummaryView(APIView):
         #         err_code=ErrorCode.SERVER_ERROR,
         #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         #     )
+
+
+# class ArticleCoverImageUploadView(APIView):
+#     """
+#     Upload or update cover image for an article.
+#     Only the author can upload cover images for their drafts.
+#     """
+
+#     permission_classes = (IsAuthorOrReadOnly,)
+#     serializer_class = CoverImageSerializer
+
+#     @extend_schema(
+#         summary="Upload article cover image",
+#         description="""
+#         Upload or update the cover image for an article.
+
+#         **Requirements:**
+#         - User must be the article author
+#         - Article must be in DRAFT, CHANGES_REQUESTED or REJECTED status
+#         - Image must be under 2MB
+#         - Supported formats: JPG, PNG, WEBP
+#         """,
+#         request={
+#             "multipart/form-data": CoverImageSerializer,
+#         },
+#         responses=COVER_IMAGE_RESPONSE_EXAMPLE,
+#         tags=article_tags,
+#     )
+#     def patch(self, request, article_id):
+#         """Upload cover image for an article"""
+#         try:
+#             article = Article.objects.get(id=article_id)
+#         except Article.DoesNotExist:
+#             raise NotFoundError("Article not found")
+
+#         self.check_object_permissions(request, article)
+
+#         # Check article status
+#         if article.status not in [
+#             ArticleStatusChoices.DRAFT,
+#             ArticleStatusChoices.CHANGES_REQUESTED,
+#             ArticleStatusChoices.REJECTED,
+#         ]:
+#             return CustomResponse.error(
+#                 message="Can only upload cover images for draft or rejected or articles with requested changes",
+#                 err_code=ErrorCode.VALIDATION_ERROR,
+#                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+#             )
+
+#         serializer = self.serializer_class(article, data=request.data, partial=True)
+#         serializer.is_valid(raise_exception=True)
+#         article = serializer.save()
+
+#         return CustomResponse.success(
+#             message="Cover image uploaded successfully",
+#             data={"cover_image_url": article.cover_image_url},
+#         )

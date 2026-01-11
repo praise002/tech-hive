@@ -1,0 +1,39 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Article Not Approved{% endblock %}
+
+{% block content %}
+<h1>Article Review Results</h1>
+
+<p>Hi {{ author.first_name|default:author.full_name }},</p>
+
+<p>Regarding your article "<strong>{{ article.title }}</strong>", we've decided not to move forward with publication at this time.</p>
+
+<div class="error-box">
+    <p style="margin: 0; font-weight: 600; color: #a32816;">Not Approved</p>
+    <p class="text-small" style="margin: 10px 0 0 0;">
+        Reviewed by: {{ reviewer.full_name }}
+    </p>
+</div>
+
+<p>This can happen for various reasons, and we encourage you to review the detailed feedback from the reviewer.</p>
+
+<div style="text-align: center;">
+    <a href="{{ article_url }}" class="btn btn-secondary">View Feedback →</a>
+</div>
+
+<div class="info-box">
+    <p style="margin: 0; font-weight: 600;">💡 What You Can Do</p>
+    <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+        <li>Review the feedback carefully</li>
+        <li>Consider a different approach or topic</li>
+        <li>Reach out to the reviewer for clarification</li>
+        <li>Submit a new article when ready</li>
+    </ul>
+</div>
+
+<p style="margin-top: 30px;">
+    Thank you for your submission and understanding.<br>
+    <strong>The Tech Hive Team</strong>
+</p>
+{% endblock %}

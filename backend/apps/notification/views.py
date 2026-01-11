@@ -20,9 +20,9 @@ class NotificationListView(ListAPIView):
     queryset = Notification.objects.none()
 
     def get_queryset(self):
-        return Notification.objects.select_related("actor", "recipient").filter(
-            recipient=self.request.user
-        )
+        return Notification.objects.select_related(
+            "actor", "recipient", "target_ct"
+        ).filter(recipient=self.request.user)
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())

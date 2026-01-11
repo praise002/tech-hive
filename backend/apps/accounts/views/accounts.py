@@ -162,21 +162,22 @@ class LoginView(TokenObtainPairView):
                     err_code=ErrorCode.FORBIDDEN,
                 )
 
-            if not user.user_active:
+            if user.is_suspended:
                 security_logger.warning(
-                    f"Login attempt on disabled account",
+                    f"Login attempt on suspended account",
                     extra={
                         "event_type": "login_attempt",
-                        "status": "blocked_disabled",
+                        "status": "blocked_suspended",
                         "email": email,
                         "user_id": user.id,
                         "client_ip": client_ip,
                         "user_agent": request.META.get("HTTP_USER_AGENT", "unknown"),
                     },
                 )
+
                 # Frontend can redirect helpful page to show how to contact support
                 return CustomResponse.error(
-                    message="Your account has been disabled. Please contact support for assistance.",
+                    message="Your account has been suspended. Please contact support for assistance.",
                     status_code=status.HTTP_403_FORBIDDEN,
                     err_code=ErrorCode.FORBIDDEN,
                 )
@@ -502,6 +503,27 @@ class PasswordResetRequestView(APIView):
 
         try:
             user = User.objects.get(email=email)
+            
+            if user.is_suspended:
+                security_logger.warning(
+                    f"Password Reset attempt on suspended account",
+                    extra={
+                        "event_type": "login_attempt",
+                        "status": "blocked_suspended",
+                        "email": email,
+                        "user_id": user.id,
+                        "client_ip": client_ip,
+                        "user_agent": request.META.get("HTTP_USER_AGENT", "unknown"),
+                    },
+                )
+
+                # Frontend can redirect helpful page to show how to contact support
+                return CustomResponse.error(
+                    message="Your account has been suspended. Please contact support for assistance.",
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    err_code=ErrorCode.FORBIDDEN,
+                )
+                
             invalidate_previous_otps(user)
             SendEmail.send_password_reset_email(request, user)
             auth_logger.info(
@@ -601,9 +623,31 @@ class PasswordResetDoneView(APIView):
 
         email = serializer.validated_data["email"]
         new_password = serializer.validated_data["new_password"]
+        client_ip = get_client_ip(request)
 
         try:
             user = User.objects.get(email=email)
+            
+            if user.is_suspended:
+                security_logger.warning(
+                    f"Password Reset Done attempt on suspended account",
+                    extra={
+                        "event_type": "login_attempt",
+                        "status": "blocked_suspended",
+                        "email": email,
+                        "user_id": user.id,
+                        "client_ip": client_ip,
+                        "user_agent": request.META.get("HTTP_USER_AGENT", "unknown"),
+                    },
+                )
+
+                # Frontend can redirect helpful page to show how to contact support
+                return CustomResponse.error(
+                    message="Your account has been suspended. Please contact support for assistance.",
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    err_code=ErrorCode.FORBIDDEN,
+                )
+                
             # Update the user's password
             user.set_password(new_password)
             user.save()

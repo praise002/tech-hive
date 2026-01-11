@@ -1,12 +1,14 @@
 import logging
 
 from apps.accounts.models import User
+from apps.common.errors import ErrorCode
 from apps.common.exceptions import NotFoundError
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
+from apps.content.filters import UserArticleFilter
 from apps.content.mixins import HeaderMixin
 from apps.content.models import Article, ArticleStatusChoices, Comment, SavedArticle
-from apps.content.permissions import IsContributor, IsPublished
+from apps.content.permissions import IsAuthor, IsContributor
 from apps.content.serializers import (
     ArticleCreateSerializer,
     ArticleSerializer,
@@ -15,7 +17,6 @@ from apps.content.serializers import (
     SaveArticleCreateSerializer,
     SavedArticleSerializer,
 )
-from apps.content.views.filters import UserArticleFilter
 from apps.profiles.schema_examples import (
     ARTICLE_CREATE_RESPONSE_EXAMPLE,
     ARTICLE_DETAIL_RESPONSE_EXAMPLE,
@@ -58,14 +59,14 @@ class UsernameListView(ListAPIView):
     pagination_class = DefaultPagination
 
     def get_queryset(self):
-        return Comment.objects.filter(is_active=True)
+        return User.objects.all().exclude(is_staff=True).values("id", "username")
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
+            serializer = self.serializer_class(page, many=True)
             paginated_data = self.get_paginated_response(serializer.data)
             return CustomResponse.success(
                 message="Usernames retrieved successfully.",
@@ -73,7 +74,7 @@ class UsernameListView(ListAPIView):
                 status_code=status.HTTP_200_OK,
             )
 
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.serializer_class(queryset, many=True)
         return CustomResponse.success(
             message="Usernames retrieved successfully.",
             data=serializer.data,
@@ -268,7 +269,9 @@ class AvatarUpdateView(APIView):
 
 
 class UserArticleListCreateView(ListCreateAPIView):
-    queryset = Article.objects.select_related("author").prefetch_related("tags")
+    queryset = Article.objects.select_related("author", "category").prefetch_related(
+        "tags"
+    )
 
     filter_backends = (DjangoFilterBackend,)
     filterset_class = UserArticleFilter
@@ -353,7 +356,16 @@ class UserArticleListCreateView(ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        # serializer.save()
+        try:
+            serializer.save()
+        except Exception as e:
+            logger.error(f"Error creating article: {str(e)}", exc_info=True)
+            return CustomResponse.error(
+                message=f"Failed to create article: {str(e)}",
+                err_code=ErrorCode.SERVER_ERROR,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         headers = self.get_success_headers(serializer.data)
 
@@ -366,22 +378,26 @@ class UserArticleListCreateView(ListCreateAPIView):
 
 
 class ArticleRetrieveUpdateView(HeaderMixin, APIView):
-    permission_classes = (IsContributor,)
+    permission_classes = (IsAuthor,)
 
     def get_object_for_read(self, slug):
         """Get object for GET requests - filtering logic"""
         try:
             # permission takes care of getting the specific user
-            obj = Article.objects.select_related("author").get(
-                slug=slug,
-                status__in=[
-                    ArticleStatusChoices.DRAFT,
-                    ArticleStatusChoices.CHANGES_REQUESTED,
-                    ArticleStatusChoices.SUBMITTED_FOR_REVIEW,
-                    ArticleStatusChoices.UNDER_REVIEW,
-                    ArticleStatusChoices.READY,
-                    ArticleStatusChoices.REJECTED,
-                ],
+            obj = (
+                Article.objects.select_related("author", "category")
+                .prefetch_related("tags")
+                .get(
+                    slug=slug,
+                    status__in=[
+                        ArticleStatusChoices.DRAFT,
+                        ArticleStatusChoices.CHANGES_REQUESTED,
+                        ArticleStatusChoices.SUBMITTED_FOR_REVIEW,
+                        ArticleStatusChoices.UNDER_REVIEW,
+                        ArticleStatusChoices.READY,
+                        ArticleStatusChoices.REJECTED,
+                    ],
+                )
             )
 
             self.check_object_permissions(self.request, obj)
@@ -392,8 +408,12 @@ class ArticleRetrieveUpdateView(HeaderMixin, APIView):
     def get_object_for_write(self, slug):
         """Get object for PATCH requests - permissions will handle edit restrictions"""
         try:
-            obj = Article.objects.select_related("author").get(
-                slug=slug,
+            obj = (
+                Article.objects.select_related("author", "category")
+                .prefetch_related("tags")
+                .get(
+                    slug=slug,
+                )
             )
             self.check_object_permissions(self.request, obj)
 
@@ -442,10 +462,25 @@ class ArticleRetrieveUpdateView(HeaderMixin, APIView):
         summary="Update article",
         description="Update an existing article using partial data. Only the article author can modify articles.",
         tags=tags,
+        request={
+            "multipart/form-data": ArticleUpdateSerializer,
+        },
         responses=ARTICLE_UPDATE_RESPONSE_EXAMPLE,
     )
     def patch(self, request, *args, **kwargs):
         article = self.get_object_for_write(slug=kwargs["slug"])
+
+        if article.status not in [
+            ArticleStatusChoices.DRAFT,
+            ArticleStatusChoices.CHANGES_REQUESTED,
+            ArticleStatusChoices.REJECTED,
+        ]:
+            return CustomResponse.error(
+                message="Can only update articles for draft or rejected or articles with requested changes",
+                err_code=ErrorCode.VALIDATION_ERROR,
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
         serializer = self.get_serializer(article, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
@@ -462,10 +497,7 @@ class ArticleRetrieveUpdateView(HeaderMixin, APIView):
 
 
 class SavedArticlesView(APIView):
-    def get_permissions(self):
-        if self.request.method == "POST":
-            return (IsPublished(),)
-        return (IsAuthenticated(),)
+    permission_classes = (IsAuthenticated,)
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -481,8 +513,10 @@ class SavedArticlesView(APIView):
 
     def get_queryset(self):
         """Filter saved articles to only return those belonging to the authenticated user."""
-        return SavedArticle.published.filter(user=self.request.user).select_related(
-            "article", "user"
+        return (
+            SavedArticle.published.filter(user=self.request.user)
+            .select_related("article__author", "article__category", "user")
+            .prefetch_related("article__tags")
         )
 
     @extend_schema(
@@ -513,6 +547,12 @@ class SavedArticlesView(APIView):
         serializer.is_valid(raise_exception=True)
 
         article = serializer.article
+        if article.status != ArticleStatusChoices.PUBLISHED:
+            return CustomResponse.error(
+                message="You can only save or unsave an article that is published.",
+                err_code=ErrorCode.UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
         # Toggle save status
         saved_article, created = SavedArticle.objects.get_or_create(
             user=request.user, article=article
@@ -537,8 +577,8 @@ class UserCommentsView(APIView):
     def get_queryset(self):
         """Filter saved articles to only return those belonging to the authenticated user."""
         return Comment.objects.filter(
-            user=self.request.user, active=True
-        ).select_related("article", "user", "replying_to")
+            user=self.request.user, is_active=True
+        ).select_related("article", "article__author", "user", "thread")
 
     @extend_schema(
         summary="Retrieve user's comments",
@@ -566,7 +606,7 @@ class UserCommentsGenericView(ListAPIView):
         """Filter saved articles to only return those belonging to the authenticated user."""
         return Comment.objects.filter(
             user=self.request.user, is_active=True
-        ).select_related("article", "user")
+        ).select_related("article", "article__author", "user", "thread")
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())

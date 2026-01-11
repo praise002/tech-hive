@@ -1,10 +1,15 @@
-from django.core.files.base import ContentFile
-from celery import shared_task
-import requests, logging, uuid
+import logging
+import uuid
 
+import requests
 from apps.accounts.models import User
-
-
+from celery import shared_task
+from django.core.files.base import ContentFile
+from django.utils import timezone
+from rest_framework_simplejwt.token_blacklist.models import (
+    BlacklistedToken,
+    OutstandingToken,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +26,7 @@ def download_and_upload_avatar(url: str, user_id: str):
     extension_map = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}
     try:
         user = User.objects.get(id=user_id)
-        
+
         response = requests.get(url)
         response.raise_for_status()
 
@@ -45,3 +50,26 @@ def download_and_upload_avatar(url: str, user_id: str):
     except requests.RequestException as e:
         logger.error(f"Error downloading image: {e}")
         return f"Error: {str(e)}"
+
+
+@shared_task
+def cleanup_expired_tokens():
+    """
+    Delete expired outstanding and blacklisted JWT tokens.
+    Runs daily via Celery Beat.
+    """
+    # Delete expired outstanding tokens
+    outstanding_deleted, _ = OutstandingToken.objects.filter(
+        expires_at__lt=timezone.now()
+    ).delete()
+
+    # Delete expired blacklisted tokens
+    blacklisted_deleted, _ = BlacklistedToken.objects.filter(
+        token__expires_at__lt=timezone.now()
+    ).delete()
+
+    logger.info(
+        f"JWT token cleanup completed: "
+        f"{outstanding_deleted} outstanding tokens deleted, "
+        f"{blacklisted_deleted} blacklisted tokens deleted"
+    )

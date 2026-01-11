@@ -51,13 +51,24 @@ class TestUtil:
         user = User.objects.create_user(**user_dict)
         return user
 
+    def random_user():
+        user_dict = {
+            "first_name": "Random",
+            "last_name": "User",
+            "email": "random@example.com",
+            "is_email_verified": True,
+            "password": "Testpassword2008@",
+        }
+        user = User.objects.create_user(**user_dict)
+        return user
+
     def disabled_user():
         user_dict = {
             "first_name": "Test",
             "last_name": "Disabled",
             "email": "testdisabled@example.com",
             "is_email_verified": True,
-            "user_active": False,
+            "is_suspended": True,
             "password": "Testpassword789#",
         }
         user = User.objects.create_user(**user_dict)

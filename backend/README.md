@@ -95,14 +95,11 @@ A scalable Django REST framework backend providing APIs for:
   - ✅ Comment system for articles
   - ✅ Notification system
 
-- [ ] **Collaboration Features**
-  - [ ] Real-time collaboration support (Liveblocks integration)
-  - [ ] Comment and suggestion system
-  - [ ] Document sharing and access control
-  - [ ] Collaboration analytics
+- ✅ **Collaboration Features**
+  - ✅ Real-time collaboration support (Liveblocks integration)
 
 - [ ] **Content Management**
-  - [ ] Editorial workflow implementation
+  - ✅ Editorial workflow implementation
   - [ ] Content moderation tools
   - [ ] Scheduled publishing system
   - [ ] Content reporting and flagging
@@ -110,58 +107,57 @@ A scalable Django REST framework backend providing APIs for:
 
 ### Phase 4: Performance & Analytics (Priority: Medium)
 
-- [ ] **Performance Optimization**
-  - [ ] Database query optimization
-  - [ ] API response caching
-  - [ ] Pagination for large datasets
-  - [ ] Database indexing strategy
-  - [ ] API rate limiting
-  - [ ] Performance monitoring setup
+- ✅ **Performance Optimization**
+  - ✅ Database query optimization
+  - ✅ API response caching
+  - ✅ Pagination for large datasets
+  - ✅ Database indexing strategy
+  - ✅ API rate limiting
+  - ✅ Performance monitoring setup
 
-- [ ] **Analytics & Insights**
-  - [ ] User engagement tracking
-  - [ ] Article reading analytics
-  - [ ] Popular content identification
-  - [ ] User behavior insights
-  - [ ] Dashboard analytics APIs
-  - [ ] Export functionality for data
+- ✅ **Analytics & Insights**
+  - ✅ User engagement tracking
+  - ✅ Article reading analytics
+  - ✅ Popular content identification
+  - ✅ User behavior insights
+  - ✅ Dashboard analytics APIs
+  - ✅ Export functionality for data
 
 - [ ] **Background Tasks**
-  - [ ] Celery task queue setup
-  - [ ] Email sending automation
-  - [ ] Image processing tasks
+  - ✅ Celery task queue setup
+  - ✅ Email sending automation
+  - ✅ Image processing tasks
   - [ ] Data cleanup and maintenance
-  - [ ] Notification delivery system
-  - [ ] Scheduled content publishing
+  - ✅ Notification delivery system
 
 ### Phase 5: Security & Scalability (Priority: High)
 
-- [ ] **Security Implementation**
-  - [ ] Input validation and sanitization
-  - [ ] SQL injection prevention
-  - [ ] XSS protection
-  - [ ] CSRF protection
-  - [ ] API security headers
-  - [ ] Secure file upload validation
-  - [ ] Rate limiting and DDoS protection
+- ✅ **Security Implementation**
+  - ✅ Input validation and sanitization
+  - ✅ SQL injection prevention
+  - ✅ XSS protection
+  - ✅ CSRF protection
+  - ✅ API security headers
+  - ✅ Secure file upload validation
+  - ✅ Rate limiting and DDoS protection
 
 - [ ] **Testing & Quality Assurance**
-  - [ ] Unit tests for all models
-  - [ ] API endpoint testing
+  - ✅ Unit tests for all models
+  - ✅ API endpoint testing
   - [ ] Integration testing
   - [ ] Performance testing
   - [ ] Security testing
   - [ ] Test coverage reporting
   - [ ] Continuous integration setup
 
-- [ ] **Deployment & DevOps**
-  - [ ] Docker containerization
-  - [ ] Docker Compose for development
-  - [ ] Production deployment configuration
-  - [ ] Database migration strategies
-  - [ ] Backup and recovery procedures
-  - [ ] Monitoring and logging setup
-  - [ ] Health check endpoints
+- ✅ **Deployment & DevOps**
+  - ✅ Docker containerization
+  - ✅ Docker Compose for development
+  - ✅ Production deployment configuration
+  - ✅ Database migration strategies
+  - ✅ Backup and recovery procedures
+  - ✅ Monitoring and logging setup
+  - ✅ Health check endpoints
 
 ## 📁 Project Structure
 
@@ -243,6 +239,7 @@ API documentation will be available at:
 - Development: `http://localhost:8000/api/docs/`
 - Swagger UI: `http://localhost:8000/api/swagger/`
 - ReDoc: `http://localhost:8000/api/redoc/`
+- Silk: `http://localhost:8000/silk/`
 
 ## 🤝 Contributing
 
@@ -295,7 +292,13 @@ API documentation will be available at:
 - [Django prometheus](https://pypi.org/project/django-prometheus/)
 - [Enhancing software quality through comprehensive testing stress tests and penetration tests](https://medium.com/@fadhilahazzah04/enhancing-software-quality-through-comprehensive-testing-stress-tests-and-penetration-tests-356a8d59e54b)
 - [Sentry](https://medium.com/@vinasllgn/monitoring-340ddb473ad9)
-- 
+- [Liveblock webhooks](https://liveblocks.io/docs/platform/webhooks)
+- [REST API Endpoints](https://liveblocks.io/docs/api-reference/rest-api-endpoints)
+- [Multi-player text editor](https://liveblocks.io/docs/ready-made-features/multiplayer/text-editor/tiptap)
+- [How to grant access to individual rooms](https://liveblocks.io/docs/guides/how-to-grant-access-to-individual-rooms-with-access-tokens)
+- [Authentication with LIveblocks: Access token](https://liveblocks.io/docs/authentication/access-token)
+- [LIveblocks node: access token example](https://liveblocks.io/docs/api-reference/liveblocks-node#access-token-example)
+- [Django docs on is_active flag](https://docs.djangoproject.com/en/6.0/ref/contrib/auth/#django.contrib.auth.models.User.is_active)
 
 ## FIXES
 - The order of silk middleware matters in development, put it first for it to work.

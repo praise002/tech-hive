@@ -1,0 +1,69 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}ESCALATION: Stale Article Ready for Publishing{% endblock %}
+
+{% block content %}
+<h1>🚨 ESCALATION: Publication Overdue</h1>
+
+<p>Hi Admin,</p>
+
+<p>An approved article has been waiting for publication for an extended period and requires immediate attention.</p>
+
+<div class="error-box">
+    <p style="margin: 0; font-weight: 600; color: #a32816;">⚠️ Critical: Publication Delayed</p>
+    <p class="text-small" style="margin: 10px 0 0 0; color: #a32816;">
+        This article has been waiting <strong>{{ days_waiting }} days</strong> since approval.
+    </p>
+</div>
+
+<h2>Article Details</h2>
+
+<table class="details-table">
+    <tr>
+        <td>Title:</td>
+        <td>{{ article.title }}</td>
+    </tr>
+    <tr>
+        <td>Assigned Editor:</td>
+        <td>{{ editor.full_name }} ({{ editor.email }})</td>
+    </tr>
+    <tr>
+        <td>Status:</td>
+        <td>{{ article.get_status_display }}</td>
+    </tr>
+    <tr>
+        <td>Approved:</td>
+        <td>{{ article.updated_at|date:"F d, Y" }}</td>
+    </tr>
+    <tr>
+        <td>Days Waiting:</td>
+        <td>{{ days_waiting }} days</td>
+    </tr>
+</table>
+
+<h2>Required Action</h2>
+
+<div class="warning-box">
+    <ol style="margin: 0; padding-left: 20px; color: #262a2a;">
+        <li style="margin-bottom: 10px;">Contact {{ editor.first_name }} to understand the delay</li>
+        <li style="margin-bottom: 10px;">Consider reassigning to another editor if necessary</li>
+        <li style="margin-bottom: 10px;">Ensure the article is published promptly</li>
+        <li style="margin-bottom: 0;">Notify the author of the status</li>
+    </ol>
+</div>
+
+<div style="text-align: center;">
+    <a href="{{ admin_dashboard_url }}" class="btn btn-primary">Take Action in Admin Dashboard →</a>
+</div>
+
+<div class="info-box" style="margin-top: 30px;">
+    <p style="margin: 0; font-size: 14px;">
+        <strong>Impact:</strong> Extended publication delays can negatively affect author satisfaction and may discourage future contributions to the platform.
+    </p>
+</div>
+
+<p style="margin-top: 30px;">
+    This is an automated escalation from the Tech Hive content management system.<br>
+    <strong>Tech Hive System</strong>
+</p>
+{% endblock %}

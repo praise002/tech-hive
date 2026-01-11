@@ -12,8 +12,8 @@ if [ "$SERVICE_TYPE" = "web" ]; then
   python manage.py migrate --noinput
   
   echo "Creating sample data..."
-  # python manage.py loaddata fixtures/shop.json
-  # python manage.py initd
+  python manage.py loaddata fixtures/content.json
+  python manage.py initd
 
   # Collect static files
   echo "Collecting static files..."

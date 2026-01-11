@@ -29,6 +29,7 @@ class ErrorCode:
 
     # Processing
     BAD_REQUEST = "bad_request"
+    UNPROCESSABLE_ENTITY = "unprocessable_entity"
     SERVER_ERROR = "server_error"
     SERVICE_UNAVAILABLE = "service_unavailable"
     OPERATION_FAILED = "operation_failed"

@@ -3,6 +3,7 @@ import logging
 from apps.common.errors import ErrorCode
 from apps.common.exceptions import NotFoundError
 from apps.common.responses import CustomResponse
+from apps.content.choices import ArticleStatusChoices
 from apps.content.models import Article, ArticleReaction
 from apps.content.schema_examples import (
     ARTICLE_REACTION_STATUS_RESPONSE_EXAMPLE,
@@ -12,7 +13,6 @@ from apps.content.serializers import (
     ArticleReactionStatusSerializer,
     ArticleReactionToggleSerializer,
 )
-from apps.content.utils import ArticleStatusChoices
 from apps.notification.utils import create_notification
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -38,7 +38,7 @@ class ArticleReactionView(APIView):
         """
         serializer_class = self.get_serializer_class()
         return serializer_class(*args, **kwargs)
-    
+
     @extend_schema(
         summary="Get reaction status for an article",
         description="Retrieve the reaction statistics for a published article, including the count for each emoji type and the total reaction count. If the user is authenticated, it also returns which reactions the user has added.",
@@ -59,7 +59,11 @@ class ArticleReactionView(APIView):
         """
         try:
 
-            article = Article.published.get(id=article_id)
+            article = (
+                Article.published.select_related("author", "category")
+                .prefetch_related("tags", "reactions")
+                .get(id=article_id)
+            )
 
             reaction_counts = article.reaction_counts
             total_reactions = article.total_reaction_counts
@@ -120,7 +124,9 @@ class ArticleReactionView(APIView):
             serializer.is_valid(raise_exception=True)
             reaction_type = serializer.validated_data["reaction_type"]
 
-            article = Article.objects.select_related("author").get(id=article_id)
+            article = Article.objects.select_related("author", "category").get(
+                id=article_id
+            )
 
             if article.status != ArticleStatusChoices.PUBLISHED:
                 return CustomResponse.error(

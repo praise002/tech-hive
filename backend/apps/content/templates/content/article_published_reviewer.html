@@ -1,0 +1,27 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Article You Reviewed is Published{% endblock %}
+
+{% block content %}
+<h1>📰 Article Published</h1>
+
+<p>Hi {{ reviewer.first_name|default:reviewer.full_name }},</p>
+
+<p>Great news! The article you reviewed, "<strong>{{ article.title }}</strong>" by {{ article.author.full_name }}, has been published.</p>
+
+<div class="success-box">
+    <p style="margin: 0; font-weight: 600; color: #2ea316;">✓ Now Live</p>
+    <p class="text-small" style="margin: 10px 0 0 0;">
+        Your feedback helped make this article great
+    </p>
+</div>
+
+<div style="text-align: center;">
+    <a href="{{ published_url }}" class="btn btn-primary">View Published Article →</a>
+</div>
+
+<p style="margin-top: 30px;">
+    Thank you for your diligent review work!<br>
+    <strong>The Tech Hive Team</strong>
+</p>
+{% endblock %}

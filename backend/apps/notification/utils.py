@@ -9,9 +9,9 @@ def create_notification(recipient, verb, target=None, actor=None):
     # check for any similar notification made in the last minute
     now = timezone.now()
     last_minute = now - datetime.timedelta(seconds=60)
-    similar_notification = Notification.objects.filter(
-        actor=actor, recipient=recipient, verb=verb, created__gte=last_minute
-    )
+    similar_notification = Notification.objects.select_related(
+        "actor", "recipient", "target_ct"
+    ).filter(actor=actor, recipient=recipient, verb=verb, created__gte=last_minute)
 
     if target:
         target_ct = ContentType.objects.get_for_model(target)
