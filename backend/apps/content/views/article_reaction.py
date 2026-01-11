@@ -59,7 +59,11 @@ class ArticleReactionView(APIView):
         """
         try:
 
-            article = Article.published.select_related("author", "category").prefetch_related("tags", "reactions").get(id=article_id)
+            article = (
+                Article.published.select_related("author", "category")
+                .prefetch_related("tags", "reactions")
+                .get(id=article_id)
+            )
 
             reaction_counts = article.reaction_counts
             total_reactions = article.total_reaction_counts
@@ -120,7 +124,9 @@ class ArticleReactionView(APIView):
             serializer.is_valid(raise_exception=True)
             reaction_type = serializer.validated_data["reaction_type"]
 
-            article = Article.objects.select_related("author", "category").prefetch_related("tags", "reactions").get(id=article_id)
+            article = Article.objects.select_related("author", "category").get(
+                id=article_id
+            )
 
             if article.status != ArticleStatusChoices.PUBLISHED:
                 return CustomResponse.error(
