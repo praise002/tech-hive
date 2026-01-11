@@ -1,4 +1,3 @@
-# Test cases for content-related views (jobs, events, resources, tools)
 from apps.common.utils import TestUtil
 from apps.content.models import Category, Event, Job, Resource, Tool
 from rest_framework import status

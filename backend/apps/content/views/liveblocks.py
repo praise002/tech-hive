@@ -164,6 +164,7 @@ class LiveblocksAuthView(APIView):
             )
             return CustomResponse.error(
                 message="Failed to generate authentication token",
+                # message=f"Failed to generate Liveblocks token for user {user.id}: {str(e)}",
                 err_code=ErrorCode.SERVER_ERROR,
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

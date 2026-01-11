@@ -1,5 +1,5 @@
 import logging
-from datetime import timezone
+from django.utils import timezone
 
 from apps.common.errors import ErrorCode
 from apps.common.exceptions import NotFoundError
@@ -69,7 +69,9 @@ class ArticleSubmitView(APIView):
 
         try:
             article = (
-                Article.objects.select_related("author", "assigned_reviewer")
+                Article.objects.select_related(
+                    "author", "assigned_reviewer", "assigned_editor"
+                )
                 .prefetch_related("reviews")
                 .get(id=article_id)
             )
@@ -97,21 +99,25 @@ class ArticleSubmitView(APIView):
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
-        from apps.content.models import ArticleReview
-
-        is_resubmission = False
+        # Check for existing review (resubmission case)
         existing_review = (
             ArticleReview.objects.filter(article=article)
             .order_by("-created_at")
             .first()
         )
+        is_resubmission = existing_review is not None
 
         try:
             with transaction.atomic():
-                if existing_review:
-                    # RESUBMISSION: Reactivate existing review
-                    is_resubmission = True
+                old_status = article.status
 
+                # Initialize variables for response
+                assigned_reviewer = None
+                assigned_editor = None
+                should_send_email = False
+
+                if is_resubmission:
+                    # RESUBMISSION FLOW: Reactivate existing review
                     existing_review.status = ArticleReviewStatusChoices.PENDING
                     existing_review.started_at = None
                     existing_review.completed_at = None
@@ -124,17 +130,24 @@ class ArticleSubmitView(APIView):
                         ]
                     )
 
+                    # Keep existing assignments
+                    assigned_reviewer = existing_review.reviewed_by
+                    assigned_editor = article.assigned_editor
+                    should_send_email = True  # Send email for resubmission
+
                     logger.info(
                         f"Article {article.id} resubmitted by {request.user.id} "
-                        f"to reviewer {reviewer.id}"
+                        f"to reviewer {existing_review.reviewed_by.id}"
                     )
 
                 else:
-                    # NEW SUBMISSION: Assign new reviewer
+                    # NEW SUBMISSION FLOW: Assign reviewer and editor
                     reviewer = assign_reviewer()
                     editor = assign_editor()
 
+                    # Check if assignments are complete
                     if not reviewer or not editor:
+                        # INCOMPLETE ASSIGNMENTS: Alert admin, don't send user email
                         try:
                             notification_service.send_assignment_failure_alert(
                                 article=article,
@@ -151,33 +164,39 @@ class ArticleSubmitView(APIView):
                                 exc_info=True,
                             )
 
+                        # Save partial assignments (can be None)
                         article.assigned_reviewer = reviewer
                         article.assigned_editor = editor
+                        assigned_reviewer = reviewer
+                        assigned_editor = editor
+                        should_send_email = False  # Don't send email if incomplete
 
-                        logger.info(
-                            f"Article {article.id} submitted by {request.user.id} "
-                            f"without complete assignments (awaiting admin intervention)"
-                        )
                     else:
-                        # Create new review record
+                        # COMPLETE ASSIGNMENTS: Create review and send email
                         ArticleReview.objects.create(
                             article=article,
                             reviewed_by=reviewer,
                         )
                         article.assigned_reviewer = reviewer
                         article.assigned_editor = editor
+                        assigned_reviewer = reviewer
+                        assigned_editor = editor
+                        should_send_email = True  # Send email on successful assignment
 
                         logger.info(
                             f"Article {article.id} submitted by {request.user.id} "
-                            f"to reviewer {reviewer.id}"
+                            f"to reviewer {reviewer.id} and editor {editor.id}"
                         )
 
-                # Update article status
-                old_status = article.status
+                # Update article status (applies to all cases)
                 article.status = ArticleStatusChoices.SUBMITTED_FOR_REVIEW
-
                 article.save(
-                    update_fields=["status", "assigned_reviewer", "updated_at"]
+                    update_fields=[
+                        "status",
+                        "assigned_reviewer",
+                        "assigned_editor",
+                        "updated_at",
+                    ]
                 )
 
                 # Create workflow history
@@ -189,32 +208,24 @@ class ArticleSubmitView(APIView):
                     notes=f"{'Resubmitted' if is_resubmission else 'Submitted'} for review",
                 )
 
-                #  Send notification email
-                if reviewer:
+                # Send email notification ONLY if assignments are complete
+                if should_send_email and assigned_reviewer:
                     try:
                         notification_service.send_article_submitted_email(
-                            article=article, reviewer=reviewer
+                            article=article, reviewer=assigned_reviewer
                         )
                     except Exception as e:
-                        # Log error but don't fail the submission
                         logger.error(
                             f"Failed to send submission email for article {article.id}: {str(e)}",
                             exc_info=True,
                         )
 
-                if is_resubmission:
-                    response_data = {
-                        "status": article.status,
-                        "assigned_reviewer": existing_review.reviewed_by,
-                        "is_resubmission": is_resubmission,
-                    }
-                else:
-                    response_data = {
-                        "status": article.status,
-                        "assigned_reviewer": reviewer,
-                        "assigned_editor": editor,
-                        "is_resubmission": is_resubmission,
-                    }
+                response_data = {
+                    "status": article.status,
+                    "assigned_reviewer": assigned_reviewer,
+                    "assigned_editor": assigned_editor,
+                    "is_resubmission": is_resubmission,
+                }
 
                 serializer = self.serializer_class(response_data)
 
@@ -296,7 +307,7 @@ class ReviewStartView(APIView):
                     from_status=old_status,
                     to_status=article.status,
                     changed_by=request.user,
-                    notes=f"Review started by {request.user.full_name()}",
+                    notes=f"Review started by {request.user.full_name}",
                 )
 
                 try:
@@ -321,7 +332,7 @@ class ReviewStartView(APIView):
         except Exception as e:
             logger.error(f"Error starting review {review_id}: {str(e)}", exc_info=True)
             return CustomResponse.error(
-                message="Failed to start review. Please try again.",
+                message=f"Failed to start review. Please try again. {str(e)}",
                 err_code=ErrorCode.OPERATION_FAILED,
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

@@ -837,41 +837,41 @@ class ArticleSubmitResponseSerializer(serializers.Serializer):
     status = serializers.CharField(
         read_only=True, help_text="Article status after submission"
     )
-    assigned_reviewer = serializers.SerializerMethodField(
-        help_text="Reviewer assigned to the article"
-    )
-    assigned_editor = serializers.SerializerMethodField(
-        help_text="Editor assigned to the article"
-    )
+    # assigned_reviewer = serializers.SerializerMethodField(
+    #     help_text="Reviewer assigned to the article"
+    # )
+    # assigned_editor = serializers.SerializerMethodField(
+    #     help_text="Editor assigned to the article"
+    # )
     is_resubmission = serializers.BooleanField(
         read_only=True, help_text="Whether this is a resubmission to the same reviewer"
     )
 
-    @extend_schema_field(serializers.DictField)
-    def get_assigned_reviewer(self, obj):
-        """Return reviewer info"""
-        reviewer = obj.get("reviewer")
-        if reviewer:
-            return {
-                "id": str(reviewer.id),
-                "name": reviewer.full_name,
-                "username": reviewer.username,
-                "avatar_url": reviewer.avatar_url,
-            }
-        return None
+    # @extend_schema_field(serializers.DictField)
+    # def get_assigned_reviewer(self, obj):
+    #     """Return reviewer info"""
+    #     reviewer = obj.get("assigned_reviewer")
+    #     if reviewer:
+    #         return {
+    #             "id": str(reviewer.id),
+    #             "name": reviewer.full_name,
+    #             "username": reviewer.username,
+    #             "avatar_url": reviewer.avatar_url,
+    #         }
+    #     return None         
     
-    @extend_schema_field(serializers.DictField)
-    def get_assigned_editor(self, obj):
-        """Return editor info"""
-        editor = obj.get("editor")
-        if editor:
-            return {
-                "id": str(editor.id),
-                "name": editor.full_name,
-                "username": editor.username,
-                "avatar_url": editor.avatar_url,
-            }
-        return None
+    # @extend_schema_field(serializers.DictField)
+    # def get_assigned_editor(self, obj):
+    #     """Return editor info"""
+    #     editor = obj.get("assigned_editor")
+    #     if editor:
+    #         return {
+    #             "id": str(editor.id),
+    #             "name": editor.full_name,
+    #             "username": editor.username,
+    #             "avatar_url": editor.avatar_url,
+    #         }
+    #     return None
 
 
 class ReviewStartResponseSerializer(serializers.Serializer):

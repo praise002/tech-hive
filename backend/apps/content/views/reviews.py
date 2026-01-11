@@ -43,7 +43,7 @@ class AssignedReviewsListView(ListAPIView):
         user = self.request.user
 
         queryset = (
-            ArticleReview.objects.filter(reviewed_by=user, is_active=True)
+            ArticleReview.objects.filter(reviewed_by=user)
             .select_related(
                 "article", "article__author", "article__category", "reviewed_by"
             )
@@ -128,8 +128,7 @@ class ReviewDetailView(APIView):
         """
         try:
             review = (
-                ArticleReview.objects.filter(is_active=True)
-                .select_related(
+                ArticleReview.objects.select_related(
                     "article",
                     "article__author",
                     "article__assigned_reviewer",
@@ -140,53 +139,20 @@ class ReviewDetailView(APIView):
                 .prefetch_related(
                     "article__tags",
                 )
-                .get(pk=review_id)
+                .get(id=review_id)
             )
         except ArticleReview.DoesNotExist:
             raise NotFoundError("Review not found")
 
         self.check_object_permissions(request, review)
 
-        serializer = self.serializer_class(review)
+        serializer = self.serializer_class(review, context={'request': request})
         return CustomResponse.success(
             message="Review retrieved successfully",
             data=serializer.data,
             status_code=status.HTTP_200_OK,
         )
 
-# FIX PERMISSION LOGIC COS NOW WE HAVE EDITOR ASSIGNED
-# Timeout due to inactivity: No resubmission after 30-60 days
-# Manual intervention: Editor reassigns reviewer
-
-# Example management command
-# from django.core.management.base import BaseCommand
-# from django.utils import timezone
-# from apps.content.models import ArticleReview
-
-# class Command(BaseCommand):
-#     help = 'Deactivate stale reviews after 30 days of inactivity'
-
-#     def handle(self, *args, **options):
-#         cutoff = timezone.now() - timezone.timedelta(days=30)
-
-#         stale_reviews = ArticleReview.objects.filter(
-#             updated_at__lt=cutoff,
-#             article__status__in=['changes_requested']
-#         )
-
-#         for review in stale_reviews:
-#             review.is_active = False
-#             review.article.assigned_reviewer = None
-#             review.article.save()
-#             review.save()
-
-#         self.stdout.write(f'Deactivated {stale_reviews.count()} stale reviews')
 
 # TODO:
 # Do more research on whetehr to put input or output serializer in the serializer_class
-# Should an error be returned when no assigned reviewer and editor or it should go through
-# and admin is alerted
-
-# Should an error be returned when no assigned reviewer and editor or it should go through
-# and admin is alerted
-

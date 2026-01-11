@@ -1158,18 +1158,18 @@ ARTICLE_SUBMIT_RESPONSE_EXAMPLE = {
                     "message": "Article resubmitted successfully",
                     "data": {
                         "status": "submitted_for_review",
-                        "assigned_reviewer": {
-                            "id": UUID_EXAMPLE,
-                            "name": "Jane Reviewer",
-                            "username": "jane-reviewer",
-                            "avatar_url": AVATAR_URL,
-                        },
-                        "assigned_editor": {
-                            "id": UUID_EXAMPLE,
-                            "name": "Jane Editor",
-                            "username": "jane-editor",
-                            "avatar_url": AVATAR_URL,
-                        },
+                        # "assigned_reviewer": {
+                        #     "id": UUID_EXAMPLE,
+                        #     "name": "Jane Reviewer",
+                        #     "username": "jane-reviewer",
+                        #     "avatar_url": AVATAR_URL,
+                        # },
+                        # "assigned_editor": {
+                        #     "id": UUID_EXAMPLE,
+                        #     "name": "Jane Editor",
+                        #     "username": "jane-editor",
+                        #     "avatar_url": AVATAR_URL,
+                        # },
                         "is_resubmission": True,
                     },
                 },

@@ -208,10 +208,8 @@ class SavedArticle(BaseModel):
         return self.article.title
 
 
-class ArticleReview(models.Model):
-    id = models.UUIDField(
-        default=uuid.uuid4, unique=True, primary_key=True, editable=False
-    )
+class ArticleReview(BaseModel):
+
     article = models.ForeignKey(
         Article, on_delete=models.CASCADE, related_name="reviews"
     )
@@ -246,7 +244,7 @@ class ArticleReview(models.Model):
     objects = models.Manager()
 
     class Meta:
-        #NOTE: NO UNIQUE CONSTRIANT
+        # NOTE: NO UNIQUE CONSTRIANT
         # unique_together = ("article", "is_active")
         indexes = [
             models.Index(fields=["article", "status"]),

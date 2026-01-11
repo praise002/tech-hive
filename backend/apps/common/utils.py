@@ -68,7 +68,7 @@ class TestUtil:
             "last_name": "Disabled",
             "email": "testdisabled@example.com",
             "is_email_verified": True,
-            "user_active": False,
+            "is_suspended": True,
             "password": "Testpassword789#",
         }
         user = User.objects.create_user(**user_dict)

@@ -136,8 +136,8 @@ class ArticleReactionAdmin(admin.ModelAdmin):
 
 @admin.register(models.ArticleReview)
 class ArticleReviewAdmin(admin.ModelAdmin):
-    list_display = ["article", "reviewed_by", "started_at"]
-    list_filter = ["started_at"]
+    list_display = ["article", "reviewed_by", "started_at", "created_at"]
+    list_filter = ["started_at", "created_at"]
     search_fields = ["article__title", "reviewed_by__email"]
     readonly_fields = ["id", "started_at", "completed_at"]
 

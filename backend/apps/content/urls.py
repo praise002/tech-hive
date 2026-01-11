@@ -60,7 +60,7 @@ urlpatterns = [
         views.ArticleSubmitView.as_view(),
     ),
     path(
-        "reviews/<uuid:pk>/",
+        "reviews/<uuid:review_id>/",
         views.ReviewDetailView.as_view(),
     ),
     path(
