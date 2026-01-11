@@ -23,7 +23,10 @@ class IsAuthor(BasePermission):
     """
 
     def has_permission(self, request, view):
-        return request.user.is_authenticated
+        return (
+            request.user.is_authenticated
+            and request.user.groups.filter(name=UserRoles.CONTRIBUTOR).exists()
+        )
 
     def has_object_permission(self, request, view, obj):
         if isinstance(obj, Article):
@@ -153,4 +156,5 @@ class CanViewReview(BasePermission):
 
 # Allows updating review status
 # Used for: Future endpoints like start/update review
+# Only the assigned reviewer can manage their reviews
 # Only the assigned reviewer can manage their reviews

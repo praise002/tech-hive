@@ -1,7 +1,9 @@
 from apps.accounts.utils import UserRoles
 from apps.content import models
 from apps.content.choices import ArticleStatusChoices
-from django.contrib import admin
+from django.contrib import admin, messages
+
+from backend.apps.content import notification_service
 
 
 @admin.register(models.Category)
@@ -15,10 +17,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
     articles_count.short_description = "Articles"
 
-# TODO: When there is a reassignment resend it automatically
-# notification_service.send_article_submitted_email(
-#                             article=article, reviewer=reviewer
-#                         )
+
 class UnassignedFilter(admin.SimpleListFilter):
     title = "Unassigned Reviewer/Editor"
     parameter_name = "unassigned"
@@ -112,6 +111,55 @@ class ArticleAdmin(admin.ModelAdmin):
 
         # Only allow editing if status is PUBLISHED or READY
         return obj.status in ["PUBLISHED", "READY"]
+
+    def save_model(self, request, obj, form, change):
+        """Override save to detect assignment changes"""
+
+        if change:  # Only for existing articles
+            # Get old values
+            old_article = models.Article.objects.get(pk=obj.pk)
+            old_reviewer = old_article.assigned_reviewer
+            old_editor = old_article.assigned_editor
+
+            # Save the article
+            super().save_model(request, obj, form, change)
+
+            # Check for changes and send emails
+            if obj.assigned_reviewer and obj.assigned_reviewer != old_reviewer:
+                try:
+                    notification_service.send_article_submitted_email(
+                        article=obj, reviewer=obj.assigned_reviewer
+                    )
+                    self.message_user(
+                        request,
+                        f"Email sent to new reviewer: {obj.assigned_reviewer.email}",
+                        messages.SUCCESS,
+                    )
+                except Exception as e:
+                    self.message_user(
+                        request,
+                        f"Failed to send email to reviewer: {str(e)}",
+                        messages.ERROR,
+                    )
+
+            if obj.assigned_editor and obj.assigned_editor != old_editor:
+                try:
+                    notification_service.send_editor_assignment_email(
+                        article=obj, editor=obj.assigned_editor
+                    )
+                    self.message_user(
+                        request,
+                        f"Email sent to new editor: {obj.assigned_editor.email}",
+                        messages.SUCCESS,
+                    )
+                except Exception as e:
+                    self.message_user(
+                        request,
+                        f"Failed to send email to editor: {str(e)}",
+                        messages.ERROR,
+                    )
+        else:
+            super().save_model(request, obj, form, change)
 
 
 @admin.register(models.Tag)
@@ -294,3 +342,21 @@ class ToolAdmin(admin.ModelAdmin):
         return ", ".join([tag.name for tag in obj.tags.all()[:3]])
 
     get_tags.short_description = "Tags"
+
+
+"""
+CAN ALSO BE DONE USING SIGNALS BUT FOR SIMPLICITY DID IT IN THE ADMIN
+What We're Solving
+Problem: When an admin manually assigns or changes a reviewer/editor in Django Admin, no email notification is sent to the newly assigned person. Currently, emails only go out during the initial article submission flow.
+
+Solution Overview: Django Signals
+Why Signals?
+Automatic: Fires whenever assigned_reviewer or assigned_editor changes, regardless of where the change happens (admin panel, API, Django shell)
+Centralized: All email notification logic lives in one place
+Non-invasive: Doesn't require modifying the Article model's save method or every view that updates articles
+We are to implement Django signals to automatically send email notifications 
+whenever a reviewer or editor is assigned/reassigned to an article. 
+The solution uses pre_save to capture old values and post_save to 
+detect changes and send emails. It's automatic, consistent, and works 
+everywhere in the codebase without requiring manual email calls.
+"""

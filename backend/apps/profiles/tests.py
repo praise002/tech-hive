@@ -154,6 +154,7 @@ class TestProfiles(APITestCase):
         }
 
         response = self.client.post(self.article_list_url, article_data)
+        print(response.data)
         self.assertEqual(response.status_code, 201)
 
         # Verify article was created

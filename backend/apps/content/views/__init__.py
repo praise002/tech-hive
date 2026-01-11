@@ -1,7 +1,7 @@
 from .article_reaction import ArticleReactionView
 from .articles import (
     AcceptGuidelinesView,
-    ArticleCoverImageUploadView,
+    # ArticleCoverImageUploadView,
     ArticleListView,
     ArticleRetrieveView,
     ArticleSummaryView,
@@ -55,7 +55,7 @@ __all__ = [
     "ArticleSummaryView",
     "UserSearchView",
     "UserBatchView",
-    "ArticleCoverImageUploadView",
+    # "ArticleCoverImageUploadView",
     "ArticleEditorView",
     "ArticleSubmitView",
     "ReviewStartView",

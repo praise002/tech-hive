@@ -145,7 +145,7 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
             "content",
             "url",
         ]
-        # TODO: Editor will add it to the right category
+        
 
     def create(self, validated_data):
         # Get the authenticated user's profile
@@ -162,14 +162,6 @@ class ArticleUpdateSerializer(serializers.ModelSerializer):
         model = models.Article
         fields = [
             "title",
-            "content",
-        ]
-
-
-class ArticleAvatarSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Article
-        fields = [
             "cover_image",
         ]
 
@@ -785,13 +777,13 @@ class ArticleEditorSerializer(serializers.ModelSerializer):
         return obj.status == ArticleStatusChoices.PUBLISHED
 
 
-class CoverImageSerializer(serializers.ModelSerializer):
+# class CoverImageSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = models.Article
-        fields = [
-            "cover_image",
-        ]
+#     class Meta:
+#         model = models.Article
+#         fields = [
+#             "cover_image",
+#         ]
 
 
 class ReviewActionRequestSerializer(serializers.Serializer):
@@ -858,8 +850,8 @@ class ArticleSubmitResponseSerializer(serializers.Serializer):
     #             "username": reviewer.username,
     #             "avatar_url": reviewer.avatar_url,
     #         }
-    #     return None         
-    
+    #     return None
+
     # @extend_schema_field(serializers.DictField)
     # def get_assigned_editor(self, obj):
     #     """Return editor info"""
@@ -987,7 +979,7 @@ class ArticleDetailForReviewSerializer(serializers.ModelSerializer):
     assigned_reviewer = UserSerializer(read_only=True)
     assigned_editor = UserSerializer(read_only=True)
     liveblocks_room_id = serializers.SerializerMethodField()
-    cover_image_url = serializers.SerializerMethodField()  
+    cover_image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Article

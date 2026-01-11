@@ -8,7 +8,7 @@ from apps.common.responses import CustomResponse
 from apps.content.filters import UserArticleFilter
 from apps.content.mixins import HeaderMixin
 from apps.content.models import Article, ArticleStatusChoices, Comment, SavedArticle
-from apps.content.permissions import IsContributor
+from apps.content.permissions import IsAuthor, IsContributor
 from apps.content.serializers import (
     ArticleCreateSerializer,
     ArticleSerializer,
@@ -370,7 +370,7 @@ class UserArticleListCreateView(ListCreateAPIView):
 
 
 class ArticleRetrieveUpdateView(HeaderMixin, APIView):
-    permission_classes = (IsContributor,)
+    permission_classes = (IsAuthor,)
 
     def get_object_for_read(self, slug):
         """Get object for GET requests - filtering logic"""
@@ -446,10 +446,25 @@ class ArticleRetrieveUpdateView(HeaderMixin, APIView):
         summary="Update article",
         description="Update an existing article using partial data. Only the article author can modify articles.",
         tags=tags,
+        request={
+            "multipart/form-data": ArticleUpdateSerializer,
+        },
         responses=ARTICLE_UPDATE_RESPONSE_EXAMPLE,
     )
     def patch(self, request, *args, **kwargs):
         article = self.get_object_for_write(slug=kwargs["slug"])
+
+        if article.status not in [
+            ArticleStatusChoices.DRAFT,
+            ArticleStatusChoices.CHANGES_REQUESTED,
+            ArticleStatusChoices.REJECTED,
+        ]:
+            return CustomResponse.error(
+                message="Can only upload cover images for draft or rejected or articles with requested changes",
+                err_code=ErrorCode.VALIDATION_ERROR,
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
         serializer = self.get_serializer(article, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 

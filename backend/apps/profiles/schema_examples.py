@@ -2,6 +2,7 @@ from apps.accounts.schema_examples import UNAUTHORIZED_USER_RESPONSE
 from apps.common.errors import ErrorCode
 from apps.common.schema_examples import (
     AVATAR_URL,
+    COVER_IMAGE_URL,
     DATETIME_EXAMPLE,
     EMAIL_EXAMPLE,
     ERR_RESPONSE_STATUS,
@@ -38,7 +39,7 @@ ARTICLE_1 = {
     "tags": TAGS,
 }
 
-ARTICLE_UPDATED = {"title": "Test post", "content": "Test content updated"}
+ARTICLE_UPDATED = {"title": "Test post", "cover_image": COVER_IMAGE_URL}
 
 PROFILE_EXAMPLE = {
     "id": UUID_EXAMPLE,

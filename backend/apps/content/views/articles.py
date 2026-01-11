@@ -7,7 +7,7 @@ from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
 from apps.content.choices import ArticleStatusChoices
 from apps.content.models import Article, Comment, Tag
-from apps.content.permissions import IsAuthorOrReadOnly, IsCommentAuthor
+from apps.content.permissions import IsCommentAuthor
 from apps.content.schema_examples import (
     ACCEPT_GUIDELINES_RESPONSE_EXAMPLE,
     ARTICLE_DETAIL_RESPONSE_EXAMPLE,
@@ -17,7 +17,6 @@ from apps.content.schema_examples import (
     COMMENT_DELETE_RESPONSE_EXAMPLE,
     COMMENT_LIKE_STATUS_RESPONSE_EXAMPLE,
     COMMENT_LIKE_TOGGLE_RESPONSE_EXAMPLE,
-    COVER_IMAGE_RESPONSE_EXAMPLE,
     RSS_RESPONSE_EXAMPLE,
     TAG_RESPONSE_EXAMPLE,
     THREAD_REPLIES_RESPONSE_EXAMPLE,
@@ -31,7 +30,6 @@ from apps.content.serializers import (
     CommentLikeStatusSerializer,
     CommentResponseSerializer,
     ContributorOnboardingSerializer,
-    CoverImageSerializer,
     TagSerializer,
     ThreadReplySerializer,
 )
@@ -644,58 +642,58 @@ class ArticleSummaryView(APIView):
         #     )
 
 
-class ArticleCoverImageUploadView(APIView):
-    """
-    Upload or update cover image for an article.
-    Only the author can upload cover images for their drafts.
-    """
+# class ArticleCoverImageUploadView(APIView):
+#     """
+#     Upload or update cover image for an article.
+#     Only the author can upload cover images for their drafts.
+#     """
 
-    permission_classes = (IsAuthorOrReadOnly,)
-    serializer_class = CoverImageSerializer
+#     permission_classes = (IsAuthorOrReadOnly,)
+#     serializer_class = CoverImageSerializer
 
-    @extend_schema(
-        summary="Upload article cover image",
-        description="""
-        Upload or update the cover image for an article.
-        
-        **Requirements:**
-        - User must be the article author
-        - Article must be in DRAFT, CHANGES_REQUESTED or REJECTED status
-        - Image must be under 2MB
-        - Supported formats: JPG, PNG, WEBP
-        """,
-        request={
-            "multipart/form-data": CoverImageSerializer,
-        },
-        responses=COVER_IMAGE_RESPONSE_EXAMPLE,
-        tags=article_tags,
-    )
-    def patch(self, request, article_id):
-        """Upload cover image for an article"""
-        try:
-            article = Article.objects.get(id=article_id)
-        except Article.DoesNotExist:
-            raise NotFoundError("Article not found")
+#     @extend_schema(
+#         summary="Upload article cover image",
+#         description="""
+#         Upload or update the cover image for an article.
 
-        self.check_object_permissions(request, article)
+#         **Requirements:**
+#         - User must be the article author
+#         - Article must be in DRAFT, CHANGES_REQUESTED or REJECTED status
+#         - Image must be under 2MB
+#         - Supported formats: JPG, PNG, WEBP
+#         """,
+#         request={
+#             "multipart/form-data": CoverImageSerializer,
+#         },
+#         responses=COVER_IMAGE_RESPONSE_EXAMPLE,
+#         tags=article_tags,
+#     )
+#     def patch(self, request, article_id):
+#         """Upload cover image for an article"""
+#         try:
+#             article = Article.objects.get(id=article_id)
+#         except Article.DoesNotExist:
+#             raise NotFoundError("Article not found")
 
-        # Check article status
-        if article.status not in [
-            ArticleStatusChoices.DRAFT,
-            ArticleStatusChoices.CHANGES_REQUESTED,
-            ArticleStatusChoices.REJECTED,
-        ]:
-            return CustomResponse.error(
-                message="Can only upload cover images for draft or rejected or articles with requested changes",
-                err_code=ErrorCode.VALIDATION_ERROR,
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            )
+#         self.check_object_permissions(request, article)
 
-        serializer = self.serializer_class(article, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        article = serializer.save()
+#         # Check article status
+#         if article.status not in [
+#             ArticleStatusChoices.DRAFT,
+#             ArticleStatusChoices.CHANGES_REQUESTED,
+#             ArticleStatusChoices.REJECTED,
+#         ]:
+#             return CustomResponse.error(
+#                 message="Can only upload cover images for draft or rejected or articles with requested changes",
+#                 err_code=ErrorCode.VALIDATION_ERROR,
+#                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+#             )
 
-        return CustomResponse.success(
-            message="Cover image uploaded successfully",
-            data={"cover_image_url": article.cover_image_url},
-        )
+#         serializer = self.serializer_class(article, data=request.data, partial=True)
+#         serializer.is_valid(raise_exception=True)
+#         article = serializer.save()
+
+#         return CustomResponse.success(
+#             message="Cover image uploaded successfully",
+#             data={"cover_image_url": article.cover_image_url},
+#         )

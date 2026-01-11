@@ -47,10 +47,10 @@ urlpatterns = [
         "articles/<uuid:article_id>/reactions/",
         views.ArticleReactionView.as_view(),
     ),
-    path(
-        "articles/<uuid:article_id>/cover-image/",
-        views.ArticleCoverImageUploadView.as_view(),
-    ),
+    # path(
+    #     "articles/<uuid:article_id>/cover-image/",
+    #     views.ArticleCoverImageUploadView.as_view(),
+    # ),
     path(
         "articles/<uuid:article_id>/editor/",
         views.ArticleEditorView.as_view(),

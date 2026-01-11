@@ -24,7 +24,7 @@ from apps.content.serializers import (
     CommentLikeStatusSerializer,
     CommentResponseSerializer,
     ContributorOnboardingSerializer,
-    CoverImageSerializer,
+    # CoverImageSerializer,
     EventSerializer,
     JobSerializer,
     LiveblocksAuthResponseSerializer,
@@ -982,30 +982,30 @@ USER_BATCH_REQUEST_EXAMPLE = [
     ),
 ]
 
-COVER_IMAGE_RESPONSE_EXAMPLE = {
-    200: OpenApiResponse(
-        description="Cover image uploaded successfully",
-        response=CoverImageSerializer,
-        examples=[
-            OpenApiExample(
-                name="Success",
-                value={
-                    "status": "success",
-                    "message": "Cover image uploaded successfully",
-                    "data": {
-                        "cover_image_url": "https://example.com/media/covers/article-123.jpg"
-                    },
-                },
-            )
-        ],
-    ),
-    401: UNAUTHORIZED_USER_RESPONSE,
-    403: OpenApiResponse(
-        response=ErrorResponseSerializer,
-        description="Permission Denied",
-    ),
-    422: ErrorDataResponseSerializer,
-}
+# COVER_IMAGE_RESPONSE_EXAMPLE = {
+#     200: OpenApiResponse(
+#         description="Cover image uploaded successfully",
+#         response=CoverImageSerializer,
+#         examples=[
+#             OpenApiExample(
+#                 name="Success",
+#                 value={
+#                     "status": "success",
+#                     "message": "Cover image uploaded successfully",
+#                     "data": {
+#                         "cover_image_url": "https://example.com/media/covers/article-123.jpg"
+#                     },
+#                 },
+#             )
+#         ],
+#     ),
+#     401: UNAUTHORIZED_USER_RESPONSE,
+#     403: OpenApiResponse(
+#         response=ErrorResponseSerializer,
+#         description="Permission Denied",
+#     ),
+#     422: ErrorDataResponseSerializer,
+# }
 
 
 ARTICLE_EDITOR_RESPONSE_EXAMPLE = {
