@@ -1,7 +1,6 @@
 from apps.accounts.models import ContributorOnboarding, User
 from apps.content import models
 from apps.content.choices import ArticleStatusChoices
-from apps.content.CustomRelations import CustomHyperlinkedIdentityField
 from apps.content.models import (
     Article,
     ArticleReaction,
@@ -127,15 +126,18 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 
 class ArticleCreateSerializer(serializers.ModelSerializer):
-    url = CustomHyperlinkedIdentityField(
-        view_name="article_detail",
-        lookup_fields=[
-            (
-                "author.username",
-                "username",
-            ),  # Get username from article.author.username
-            ("slug", "slug"),  # Get slug from article.slug
-        ],
+    # url = CustomHyperlinkedIdentityField(
+    #     view_name="article_detail",
+    #     lookup_fields=[
+    #         (
+    #             "author.username",
+    #             "username",
+    #         ),  # Get username from article.author.username
+    #         ("slug", "slug"),  # Get slug from article.slug
+    #     ],
+    # )
+    url = serializers.HyperlinkedIdentityField(
+        view_name="article_detail", lookup_field="slug"
     )
 
     class Meta:
@@ -145,7 +147,6 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
             "content",
             "url",
         ]
-        
 
     def create(self, validated_data):
         # Get the authenticated user's profile

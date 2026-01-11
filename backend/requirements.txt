@@ -37,6 +37,7 @@ djangorestframework==3.15.2
 djangorestframework_simplejwt==5.4.0
 drf-social-oauth2==3.1.0
 drf-spectacular==0.28.0
+et_xmlfile==2.0.0
 gprof2dot==2025.4.14
 groq==0.33.0
 gunicorn==23.0.0

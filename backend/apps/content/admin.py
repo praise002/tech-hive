@@ -1,9 +1,7 @@
 from apps.accounts.utils import UserRoles
-from apps.content import models
+from apps.content import models, notification_service
 from apps.content.choices import ArticleStatusChoices
 from django.contrib import admin, messages
-
-from backend.apps.content import notification_service
 
 
 @admin.register(models.Category)

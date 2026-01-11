@@ -191,8 +191,6 @@ COMMENTS_DATA_EXAMPLE = [
         "article_id": "146541be-1b9b-48a2-8117-2b5fd4bd301b",
         "article_title": "Test title 2",
         "created_at": "2025-08-12T10:00:54.576519Z",
-        "is_reply": False,
-        "reply_count": 1,
         "body": "portfolio",
     },
     {
@@ -201,8 +199,6 @@ COMMENTS_DATA_EXAMPLE = [
         "article_id": "146541be-1b9b-48a2-8117-2b5fd4bd301b",
         "article_title": "Test title 2",
         "created_at": "2025-08-12T10:00:54.576519Z",
-        "is_reply": False,
-        "reply_count": 0,
         "body": "Lorem",
     },
     {
@@ -211,8 +207,6 @@ COMMENTS_DATA_EXAMPLE = [
         "article_id": "146541be-1b9b-48a2-8117-2b5fd4bd301b",
         "article_title": "Test title 2",
         "created_at": "2025-08-12T10:00:54.576519Z",
-        "is_reply": True,
-        "reply_count": 0,
         "body": "Ikr",
     },
 ]
@@ -362,17 +356,29 @@ ARTICLE_LIST_EXAMPLE = {
             OpenApiExample(
                 name="All Articles (No Filter)",
                 summary="Default response with all user articles",
-                value=ARTICLES,
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Articles retrieved successfully.",
+                    "data": ARTICLES,
+                },
             ),
             OpenApiExample(
                 name="Draft Articles Only",
                 summary="Filtered by status=draft",
-                value=DRAFTS_ARTICLES,
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Articles retrieved successfully.",
+                    "data": DRAFTS_ARTICLES,
+                },
             ),
             OpenApiExample(
                 name="Published Articles Only",
                 summary="Filtered by status=published",
-                value=PUBLISHED_ARTICLES,
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Articles retrieved successfully.",
+                    "data": PUBLISHED_ARTICLES,
+                },
             ),
             OpenApiExample(
                 name="Submitted Articles (Multiple Statuses)",
@@ -386,7 +392,11 @@ ARTICLE_LIST_EXAMPLE = {
             OpenApiExample(
                 name="Empty Results",
                 summary="No articles found matching the filter criteria",
-                value=[],
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Articles retrieved successfully.",
+                    "data": [],
+                },
             ),
         ],
     ),
@@ -428,7 +438,7 @@ ARTICLE_DETAIL_RESPONSE_EXAMPLE = {
                 name="Success Response",
                 value={
                     "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Article detail retrieved successfull.",
+                    "message": "Article detail retrieved successfully.",
                     "data": ARTICLE_1,
                 },
             ),
@@ -487,7 +497,7 @@ SAVED_ARTICLES_RESPONSE_EXAMPLE = {
                 name="Success Response",
                 value={
                     "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Saved Articles retrieved successfully",
+                    "message": "Saved Articles retrieved successfully.",
                     "data": SAVED_ARTICLE_EXAMPLE,
                 },
             ),
@@ -537,7 +547,14 @@ COMMENTS_ARTICLES_RESPONSE_EXAMPLE = {
         description="Comments retrieved successfully",
         response=CommentSerializer,
         examples=[
-            OpenApiExample(name="Success Response", value=COMMENTS_DATA_EXAMPLE),
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Comments retrieved successfully.",
+                    "data": COMMENTS_DATA_EXAMPLE,
+                },
+            ),
         ],
     ),
     401: UNAUTHORIZED_USER_RESPONSE,

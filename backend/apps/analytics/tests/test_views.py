@@ -3,9 +3,7 @@ from apps.analytics.choices import EventTypeChoices
 from apps.analytics.models import SessionMetrics, UserActivity
 from apps.analytics.tests.utils import AnalyticsTestHelper
 from apps.common.utils import TestUtil
-from apps.content.models import Article
 from django.core.cache import cache
-from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -456,72 +454,6 @@ class TestArticlePerformanceView(APITestCase):
         self.assertLessEqual(data["bounce_rate"], 100)
 
 
-# class TestDashboardExportView(APITestCase):
-#     url = "/api/v1/analytics/dashboard/export/"
-
-#     def setUp(self):
-#         self.admin_user = TestUtil.verified_user()
-#         self.admin_user.is_staff = True
-#         self.admin_user.is_superuser = True
-#         self.admin_user.save()
-
-#         self.regular_user = TestUtil.other_verified_user()
-
-#     def test_unauthenticated_access_denied(self):
-#         """Test unauthenticated users cannot export"""
-#         response = self.client.get(self.url)
-
-#         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-#     def test_non_admin_access_denied(self):
-#         """Test regular users cannot export"""
-#         self.client.force_authenticate(user=self.regular_user)
-#         response = self.client.get(self.url)
-
-#         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-# # TODO:
-#     def test_admin_can_export_csv(self):
-#         """Test admin can export dashboard metrics as CSV"""
-#         self.client.force_authenticate(user=self.admin_user)
-#         response = self.client.get(self.url, {"format": "csv"})
-#         print(response)
-
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
-#         self.assertEqual(response["Content-Type"], "text/csv")
-#         self.assertIn("Content-Disposition", response)
-
-#     def test_admin_can_export_excel(self):
-#         """Test admin can export dashboard metrics as Excel"""
-#         self.client.force_authenticate(user=self.admin_user)
-#         response = self.client.get(self.url, {"format": "excel"})
-
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
-#         self.assertIn("application/vnd.openxmlformats", response["Content-Type"])
-
-#     def test_default_format_is_csv(self):
-#         """Test defaults to CSV format"""
-#         self.client.force_authenticate(user=self.admin_user)
-#         response = self.client.get(self.url)
-
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
-#         self.assertEqual(response["Content-Type"], "text/csv")
-
-#     def test_invalid_format_returns_400(self):
-#         """Test invalid format parameter returns error"""
-#         self.client.force_authenticate(user=self.admin_user)
-#         response = self.client.get(self.url, {"format": "pdf"})
-
-#         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-#     def test_invalid_period_returns_400(self):
-#         """Test invalid period parameter returns error"""
-#         self.client.force_authenticate(user=self.admin_user)
-#         response = self.client.get(self.url, {"period": "yearly", "format": "csv"})
-
-#         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
 # python manage.py test apps.analytics.tests.test_views.TestDashboardMetricsView
 # python manage.py test apps.analytics.tests.test_views.TestTrackActivityView
 # python manage.py test apps.analytics.tests.test_views.TestArticlePerformanceView
-# python manage.py test apps.analytics.tests.test_views.TestDashboardExportView

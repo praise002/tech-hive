@@ -18,8 +18,6 @@ from apps.content.serializers import (
     SavedArticleSerializer,
 )
 from apps.profiles.schema_examples import (
-    ACCOUNT_DEACTIVATE_RESPONSE_EXAMPLE,
-    ACCOUNT_REACTIVATE_RESPONSE_EXAMPLE,
     ARTICLE_CREATE_RESPONSE_EXAMPLE,
     ARTICLE_DETAIL_RESPONSE_EXAMPLE,
     ARTICLE_LIST_EXAMPLE,
@@ -38,7 +36,6 @@ from apps.profiles.serializers import (
     UsernameSerializer,
     UserSerializer,
 )
-from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
@@ -62,14 +59,14 @@ class UsernameListView(ListAPIView):
     pagination_class = DefaultPagination
 
     def get_queryset(self):
-        return Comment.objects.filter(is_active=True)
+        return User.objects.all().exclude(is_staff=True).values("id", "username")
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
+            serializer = self.serializer_class(page, many=True)
             paginated_data = self.get_paginated_response(serializer.data)
             return CustomResponse.success(
                 message="Usernames retrieved successfully.",
@@ -77,7 +74,7 @@ class UsernameListView(ListAPIView):
                 status_code=status.HTTP_200_OK,
             )
 
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.serializer_class(queryset, many=True)
         return CustomResponse.success(
             message="Usernames retrieved successfully.",
             data=serializer.data,
@@ -357,7 +354,16 @@ class UserArticleListCreateView(ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        # serializer.save()
+        try:
+            serializer.save()
+        except Exception as e:
+            logger.error(f"Error creating article: {str(e)}", exc_info=True)
+            return CustomResponse.error(
+                message=f"Failed to create article: {str(e)}",
+                err_code=ErrorCode.SERVER_ERROR,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         headers = self.get_success_headers(serializer.data)
 
@@ -460,7 +466,7 @@ class ArticleRetrieveUpdateView(HeaderMixin, APIView):
             ArticleStatusChoices.REJECTED,
         ]:
             return CustomResponse.error(
-                message="Can only upload cover images for draft or rejected or articles with requested changes",
+                message="Can only update articles for draft or rejected or articles with requested changes",
                 err_code=ErrorCode.VALIDATION_ERROR,
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             )
@@ -559,8 +565,8 @@ class UserCommentsView(APIView):
     def get_queryset(self):
         """Filter saved articles to only return those belonging to the authenticated user."""
         return Comment.objects.filter(
-            user=self.request.user, active=True
-        ).select_related("article", "user", "replying_to")
+            user=self.request.user, is_active=True
+        ).select_related("article", "user")
 
     @extend_schema(
         summary="Retrieve user's comments",
