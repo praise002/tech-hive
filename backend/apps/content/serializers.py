@@ -1062,4 +1062,4 @@ class ReviewDetailSerializer(serializers.ModelSerializer):
         return None  # Hide from article author and others
 
 
-# TODO: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH
+# NOTE: MIGHT REMOVE READ-ONLY IN SOME IF IT IS JUST GET AND NO PUT/PATCH

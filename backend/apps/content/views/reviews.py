@@ -155,4 +155,4 @@ class ReviewDetailView(APIView):
 
 
 # TODO:
-# Do more research on whetehr to put input or output serializer in the serializer_class
+# Do more research on whether to put input or output serializer in the serializer_class

@@ -43,24 +43,6 @@ class EventFilter(django_filters.FilterSet):
 
 
 class UserArticleFilter(filters.FilterSet):
-    # status = filters.ChoiceFilter(
-    #     choices=[
-    #         (ArticleStatusChoices.DRAFT, "Draft"),
-    #         (ArticleStatusChoices.SUBMITTED_FOR_REVIEW, "Submitted for Review"),
-    #         (ArticleStatusChoices.UNDER_REVIEW, "Under Review"),
-    #         (ArticleStatusChoices.CHANGES_REQUESTED, "Changes Requested"),
-    #         (ArticleStatusChoices.READY, "Ready for Publishing"),
-    #         (ArticleStatusChoices.PUBLISHED, "Published"),
-    #         (ArticleStatusChoices.REJECTED, "Rejected"),
-    #     ],
-    #     help_text="Filter articles by their current status",
-    # )
-    # TODO:
-    # status = filters.ChoiceFilter(
-    #     field_name="status",
-    #     choices=ArticleReviewStatusChoices.choices,
-    #     help_text="Filter reviews by their current status",
-    # )
 
     status_group = filters.ChoiceFilter(
         choices=[

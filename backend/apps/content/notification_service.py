@@ -489,4 +489,4 @@ notification_service = NotificationService()
 # According to the Liveblocks documentation:
 
 # "The event won't be triggered if the user has seen the thread..."
-# TODO: MOST OF THE article_url are non-existent so fix that in the frontend
+# NOTE: MOST OF THE article_url are non-existent so fix that in the frontend
