@@ -68,3 +68,4 @@ def liveblocks_webhook(request):
         webhook_event.save()
 
     return HttpResponse(status=200)
+
