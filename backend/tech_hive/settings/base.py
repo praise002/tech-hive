@@ -251,10 +251,6 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "UPLOADED_FILES_USE_URL": False,
     "COMPONENT_SPLIT_REQUEST": True,
-    "ENUM_NAME_OVERRIDES": {
-        ("content.Article.status", "ArticleStatusEnum"),
-        ("content.ArticleReview.status", "ArticleReviewStatusEnum"),
-    },
 }
 
 
