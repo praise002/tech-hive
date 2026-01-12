@@ -175,7 +175,7 @@ class TestArticles(APITestCase):
 
         self.assertEqual(data["title"], "Published Article 1")
         self.assertEqual(data["content"], "This is a published article content")
-        self.assertEqual(data["author"], self.user2.full_name)
+        self.assertEqual(data["author"]["name"], self.user2.full_name)
         self.assertEqual(data["status"], ArticleStatusChoices.PUBLISHED)
 
         self.assertIn("comments", data)

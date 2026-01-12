@@ -114,7 +114,7 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.CharField)
     def get_author(self, obj):
-        return obj.author.full_name
+        return {"name": obj.author.full_name, "avatar": obj.author.avatar_url}
 
     @extend_schema_field(serializers.IntegerField)
     def get_total_reaction_counts(self, obj):
