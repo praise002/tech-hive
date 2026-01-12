@@ -73,17 +73,17 @@ class CreateData:
 
         return superuser
 
-    def create_groups(self):
-        """Create user role groups"""
-        groups = [
-            UserRoles.CONTRIBUTOR,
-            UserRoles.REVIEWER,
-            UserRoles.EDITOR,
-            UserRoles.MANAGER,
-        ]
-        for group_name in groups:
-            Group.objects.get_or_create(name=group_name)
-        logger.info("Created user groups")
+    # def create_groups(self):
+    #     """Create user role groups"""
+    #     groups = [
+    #         UserRoles.CONTRIBUTOR,
+    #         UserRoles.REVIEWER,
+    #         UserRoles.EDITOR,
+    #         UserRoles.MANAGER,
+    #     ]
+    #     for group_name in groups:
+    #         Group.objects.get_or_create(name=group_name)
+    #     logger.info("Created user groups")
 
     def create_categories(self):
         """Create content categories"""

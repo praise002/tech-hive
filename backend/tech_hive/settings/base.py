@@ -33,7 +33,7 @@ SITE_ID = 1
 
 
 DJANGO_APPS = [
-    # "jazzmin",
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -251,11 +251,10 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "UPLOADED_FILES_USE_URL": False,
     "COMPONENT_SPLIT_REQUEST": True,
-    # TODO:
-    # "ENUM_NAME_OVERRIDES": {
-    #     ("content.Article.status", "ArticleStatusEnum"),
-    #     ("content.ArticleReview.status", "ArticleReviewStatusEnum"),
-    # },
+    "ENUM_NAME_OVERRIDES": {
+        ("content.Article.status", "ArticleStatusEnum"),
+        ("content.ArticleReview.status", "ArticleReviewStatusEnum"),
+    },
 }
 
 
