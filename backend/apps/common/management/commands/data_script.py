@@ -33,7 +33,7 @@ class CreateData:
     def __init__(self):
         with transaction.atomic():
             self.superuser = self.create_superuser()
-            self.create_groups()
+            # self.create_groups()
             self.create_categories()
             self.create_tags()
             self.create_tool_tags()
