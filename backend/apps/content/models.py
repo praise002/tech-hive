@@ -445,6 +445,7 @@ class Job(BaseModel):
         Category, related_name="jobs", on_delete=models.SET_NULL, null=True
     )
     title = models.CharField(max_length=250)
+    slug = AutoSlugField(populate_from="title", unique=True, always_update=True)
     company = models.CharField(max_length=250)
     desc = models.TextField()
     requirements = models.TextField()
@@ -475,6 +476,7 @@ class Event(BaseModel):
         Category, related_name="events", on_delete=models.SET_NULL, null=True
     )
     title = models.CharField(max_length=250)
+    slug = AutoSlugField(populate_from="title", unique=True, always_update=True)
     desc = models.TextField()
     start_date = models.DateTimeField(default=timezone.now)
     end_date = models.DateTimeField(default=timezone.now)
@@ -494,6 +496,7 @@ class Resource(BaseModel):
         Category, related_name="resources", on_delete=models.SET_NULL, null=True
     )
     name = models.CharField(max_length=250)
+    slug = AutoSlugField(populate_from="name", unique=True, always_update=True)
     image = models.ImageField(
         upload_to="resources/", null=True, blank=True, validators=[validate_file_size]
     )
@@ -528,6 +531,7 @@ class Tool(BaseModel):
         Category, related_name="tools", on_delete=models.SET_NULL, null=True
     )
     name = models.CharField(max_length=250)
+    slug = AutoSlugField(populate_from="name", unique=True, always_update=True)
     desc = models.TextField()
     url = models.CharField(max_length=250, validators=[URLValidator()])
     image_url = models.CharField(max_length=250, validators=[URLValidator()])
@@ -543,5 +547,4 @@ class Tool(BaseModel):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return self.name
         return self.name

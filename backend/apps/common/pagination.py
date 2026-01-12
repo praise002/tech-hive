@@ -29,7 +29,7 @@ class DefaultPagination(PageNumberPagination):
                 "data": {
                     "type": "object",
                     "properties": {
-                        "count": {
+                        "count": {  # total objects in the db e.g articles total
                             "type": "integer",
                             "example": 123,
                         },

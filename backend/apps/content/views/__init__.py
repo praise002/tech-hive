@@ -1,7 +1,6 @@
 from .article_reaction import ArticleReactionView
-from .articles import (
+from .articles import (  # ArticleCoverImageUploadView,
     AcceptGuidelinesView,
-    # ArticleCoverImageUploadView,
     ArticleListView,
     ArticleRetrieveView,
     ArticleSummaryView,
@@ -15,10 +14,15 @@ from .articles import (
 )
 from .contents import (
     CategoryGenericView,
+    CategoryRetrieveView,
     EventListView,
+    EventRetrieveView,
     JobListView,
+    JobRetrieveView,
     ResourceListView,
+    ResourceRetrieveView,
     ToolListView,
+    ToolRetrieveView,
 )
 from .liveblocks import (
     ArticleEditorView,
@@ -65,4 +69,9 @@ __all__ = [
     "LiveblocksAuthView",
     "AssignedReviewsListView",
     "ReviewDetailView",
+    "CategoryRetrieveView",
+    "EventRetrieveView",
+    "ResourceRetrieveView",
+    "ToolRetrieveView",
+    "JobRetrieveView",
 ]

@@ -40,6 +40,22 @@ urlpatterns = [
     ),
     # SECTION 2: UUID-based paths (specific)
     path(
+        "jobs/<uuid:job_id>/",
+        views.JobRetrieveView.as_view(),
+    ),
+    path(
+        "events/<uuid:event_id>/",
+        views.EventRetrieveView.as_view(),
+    ),
+    path(
+        "resources/<uuid:resource_id>/",
+        views.ResourceRetrieveView.as_view(),
+    ),
+    path(
+        "tools/<uuid:tool_id>/",
+        views.ToolRetrieveView.as_view(),
+    ),
+    path(
         "articles/<uuid:article_id>/summarize/",
         views.ArticleSummaryView.as_view(),
     ),
@@ -96,7 +112,11 @@ urlpatterns = [
         views.CommentLikeStatusView.as_view(),
     ),
     # SECTION 3: Slug-based paths (LAST!)
-    # ⚠️ IMPORTANT: This MUST be last because it's a catch-all pattern
+    # ⚠️ IMPORTANT: These MUST be last because they're catch-all patterns
+    path(
+        "categories/<slug:slug>/",
+        views.CategoryRetrieveView.as_view(),
+    ),
     path(
         "articles/<str:username>/<slug:slug>/",
         views.ArticleRetrieveView.as_view(),

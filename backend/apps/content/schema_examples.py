@@ -173,6 +173,60 @@ JOB_EXAMPLE = {
     "category": "Engineering",
 }
 
+CATEGORY_DETAIL_EXAMPLE = {
+    "id": UUID_EXAMPLE,
+    "name": "Technology",
+    "slug": "technology",
+    "desc": "All articles and tutorials related to technology and innovation.",
+}
+
+JOB_DETAIL_EXAMPLE = {
+    "id": "2c9e2a3b-f7a8-4a9b-b3a1-d7c8e9f0a1b2",
+    "title": "Senior Full Stack Developer",
+    "company": "TechHive Inc.",
+    "desc": "We are seeking an experienced full stack developer to join our growing team and lead development projects.",
+    "requirements": "5+ years of experience with React, Node.js, Python. Bachelor's degree in Computer Science or related field.",
+    "responsibilities": "Lead development of web applications, mentor junior developers, review code, and collaborate with product team.",
+    "url": "https://example.com/jobs/senior-full-stack-developer",
+    "salary": "120000-180000",
+    "location": "San Francisco, CA",
+    "job_type": "Full-time",
+    "work_mode": "Hybrid",
+    "category": "Engineering",
+}
+
+EVENT_DETAIL_EXAMPLE = {
+    "id": "d9c34a1a-9b2b-4a0a-8b1a-1b9b4a0a8b1a",
+    "title": "Tech Conference 2026",
+    "desc": "Join us for the premier tech conference of the year featuring industry leaders, innovative workshops, and networking opportunities.",
+    "start_date": "2026-11-15T09:00:00Z",
+    "end_date": "2026-11-17T17:00:00Z",
+    "location": "San Francisco Convention Center, CA",
+    "agenda": "Day 1: Keynote speeches and panel discussions. Day 2: Technical workshops and breakout sessions. Day 3: Hackathon and networking events.",
+    "ticket_url": "https://example.com/events/tech-conference-2026",
+    "category": "Conference",
+}
+
+RESOURCE_DETAIL_EXAMPLE = {
+    "id": "f8e7c6b5-4a3f-4c2e-9b8f-7a6d5e4c3b2a",
+    "name": "Complete Django REST Framework Tutorial",
+    "image_url": "https://example.com/resources/django-rest-tutorial.png",
+    "body": "A comprehensive step-by-step guide to building robust REST APIs with Django REST Framework. Covers authentication, serialization, viewsets, permissions, and deployment best practices.",
+    "url": "https://example.com/resources/django-rest-tutorial",
+    "category": "Tutorial",
+}
+
+TOOL_DETAIL_EXAMPLE = {
+    "id": "a7b8c9d0-1a2b-4c5d-8e9f-0a1b2c3d4e5f",
+    "name": "ChatGPT Code Assistant",
+    "desc": "An AI-powered tool for code generation, debugging, and documentation. Supports multiple programming languages and integrates seamlessly with popular IDEs.",
+    "url": "https://example.com/tools/chatgpt-code-assistant",
+    "image_url": "https://example.com/tools/chatgpt-code-assistant.png",
+    "call_to_action": "Try it now for free!",
+    "tags": [TOOL_TAG_EXAMPLE],
+    "category": "AI",
+}
+
 
 REPLIES_DATA_EXAMPLE = [
     {
@@ -423,6 +477,161 @@ JOB_RESPONSE_EXAMPLE = {
             OpenApiExample(
                 name="Success Response",
                 value=[JOB_EXAMPLE],
+            ),
+        ],
+    ),
+}
+
+CATEGORY_DETAIL_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Category retrieved successfully",
+        response=CategorySerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Category detail retrieved successfully.",
+                    "data": CATEGORY_DETAIL_EXAMPLE,
+                },
+            ),
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Category not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Category Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Category not found.",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+}
+
+JOB_DETAIL_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Job retrieved successfully",
+        response=JobSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Job detail retrieved successfully.",
+                    "data": JOB_DETAIL_EXAMPLE,
+                },
+            ),
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Job not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Job Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Job not found.",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+}
+
+EVENT_DETAIL_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Event retrieved successfully",
+        response=EventSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Event detail retrieved successfully.",
+                    "data": EVENT_DETAIL_EXAMPLE,
+                },
+            ),
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Event not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Event Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Event not found.",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+}
+
+RESOURCE_DETAIL_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Resource retrieved successfully",
+        response=ResourceSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Resource detail retrieved successfully.",
+                    "data": RESOURCE_DETAIL_EXAMPLE,
+                },
+            ),
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Resource not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Resource Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Resource not found.",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+}
+
+TOOL_DETAIL_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Tool retrieved successfully",
+        response=ToolSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Tool detail retrieved successfully.",
+                    "data": TOOL_DETAIL_EXAMPLE,
+                },
+            ),
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Tool not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Tool Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Tool not found.",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
             ),
         ],
     ),
