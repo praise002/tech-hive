@@ -106,13 +106,18 @@ class AcceptGuidelinesView(APIView):
 
 class ArticleListView(ListAPIView):
     # List all published article
-    queryset = Article.published.select_related("category", "author").prefetch_related("tags").all()
+    queryset = (
+        Article.published.select_related("category", "author")
+        .prefetch_related("tags")
+        .all()
+    )
     serializer_class = ArticleSerializer
     # serializer_class = ArticleCommentWithLikesSerializer
     filter_backends = (DjangoFilterBackend, SearchFilter)
     filterset_fields = ("is_featured",)
     search_fields = ["title", "content"]
     pagination_class = DefaultPagination
+    default_limit = 10
 
     @extend_schema(
         summary="Retrieve a list of all published articles",
@@ -121,6 +126,13 @@ class ArticleListView(ListAPIView):
             OpenApiParameter(
                 name="search",
                 description="Search across title, and description.",
+            ),
+            OpenApiParameter(
+                name="limit",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Maximum number of articles to return (default is 10).",
             ),
         ],
         tags=article_tags,
@@ -135,6 +147,16 @@ class ArticleListView(ListAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
+
+        try:
+            limit = int(request.query_params.get("limit", self.default_limit))
+            if limit <= 0:
+                limit = self.default_limit
+        except ValueError:
+            # if an invalid integer uses the default instead of crashing
+            limit = self.default_limit
+
+        queryset = queryset[:limit]
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -169,7 +191,9 @@ class ArticleRetrieveView(APIView):
                 Article.published.prefetch_related(
                     Prefetch(
                         "comments",
-                        queryset=Comment.objects.filter(is_active=True).select_related("user", "thread"),
+                        queryset=Comment.objects.filter(is_active=True).select_related(
+                            "user", "thread"
+                        ),
                     ),
                     "tags",
                 )
@@ -367,7 +391,9 @@ class CommentDeleteView(APIView):
     def delete(self, request, *args, **kwargs):
         comment_id = self.kwargs.get("comment_id")
         try:
-            comment = Comment.objects.select_related("user", "article").get(id=comment_id)
+            comment = Comment.objects.select_related("user", "article").get(
+                id=comment_id
+            )
         except Comment.DoesNotExist:
             raise NotFoundError("Comment not found.")
 
@@ -411,7 +437,9 @@ class CommentLikeToggleView(APIView):
         """
         try:
 
-            comment = Comment.active.select_related("user", "article").get(id=comment_id)
+            comment = Comment.active.select_related("user", "article").get(
+                id=comment_id
+            )
 
             user_id = request.user.id
 
@@ -471,7 +499,9 @@ class CommentLikeStatusView(APIView):
         """
         try:
 
-            comment = Comment.active.select_related("article", "user").get(id=comment_id)
+            comment = Comment.active.select_related("article", "user").get(
+                id=comment_id
+            )
 
             user_id = request.user.id if request.user.is_authenticated else None
 
@@ -554,7 +584,11 @@ class ArticleSummaryView(APIView):
         )
 
         try:
-            article = Article.objects.select_related("author", "category").prefetch_related("tags").get(id=article_id)
+            article = (
+                Article.objects.select_related("author", "category")
+                .prefetch_related("tags")
+                .get(id=article_id)
+            )
 
             if article.status != ArticleStatusChoices.PUBLISHED:
                 return CustomResponse.error(
