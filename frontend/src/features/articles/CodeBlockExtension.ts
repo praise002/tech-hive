@@ -1,6 +1,6 @@
 import { Node } from '@tiptap/core';
 import { ReactNodeViewRenderer } from '@tiptap/react';
-import CodeBlockComponent from './CodeBlockComponent';
+import CodeBlockComponent from './components/editor/CodeBlockComponent';
 
 // STEP 1: CREATE A NODE EXTENSION
 export const CodeBlockExtension = Node.create({

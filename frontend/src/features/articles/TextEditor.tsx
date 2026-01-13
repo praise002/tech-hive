@@ -9,7 +9,7 @@ import StarterKit from '@tiptap/starter-kit';
 import { Threads } from './Threads';
 import Youtube from '@tiptap/extension-youtube';
 
-import CustomToolbar from './CustomToolbar';
+import CustomToolbar from './components/editor/CustomToolbar';
 import { ClientSideSuspense } from '@liveblocks/react';
 import TableRow from '@tiptap/extension-table-row';
 import TableHeader from '@tiptap/extension-table-header';
@@ -21,15 +21,15 @@ import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import { common, createLowlight } from 'lowlight';
-import CodeBlockComponent from './CodeBlockComponent';
+import CodeBlockComponent from './components/editor/CodeBlockComponent';
 import Typography from '@tiptap/extension-typography';
 import Text from '../../components/common/Text';
-import ArticleMetadata from './ArticleMetadata';
+import ArticleMetadata from './components/common/ArticleMetadata';
 import Button from '../../components/common/Button';
 import { useState } from 'react';
-import PreviewMode from './PreviewMode';
+import PreviewMode from './components/editor/PreviewMode';
 import Dropcursor from '@tiptap/extension-dropcursor';
-import Image from './Image';
+import Image from './components/common/Image';
 import toast from 'react-hot-toast';
 
 // create a lowlight instance with all languages loaded or use common

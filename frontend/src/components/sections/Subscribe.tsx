@@ -65,7 +65,8 @@ function Subscribe() {
 
   return (
     <section className="px-0 sm:px-6 lg:px-8" id="subscribe">
-      <div className="px-6 flex sm:flex-row flex-col sm:rounded-lg bg-light m-6 items-center justify-center py-8 gap-4 max-w-7xl mx-auto">
+      <div className="px-6 flex sm:flex-row flex-col sm:rounded-lg bg-light m-6 items-center justify-center py-8 gap-4  mx-auto">
+        {/* max-w-7xl */}
         <div className="flex-1 order-2 sm:order-none">
           <Text variant="h2" size="2xl" className="mb-4">
             Subscribe to Our <br />

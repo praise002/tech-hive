@@ -3,8 +3,11 @@ import Text from '../common/Text';
 
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { displayedArticles } from '../../data/articles';
-import { ArticlesProps } from '../../types/types';
+
+import { Article, ArticlesProps } from '../../types/types';
+
+import Spinner from '../common/Spinner';
+import { useArticles } from '../../hooks/useContent';
 
 function Articles({
   marginTop = 20,
@@ -13,15 +16,22 @@ function Articles({
   visibleHeader = true,
 }: ArticlesProps) {
   const [openArticleId, setOpenArticleId] = useState<string | null>(null);
+  const { isPending, articles } = useArticles({ limit: 4 });
 
   function handleMenuClick(articleId: string) {
     setOpenArticleId((prevId) => (prevId === articleId ? null : articleId));
   }
 
+  if (isPending)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Spinner />
+      </div>
+    );
+
   return (
-    <section
-      className={`lg:mt-4 max-w-7xl mx-auto px-4 lg:px-8 mb-4 mt-${marginTop}`}
-    >
+    <section className={`lg:mt-4  mx-auto px-4 lg:px-8 mb-4 mt-${marginTop}`}>
+      {/* max-w-7xl */}
       {visibleHeader && (
         <div className="flex justify-between items-center">
           <div className="my-4">
@@ -50,7 +60,7 @@ function Articles({
       <div>
         <ul className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4 h-full">
           {/* <div className="flex flex-col gap-y-2"> */}
-          {displayedArticles.map((article) => (
+          {articles?.map((article: Article) => (
             <li key={article.id}>
               <ArticleCard
                 showAdminActions={showAdminActions}

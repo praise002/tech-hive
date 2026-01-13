@@ -6,9 +6,9 @@ import {
   ClientSideSuspense,
 } from '@liveblocks/react/suspense';
 
-import { publicApiKey } from '../../utils/liveblock';
-import TextEditor from './TextEditor';
-import Spinner from '../../components/common/Spinner';
+import { publicApiKey } from '../../../utils/liveblock';
+import TextEditor from '../TextEditor';
+import Spinner from '../../../components/common/Spinner';
 
 function Liveblock() {
   return (

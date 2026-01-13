@@ -1,4 +1,4 @@
-import { MarkdownTagsProps } from '../../types/types';
+import { MarkdownTagsProps } from '../../../../types/types';
 
 // Define a Color Palette
 const tagColors = [

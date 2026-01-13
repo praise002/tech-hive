@@ -4,7 +4,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Button from '../../components/common/Button';
 import Text from '../../components/common/Text';
 
-import MenuBar from './MenuBar';
+import MenuBar from './components/common/MenuBar';
 import TextStyle from '@tiptap/extension-text-style';
 import ListItem from '@tiptap/extension-list-item';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
@@ -22,10 +22,10 @@ import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
 import Typography from '@tiptap/extension-typography';
 import BubbleMenuFromProvider from './BubbleMenuFromProvider';
-import FloatingMenuFromProvider from './FloatingMenuFromProvider';
-import ArticleMetadata from './ArticleMetadata';
+import FloatingMenuFromProvider from './components/editor/FloatingMenuFromProvider';
+import ArticleMetadata from './components/common/ArticleMetadata';
 
-import CodeBlockComponent from './CodeBlockComponent';
+import CodeBlockComponent from './components/editor/CodeBlockComponent';
 
 // create a lowlight instance with all languages loaded or use common
 const lowlight = createLowlight(common);

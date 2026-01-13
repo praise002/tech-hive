@@ -9,20 +9,21 @@ import ArticleReactions from './ArticleReactions';
 import Image from './Image';
 import Button from './Button';
 import { ArticleCardProps } from '../../types/types';
+import { getPreviewText } from '../../utils/utils';
 
 function ArticleCard({
   article,
   isOpen,
   onMenuClick = () => {},
   showAdminActions = false,
-  context = 'published', 
+  context = 'published',
 }: ArticleCardProps) {
   return (
     <>
       <article className="relative overflow-hidden rounded-lg shadow-lg h-full flex flex-col">
         <Image
           alt={article.title}
-          src={article.image}
+          src={article.cover_image_url}
           className="flex-shrink-0"
         />
         {showAdminActions && (
@@ -84,7 +85,7 @@ function ArticleCard({
         <div className="flex flex-col justify-between flex-grow p-5 border border-l border-r border-b border-gray dark:border-gray-700 rounded-bl-lg rounded-br-lg overflow-hidden">
           <div className="space-y-2">
             <ArticleTitle>{article.title}</ArticleTitle>
-            <Description>{article.description}</Description>
+            <Description>{getPreviewText(article.content)}</Description>
             <Tags tags={article.tags} />
           </div>
           <div className="space-y-2">
@@ -92,10 +93,10 @@ function ArticleCard({
               <Link to="/articles/a">View details</Link>
             </Button>
             <ArticleReactions
-              reactions={article.reactions}
-              reactionsCount={article.reactionsCount}
-              posted={article.posted}
-              readTime={article.readTime}
+              reaction_counts={article.reaction_counts}
+              total_reaction_counts={article.total_reaction_counts}
+              created_at={article.created_at}
+              read_time={article.read_time}
             />
           </div>
         </div>

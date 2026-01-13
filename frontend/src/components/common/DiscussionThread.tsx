@@ -2,9 +2,9 @@ import { useState } from 'react';
 import Like from './Like';
 import Text from './Text';
 import Button from './Button';
-import { Comment } from '../../types/types';
+import { Comment, DiscussionThreadProps } from '../../types/types';
 
-function DiscussionThread() {
+function DiscussionThread({comments, commentsCount, articleId} : DiscussionThreadProps) {
   const [comments, setComments] = useState<Comment[]>([
     {
       id: crypto.randomUUID(),

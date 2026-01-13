@@ -5,7 +5,8 @@ import Text from '../common/Text';
 
 function TrendingArticles() {
   return (
-    <section className="mt-20 lg:mt-4 max-w-7xl mx-auto px-4 lg:px-8 mb-4">
+    <section className="mt-20 lg:mt-4  mx-auto px-4 lg:px-8 mb-4">
+      {/* max-w-7xl */}
       <div className="flex justify-between items-center">
         <div className="my-4">
           <Text

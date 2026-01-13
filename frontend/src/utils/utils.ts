@@ -5,8 +5,36 @@ export function formatDate(dateString: string): string {
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
-  })
+    day: 'numeric',
+  });
+}
+
+export function formatDateB(dateString: string) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffTime = Math.abs(now.getTime() - date.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // 1000ms=is
+
+  if (diffDays === 0) return 'today';
+  if (diffDays === 1) return 'yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+  return `${Math.floor(diffDays / 365)} years ago`;
+}
+
+export function getPreviewText(html: string, maxLength: number = 150) {
+  const tmp = document.createElement('DIV');
+  tmp.innerHTML = html;
+  const plainText = tmp.textContent || tmp.innerText || '';
+
+  const trimmedText = plainText.trim();
+
+  if (trimmedText.length <= maxLength) {
+    return trimmedText;
+  }
+
+  return trimmedText.slice(0, maxLength) + '...';
 }
 
 export function safeLocalStorage() {
@@ -44,7 +72,6 @@ export function clearTokens() {
 export function setToken(data: object) {
   const storage = safeLocalStorage();
   storage.setItem('authTokens', JSON.stringify(data));
-  
 }
 
 export function getToken() {

@@ -2,7 +2,7 @@ import { useCurrentEditor } from '@tiptap/react';
 import { useCallback, useState } from 'react';
 import toast from 'react-hot-toast';
 
-import Spinner from '../../components/common/Spinner';
+import Spinner from '../../../../components/common/Spinner';
 
 export function ButtonClass(isActive: boolean) {
   return `p-2 rounded-lg cursor-pointer focus-visible:outline-0 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-red-300 transition duration-300 ${

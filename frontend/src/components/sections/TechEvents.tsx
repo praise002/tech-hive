@@ -7,9 +7,10 @@ import { displayedEvents } from '../../data/events';
 function TechEvents() {
   return (
     <section
-      className="mt-20 lg:mt-4 max-w-7xl mx-auto px-4 lg:px-8 mb-4"
+      className="mt-20 lg:mt-4  mx-auto px-4 lg:px-8 mb-4"
       aria-label="Tech events"
     >
+      {/* max-w-7xl */}
       <div className="flex justify-between items-center">
         <div className="my-4">
           <Text

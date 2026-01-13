@@ -19,14 +19,23 @@ export interface TextProps {
 
 export interface Article {
   id: string;
-  image: string;
   title: string;
-  description: string;
-  tags: string[];
-  reactions: string[];
-  reactionsCount: number;
-  posted: string;
-  readTime: string;
+  slug: string;
+  content: string;
+  cover_image_url: string;
+  read_time: number;
+  status: string;
+  created_at: string;
+  is_featured: boolean;
+  author: string;
+  total_reaction_counts: number;
+  reaction_counts: {
+    [key: string]: number;
+  };
+  tags: Array<{
+    id: string;
+    name: string;
+  }>;
 }
 
 export interface MarkdownTagsProps {
@@ -68,10 +77,12 @@ export interface ImageProps {
 }
 
 export interface ArticleReactionsProps {
-  reactions: string[];
-  reactionsCount: number;
-  posted: string;
-  readTime: string;
+  reaction_counts: {
+    [key: string]: number;
+  };
+  total_reaction_counts: number;
+  created_at: string;
+  read_time: number;
 }
 
 export interface BookmarkProps {
@@ -79,7 +90,10 @@ export interface BookmarkProps {
 }
 
 export interface TagsProps {
-  tags: string[];
+  tags: Array<{
+    id: string;
+    name: string;
+  }>;
 }
 
 export interface ArticleTitleProps {
@@ -223,3 +237,36 @@ export interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
+export interface ArticleReply {
+  id: string;
+  body: string;
+  created_at: string;
+  user_name: string;
+  user_username: string;
+  user_avatar: string;
+  replying_to_name: string;
+  replying_to_username: string;
+}
+
+export interface ArticleComment {
+  id: string;
+  thread_id: string;
+  body: string;
+  created_at: string;
+  user_name: string;
+  user_username: string;
+  user_avatar: string;
+  total_replies: number;
+  replies?: ArticleReply[]; // Optional: only loaded when user clicks "View replies"
+}
+
+export interface ArticleDetail extends Article {
+  comments: ArticleComment[];
+  comments_count: number;
+}
+
+export interface DiscussionThreadProps {
+  comments: ArticleComment[];
+  commentsCount: number;
+  articleId: string;
+}

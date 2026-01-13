@@ -1,12 +1,17 @@
 import { ArticleReactionsProps } from '../../types/types';
+import { formatDateB } from '../../utils/utils';
 import Bookmark from './Bookmark';
 
+// Math.ceil - rounds up, Math.floor - rounds down
+
 function ArticleReactions({
-  reactions,
-  reactionsCount,
-  posted,
-  readTime,
+  reaction_counts: reactionCounts,
+  total_reaction_counts: totalReactionCounts,
+  created_at: createdAt,
+  read_time: readTime,
 }: ArticleReactionsProps) {
+  const reactions = reactionCounts ? Object.keys(reactionCounts) : [];
+
   return (
     <div
       className="flex flex-col"
@@ -18,7 +23,7 @@ function ArticleReactions({
         {/* Reactions */}
         <div className="flex items-center space-x-2">
           <div className="flex space-x-1 text-lg">
-            {reactions.map((reaction, index) => (
+            {reactions.slice(0, 3).map((emoji, index) => (
               <span
                 key={index}
                 className={`inline-flex items-center justify-center w-6 h-6 rounded-full shadow-md ${
@@ -26,15 +31,15 @@ function ArticleReactions({
                 }`}
                 aria-label={`Reaction emoji ${index + 1}`}
               >
-                {reaction}
+                {emoji}
               </span>
             ))}
           </div>
           <div
             className="whitespace-nowrap text-xs md:text-sm text-primary dark:text-custom-white font-medium"
-            aria-label={`${reactionsCount} reactions`}
+            aria-label={`${totalReactionCounts} reactions`}
           >
-            {reactionsCount} reactions
+            {totalReactionCounts} reactions
           </div>
         </div>
 
@@ -59,9 +64,9 @@ function ArticleReactions({
       {/* Posted Time */}
       <div
         className="text-xs text-gray-700 dark:text-secondary"
-        aria-label={`Posted ${posted}`}
+        aria-label={`Posted ${formatDateB(createdAt)}`}
       >
-        Posted {posted}
+        Posted {formatDateB(createdAt)}
       </div>
     </div>
   );

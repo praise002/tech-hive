@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TagInputProps } from '../../types/types';
+import { TagInputProps } from '../../../../types/types';
 
 function TagInput({
   tags,

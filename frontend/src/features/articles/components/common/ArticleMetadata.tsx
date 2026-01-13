@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import Button from '../../components/common/Button';
+import Button from '../../../../components/common/Button';
 import MarkdownTags from './MarkdownTags';
 import TagInput from './TagInput';
 import toast from 'react-hot-toast';
-import Spinner from '../../components/common/Spinner';
-import { ToolTip } from '../../components/common/SocialLinks';
-import Text from '../../components/common/Text';
+import Spinner from '../../../../components/common/Spinner';
+import { ToolTip } from '../../../../components/common/SocialLinks';
+import Text from '../../../../components/common/Text';
 
 const suggestedTags = [
   'JavaScript',

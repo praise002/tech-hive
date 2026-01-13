@@ -27,7 +27,7 @@ import {
   FaTable,
   FaYoutube,
 } from 'react-icons/fa6';
-import Spinner from '../../components/common/Spinner';
+import Spinner from '../../../../components/common/Spinner';
 
 function CustomToolbar({ editor }: { editor: Editor | null }) {
   if (!editor) return null;

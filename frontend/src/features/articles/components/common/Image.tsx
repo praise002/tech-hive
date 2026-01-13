@@ -5,8 +5,8 @@ import {
   ReactNodeViewRenderer,
 } from '@tiptap/react';
 import { useEffect, useRef, useState } from 'react';
-import Button from '../../components/common/Button';
-import Text from '../../components/common/Text';
+import Button from '../../../../components/common/Button';
+import Text from '../../../../components/common/Text';
 
 function ImageNode(props: NodeViewWrapperProps) {
   const [isAltTextModalOpen, setIsAltTextModalOpen] = useState(false);

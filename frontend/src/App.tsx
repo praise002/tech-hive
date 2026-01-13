@@ -32,12 +32,12 @@ import { Toaster } from 'react-hot-toast';
 
 import AdminDashboard from './features/admin/AdminDashboard';
 
-import Liveblock from './features/articles/Liveblock';
-import Docs from './features/articles/Docs';
+import Liveblock from './features/articles/pages/Liveblock';
+import Docs from './features/articles/pages/Docs';
 import ComingSoon from './pages/coming-soon';
 import CampusKart from './pages/CampusKart';
-import ArticleList from './features/articles/ArticleList';
-import ArticleDetail from './features/articles/ArticleDetail';
+import ArticleList from './features/articles/pages/ArticleList';
+
 import VerifyEmail from './features/auth/pages/VerifyEmail';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import ProfileDetail from './features/profile/pages/ProfileDetail';
@@ -47,6 +47,7 @@ import {
   GoogleLoginCallback,
   GoogleRegisterCallback,
 } from './features/auth/pages/GoogleCallback';
+import ArticleDetail from './features/articles/pages/ArticleDetail';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -66,7 +67,7 @@ function App() {
             {/* <Route path="/" element={<Home />} /> */}
             <Route index element={<Home />} />
             <Route path="articles" element={<ArticleList />} />
-            <Route path="articles/:articleSlug" element={<ArticleDetail />} />
+            <Route path="articles/:username/:slug" element={<ArticleDetail />} />
             <Route path="jobs" element={<TechJobsList />} />
             <Route path="jobs/:jobSlug" element={<TechJobDetail />} />
             <Route path="events" element={<TechEventList />} />

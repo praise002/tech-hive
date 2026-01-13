@@ -1,4 +1,5 @@
-export const API_URL = 'https://127.0.0.1:8000/api/v1';
+export const API_URL = 'http://127.0.0.1:9000/api/v1';
+// export const API_URL = 'https://252f6a1b6106.ngrok-free.app/api/v1';
 // export const API_URL = 'https://tech-hive-production.up.railway.app/api/v1';
 export const AUTH_URL = '/auth';
 export const PROFILE_URL = '/profiles';
@@ -34,13 +35,21 @@ export const routes = {
 
   content: {
     categories: '/categories/',
+    articles: '/articles/',
     events: '/events/',
     jobs: '/jobs/',
     resources: '/resources/',
     tools: '/tools/',
+    byArticle: (username: string, slug: string) =>
+      `/articles/${username}/${slug}/`,
+    byCategory: (slug: string) => `/categories/${slug}/`,
+    byJob: (jobId: string) => `/jobs/${jobId}/`,
+    byEvent: (eventId: string) => `/events/${eventId}/`,
+    byResource: (resourceId: string) => `/resources/${resourceId}/`,
+    byTool: (toolId: string) => `/tools/${toolId}/`,
   },
 
   general: {
-    nesletter: '/newsletter/',
+    newsletter: '/newsletter/',
   },
 };
