@@ -184,6 +184,7 @@ class ArticleRetrieveView(APIView):
         description="Retrieve detailed information about a specific article using the author's username and article slug.",
         tags=article_tags,
         responses=ARTICLE_DETAIL_RESPONSE_EXAMPLE,
+        auth=[],
     )
     def get(self, *args, **kwargs):
         try:
@@ -363,6 +364,7 @@ class RSSFeedInfoView(APIView):
         description="Get information about subscribing to Tech Hive's RSS feed.",
         tags=article_tags,
         responses=RSS_RESPONSE_EXAMPLE,
+        auth=[],
     )
     def get(self, request):
         base_url = request.build_absolute_uri("/").rstrip("/")
