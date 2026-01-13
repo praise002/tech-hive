@@ -908,16 +908,16 @@ ARTICLE_REACTION_TOGGLE_RESPONSE_EXAMPLE = {
 }
 
 
-ARTICLE_REACTION_STATUS_RESPONSE_EXAMPLE = {
+ARTICLE_REACTION_STATISTICS_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(
         response=ArticleReactionStatusSerializer,
-        description="Reaction status retrieved successfully. `user_reactions` will be `null` for unauthenticated users.",
+        description="Reaction statistics retrieved successfully. `user_reactions` will be `null` for unauthenticated users.",
         examples=[
             OpenApiExample(
                 name="Authenticated user with reactions",
                 value={
                     "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Reaction status retrieved successfully",
+                    "message": "Reaction statistics retrieved successfully",
                     "data": {
                         "article_id": UUID_EXAMPLE,
                         "reaction_counts": {
@@ -935,7 +935,7 @@ ARTICLE_REACTION_STATUS_RESPONSE_EXAMPLE = {
                 name="Authenticated user without reactions",
                 value={
                     "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Reaction status retrieved successfully",
+                    "message": "Reaction statistics retrieved successfully",
                     "data": {
                         "article_id": UUID_EXAMPLE,
                         "reaction_counts": {
@@ -953,7 +953,7 @@ ARTICLE_REACTION_STATUS_RESPONSE_EXAMPLE = {
                 name="Unauthenticated user",
                 value={
                     "status": SUCCESS_RESPONSE_STATUS,
-                    "message": "Reaction status retrieved successfully",
+                    "message": "Reaction statistics retrieved successfully",
                     "data": {
                         "article_id": UUID_EXAMPLE,
                         "reaction_counts": {

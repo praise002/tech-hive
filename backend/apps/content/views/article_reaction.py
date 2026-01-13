@@ -6,7 +6,7 @@ from apps.common.responses import CustomResponse
 from apps.content.choices import ArticleStatusChoices
 from apps.content.models import Article, ArticleReaction
 from apps.content.schema_examples import (
-    ARTICLE_REACTION_STATUS_RESPONSE_EXAMPLE,
+    ARTICLE_REACTION_STATISTICS_RESPONSE_EXAMPLE,
     ARTICLE_REACTION_TOGGLE_RESPONSE_EXAMPLE,
 )
 from apps.content.serializers import (
@@ -40,10 +40,10 @@ class ArticleReactionView(APIView):
         return serializer_class(*args, **kwargs)
 
     @extend_schema(
-        summary="Get reaction status for an article",
+        summary="Get reaction statistics for an article",
         description="Retrieve the reaction statistics for a published article, including the count for each emoji type and the total reaction count. If the user is authenticated, it also returns which reactions the user has added.",
         tags=tags,
-        responses=ARTICLE_REACTION_STATUS_RESPONSE_EXAMPLE,
+        responses=ARTICLE_REACTION_STATISTICS_RESPONSE_EXAMPLE,
     )
     def get(self, request, article_id):
         """
@@ -85,7 +85,7 @@ class ArticleReactionView(APIView):
 
             serializer = self.get_serializer(response_data)
             return CustomResponse.success(
-                message="Reaction status retrieved successfully",
+                message="Reaction statistics retrieved successfully",
                 data=serializer.data,
                 status_code=status.HTTP_200_OK,
             )
