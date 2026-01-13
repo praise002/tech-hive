@@ -83,3 +83,21 @@ export function getToken() {
   const userToken = JSON.parse(authToken);
   return userToken;
 }
+
+export const handleQueryError = (error: unknown, context?: string) => {
+  const message = error instanceof Error ? error.message : 'Unknown error';
+
+  // Development logging
+  if (import.meta.env.DEV) {
+    console.error(`[${context || 'Query Error'}]:`, error);
+  }
+
+  // Production error tracking
+  if (import.meta.env.PROD) {
+    // Send to your error monitoring service
+    // Sentry.captureException(error, { tags: { context } });
+  }
+
+  // Optional: User notification
+  // You can add toast notifications here if needed
+};

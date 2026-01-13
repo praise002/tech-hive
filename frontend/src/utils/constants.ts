@@ -35,18 +35,48 @@ export const routes = {
 
   content: {
     categories: '/categories/',
-    articles: '/articles/',
     events: '/events/',
     jobs: '/jobs/',
     resources: '/resources/',
     tools: '/tools/',
-    byArticle: (username: string, slug: string) =>
-      `/articles/${username}/${slug}/`,
+    comment: '/comments/',
     byCategory: (slug: string) => `/categories/${slug}/`,
     byJob: (jobId: string) => `/jobs/${jobId}/`,
     byEvent: (eventId: string) => `/events/${eventId}/`,
     byResource: (resourceId: string) => `/resources/${resourceId}/`,
     byTool: (toolId: string) => `/tools/${toolId}/`,
+  },
+
+  article: {
+    articles: '/articles/',
+    tags: '/tags/',
+    comments: '/comments/',
+    assignedReviews: '/reviews/assigned/',
+    rssInfo: '/articles/rss/',
+    byArticle: (username: string, slug: string) =>
+      `/articles/${username}/${slug}/`,
+
+    commentById: (commentId: string) => `/comments/${commentId}/`,
+    commentReplies: (commentId: string) => `/comments/${commentId}/replies/`,
+    commentLike: (commentId: string) => `/comments/${commentId}/like/`,
+    commentLikes: (commentId: string) => `/comments/${commentId}/likes/`,
+
+    articleSummary: (articleId: string) => `/articles/${articleId}/summarize/`,
+    articleReactions: (articleId: string) =>
+      `/articles/${articleId}/reactions/`,
+    articleEditor: (articleId: string) => `/articles/${articleId}/editor/`,
+    articleSubmit: (articleId: string) => `/articles/${articleId}/submit/`,
+
+    reviewById: (reviewId: string) => `/reviews/${reviewId}/`,
+    reviewStart: (reviewId: string) => `/reviews/${reviewId}/start/`,
+    reviewRequestChanges: (reviewId: string) =>
+      `/reviews/${reviewId}/request-changes/`,
+    reviewApprove: (reviewId: string) => `/reviews/${reviewId}/approve/`,
+    reviewReject: (reviewId: string) => `/reviews/${reviewId}/reject/`,
+
+    liveblocksAuth: '/liveblocks/auth/',
+    userSearch: '/users/search/',
+    userBatch: '/users/batch/',
   },
 
   general: {

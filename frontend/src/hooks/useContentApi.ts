@@ -8,6 +8,8 @@ export const useContentApi = () => {
   const getCategories = async (params?: {
     page?: number;
     page_size?: number;
+    ordering?: number;
+    search?: number;
   }) => {
     let url = routes.content.categories;
 
@@ -22,36 +24,12 @@ export const useContentApi = () => {
         searchParams.append('page_size', params.page_size.toString());
       }
 
-      // Only add '?' if we have params
-      if (searchParams.toString()) {
-        url = `${url}?${searchParams.toString()}`;
-      }
-    }
-    const response = await sendRequest(ApiMethod.GET, url);
-
-    return response.data;
-  };
-
-  const getArticles = async (params?: {
-    limit?: number;
-    page?: number;
-    page_size?: number;
-  }) => {
-    let url = routes.content.articles;
-
-    if (params) {
-      const searchParams = new URLSearchParams();
-
-      if (params.limit) {
-        searchParams.append('limit', params.limit.toString());
+      if (params.search) {
+        searchParams.append('search', params.search.toString());
       }
 
-      if (params.page) {
-        searchParams.append('page', params.page.toString());
-      }
-
-      if (params.page_size) {
-        searchParams.append('page_size', params.page_size.toString());
+      if (params.ordering) {
+        searchParams.append('search', params.ordering.toString());
       }
 
       // Only add '?' if we have params
@@ -163,13 +141,6 @@ export const useContentApi = () => {
     return response.data;
   };
 
-  const getArticleDetail = async (username: string, slug: string) => {
-    const articleDetail = routes.content.byArticle(username, slug);
-    const response = await sendRequest(ApiMethod.GET, articleDetail);
-
-    return response.data;
-  };
-
   const getCategoryDetail = async (slug: string) => {
     const url = routes.content.byCategory(slug);
     const response = await sendRequest(ApiMethod.GET, url);
@@ -206,13 +177,11 @@ export const useContentApi = () => {
   };
 
   return {
-    getArticles,
     getResources,
     getEvents,
     getJobs,
     getTools,
     getCategories,
-    getArticleDetail,
     getCategoryDetail,
     getJobDetail,
     getEventDetail,

@@ -37,6 +37,11 @@ const sendRequest = async (
     // }
   }
 
+  // Handle 204 No Content response
+  if (response.status === 204) {
+    return { data: null };
+  }
+
   return await response.json();
 };
 

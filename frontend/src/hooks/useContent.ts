@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import { useContentApi } from './useContentApi';
-import { useNavigate } from 'react-router-dom';
 
 export function useCategories(params?: { page?: number; page_size?: number }) {
   const { getCategories } = useContentApi();
@@ -27,42 +26,6 @@ export function useCategories(params?: { page?: number; page_size?: number }) {
     isPending,
     isError,
     categories,
-    count,
-    next,
-    previous,
-    error,
-  };
-}
-
-export function useArticles(params?: {
-  limit?: number;
-  page?: number;
-  page_size?: number;
-}) {
-  const { getArticles } = useContentApi();
-
-  const {
-    isPending,
-    isError,
-    data: articlesResponse,
-    error,
-  } = useQuery({
-    queryKey: ['articles', params],
-    queryFn: async () => {
-      const response = await getArticles(params);
-      return response;
-    },
-  });
-
-  const articles = articlesResponse?.results || [];
-  const count = articlesResponse?.count;
-  const next = articlesResponse?.next;
-  const previous = articlesResponse?.previous;
-
-  return {
-    isPending,
-    isError,
-    articles,
     count,
     next,
     previous,
@@ -196,25 +159,6 @@ export function useTools(params?: { page?: number; page_size?: number }) {
     previous,
     error,
   };
-}
-
-export function useArticleDetail(username: string, slug: string) {
-  const { getArticleDetail } = useContentApi();
-
-  const {
-    isPending,
-    isError,
-    data: article,
-    error,
-  } = useQuery({
-    queryKey: ['articleDetail', username, slug],
-    queryFn: async () => {
-      return getArticleDetail(username, slug);
-    },
-    enabled: !!slug && !!username,
-  });
-
-  return { isPending, isError, article, error };
 }
 
 export function useCategoryDetail(slug: string) {

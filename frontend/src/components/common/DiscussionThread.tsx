@@ -2,42 +2,29 @@ import { useState } from 'react';
 import Like from './Like';
 import Text from './Text';
 import Button from './Button';
-import { Comment, DiscussionThreadProps } from '../../types/types';
+import {
+  ArticleComment,
+  Comment,
+  DiscussionThreadProps,
+} from '../../types/types';
 
-function DiscussionThread({comments, commentsCount, articleId} : DiscussionThreadProps) {
-  const [comments, setComments] = useState<Comment[]>([
-    {
-      id: crypto.randomUUID(),
-      author: 'Adebayo Abibat',
-      text: 'This is really informative',
-      timestamp: '2h',
-      replies: [],
-    },
-  ]); // Stores the list of existing comments
+function DiscussionThread({
+  comments: initialComments,
+  commentsCount,
+  articleId,
+}: DiscussionThreadProps) {
+  const [comments, setComments] = useState<ArticleComment[]>(initialComments); // Stores the list of existing comments
   const [newComment, setNewComment] = useState<string>(''); // Tracks the user's input in the textarea
   const [replyText, setReplyText] = useState<Record<string, string>>({}); // For replies (keyed by comment ID)
 
-  interface NewComment {
-    id: string;
-    author: string;
-    text: string;
-    timestamp: string;
-    replies: Comment['replies'];
-  }
-
   function handleAddComment(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (newComment.trim() === '') return; // Prevent empty comments
+    if (!newComment.trim()) return; // Prevent empty comments
 
-    const newCommentObj: NewComment = {
-      id: crypto.randomUUID(),
-      author: 'Praise Idowu',
-      text: newComment,
-      timestamp: 'Just now', // Replace with dynamic timestamp logic later
-      replies: [],
-    };
+    const response;
+    const newCommentData;
 
-    setComments([newCommentObj, ...comments]);
+    setComments([newCommentData, ...comments]);
     setNewComment(''); // Clear the textarea
   }
 
