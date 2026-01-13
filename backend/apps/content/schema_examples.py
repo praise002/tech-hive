@@ -1840,7 +1840,31 @@ REVIEW_DETAIL_RESPONSE_EXAMPLE = {
 LIVEBLOCK_AUTH_RESPONSE_EX = {
     200: OpenApiResponse(
         response=LiveblocksAuthResponseSerializer,
-        description="Success Response",
+        description="Authentication successful",
+        examples=[
+            OpenApiExample(
+                name="Write Access",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Authentication successful",
+                    "data": {
+                        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+                        "user_id": UUID_EXAMPLE,
+                    },
+                },
+            ),
+            OpenApiExample(
+                name="Read-Only Access",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Authentication successful (read-only)",
+                    "data": {
+                        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+                        "user_id": UUID_EXAMPLE,
+                    },
+                },
+            ),
+        ],
     ),
     400: OpenApiResponse(
         response=ErrorDataResponseSerializer,
@@ -1854,7 +1878,7 @@ LIVEBLOCK_AUTH_RESPONSE_EX = {
                 name="Access Denied",
                 value={
                     "status": ERR_RESPONSE_STATUS,
-                    "message": "You do not have permission to view this review.",
+                    "message": "You don't have permission to access this room",
                     "code": ErrorCode.FORBIDDEN,
                 },
             )
@@ -1863,5 +1887,37 @@ LIVEBLOCK_AUTH_RESPONSE_EX = {
     422: OpenApiResponse(
         response=ErrorDataResponseSerializer,
         description="Unprocessable Entity",
+        examples=[
+            OpenApiExample(
+                name="Article Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Article not found",
+                    "code": ErrorCode.UNPROCESSABLE_ENTITY,
+                },
+            ),
+            OpenApiExample(
+                name="Invalid Article ID",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Invalid article ID format",
+                    "code": ErrorCode.UNPROCESSABLE_ENTITY,
+                },
+            ),
+        ],
+    ),
+    500: OpenApiResponse(
+        description="Server Error",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Token Generation Failed",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Failed to generate authentication token",
+                    "code": ErrorCode.SERVER_ERROR,
+                },
+            )
+        ],
     ),
 }
