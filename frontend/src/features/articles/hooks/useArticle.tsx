@@ -1,7 +1,32 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useArticleApi } from './useArticleApi';
-import { CreateCommentData } from '../../../types/article';
+
 import { useNavigate } from 'react-router-dom';
+import { handleQueryError } from '../../../utils/utils';
+import {
+  ArticleDetail,
+  ArticleEditorResponse,
+  ArticleReactionStatisticsResponse,
+  ArticleReactionToggleResponse,
+  ArticlesResponse,
+  ArticleSubmitResponse,
+  ArticleSummaryResponse,
+  AssignedReviewsResponse,
+  CommentCreateRequest,
+  CommentCreateResponse,
+  CommentLikeStatus,
+  CommentLikeToggleResponse,
+  LiveblocksAuthResponse,
+  ReactionType,
+  ReviewActionResponse,
+  ReviewApproveResponse,
+  ReviewDetail,
+  ReviewStartResponse,
+  RssFeedInfo,
+  TagsResponse,
+  ThreadReply,
+  UserMention,
+} from '../../../types/article';
 
 export function useArticles(params?: {
   limit?: number;
@@ -15,7 +40,7 @@ export function useArticles(params?: {
     isError,
     data: articlesResponse,
     error,
-  } = useQuery({
+  } = useQuery<ArticlesResponse>({
     queryKey: ['articles', params],
     queryFn: async () => {
       const response = await getArticles(params);
@@ -47,7 +72,7 @@ export function useArticleDetail(username: string, slug: string) {
     isError,
     data: article,
     error,
-  } = useQuery({
+  } = useQuery<ArticleDetail>({
     queryKey: ['articleDetail', username, slug],
     queryFn: async () => {
       return getArticleDetail(username, slug);
@@ -66,7 +91,7 @@ export function useTags(params?: { limit?: number; search?: string }) {
     isError,
     data: tags,
     error,
-  } = useQuery({
+  } = useQuery<TagsResponse>({
     queryKey: ['tags', params],
     queryFn: async () => {
       const response = await getTags(params);
@@ -92,8 +117,8 @@ export function useCreateComment() {
     isPending,
     isError,
     error,
-  } = useMutation({
-    mutationFn: (data: CreateCommentData) => {
+  } = useMutation<CommentCreateResponse, Error, CommentCreateRequest>({
+    mutationFn: (data: CommentCreateRequest) => {
       const handleUnauthenticated = () => {
         navigate('/login');
       };
@@ -101,7 +126,7 @@ export function useCreateComment() {
       return createCommentApi(handleUnauthenticated, data);
     },
 
-    onSuccess: (variables) => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ['articleDetail'],
       });
@@ -115,7 +140,7 @@ export function useCreateComment() {
     },
 
     onError: (error) => {
-      console.error('Comment update error:', error);
+      handleQueryError(error, 'Comment update');
     },
   });
 
@@ -132,7 +157,7 @@ export function useThreadReplies(commentId: string, enabled: boolean = true) {
     isError,
     data: replies,
     error,
-  } = useQuery({
+  } = useQuery<ThreadReply[]>({
     queryKey: ['threadReplies', commentId],
     queryFn: () => getThreadReplies(commentId),
     enabled: enabled && !!commentId, // Only fetch if enabled and commentId exists
@@ -151,7 +176,7 @@ export function useDeleteComment() {
     isPending,
     isError,
     error,
-  } = useMutation({
+  } = useMutation<boolean, Error, string>({
     mutationFn: (commentId: string) => {
       const handleUnauthenticated = () => {
         navigate('/login');
@@ -165,7 +190,7 @@ export function useDeleteComment() {
     },
 
     onError: (error) => {
-      console.error('Comment delete error:', error);
+      handleQueryError(error, 'Comment delete');
     },
   });
 
@@ -182,7 +207,7 @@ export function useToggleCommentLike() {
     isPending,
     isError,
     error,
-  } = useMutation({
+  } = useMutation<CommentLikeToggleResponse, Error, string>({
     mutationFn: (commentId: string) => {
       const handleUnauthenticated = () => {
         navigate('/login');
@@ -198,7 +223,7 @@ export function useToggleCommentLike() {
     },
 
     onError: (error) => {
-      console.error('Comment delete error:', error);
+      handleQueryError(error, 'Comment like toggle');
     },
   });
   return { toggleCommentLike, isPending, isError, error };
@@ -215,7 +240,7 @@ export function useCommentLikeStatus(
     isError,
     data: likeStatus,
     error,
-  } = useQuery({
+  } = useQuery<CommentLikeStatus>({
     queryKey: ['commentLikeStatus', commentId],
     queryFn: () => getCommentLikeStatus(commentId),
     enabled: enabled && !!commentId,
@@ -234,14 +259,12 @@ export function useGenerateArticleSummary() {
     isPending,
     isError,
     error,
-  } = useMutation({
-    mutationFn: ({
-      articleId,
-      forceRegenerate,
-    }: {
-      articleId: string;
-      forceRegenerate?: boolean;
-    }) => {
+  } = useMutation<
+    ArticleSummaryResponse,
+    Error,
+    { articleId: string; forceRegenerate?: boolean }
+  >({
+    mutationFn: ({ articleId, forceRegenerate }) => {
       const handleUnauthenticated = () => {
         navigate('/login');
       };
@@ -258,7 +281,7 @@ export function useGenerateArticleSummary() {
     },
 
     onError: (error) => {
-      console.error('Generate article summary error:', error);
+      handleQueryError(error, 'Generate article summary');
     },
   });
   return { generateArticleSummary, isPending, isError, error };
@@ -274,14 +297,12 @@ export function useToggleArticleReaction() {
     isPending,
     isError,
     error,
-  } = useMutation({
-    mutationFn: ({
-      articleId,
-      reactionType,
-    }: {
-      articleId: string;
-      reactionType: string;
-    }) => {
+  } = useMutation<
+    ArticleReactionToggleResponse,
+    Error,
+    { articleId: string; reactionType: ReactionType }
+  >({
+    mutationFn: ({ articleId, reactionType }) => {
       const handleUnauthenticated = () => {
         navigate('/login');
       };
@@ -303,7 +324,7 @@ export function useToggleArticleReaction() {
     },
 
     onError: (error) => {
-      console.error('Toggle reaction error:', error);
+      handleQueryError(error, 'Toggle article reaction');
     },
   });
   return { toggleArticleReaction, isPending, isError, error };
@@ -312,7 +333,7 @@ export function useToggleArticleReaction() {
 export function useArticleReactionStatistics(articleId: string) {
   const { getArticleReactionStatistics } = useArticleApi();
 
-  return useQuery({
+  return useQuery<ArticleReactionStatisticsResponse>({
     queryKey: ['articleReactionStatus', articleId],
     queryFn: () => getArticleReactionStatistics(articleId),
     enabled: !!articleId,
@@ -328,7 +349,7 @@ export function useArticleEditor(articleId: string) {
     isError,
     data: article,
     error,
-  } = useQuery({
+  } = useQuery<ArticleEditorResponse>({
     queryKey: ['articleEditor', articleId],
     queryFn: () => {
       const handleUnauthenticated = () => {
@@ -352,7 +373,7 @@ export function useSubmitArticle() {
     isPending,
     isError,
     error,
-  } = useMutation({
+  } = useMutation<ArticleSubmitResponse, Error, string>({
     mutationFn: (articleId: string) => {
       const handleUnauthenticated = () => {
         navigate('/login');
@@ -368,7 +389,7 @@ export function useSubmitArticle() {
     },
 
     onError: (error) => {
-      console.error('Submit article error:', error);
+      handleQueryError(error, 'Submit article');
     },
   });
   return { submitArticle, isPending, isError, error };
@@ -386,7 +407,7 @@ export function useAssignedReviews(params?: {
     isError,
     data: reviewsResponse,
     error,
-  } = useQuery({
+  } = useQuery<AssignedReviewsResponse>({
     queryKey: ['assignedReviews', params],
     queryFn: () => {
       const handleUnauthenticated = () => {
@@ -421,7 +442,7 @@ export function useReviewDetail(reviewId: string) {
     isError,
     data: review,
     error,
-  } = useQuery({
+  } = useQuery<ReviewDetail>({
     queryKey: ['reviewDetail', reviewId],
     queryFn: () => {
       const handleUnauthenticated = () => {
@@ -447,7 +468,7 @@ export function useStartReview() {
     isPending,
     isError,
     error,
-  } = useMutation({
+  } = useMutation<ReviewStartResponse, Error, string>({
     mutationFn: (reviewId: string) => {
       const handleUnauthenticated = () => {
         navigate('/login');
@@ -463,7 +484,7 @@ export function useStartReview() {
     },
 
     onError: (error) => {
-      console.error('Start review error:', error);
+      handleQueryError(error, 'Start review');
     },
   });
   return { startReview, isPending, isError, error };
@@ -479,14 +500,12 @@ export function useRequestReviewChanges() {
     isPending,
     isError,
     error,
-  } = useMutation({
-    mutationFn: ({
-      reviewId,
-      reviewerNotes,
-    }: {
-      reviewId: string;
-      reviewerNotes?: string;
-    }) => {
+  } = useMutation<
+    ReviewActionResponse,
+    Error,
+    { reviewId: string; reviewerNotes?: string }
+  >({
+    mutationFn: ({ reviewId, reviewerNotes }) => {
       const handleUnauthenticated = () => {
         navigate('/login');
       };
@@ -497,7 +516,7 @@ export function useRequestReviewChanges() {
         reviewerNotes
       );
     },
-    onSuccess: (variables) => {
+    onSuccess: (_, variables) => {
       // Refresh review detail
       queryClient.invalidateQueries({
         queryKey: ['reviewDetail', variables.reviewId],
@@ -509,7 +528,7 @@ export function useRequestReviewChanges() {
     },
 
     onError: (error) => {
-      console.error('Start review error:', error);
+      handleQueryError(error, 'Request review changes');
     },
   });
   return { requestReviewChanges, isPending, isError, error };
@@ -525,7 +544,11 @@ export function useApproveReview() {
     isPending,
     isError,
     error,
-  } = useMutation({
+  } = useMutation<
+    ReviewApproveResponse,
+    Error,
+    { reviewId: string; reviewerNotes?: string }
+  >({
     mutationFn: ({
       reviewId,
       reviewerNotes,
@@ -539,7 +562,7 @@ export function useApproveReview() {
 
       return approveReviewApi(handleUnauthenticated, reviewId, reviewerNotes);
     },
-    onSuccess: (variables) => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ['reviewDetail', variables.reviewId],
       });
@@ -548,7 +571,7 @@ export function useApproveReview() {
     },
 
     onError: (error) => {
-      console.error('Approve review error:', error);
+      handleQueryError(error, 'Approve review');
     },
   });
   return { approveReview, isPending, isError, error };
@@ -564,21 +587,19 @@ export function useRejectReview() {
     isPending,
     isError,
     error,
-  } = useMutation({
-    mutationFn: ({
-      reviewId,
-      reviewerNotes,
-    }: {
-      reviewId: string;
-      reviewerNotes?: string;
-    }) => {
+  } = useMutation<
+    ReviewActionResponse,
+    Error,
+    { reviewId: string; reviewerNotes?: string }
+  >({
+    mutationFn: ({ reviewId, reviewerNotes }) => {
       const handleUnauthenticated = () => {
         navigate('/login');
       };
 
       return rejectReviewApi(handleUnauthenticated, reviewId, reviewerNotes);
     },
-    onSuccess: (variables) => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ['reviewDetail', variables.reviewId],
       });
@@ -587,7 +608,7 @@ export function useRejectReview() {
     },
 
     onError: (error) => {
-      console.error('Start review error:', error);
+      handleQueryError(error, 'Reject review');
     },
   });
   return { rejectReview, isPending, isError, error };
@@ -603,7 +624,7 @@ export function useLiveblocksAuth() {
     isPending,
     isError,
     error,
-  } = useMutation({
+  } = useMutation<LiveblocksAuthResponse, Error, string>({
     mutationFn: (roomId: string) => {
       const handleUnauthenticated = () => {
         navigate('/login');
@@ -636,7 +657,7 @@ export function useSearchUsers(
     isError,
     data: users,
     error,
-  } = useQuery({
+  } = useQuery<UserMention[]>({
     queryKey: ['userSearch', query, roomId],
     queryFn: () => {
       const handleUnauthenticated = () => {
@@ -663,7 +684,7 @@ export function useBatchGetUsers() {
     isPending,
     isError,
     error,
-  } = useMutation({
+  } = useMutation<UserMention[], Error, string[]>({
     mutationFn: (userIds: string[]) => {
       const handleUnauthenticated = () => {
         navigate('/login');
@@ -684,7 +705,7 @@ export function useRssFeedInfo() {
     isError,
     data: rssInfo,
     error,
-  } = useQuery({
+  } = useQuery<RssFeedInfo>({
     queryKey: ['rssInfo'],
     queryFn: () => getRssFeedInfo(),
     staleTime: Infinity, // RSS info rarely changes

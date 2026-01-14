@@ -90,7 +90,7 @@ export function useUpdateUserProfile() {
     },
 
     onError: (error) => {
-      console.error('Profile update error:', error);
+      handleQueryError(error, 'Profile update');
     },
   });
   return { updateCurrentUserProfile, isPending, isError, error };
@@ -122,7 +122,7 @@ export function useUpdateUserAvatar() {
     },
 
     onError: (error) => {
-      console.error('Profile update error:', error);
+      handleQueryError(error, 'Avatar update');
     },
   });
   return { updateCurrentUserAvatar, isPending, isError, error };
@@ -204,7 +204,7 @@ export function useUpdateUserArticleBySlug() {
     },
 
     onError: (error) => {
-      console.error('Article update error:', error);
+      handleQueryError(error, 'User Article update');
     },
   });
   return { updateUserArticleBySlug, isPending, isError, error };
@@ -256,7 +256,7 @@ export function useUpdateSavedArticle() {
     },
 
     onError: (error) => {
-      console.error('Saved Article update error:', error);
+      handleQueryError(error, 'Saved Article update');
     },
   });
   return { updateSavedArticle, isPending, isError, error };

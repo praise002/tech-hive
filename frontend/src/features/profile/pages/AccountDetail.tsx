@@ -28,7 +28,7 @@ import {
   useUpdateUserProfile,
 } from '../hooks/useProfile';
 import Spinner from '../../../components/common/Spinner';
-import { formatDate } from '../../../utils/utils';
+import { formatDate, handleQueryError } from '../../../utils/utils';
 
 const defaultProfilePicture = '/assets/icons/Avatars.png';
 
@@ -199,7 +199,7 @@ function AccountDetail() {
         });
       });
     } catch (error) {
-      console.error('Error cropping image:', error);
+      handleQueryError(error, 'Error cropping image');
       toast.error('Failed to crop image');
     }
   }

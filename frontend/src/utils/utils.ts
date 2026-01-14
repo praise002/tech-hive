@@ -51,7 +51,7 @@ export function safeLocalStorage() {
     };
   } catch (e) {
     // localStorage is not available (private browsing, disabled, etc.)
-    console.error('Error:', e);
+    handleQueryError(e, 'Error');
     toast.error(
       'Your browser settings are blocking storage. Some features may not work properly. Try enabling cookies or using a different browser.'
     );
@@ -85,7 +85,7 @@ export function getToken() {
 }
 
 export const handleQueryError = (error: unknown, context?: string) => {
-  const message = error instanceof Error ? error.message : 'Unknown error';
+  // const message = error instanceof Error ? error.message : 'Unknown error';
 
   // Development logging
   if (import.meta.env.DEV) {

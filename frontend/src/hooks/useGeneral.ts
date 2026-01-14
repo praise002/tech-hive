@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { useGeneralApi } from './useGeneralApi';
+import { handleQueryError } from '../utils/utils';
 
 export function useSubscribeNewsletter() {
   const { subscribeNewsletter: subscribeNewsletterApi } = useGeneralApi();
@@ -14,7 +15,7 @@ export function useSubscribeNewsletter() {
     onSuccess: () => {},
 
     onError: (error) => {
-      console.error('Subscription error:', error);
+      handleQueryError(error, 'Newsletter Subscription');
     },
   });
   return { subscribeNewsletter, isPending, isError, error };

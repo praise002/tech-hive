@@ -1,6 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useContentApi } from './useContentApi';
 import { useNavigate } from 'react-router-dom';
+import { handleQueryError } from '../utils/utils';
+import {
+  CategoriesResponse,
+  Category,
+  Event,
+  EventsResponse,
+  Job,
+  JobsResponse,
+  Resource,
+  ResourcesResponse,
+  Tool,
+  ToolsResponse,
+} from '../types/content';
 
 export function useCategories(params?: { page?: number; page_size?: number }) {
   const { getCategories } = useContentApi();
@@ -10,7 +23,7 @@ export function useCategories(params?: { page?: number; page_size?: number }) {
     isError,
     data: categoriesResponse,
     error,
-  } = useQuery({
+  } = useQuery<CategoriesResponse>({
     queryKey: ['categories', params],
     queryFn: async () => {
       const response = await getCategories(params);
@@ -42,7 +55,7 @@ export function useEvents(params?: { page?: number; page_size?: number }) {
     isError,
     data: eventsResponse,
     error,
-  } = useQuery({
+  } = useQuery<EventsResponse>({
     queryKey: ['events', params],
     queryFn: async () => {
       const response = await getEvents(params);
@@ -74,7 +87,7 @@ export function useJobs(params?: { page?: number; page_size?: number }) {
     isError,
     data: jobsResponse,
     error,
-  } = useQuery({
+  } = useQuery<JobsResponse>({
     queryKey: ['jobs', params],
     queryFn: async () => {
       const response = await getJobs(params);
@@ -106,7 +119,7 @@ export function useResources(params?: { page?: number; page_size?: number }) {
     isError,
     data: resourcesResponse,
     error,
-  } = useQuery({
+  } = useQuery<ResourcesResponse>({
     queryKey: ['resources', params],
     queryFn: async () => {
       const response = await getResources(params);
@@ -138,7 +151,7 @@ export function useTools(params?: { page?: number; page_size?: number }) {
     isError,
     data: toolsResponse,
     error,
-  } = useQuery({
+  } = useQuery<ToolsResponse>({
     queryKey: ['tools', params],
     queryFn: async () => {
       const response = await getTools(params);
@@ -170,7 +183,7 @@ export function useCategoryDetail(slug: string) {
     isError,
     data: category,
     error,
-  } = useQuery({
+  } = useQuery<Category>({
     queryKey: ['categoryDetail', slug],
     queryFn: async () => {
       return getCategoryDetail(slug);
@@ -189,7 +202,7 @@ export function useJobDetail(jobId: string) {
     isError,
     data: job,
     error,
-  } = useQuery({
+  } = useQuery<Job>({
     queryKey: ['jobDetail', jobId],
     queryFn: async () => {
       return getJobDetail(jobId);
@@ -208,7 +221,7 @@ export function useEventDetail(eventId: string) {
     isError,
     data: event,
     error,
-  } = useQuery({
+  } = useQuery<Event>({
     queryKey: ['eventDetail', eventId],
     queryFn: async () => {
       return getEventDetail(eventId);
@@ -227,7 +240,7 @@ export function useResourceDetail(resourceId: string) {
     isError,
     data: resource,
     error,
-  } = useQuery({
+  } = useQuery<Resource>({
     queryKey: ['resourceDetail', resourceId],
     queryFn: async () => {
       return getResourceDetail(resourceId);
@@ -246,7 +259,7 @@ export function useToolDetail(toolId: string) {
     isError,
     data: tool,
     error,
-  } = useQuery({
+  } = useQuery<Tool>({
     queryKey: ['toolDetail', toolId],
     queryFn: async () => {
       return getToolDetail(toolId);
@@ -282,11 +295,9 @@ export function useAcceptGuidelines() {
     },
 
     onError: (error) => {
-      console.error('Accept guidelines error:', error);
+      handleQueryError(error, 'Accept guidelines');
     },
   });
 
   return { acceptGuidelines, isPending, isError, error };
 }
-
-// TODO: USE THE ERROR UTILS, TYPES

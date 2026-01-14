@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { LoginUserData } from '../../../types/auth';
 import { useAuthApi } from './useAuthApi';
 
-import { clearTokens, setToken } from '../../../utils/utils';
+import { clearTokens, handleQueryError, setToken } from '../../../utils/utils';
 
 export function useEmail() {
   const queryClient = useQueryClient();
@@ -28,7 +28,7 @@ export function useRegister() {
     },
 
     onError: (error) => {
-      console.error('Registration error:', error);
+      handleQueryError(error, 'Registration');
     },
   });
   return { register, isPending, isError, error };
@@ -49,7 +49,7 @@ export function useRegisterOtp() {
       queryClient.removeQueries({ queryKey: ['email'] });
     },
     onError: (error) => {
-      console.error('OTP Verification error:', error);
+      handleQueryError(error, 'OTP Verification');
     },
   });
   return { verifyRegistrationOtp, isPending, isError, error };
@@ -67,7 +67,7 @@ export function useRegisterResendOtp() {
     mutationFn: resendRegistrationOtpApi,
     onSuccess: () => {},
     onError: (error) => {
-      console.error('OTP Verification error:', error);
+      handleQueryError(error, 'OTP Verification');
     },
   });
   return { resendRegistrationOtp, isPending, isError, error };
@@ -87,7 +87,7 @@ export function useLogin() {
       setToken(response.data);
     },
     onError: (error) => {
-      console.error('Login error:', error);
+      handleQueryError(error, 'Login');
     },
   });
 
@@ -107,7 +107,7 @@ export function useLogout() {
       queryClient.removeQueries();
     },
     onError: (error) => {
-      console.error('Logout error:', error);
+      handleQueryError(error, 'Logout');
     },
   });
 
@@ -127,7 +127,7 @@ export function useLogoutAll() {
       queryClient.removeQueries();
     },
     onError: (error) => {
-      console.error('Logout all devices error:', error);
+      handleQueryError(error, 'Logout all devices');
     },
   });
 
@@ -143,7 +143,7 @@ export function useChangePassword() {
       setToken(response.data);
     },
     onError: (error) => {
-      console.error('Change Password error:', error);
+      handleQueryError(error, 'Change Password');
     },
   });
 
@@ -157,7 +157,7 @@ export function useRequestPasswordReset() {
     mutationFn: requestPasswordResetApi,
     onSuccess: () => {},
     onError: (error) => {
-      console.error('Request Password Reset error:', error);
+      handleQueryError(error, 'Request Password Reset');
     },
   });
 
@@ -171,7 +171,7 @@ export function useVerifyPasswordResetOtp() {
     mutationFn: verifyPasswordResetOtpApi,
     onSuccess: () => {},
     onError: (error) => {
-      console.error('Verify Password Reset Otp error:', error);
+      handleQueryError(error, 'Verify Password Reset Otp');
     },
   });
 
@@ -185,7 +185,7 @@ export function useCompletePasswordReset() {
     mutationFn: completePasswordResetApi,
     onSuccess: () => {},
     onError: (error) => {
-      console.error('Complete Password Reset error:', error);
+      handleQueryError(error, 'Complete Password Reset');
     },
   });
 
@@ -199,7 +199,7 @@ export const useGoogleSignup = () => {
     mutationFn: fetchAuthRegisterUrlApi,
     onSuccess: () => {},
     onError: (error) => {
-      console.error('Error fetching auth URL:', error);
+      handleQueryError(error, 'Google Signup Auth URL');
     },
   });
 
@@ -213,7 +213,7 @@ export const useGoogleLogin = () => {
     mutationFn: fetchAuthLoginUrlApi,
     onSuccess: () => {},
     onError: (error) => {
-      console.error('Error fetching auth URL:', error);
+      handleQueryError(error, 'Google Login Auth URL');
     },
   });
 
@@ -230,7 +230,7 @@ export function useGoogleCallback() {
       setToken(data);
     },
     onError: (error) => {
-      console.error('Google callback error:', error);
+      handleQueryError(error, 'Google callback');
     },
   });
 

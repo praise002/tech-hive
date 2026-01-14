@@ -270,3 +270,25 @@ export interface DiscussionThreadProps {
   commentsCount: number;
   articleId: string;
 }
+
+export interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
+
+// ============================================================================
+// API RESPONSE WRAPPER (from your CustomResponse backend)
+// ============================================================================
+
+export interface ApiResponse<T = any> {
+  status: 'success' | 'error';
+  message: string;
+  data?: T;
+  error_code?: string;
+  errors?: Record<string, string[]>;
+}
+
+
+// TODO: REMOVE SOME STUFFS

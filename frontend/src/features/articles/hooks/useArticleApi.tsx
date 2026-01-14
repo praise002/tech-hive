@@ -1,4 +1,4 @@
-import { CreateCommentData } from '../../../types/article';
+import { CommentCreateRequest } from '../../../types/article';
 import { ApiMethod } from '../../../types/auth';
 import { routes } from '../../../utils/constants';
 import { useApi } from '../../auth/hooks/useApi';
@@ -85,7 +85,7 @@ export const useArticleApi = () => {
   // CREATE COMMENT (root or reply)
   const createComment = async (
     userIsNotAuthenticatedCallback: () => void,
-    data: CreateCommentData
+    data: CommentCreateRequest
   ) => {
     const url = routes.article.comments;
     const response = await sendAuthGuardedRequest(
