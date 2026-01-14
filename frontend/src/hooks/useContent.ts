@@ -1,5 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useContentApi } from './useContentApi';
+import { useNavigate } from 'react-router-dom';
 
 export function useCategories(params?: { page?: number; page_size?: number }) {
   const { getCategories } = useContentApi();
@@ -255,3 +256,37 @@ export function useToolDetail(toolId: string) {
 
   return { isPending, isError, tool, error };
 }
+
+export function useAcceptGuidelines() {
+  const { acceptGuidelines: acceptGuidelinesApi } = useContentApi();
+  const queryClient = useQueryClient();
+
+  const navigate = useNavigate();
+
+  const {
+    mutate: acceptGuidelines,
+    isPending,
+    isError,
+    error,
+  } = useMutation({
+    mutationFn: (termsAccepted: boolean) => {
+      const handleUnauthenticated = () => {
+        navigate('/login');
+      };
+
+      return acceptGuidelinesApi(handleUnauthenticated, termsAccepted);
+    },
+    onSuccess: () => {
+      // Refresh user profile to show new contributor role
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+    },
+
+    onError: (error) => {
+      console.error('Accept guidelines error:', error);
+    },
+  });
+
+  return { acceptGuidelines, isPending, isError, error };
+}
+
+// TODO: USE THE ERROR UTILS, TYPES

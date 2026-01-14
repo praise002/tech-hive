@@ -40,6 +40,7 @@ export const routes = {
     resources: '/resources/',
     tools: '/tools/',
     comment: '/comments/',
+    contribute: '/contribute/',
     byCategory: (slug: string) => `/categories/${slug}/`,
     byJob: (jobId: string) => `/jobs/${jobId}/`,
     byEvent: (eventId: string) => `/events/${eventId}/`,
