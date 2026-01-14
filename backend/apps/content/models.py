@@ -1,5 +1,3 @@
-import uuid
-
 from apps.common.models import BaseModel
 from apps.common.validators import validate_file_size
 from apps.content.choices import ArticleReviewStatusChoices, ArticleStatusChoices
