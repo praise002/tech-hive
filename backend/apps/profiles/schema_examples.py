@@ -49,6 +49,7 @@ PROFILE_EXAMPLE = {
     "email": EMAIL_EXAMPLE,
     "created_at": DATETIME_EXAMPLE,
     "avatar_url": AVATAR_URL,
+    "role": "contributor",
 }
 
 

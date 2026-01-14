@@ -83,8 +83,8 @@ class EventListView(CustomListView):
     queryset = Event.objects.select_related("category").all()
 
     @extend_schema(
-        summary="List all events",
-        description="Retrieve a list of all events",
+        summary="List all events.",
+        description="Retrieve a list of all events. Accepted date format: YYYY-MM-DD e.g 2024-01-14",
         tags=tags,
         responses=EVENTS_RESPONSE_EXAMPLE,
         auth=[],
@@ -198,9 +198,7 @@ class EventRetrieveView(APIView):
     )
     def get(self, request, *args, **kwargs):
         try:
-            event = Event.objects.select_related("category").get(
-                id=kwargs["event_id"]
-            )
+            event = Event.objects.select_related("category").get(id=kwargs["event_id"])
             serializer = self.serializer_class(event)
             return CustomResponse.success(
                 message="Event detail retrieved successfully.",
@@ -248,9 +246,11 @@ class ToolRetrieveView(APIView):
     )
     def get(self, request, *args, **kwargs):
         try:
-            tool = Tool.objects.select_related("category").prefetch_related(
-                "tags"
-            ).get(id=kwargs["tool_id"])
+            tool = (
+                Tool.objects.select_related("category")
+                .prefetch_related("tags")
+                .get(id=kwargs["tool_id"])
+            )
             serializer = self.serializer_class(tool)
             return CustomResponse.success(
                 message="Tool detail retrieved successfully.",

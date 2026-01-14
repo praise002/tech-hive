@@ -299,7 +299,7 @@ REVIEW_EXAMPLE = [
 ACCEPT_GUIDELINES_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(
         response=ContributorOnboardingSerializer,
-        description="Guidelines retrieved successfully",
+        description="Guidelines accepted successfully",
         examples=[
             OpenApiExample(
                 name="Already a contributor",
@@ -312,7 +312,7 @@ ACCEPT_GUIDELINES_RESPONSE_EXAMPLE = {
     ),
     201: OpenApiResponse(
         response=ContributorOnboardingSerializer,
-        description="Guidelines retrieved successfully",
+        description="Guidelines accepted successfully",
         examples=[
             OpenApiExample(
                 name="Onboarding successful",

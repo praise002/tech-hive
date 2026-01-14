@@ -14,6 +14,7 @@ class UsernameSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     avatar_url = serializers.SerializerMethodField(read_only=True)
+    roles = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -25,6 +26,7 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
             "created_at",
             "avatar_url",
+            "role",
         ]
         extra_kwargs = {
             "id": {"read_only": True},
@@ -34,6 +36,11 @@ class UserSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.URLField)
     def get_avatar_url(self, obj):
         return obj.avatar_url
+    
+    @extend_schema_field(serializers.CharField)
+    def get_role(self, obj):
+        group = obj.groups.first()
+        return group.name if group else None
 
 
 class AvatarSerializer(serializers.ModelSerializer):
