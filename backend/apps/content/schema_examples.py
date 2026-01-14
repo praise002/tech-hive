@@ -64,30 +64,28 @@ ARTICLES = [
         "title": "Test title 2",
         "slug": "test-title-2",
         "content": "Test content",
-        "cover_image_url": "",
-        "read_time": 0,
-        "status": "published",
-        "created_at": "2025-08-12T10:00:54.576519Z",
-        "is_featured": False,
-        "author": {"name": "Praise Idowu", "avatar": AVATAR_URL},
-        "total_reaction_counts": 2,
-        "reaction_counts": {"❤️": 2},
         "tags": [{"id": "d5afcd69-4c7d-4ea5-94bd-e1a2549a3f72", "name": "python"}],
+        "is_featured": False,
+        "read_time": 0,
+        "total_reaction_counts": 2,
+        "reactions": ["❤️"],
+        "is_saved": False,
+        "cover_image_url": "",
+        "published_at": "2025-08-12T10:00:54.576519Z",
     },
     {
         "id": "26b0dee3-54a8-46eb-8c9d-00ca481d201f",
         "title": "Test title",
         "slug": "test-title",
         "content": "Test content",
-        "cover_image_url": "",
-        "read_time": 5,
-        "status": "published",
-        "created_at": "2025-08-07T18:48:26.389204Z",
-        "is_featured": False,
-        "author": {"name": "Praise Idowu", "avatar": AVATAR_URL},
-        "total_reaction_counts": 4,
-        "reaction_counts": {"❤️": 4, "👍": 1, "🔥": 1, "😍": 3},
         "tags": [{"id": "d5afcd69-4c7d-4ea5-94bd-e1a2549a3f72", "name": "python"}],
+        "is_featured": False,
+        "read_time": 5,
+        "total_reaction_counts": 4,
+        "reactions": ["❤️", "👍", "🔥", "😍"],
+        "is_saved": True,
+        "cover_image_url": "",
+        "published_at": "2025-08-07T18:48:26.389204Z",
     },
 ]
 
@@ -123,23 +121,21 @@ ARTICLE_DETAIL_EXAMPLE = {
 
 EVENT_EXAMPLE = {
     "id": "d9c34a1a-9b2b-4a0a-8b1a-1b9b4a0a8b1a",
+    "slug": "tech-conference-2025",
     "title": "Tech Conference 2025",
-    "desc": "Join us for the premier tech conference of the year!",
+    "location": "San Francisco, CA",
     "start_date": "2025-11-15T09:00:00Z",
     "end_date": "2025-11-17T17:00:00Z",
-    "location": "San Francisco, CA",
-    "agenda": "Keynotes, workshops, and networking events",
-    "ticket_url": "https://example.com/tech-conference-2025",
-    "category": "Conference",
+    "published_at": "2025-10-01T09:00:00Z",
 }
 
 RESOURCE_EXAMPLE = {
     "id": "f8e7c6b5-4a3f-4c2e-9b8f-7a6d5e4c3b2a",
     "name": "Awesome Django Tutorial",
-    "image_url": "https://example.com/django-tutorial.png",
+    "slug": "awesome-django-tutorial",
     "body": "A comprehensive guide to building web apps with Django",
-    "url": "https://example.com/django-tutorial",
-    "category": "Tutorial",
+    "published_at": "2025-09-15T10:00:00Z",
+    "image_url": "https://example.com/django-tutorial.png",
 }
 
 
@@ -148,28 +144,24 @@ TOOL_TAG_EXAMPLE = {"id": "b1d6e859-df99-4842-b1d6-e859df99bc93", "name": "AI"}
 TOOL_EXAMPLE = {
     "id": "a7b8c9d0-1a2b-4c5d-8e9f-0a1b2c3d4e5f",
     "name": "AI Tool",
+    "slug": "ai-tool",
     "desc": "An AI-powered tool for content creation",
-    "url": "https://example.com/ai-tool",
-    "image_url": "https://example.com/ai-tool.png",
+    "published_at": "2025-08-20T12:00:00Z",
     "call_to_action": "Try it now!",
+    "image_url": "https://example.com/ai-tool.png",
     "tags": [TOOL_TAG_EXAMPLE],
-    "category": "AI",
 }
 
 
 JOB_EXAMPLE = {
     "id": "2c9e2a3b-f7a8-4a9b-b3a1-d7c8e9f0a1b2",
     "title": "Software Engineer",
+    "slug": "software-engineer",
     "company": "TechHive Inc.",
-    "desc": "We are looking for a talented software engineer to join our team.",
-    "requirements": "Bachelor's degree in Computer Science, 3+ years of experience",
-    "responsibilities": "Develop and maintain web applications",
-    "url": "https://example.com/jobs/software-engineer",
-    "salary": "80000-120000",
     "location": "San Francisco, CA",
     "job_type": "Full-time",
     "work_mode": "Remote",
-    "category": "Engineering",
+    "published_at": "2025-09-01T08:00:00Z",
 }
 
 CATEGORY_DETAIL_EXAMPLE = {

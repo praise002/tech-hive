@@ -16,9 +16,13 @@ from apps.content.schema_examples import (
 )
 from apps.content.serializers import (
     CategorySerializer,
+    EventListSerializer,
     EventSerializer,
+    JobListSerializer,
     JobSerializer,
+    ResourceListSerializer,
     ResourceSerializer,
+    ToolListSerializer,
     ToolSerializer,
 )
 from apps.general.views import CustomListView
@@ -50,7 +54,7 @@ class CategoryGenericView(CustomListView):
 
 
 class JobListView(CustomListView):
-    serializer_class = JobSerializer
+    serializer_class = JobListSerializer
     filter_backends = (
         DjangoFilterBackend,
         SearchFilter,
@@ -64,7 +68,7 @@ class JobListView(CustomListView):
         summary="List all jobs",
         description="Retrieve a list of all jobs",
         tags=tags,
-        responses=JOB_RESPONSE_EXAMPLE,
+        responses={200: JobListSerializer(many=True)},
         auth=[],
     )
     def get(self, request, *args, **kwargs):
@@ -72,7 +76,7 @@ class JobListView(CustomListView):
 
 
 class EventListView(CustomListView):
-    serializer_class = EventSerializer
+    serializer_class = EventListSerializer
     filter_backends = (
         DjangoFilterBackend,
         SearchFilter,
@@ -86,7 +90,7 @@ class EventListView(CustomListView):
         summary="List all events.",
         description="Retrieve a list of all events. Accepted date format: YYYY-MM-DD e.g 2024-01-14",
         tags=tags,
-        responses=EVENTS_RESPONSE_EXAMPLE,
+        responses={200: EventListSerializer(many=True)},
         auth=[],
     )
     def get(self, request, *args, **kwargs):
@@ -94,7 +98,7 @@ class EventListView(CustomListView):
 
 
 class ResourceListView(CustomListView):
-    serializer_class = ResourceSerializer
+    serializer_class = ResourceListSerializer
     filter_backends = (
         DjangoFilterBackend,
         SearchFilter,
@@ -110,7 +114,7 @@ class ResourceListView(CustomListView):
         summary="List all resources",
         description="Retrieve a list of all resources",
         tags=tags,
-        responses=RESOURCES_RESPONSE_EXAMPLE,
+        responses={200: ResourceListSerializer(many=True)},
         auth=[],
     )
     def get(self, request, *args, **kwargs):
@@ -118,7 +122,7 @@ class ResourceListView(CustomListView):
 
 
 class ToolListView(CustomListView):
-    serializer_class = ToolSerializer
+    serializer_class = ToolListSerializer
     filter_backends = (
         DjangoFilterBackend,
         SearchFilter,
@@ -133,7 +137,7 @@ class ToolListView(CustomListView):
         summary="List all tools",
         description="Retrieve a list of all tools",
         tags=tags,
-        responses=TOOLS_RESPONSE_EXAMPLE,
+        responses={200: ToolListSerializer(many=True)},
         auth=[],
     )
     def get(self, request, *args, **kwargs):

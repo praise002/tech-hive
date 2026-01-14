@@ -47,5 +47,81 @@ class TestNotifications(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["data"]["results"]), 0)
 
+    def test_get_notification_detail_authenticated(self):
+        """Test retrieving a single notification and auto-marking as read."""
+        notification = Notification.objects.create(
+            recipient=self.user1, actor=self.user2, verb="liked your comment"
+        )
+        self.assertFalse(notification.is_read)
 
-# python manage.py test apps.notification.tests.TestNotifications.test_notification_for_user_with_no_notifications
+        self.client.force_authenticate(user=self.user1)
+        response = self.client.get(f"/api/v1/notifications/{notification.id}/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["data"]["is_read"])
+
+        notification.refresh_from_db()
+        self.assertTrue(notification.is_read)
+
+    def test_delete_notification_authenticated(self):
+        """Test soft-deleting a notification."""
+        notification = Notification.objects.create(
+            recipient=self.user1, actor=self.user2, verb="disliked your comment"
+        )
+
+        self.client.force_authenticate(user=self.user1)
+        response = self.client.get(
+            f"/api/v1/notifications/{notification.id}/"
+        )  # Mark as read first to be sure
+        response = self.client.delete(f"/api/v1/notifications/{notification.id}/")
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Verify soft-delete
+        notification.refresh_from_db()
+        self.assertTrue(notification.is_deleted)
+
+        # Should not be returned by default manager
+        self.assertFalse(Notification.objects.filter(id=notification.id).exists())
+
+    def test_restore_notification_authenticated(self):
+        """Test restoring a soft-deleted notification."""
+        notification = Notification.objects.create(
+            recipient=self.user1, actor=self.user2, verb="super-liked your comment"
+        )
+        notification.delete()  # Soft delete
+        self.assertTrue(notification.is_deleted)
+
+        self.client.force_authenticate(user=self.user1)
+        response = self.client.post(f"/api/v1/notifications/{notification.id}/restore/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["data"]["id"], str(notification.id))
+
+        # Verify in DB
+        notification.refresh_from_db()
+        self.assertFalse(notification.is_deleted)
+        self.assertIsNone(notification.deleted_at)
+
+    def test_notification_security(self):
+        """Test that users cannot access others' notifications."""
+        notification = Notification.objects.create(
+            recipient=self.user2, actor=self.user1, verb="private action"
+        )
+
+        self.client.force_authenticate(user=self.user1)
+
+        # Try GET
+        response = self.client.get(f"/api/v1/notifications/{notification.id}/")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        # Try DELETE
+        response = self.client.delete(f"/api/v1/notifications/{notification.id}/")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        # Try RESTORE
+        response = self.client.post(f"/api/v1/notifications/{notification.id}/restore/")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+# python manage.py test apps.notification.tests.TestNotifications

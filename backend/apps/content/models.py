@@ -3,6 +3,7 @@ from apps.common.validators import validate_file_size
 from apps.content.choices import ArticleReviewStatusChoices, ArticleStatusChoices
 from apps.content.manager import (
     ActiveManager,
+    ContentPublishedManager,
     PublishedManager,
     SavedPublishedArticlesManager,
 )
@@ -458,9 +459,12 @@ class Job(BaseModel):
         max_length=20, choices=WORK_MODE_CHOICES, default="ONSITE"
     )
     is_active = models.BooleanField(default=True)
+    is_published = models.BooleanField(default=True)
+    published_at = models.DateTimeField(null=True, blank=True)
 
     objects = models.Manager()
     active = ActiveManager()
+    published = ContentPublishedManager()
 
     class Meta:
         ordering = ["-created_at"]
@@ -481,6 +485,13 @@ class Event(BaseModel):
     location = models.CharField(max_length=100)
     agenda = models.TextField()
     ticket_url = models.CharField(max_length=250, validators=[URLValidator()])
+    is_active = models.BooleanField(default=True)
+    is_published = models.BooleanField(default=True)
+    published_at = models.DateTimeField(null=True, blank=True)
+
+    objects = models.Manager()
+    active = ActiveManager()
+    published = ContentPublishedManager()
 
     class Meta:
         ordering = ["-created_at"]
@@ -500,7 +511,15 @@ class Resource(BaseModel):
     )
     body = models.TextField()
     url = models.CharField(max_length=250, validators=[URLValidator()])
+    tags = models.ManyToManyField(Tag, blank=True, related_name="resources")
+    is_active = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
+    is_published = models.BooleanField(default=True)
+    published_at = models.DateTimeField(null=True, blank=True)
+
+    objects = models.Manager()
+    active = ActiveManager()
+    published = ContentPublishedManager()
 
     class Meta:
         ordering = ["-created_at"]
@@ -540,6 +559,13 @@ class Tool(BaseModel):
         help_text="Dynamic button text (e.g., 'Sign Up to GitHub', 'Try Figma for Free')",
     )
     is_featured = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    is_published = models.BooleanField(default=True)
+    published_at = models.DateTimeField(null=True, blank=True)
+
+    objects = models.Manager()
+    active = ActiveManager()
+    published = ContentPublishedManager()
 
     class Meta:
         ordering = ["-created_at"]

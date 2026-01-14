@@ -19,6 +19,7 @@ from apps.content.models import (
     Tool,
     ToolTag,
 )
+from apps.general.models import SiteDetail
 from django.conf import settings
 from django.contrib.auth.models import Group
 from django.db import transaction
@@ -37,6 +38,7 @@ class CreateData:
             self.create_categories()
             self.create_tags()
             self.create_tool_tags()
+            self.create_site_details()
 
             # Create users
             self.contributors = self.create_contributors()
@@ -72,6 +74,43 @@ class CreateData:
             logger.info(f"Created superuser: {superuser.email}")
 
         return superuser
+
+    def create_site_details(self):
+        """Create site specific details from About page"""
+        body_text = (
+            "Welcome to Tech Hive\n\n"
+            "At Tech Hive, we are passionate about everything tech. Whether you're a budding developer, "
+            "a seasoned professional, or a tech enthusiast exploring the latest innovations, our platform "
+            "is your ultimate destination for insights, resources, and opportunities in the tech world.\n\n"
+            "Our Mission\n\n"
+            "To inspire and empower the global tech community by delivering high-quality content, tools, "
+            "and resources that fuel innovation and drive progress.\n\n"
+            "What We Offer\n\n"
+            "- Featured Tech Tools: Discover innovative tools and software that can transform the way you work and create.\n"
+            "- Tech Jobs: Explore exciting career opportunities and connect with top companies shaping the future.\n"
+            "- Tech Articles: Dive into in-depth analyses, tutorials, and stories covering the latest trends and breakthroughs in technology.\n"
+            "- Resource Spotlight: Access curated resources to help you learn, grow, and stay ahead in the tech industry.\n\n"
+            "Why Tech Hive?\n\n"
+            "Tech Hive is more than just a blog; it’s a thriving hub for tech enthusiasts and professionals. "
+            "We’re dedicated to fostering a community where knowledge meets opportunity and ideas come to life.\n\n"
+            "Join the Buzz\n\n"
+            "Stay updated with the latest in tech by following us on our journey. Let's shape the future of technology together!"
+        )
+
+        detail_data = {
+            "body": body_text,
+            "fb": "https://facebook.com/techhive",
+            "ln": "https://linkedin.com/company/techhive",
+            "x": "https://twitter.com/techhive",
+            "ig": "https://instagram.com/techhive",
+        }
+
+        # SiteDetail is likely a singleton or we just need one
+        if not SiteDetail.objects.exists():
+            SiteDetail.objects.create(**detail_data)
+            logger.info("Created site details from About page static data")
+        else:
+            logger.info("Site details already exist")
 
     # def create_groups(self):
     #     """Create user role groups"""

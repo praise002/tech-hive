@@ -85,6 +85,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     author = serializers.SerializerMethodField()
     total_reaction_counts = serializers.SerializerMethodField()
     reaction_counts = serializers.SerializerMethodField()
+    is_saved = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Article
@@ -96,6 +97,7 @@ class ArticleSerializer(serializers.ModelSerializer):
             "cover_image_url",
             "read_time",
             "status",
+            "is_saved",
             "created_at",
             "is_featured",
             "author",
@@ -123,6 +125,76 @@ class ArticleSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.IntegerField)
     def get_reaction_counts(self, obj):
         return obj.reaction_counts
+
+    @extend_schema_field(serializers.BooleanField)
+    def get_is_saved(self, obj):
+        """Check if article is saved by the current user"""
+        user = self.context.get("request").user
+        if user.is_authenticated:
+            return obj.saved_by_user.filter(user=user).exists()
+        return False
+
+
+class ArticleListSerializer(serializers.ModelSerializer):
+    content = serializers.SerializerMethodField()
+    tags = TagSerializer(many=True, read_only=True)
+    total_reaction_counts = serializers.SerializerMethodField()
+    reactions = serializers.SerializerMethodField()
+    is_saved = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.Article
+        fields = [
+            "id",
+            "title",
+            "slug",
+            "content",
+            "tags",
+            "is_featured",
+            "read_time",
+            "total_reaction_counts",
+            "reactions",
+            "is_saved",
+            "cover_image_url",
+            "published_at",
+        ]
+
+    @extend_schema_field(serializers.BooleanField)
+    def get_is_saved(self, obj):
+        """Check if article is saved by the current user"""
+        user = self.context.get("request").user
+        if user.is_authenticated:
+            return obj.saved_by_user.filter(user=user).exists()
+        return False
+
+    @extend_schema_field(serializers.ListField(child=serializers.CharField()))
+    def get_reactions(self, obj):
+        """Return a unique list of emojis used in reactions for this article"""
+        return list(obj.reaction_counts.keys())
+
+    @extend_schema_field(serializers.IntegerField)
+    def get_total_reaction_counts(self, obj):
+        return obj.total_reaction_counts
+
+    @extend_schema_field(serializers.IntegerField)
+    def get_read_time(self, obj):
+        return obj.calculate_read_time()
+
+    @extend_schema_field(serializers.URLField)
+    def get_cover_image_url(self, obj):
+        return obj.cover_image_url
+
+    @extend_schema_field(serializers.CharField)
+    def get_content(self, obj):
+        if not obj.content:
+            return ""
+        # Remove HTML tags and truncate
+        from django.utils.html import strip_tags
+
+        text = strip_tags(obj.content)
+        if len(text) <= 200:
+            return text
+        return text[:197] + "..."
 
 
 class ArticleCreateSerializer(serializers.ModelSerializer):
@@ -494,6 +566,7 @@ class JobSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "title",
+            "slug",
             "company",
             "desc",
             "requirements",
@@ -504,6 +577,23 @@ class JobSerializer(serializers.ModelSerializer):
             "job_type",
             "work_mode",
             "category",
+            "published_at",
+        ]
+
+
+class JobListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Job
+        fields = [
+            "id",
+            "title",
+            "slug",
+            "company",
+            "location",
+            "job_type",
+            "work_mode",
+            "published_at",
         ]
 
 
@@ -515,6 +605,7 @@ class EventSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "title",
+            "slug",
             "desc",
             "start_date",
             "end_date",
@@ -522,20 +613,71 @@ class EventSerializer(serializers.ModelSerializer):
             "agenda",
             "ticket_url",
             "category",
+            "published_at",
+        ]
+
+
+class EventListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Event
+        fields = [
+            "id",
+            "slug",
+            "title",
+            "location",
+            "start_date",
+            "end_date",
+            "published_at",
         ]
 
 
 class ResourceSerializer(serializers.ModelSerializer):
     category = serializers.CharField(source="category.name", read_only=True)
     image_url = serializers.SerializerMethodField()
+    tags = TagSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.Resource
-        fields = ["id", "name", "image_url", "body", "url", "category", "is_featured"]
+        fields = [
+            "id",
+            "name",
+            "slug",
+            "image_url",
+            "body",
+            "tags",
+            "url",
+            "category",
+            "is_featured",
+            "published_at",
+        ]
 
     @extend_schema_field(serializers.CharField)
     def get_image_url(self, obj):
         return obj.image_url
+
+
+class ResourceListSerializer(serializers.ModelSerializer):
+    body = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.Resource
+        fields = ["id", "name", "slug", "body", "published_at", "image_url"]
+
+    @extend_schema_field(serializers.CharField)
+    def get_image_url(self, obj):
+        return obj.image_url
+
+    @extend_schema_field(serializers.CharField)
+    def get_body(self, obj):
+        if not obj.body:
+            return ""
+        from django.utils.html import strip_tags
+
+        text = strip_tags(obj.body)
+        if len(text) <= 150:
+            return text
+        return text[:147] + "..."
 
 
 class ToolTagSerializer(serializers.ModelSerializer):
@@ -547,12 +689,14 @@ class ToolTagSerializer(serializers.ModelSerializer):
 class ToolSerializer(serializers.ModelSerializer):
     tags = ToolTagSerializer(many=True, read_only=True)
     category = serializers.CharField(source="category.name", read_only=True)
+    image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Tool
         fields = [
             "id",
             "name",
+            "slug",
             "desc",
             "url",
             "image_url",
@@ -560,7 +704,46 @@ class ToolSerializer(serializers.ModelSerializer):
             "tags",
             "category",
             "is_featured",
+            "published_at",
         ]
+
+    @extend_schema_field(serializers.CharField)
+    def get_image_url(self, obj):
+        return obj.image_url
+
+
+class ToolListSerializer(serializers.ModelSerializer):
+    desc = serializers.SerializerMethodField()
+    image_url = serializers.SerializerMethodField()
+    tags = ToolTagSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = models.Tool
+        fields = [
+            "id",
+            "name",
+            "slug",
+            "desc",
+            "published_at",
+            "call_to_action",
+            "image_url",
+            "tags",
+        ]
+
+    @extend_schema_field(serializers.CharField)
+    def get_image_url(self, obj):
+        return obj.image_url
+
+    @extend_schema_field(serializers.CharField)
+    def get_desc(self, obj):
+        if not obj.desc:
+            return ""
+        from django.utils.html import strip_tags
+
+        text = strip_tags(obj.desc)
+        if len(text) <= 150:
+            return text
+        return text[:147] + "..."
 
 
 class CommentLikeSerializer(serializers.Serializer):

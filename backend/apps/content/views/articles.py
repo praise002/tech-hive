@@ -23,6 +23,7 @@ from apps.content.schema_examples import (
 )
 from apps.content.serializers import (
     ArticleDetailSerializer,
+    ArticleListSerializer,
     ArticleSerializer,
     ArticleSummaryResponseSerializer,
     CommentCreateSerializer,
@@ -50,6 +51,7 @@ from rest_framework import status
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
 article_tags = ["Articles"]
@@ -111,7 +113,7 @@ class ArticleListView(ListAPIView):
         .prefetch_related("tags")
         .all()
     )
-    serializer_class = ArticleSerializer
+    serializer_class = ArticleListSerializer
     # serializer_class = ArticleCommentWithLikesSerializer
     filter_backends = (DjangoFilterBackend, SearchFilter)
     filterset_fields = ("is_featured",)
@@ -403,10 +405,7 @@ class CommentDeleteView(APIView):
 
         comment.delete()
 
-        return CustomResponse.success(
-            message="Comment deleted successfully.",
-            status_code=status.HTTP_204_NO_CONTENT,
-        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CommentLikeToggleView(APIView):
