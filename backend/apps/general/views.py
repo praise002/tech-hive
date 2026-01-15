@@ -1,5 +1,5 @@
 from apps.accounts.emails import SendEmail
-from apps.common.errors import ErrorCode
+from apps.common.exceptions import NotFoundError
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
 from apps.general.models import Newsletter, SiteDetail
@@ -14,10 +14,10 @@ from apps.general.serializer import (
     NewsletterSerializer,
     SiteDetailSerializer,
 )
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from django.utils import timezone
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView
-from rest_framework.response import Response
 from rest_framework.views import APIView
 
 tags = ["General"]
@@ -52,7 +52,7 @@ class NewsletterView(APIView):
 
     @extend_schema(
         summary="Subscribe to Newsletter",
-        description="This endpoint allows users to subscribe to newsletter",
+        description="Subscribe to newsletter. You'll receive an email with an unsubscribe link.",
         tags=tags,
         responses=SUBSCRIBE_RESPONSE_EXAMPLE,
         auth=[],
@@ -60,78 +60,44 @@ class NewsletterView(APIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        email = serializer.save()
+        subscription = serializer.save()
 
-        SendEmail.subscription(request, email)
+        SendEmail.subscription(request, subscription)
 
         return CustomResponse.success(
             message="Subscribed to newsletter successfully.",
             status_code=status.HTTP_201_CREATED,
         )
 
+
+class NewsletterUnsubscribeView(APIView):
+    serializer_class = None
+    
     @extend_schema(
-        summary="Unsubscribe to Newsletter",
-        description="This endpoint allows users to unsubscribe to newsletter",
+        summary="Unsubscribe from Newsletter",
+        description="Unsubscribe using the unique token from your newsletter email.",
         tags=tags,
-        parameters=[
-            OpenApiParameter(
-                name="email",
-                type=str,
-                location=OpenApiParameter.QUERY,
-                required=True,
-                description="Email address to unsubscribe",
-                # examples=[
-                #     OpenApiExample(
-                #         "Example Request",
-                #         value="user@example.com",
-                #     )
-                # ],
-            )
-        ],
+        auth=[],
         responses=UNSUBSCRIBE_RESPONSE_EXAMPLE,
-        auth=[],
     )
-    def delete(self, request):
-        email = request.query_params.get("email")
-        if not email:
-            return CustomResponse.error(
-                message="Email parameter is required.",
-                err_code=ErrorCode.VALIDATION_ERROR,
-            )
-
+    def get(self, request, token):
+        """
+        GET allows one-click unsubscribe from email clients
+        """
         try:
-            subscription = Newsletter.objects.get(email=email)
-            subscription.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Newsletter.DoesNotExist:
-            return CustomResponse.error(
-                message="Subscription not found for the provided email.",
-                err_code=ErrorCode.VALIDATION_ERROR,
+            subscription = Newsletter.objects.get(
+                unsubscribe_token=token, is_subscribed=True
             )
+            subscription.is_subscribed = False
+            subscription.unsubscribed_at = timezone.now()
+            subscription.save()
 
-
-class NewsletterGenericView(CreateAPIView):
-    serializer_class = NewsletterSerializer
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-
-        return CustomResponse.success(
-            message="Subscribed to newsletter successfully.",
-            status_code=status.HTTP_201_CREATED,
-        )
-
-    @extend_schema(
-        summary="Subscribe to Newsletter",
-        description="This endpoint allows users to subscribe to newsletter",
-        tags=tags,
-        responses=SUBSCRIBE_RESPONSE_EXAMPLE,
-        auth=[],
-    )
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+            return CustomResponse.success(
+                message="You have been unsubscribed from our newsletter.",
+                status_code=status.HTTP_200_OK,
+            )
+        except Newsletter.DoesNotExist:
+            raise NotFoundError("Invalid unsubscribe link or already unsubscribed.")
 
 
 class SiteDetailView(APIView):

@@ -54,9 +54,12 @@ class SendEmail:
         EmailThread(email_message).start()
 
     @staticmethod
-    def subscription(request, email):
+    def subscription(request, subscription):
         subject = "Newsletter Subscription Confirmation"
-        message = render_to_string("emails/newsletter_subscribe_message.html")
+        unsubscribe_url = subscription.get_unsubscribe_url(request)
+        email = subscription.email
+        context = {"unsubscribe_url": unsubscribe_url}
+        message = render_to_string("emails/newsletter_subscribe_message.html", context)
         email_message = EmailMessage(subject=subject, body=message, to=[email])
         email_message.content_subtype = "html"
         EmailThread(email_message).start()

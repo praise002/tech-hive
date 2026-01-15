@@ -433,10 +433,10 @@ class ArticleRetrieveUpdateView(HeaderMixin, APIView):
         """
         Helper to get an instance of the correct serializer.
         """
-        serializer_class = self.get_serializer_class(
-            kwargs.get("request") or self.request
-        )
-        return serializer_class(*args, **kwargs)
+        request = kwargs.get("request") or self.request
+        serializer_class = self.get_serializer_class(request)
+        context = kwargs.get("context") or {"request": request}
+        return serializer_class(*args, context=context, **kwargs)
 
     @extend_schema(
         summary="Retrieve article details",
@@ -509,6 +509,10 @@ class SavedArticlesView(APIView):
         Helper to get an instance of the correct serializer.
         """
         serializer_class = self.get_serializer_class()
+
+        # IMPORTANT: Use setdefault to add context if not already provided
+        kwargs.setdefault("context", {"request": self.request, "view": self})
+
         return serializer_class(*args, **kwargs)
 
     def get_queryset(self):

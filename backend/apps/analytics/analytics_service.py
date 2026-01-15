@@ -340,7 +340,7 @@ class AnalyticsService:
             try:
                 from apps.content.models import Job
 
-                job = Job.active.get(id=job_id)
+                job = Job.objects.published().get(id=job_id)
 
                 shares_count = UserActivity.objects.filter(
                     event_type=EventTypeChoices.SHARE,

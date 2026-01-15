@@ -142,3 +142,43 @@ class NotificationRestoreView(APIView):
             message="Notification is not deleted.",
             status_code=status.HTTP_200_OK,
         )
+
+
+class NotificationBadgeCountView(APIView):
+    """
+    Get the count of unread notifications for badge display.
+    This is a lightweight endpoint that only returns the count.
+    """
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = None
+
+    @extend_schema(
+        summary="Get unread notification count",
+        description="Returns the count of unread notifications for the authenticated user. Used for displaying badge counts in the UI.",
+        tags=tags,
+        responses={
+            200: {
+                "description": "Unread notification count retrieved successfully",
+                "content": {
+                    "application/json": {
+                        "example": {
+                            "status": "success",
+                            "message": "Unread notification count retrieved successfully.",
+                            "data": {"unread_count": 5},
+                        }
+                    }
+                },
+            }
+        },
+    )
+    def get(self, request):
+        unread_count = Notification.objects.filter(
+            recipient=request.user, is_read=False
+        ).count()
+
+        return CustomResponse.success(
+            message="Unread notification count retrieved successfully.",
+            data={"unread_count": unread_count},
+            status_code=status.HTTP_200_OK,
+        )

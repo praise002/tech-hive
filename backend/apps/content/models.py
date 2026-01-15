@@ -3,7 +3,7 @@ from apps.common.validators import validate_file_size
 from apps.content.choices import ArticleReviewStatusChoices, ArticleStatusChoices
 from apps.content.manager import (
     ActiveManager,
-    ContentPublishedManager,
+    ContentManager,
     PublishedManager,
     SavedPublishedArticlesManager,
 )
@@ -240,8 +240,6 @@ class ArticleReview(BaseModel):
         null=True, blank=True, help_text="Private notes for reviewer's reference only"
     )
 
-    objects = models.Manager()
-
     class Meta:
         # NOTE: NO UNIQUE CONSTRIANT
         # unique_together = ("article", "is_active")
@@ -458,13 +456,11 @@ class Job(BaseModel):
     work_mode = models.CharField(
         max_length=20, choices=WORK_MODE_CHOICES, default="ONSITE"
     )
-    is_active = models.BooleanField(default=True)
+
     is_published = models.BooleanField(default=True)
     published_at = models.DateTimeField(null=True, blank=True)
 
-    objects = models.Manager()
-    active = ActiveManager()
-    published = ContentPublishedManager()
+    objects = ContentManager()
 
     class Meta:
         ordering = ["-created_at"]
@@ -485,13 +481,11 @@ class Event(BaseModel):
     location = models.CharField(max_length=100)
     agenda = models.TextField()
     ticket_url = models.CharField(max_length=250, validators=[URLValidator()])
-    is_active = models.BooleanField(default=True)
+
     is_published = models.BooleanField(default=True)
     published_at = models.DateTimeField(null=True, blank=True)
 
-    objects = models.Manager()
-    active = ActiveManager()
-    published = ContentPublishedManager()
+    objects = ContentManager()
 
     class Meta:
         ordering = ["-created_at"]
@@ -512,14 +506,12 @@ class Resource(BaseModel):
     body = models.TextField()
     url = models.CharField(max_length=250, validators=[URLValidator()])
     tags = models.ManyToManyField(Tag, blank=True, related_name="resources")
-    is_active = models.BooleanField(default=True)
+
     is_featured = models.BooleanField(default=False)
     is_published = models.BooleanField(default=True)
     published_at = models.DateTimeField(null=True, blank=True)
 
-    objects = models.Manager()
-    active = ActiveManager()
-    published = ContentPublishedManager()
+    objects = ContentManager()
 
     class Meta:
         ordering = ["-created_at"]
@@ -559,15 +551,17 @@ class Tool(BaseModel):
         help_text="Dynamic button text (e.g., 'Sign Up to GitHub', 'Try Figma for Free')",
     )
     is_featured = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
+
     is_published = models.BooleanField(default=True)
     published_at = models.DateTimeField(null=True, blank=True)
 
-    objects = models.Manager()
-    active = ActiveManager()
-    published = ContentPublishedManager()
+    objects = ContentManager()
 
     class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.name
         ordering = ["-created_at"]
 
     def __str__(self):

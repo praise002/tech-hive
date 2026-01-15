@@ -63,6 +63,7 @@ ARTICLES = [
         "id": "146541be-1b9b-48a2-8117-2b5fd4bd301b",
         "title": "Test title 2",
         "slug": "test-title-2",
+        "category": "DevOps",
         "content": "Test content",
         "tags": [{"id": "d5afcd69-4c7d-4ea5-94bd-e1a2549a3f72", "name": "python"}],
         "is_featured": False,
@@ -77,6 +78,7 @@ ARTICLES = [
         "id": "26b0dee3-54a8-46eb-8c9d-00ca481d201f",
         "title": "Test title",
         "slug": "test-title",
+        "category": "Backend",
         "content": "Test content",
         "tags": [{"id": "d5afcd69-4c7d-4ea5-94bd-e1a2549a3f72", "name": "python"}],
         "is_featured": False,
@@ -94,6 +96,7 @@ ARTICLE_DETAIL_EXAMPLE = {
     "id": "09fc9e71-d071-4fb4-ba28-16a493e609d6",
     "title": "Test Article",
     "slug": "test-article",
+    "category": "Mobile Development",
     "content": "<p>Test purposes</p>",
     "cover_image_url": COVER_IMAGE_URL,
     "read_time": 1,
@@ -119,50 +122,9 @@ ARTICLE_DETAIL_EXAMPLE = {
     "comments_count": 1,
 }
 
-EVENT_EXAMPLE = {
-    "id": "d9c34a1a-9b2b-4a0a-8b1a-1b9b4a0a8b1a",
-    "slug": "tech-conference-2025",
-    "title": "Tech Conference 2025",
-    "location": "San Francisco, CA",
-    "start_date": "2025-11-15T09:00:00Z",
-    "end_date": "2025-11-17T17:00:00Z",
-    "published_at": "2025-10-01T09:00:00Z",
-}
-
-RESOURCE_EXAMPLE = {
-    "id": "f8e7c6b5-4a3f-4c2e-9b8f-7a6d5e4c3b2a",
-    "name": "Awesome Django Tutorial",
-    "slug": "awesome-django-tutorial",
-    "body": "A comprehensive guide to building web apps with Django",
-    "published_at": "2025-09-15T10:00:00Z",
-    "image_url": "https://example.com/django-tutorial.png",
-}
-
 
 TOOL_TAG_EXAMPLE = {"id": "b1d6e859-df99-4842-b1d6-e859df99bc93", "name": "AI"}
 
-TOOL_EXAMPLE = {
-    "id": "a7b8c9d0-1a2b-4c5d-8e9f-0a1b2c3d4e5f",
-    "name": "AI Tool",
-    "slug": "ai-tool",
-    "desc": "An AI-powered tool for content creation",
-    "published_at": "2025-08-20T12:00:00Z",
-    "call_to_action": "Try it now!",
-    "image_url": "https://example.com/ai-tool.png",
-    "tags": [TOOL_TAG_EXAMPLE],
-}
-
-
-JOB_EXAMPLE = {
-    "id": "2c9e2a3b-f7a8-4a9b-b3a1-d7c8e9f0a1b2",
-    "title": "Software Engineer",
-    "slug": "software-engineer",
-    "company": "TechHive Inc.",
-    "location": "San Francisco, CA",
-    "job_type": "Full-time",
-    "work_mode": "Remote",
-    "published_at": "2025-09-01T08:00:00Z",
-}
 
 CATEGORY_DETAIL_EXAMPLE = {
     "id": UUID_EXAMPLE,
@@ -421,57 +383,6 @@ ARTICLE_DETAIL_RESPONSE_EXAMPLE = {
     ),
 }
 
-EVENTS_RESPONSE_EXAMPLE = {
-    200: OpenApiResponse(
-        description="Events retrieved successfully",
-        response=EventSerializer,
-        examples=[
-            OpenApiExample(
-                name="Success Response",
-                value=[EVENT_EXAMPLE],
-            ),
-        ],
-    ),
-}
-
-RESOURCES_RESPONSE_EXAMPLE = {
-    200: OpenApiResponse(
-        description="Resources retrieved successfully",
-        response=ResourceSerializer,
-        examples=[
-            OpenApiExample(
-                name="Success Response",
-                value=[RESOURCE_EXAMPLE],
-            ),
-        ],
-    ),
-}
-
-TOOLS_RESPONSE_EXAMPLE = {
-    200: OpenApiResponse(
-        description="Tools retrieved successfully",
-        response=ToolSerializer,
-        examples=[
-            OpenApiExample(
-                name="Success Response",
-                value=[TOOL_EXAMPLE],
-            ),
-        ],
-    ),
-}
-
-JOB_RESPONSE_EXAMPLE = {
-    200: OpenApiResponse(
-        description="Jobs retrieved successfully",
-        response=JobSerializer,
-        examples=[
-            OpenApiExample(
-                name="Success Response",
-                value=[JOB_EXAMPLE],
-            ),
-        ],
-    ),
-}
 
 CATEGORY_DETAIL_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(

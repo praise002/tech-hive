@@ -1,5 +1,10 @@
-from apps.common.schema_examples import AVATAR_URL, SUCCESS_RESPONSE_STATUS
-from apps.common.serializers import ErrorDataResponseSerializer
+from apps.common.errors import ErrorCode
+from apps.common.schema_examples import (
+    AVATAR_URL,
+    ERR_RESPONSE_STATUS,
+    SUCCESS_RESPONSE_STATUS,
+)
+from apps.common.serializers import ErrorDataResponseSerializer, ErrorResponseSerializer
 from apps.general.serializer import (
     ContactSerializer,
     NewsletterSerializer,
@@ -37,13 +42,32 @@ SUBSCRIBE_RESPONSE_EXAMPLE = {
 }
 
 UNSUBSCRIBE_RESPONSE_EXAMPLE = {
-    204: OpenApiResponse(
-        response=None,
+    200: OpenApiResponse(
+        response=NewsletterSerializer,
         description="Unsubscription Successful",
+        examples=[
+            OpenApiExample(
+                name="Unsubscription Successful",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "You have been unsubscribed from our newsletter.",
+                },
+            ),
+        ],
     ),
-    422: OpenApiResponse(
-        response=ErrorDataResponseSerializer,
-        description="Validation Error",
+    404: OpenApiResponse(
+        description="Subscription not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Subscription Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Invalid unsubscribe link or already unsubscribed.",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
     ),
 }
 

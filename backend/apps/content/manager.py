@@ -22,6 +22,12 @@ class ActiveManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(is_active=True)
 
-class ContentPublishedManager(models.Manager):
-    def get_queryset(self):
-        return super().get_queryset().filter(is_published=True)
+
+class ContentManager(models.Manager):
+    """Manager for content models (Job, Event, Resource, Tool) with active() and published() methods"""
+
+    def active(self):
+        return self.filter(is_active=True)
+
+    def published(self):
+        return self.filter(is_published=True)

@@ -26,6 +26,7 @@ class SiteDetailAdmin(admin.ModelAdmin):
 @admin.register(models.Newsletter)
 class NewsletterAdmin(admin.ModelAdmin):
     list_display = ("email",)
+    list_filter = ("is_subscribed",)
 
 
 @admin.register(models.Contact)

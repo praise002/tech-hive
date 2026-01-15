@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
     path("notifications/", views.NotificationListView.as_view()),
+    path("notifications/badge-count/", views.NotificationBadgeCountView.as_view()),
     path(
         "notifications/<uuid:pk>/",
         views.NotificationDetailView.as_view(),

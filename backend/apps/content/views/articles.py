@@ -24,7 +24,6 @@ from apps.content.schema_examples import (
 from apps.content.serializers import (
     ArticleDetailSerializer,
     ArticleListSerializer,
-    ArticleSerializer,
     ArticleSummaryResponseSerializer,
     CommentCreateSerializer,
     CommentLikeSerializer,
@@ -109,14 +108,15 @@ class AcceptGuidelinesView(APIView):
 class ArticleListView(ListAPIView):
     # List all published article
     queryset = (
-        Article.published.select_related("category", "author")
+        Article.objects.filter(status=ArticleStatusChoices.PUBLISHED)
+        .select_related("category", "author")
         .prefetch_related("tags")
         .all()
     )
     serializer_class = ArticleListSerializer
     # serializer_class = ArticleCommentWithLikesSerializer
     filter_backends = (DjangoFilterBackend, SearchFilter)
-    filterset_fields = ("is_featured",)
+    filterset_fields = ("is_featured", "category")
     search_fields = ["title", "content"]
     pagination_class = DefaultPagination
     default_limit = 10
@@ -191,7 +191,8 @@ class ArticleRetrieveView(APIView):
     def get(self, *args, **kwargs):
         try:
             article = (
-                Article.published.prefetch_related(
+                Article.objects.filter(status=ArticleStatusChoices.PUBLISHED)
+                .prefetch_related(
                     Prefetch(
                         "comments",
                         queryset=Comment.objects.filter(is_active=True).select_related(
@@ -204,7 +205,9 @@ class ArticleRetrieveView(APIView):
                 .get(author__username=kwargs["username"], slug=kwargs["slug"])
             )
 
-            serializer = self.serializer_class(article)
+            serializer = self.serializer_class(
+                article, context={"request": self.request}
+            )
             return CustomResponse.success(
                 message="Article detail retrieved successfully.",
                 data=serializer.data,

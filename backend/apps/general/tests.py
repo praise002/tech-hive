@@ -40,35 +40,59 @@ class TestGeneral(APITestCase):
     def test_newsletter_subscription(self):
         data = {"email": "testuser@example.com"}
         response = self.client.post(self.newsletter_url, data)
+        print(response.data)
         self.assertEqual(response.status_code, 201)
         self.assertTrue(
-            Newsletter.objects.filter(email="testuser@example.com").exists()
+            Newsletter.objects.filter(
+                email="testuser@example.com", is_subscribed=True
+            ).exists()
         )
+
+    def test_newsletter_duplicate_subscription_fails(self):
+        email = "testuser@example.com"
+        Newsletter.objects.create(email=email)
+
+        data = {"email": email}
+        response = self.client.post(self.newsletter_url, data)
+        print(response.data)
+        self.assertEqual(response.status_code, 422)
+        self.assertIn(
+            "This email is already subscribed to the newsletter.",
+            response.data["data"]["email"],
+        )
+
+    def test_newsletter_resubscription_success(self):
+        email = "testuser@example.com"
+        # Create an unsubscribed user
+        Newsletter.objects.create(email=email, is_subscribed=False)
+
+        data = {"email": email}
+        response = self.client.post(self.newsletter_url, data)
+        print(response.data)
+        self.assertEqual(response.status_code, 201)
+
+        # Verify they are now subscribed
+        newsletter = Newsletter.objects.get(email=email)
+        self.assertTrue(newsletter.is_subscribed)
+        self.assertIsNone(newsletter.unsubscribed_at)
 
     def test_newsletter_unsubscription(self):
-        # First, subscribe
-        Newsletter.objects.create(email="testuser@example.com")
-        # Unsubscribe using query param
-        print(self.newsletter_url)
-        response = self.client.delete(
-            f"{self.newsletter_url}?email=testuser@example.com"
-        )
+        newsletter = Newsletter.objects.create(email="testuser@example.com")
+        token = newsletter.unsubscribe_token
 
-        self.assertEqual(response.status_code, 204)
-        self.assertFalse(
-            Newsletter.objects.filter(email="testuser@example.com").exists()
-        )
+        # Unsubscribe using the token
+        response = self.client.get(f"/api/v1/newsletter/unsubscribe/{token}/")
+        print(response.data)
+        self.assertEqual(response.status_code, 200)
 
-        # non-existent email
-        response = self.client.delete(
-            f"{self.newsletter_url}?email=notfound@example.com"
-        )
-        self.assertEqual(response.status_code, 422)
+        newsletter.refresh_from_db()
+        self.assertFalse(newsletter.is_subscribed)
+        self.assertIsNotNone(newsletter.unsubscribed_at)
 
-        # no email
-        response = self.client.delete(f"{self.newsletter_url}?email=")
-
-        self.assertEqual(response.status_code, 422)
+        # Invalid token
+        response = self.client.get("/api/v1/newsletter/unsubscribe/invalid-token/")
+        self.assertEqual(response.status_code, 404)
+        print(response.data)
 
 
 # python manage.py test apps.general.tests.TestGeneral.test_message_create

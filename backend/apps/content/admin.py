@@ -278,10 +278,10 @@ class JobAdmin(admin.ModelAdmin):
         "job_type",
         "work_mode",
         "location",
-        "is_active",
+        "is_published",
         "created_at",
     ]
-    list_filter = ["job_type", "work_mode", "is_active", "category", "created_at"]
+    list_filter = ["job_type", "work_mode", "is_published", "category", "created_at"]
     search_fields = ["title", "company", "location"]
     readonly_fields = ["id", "created_at"]
 

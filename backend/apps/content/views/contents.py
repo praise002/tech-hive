@@ -6,13 +6,9 @@ from apps.content.schema_examples import (
     CATEGORY_DETAIL_RESPONSE_EXAMPLE,
     CATEGORY_RESPONSE_EXAMPLE,
     EVENT_DETAIL_RESPONSE_EXAMPLE,
-    EVENTS_RESPONSE_EXAMPLE,
     JOB_DETAIL_RESPONSE_EXAMPLE,
-    JOB_RESPONSE_EXAMPLE,
     RESOURCE_DETAIL_RESPONSE_EXAMPLE,
-    RESOURCES_RESPONSE_EXAMPLE,
     TOOL_DETAIL_RESPONSE_EXAMPLE,
-    TOOLS_RESPONSE_EXAMPLE,
 )
 from apps.content.serializers import (
     CategorySerializer,
@@ -62,7 +58,7 @@ class JobListView(CustomListView):
     filterset_class = JobFilter
     search_fields = ["title"]
 
-    queryset = Job.active.select_related("category").all()
+    queryset = Job.objects.filter(is_published=True).select_related("category").all()
 
     @extend_schema(
         summary="List all jobs",
@@ -84,7 +80,7 @@ class EventListView(CustomListView):
     filterset_class = EventFilter
     search_fields = ["title"]
 
-    queryset = Event.objects.select_related("category").all()
+    queryset = Event.objects.filter(is_published=True).select_related("category").all()
 
     @extend_schema(
         summary="List all events.",
@@ -108,7 +104,9 @@ class ResourceListView(CustomListView):
 
     search_fields = ["name"]
 
-    queryset = Resource.objects.select_related("category").all()
+    queryset = (
+        Resource.objects.filter(is_published=True).select_related("category").all()
+    )
 
     @extend_schema(
         summary="List all resources",
@@ -127,11 +125,15 @@ class ToolListView(CustomListView):
         DjangoFilterBackend,
         SearchFilter,
     )
-    filterset_fields = ("is_featured",)
-    filterset_fields = ["category"]
+    filterset_fields = ("is_featured", "category")
     search_fields = ["name"]
 
-    queryset = Tool.objects.select_related("category").prefetch_related("tags").all()
+    queryset = (
+        Tool.objects.filter(is_published=True)
+        .select_related("category")
+        .prefetch_related("tags")
+        .all()
+    )
 
     @extend_schema(
         summary="List all tools",
@@ -179,7 +181,11 @@ class JobRetrieveView(APIView):
     )
     def get(self, request, *args, **kwargs):
         try:
-            job = Job.active.select_related("category").get(id=kwargs["job_id"])
+            job = (
+                Job.objects.filter(is_published=True)
+                .select_related("category")
+                .get(id=kwargs["job_id"])
+            )
             serializer = self.serializer_class(job)
             return CustomResponse.success(
                 message="Job detail retrieved successfully.",
@@ -202,7 +208,11 @@ class EventRetrieveView(APIView):
     )
     def get(self, request, *args, **kwargs):
         try:
-            event = Event.objects.select_related("category").get(id=kwargs["event_id"])
+            event = (
+                Event.objects.filter(is_published=True)
+                .select_related("category")
+                .get(id=kwargs["event_id"])
+            )
             serializer = self.serializer_class(event)
             return CustomResponse.success(
                 message="Event detail retrieved successfully.",
@@ -225,8 +235,10 @@ class ResourceRetrieveView(APIView):
     )
     def get(self, request, *args, **kwargs):
         try:
-            resource = Resource.objects.select_related("category").get(
-                id=kwargs["resource_id"]
+            resource = (
+                Resource.objects.filter(is_published=True)
+                .select_related("category")
+                .get(id=kwargs["resource_id"])
             )
             serializer = self.serializer_class(resource)
             return CustomResponse.success(
@@ -251,7 +263,8 @@ class ToolRetrieveView(APIView):
     def get(self, request, *args, **kwargs):
         try:
             tool = (
-                Tool.objects.select_related("category")
+                Tool.objects.filter(is_published=True)
+                .select_related("category")
                 .prefetch_related("tags")
                 .get(id=kwargs["tool_id"])
             )

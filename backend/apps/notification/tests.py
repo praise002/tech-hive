@@ -123,5 +123,44 @@ class TestNotifications(APITestCase):
         response = self.client.post(f"/api/v1/notifications/{notification.id}/restore/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_get_notification_badge_count(self):
+        """Test retrieving the unread notification count."""
+        # user1 has 1 unread notification (created in setUp)
+        # The first one created in setUp has no is_read set, so it defaults to False.
+        # The second one has is_read=True.
+
+        self.client.force_authenticate(user=self.user1)
+        response = self.client.get("/api/v1/notifications/badge-count/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["data"]["unread_count"], 1)
+
+        # Mark the unread one as read
+        notification = Notification.objects.filter(
+            recipient=self.user1, is_read=False
+        ).first()
+        notification.is_read = True
+        notification.save()
+
+        # Check count again
+        response = self.client.get("/api/v1/notifications/badge-count/")
+        self.assertEqual(response.data["data"]["unread_count"], 0)
+
+    def test_list_filter_is_read(self):
+        """Test filtering notifications by read status."""
+        self.client.force_authenticate(user=self.user1)
+
+        # Filter unread
+        response = self.client.get(f"{self.url}?is_read=false")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["data"]["results"]), 1)
+        self.assertFalse(response.data["data"]["results"][0]["is_read"])
+
+        # Filter read
+        response = self.client.get(f"{self.url}?is_read=true")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["data"]["results"]), 1)
+        self.assertTrue(response.data["data"]["results"][0]["is_read"])
+
 
 # python manage.py test apps.notification.tests.TestNotifications

@@ -17,7 +17,7 @@ class LatestArticlesFeed(Feed):
     description = "New posts of Tech Hive."
 
     def items(self):
-        return Article.published.all()[:5]
+        return Article.objects.published().all()[:5]
 
     def item_title(self, item):
         return item.title

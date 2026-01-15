@@ -80,6 +80,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class ArticleSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
+    category = serializers.SerializerMethodField()
     cover_image_url = serializers.SerializerMethodField()
     read_time = serializers.SerializerMethodField()
     author = serializers.SerializerMethodField()
@@ -93,6 +94,7 @@ class ArticleSerializer(serializers.ModelSerializer):
             "id",
             "title",
             "slug",
+            "category",
             "content",
             "cover_image_url",
             "read_time",
@@ -118,6 +120,11 @@ class ArticleSerializer(serializers.ModelSerializer):
     def get_author(self, obj):
         return {"name": obj.author.full_name, "avatar": obj.author.avatar_url}
 
+    @extend_schema_field(serializers.CharField)
+    def get_category(self, obj):
+        if obj.category:
+            return obj.category.name
+
     @extend_schema_field(serializers.IntegerField)
     def get_total_reaction_counts(self, obj):
         return obj.total_reaction_counts
@@ -129,18 +136,21 @@ class ArticleSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.BooleanField)
     def get_is_saved(self, obj):
         """Check if article is saved by the current user"""
-        user = self.context.get("request").user
-        if user.is_authenticated:
-            return obj.saved_by_user.filter(user=user).exists()
+        request = self.context.get("request")
+        if request and hasattr(request, "user") and request.user.is_authenticated:
+            return obj.saved_by_user.filter(user=request.user).exists()
         return False
 
 
 class ArticleListSerializer(serializers.ModelSerializer):
     content = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
     tags = TagSerializer(many=True, read_only=True)
     total_reaction_counts = serializers.SerializerMethodField()
     reactions = serializers.SerializerMethodField()
     is_saved = serializers.SerializerMethodField()
+    read_time = serializers.SerializerMethodField()
+    cover_image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Article
@@ -148,6 +158,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
             "id",
             "title",
             "slug",
+            "category",
             "content",
             "tags",
             "is_featured",
@@ -183,6 +194,11 @@ class ArticleListSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.URLField)
     def get_cover_image_url(self, obj):
         return obj.cover_image_url
+
+    @extend_schema_field(serializers.CharField)
+    def get_category(self, obj):
+        if obj.category:
+            return obj.category.name
 
     @extend_schema_field(serializers.CharField)
     def get_content(self, obj):
@@ -582,6 +598,7 @@ class JobSerializer(serializers.ModelSerializer):
 
 
 class JobListSerializer(serializers.ModelSerializer):
+    category = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Job
@@ -589,14 +606,20 @@ class JobListSerializer(serializers.ModelSerializer):
             "id",
             "title",
             "slug",
+            "category",
             "company",
             "location",
             "job_type",
             "work_mode",
+            "salary",
             "published_at",
         ]
 
-
+    @extend_schema_field(serializers.CharField)
+    def get_category(self, obj):
+        if obj.category:
+            return obj.category.name
+        
 class EventSerializer(serializers.ModelSerializer):
     category = serializers.CharField(source="category.name", read_only=True)
 
@@ -618,6 +641,7 @@ class EventSerializer(serializers.ModelSerializer):
 
 
 class EventListSerializer(serializers.ModelSerializer):
+    category = serializers.CharField(source="category.name", read_only=True)
 
     class Meta:
         model = models.Event
@@ -625,6 +649,7 @@ class EventListSerializer(serializers.ModelSerializer):
             "id",
             "slug",
             "title",
+            "category",
             "location",
             "start_date",
             "end_date",
@@ -659,10 +684,20 @@ class ResourceSerializer(serializers.ModelSerializer):
 
 class ResourceListSerializer(serializers.ModelSerializer):
     body = serializers.SerializerMethodField()
+    category = serializers.CharField(source="category.name", read_only=True)
 
     class Meta:
         model = models.Resource
-        fields = ["id", "name", "slug", "body", "published_at", "image_url"]
+        fields = [
+            "id",
+            "name",
+            "slug",
+            "category",
+            "body",
+            "is_featured",
+            "published_at",
+            "image_url",
+        ]
 
     @extend_schema_field(serializers.CharField)
     def get_image_url(self, obj):
@@ -728,6 +763,7 @@ class ToolListSerializer(serializers.ModelSerializer):
             "call_to_action",
             "image_url",
             "tags",
+            "is_featured",
         ]
 
     @extend_schema_field(serializers.CharField)
