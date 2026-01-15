@@ -1,13 +1,13 @@
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from 'react-icons/md';
 
-import Text from '../../components/common/Text';
+import Text from '../../../components/common/Text';
 import { MdArticle, MdLibraryBooks, MdAnalytics } from 'react-icons/md';
 
 import { useState } from 'react';
-import ManagePosts from './ManagePosts';
-import ManageContent from './ManageContent';
-import Analytics from './Analytics';
-import Button from '../../components/common/Button';
+import ManagePosts from '../componenets/ManagePosts';
+import ManageContent from '../componenets/ManageContent';
+import Analytics from '../componenets/Analytics';
+import Button from '../../../components/common/Button';
 
 function AdminDashboard() {
   const [isActiveTab, setIsActiveTab] = useState('manage posts');

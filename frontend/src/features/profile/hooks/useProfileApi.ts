@@ -1,5 +1,6 @@
 import {
   ApiMethod,
+  CreateArticleData,
   SaveArticleData,
   UpdateArticleData,
   UpdateUserData,
@@ -138,6 +139,37 @@ export const useProfileApi = () => {
     return response.data;
   };
 
+  const getUsernames = async (params?: {
+    page?: number;
+    page_size?: number;
+    search?: string;
+  }) => {
+    let url = routes.profile.usernames;
+
+    if (params) {
+      const searchParams = new URLSearchParams();
+
+      if (params.page) {
+        searchParams.append('page', params.page.toString());
+      }
+
+      if (params.page_size) {
+        searchParams.append('page_size', params.page_size.toString());
+      }
+
+      if (params.search) {
+        searchParams.append('search', params.search);
+      }
+
+      if (searchParams.toString()) {
+        url = `${url}?${searchParams.toString()}`;
+      }
+    }
+
+    const response = await sendRequest(ApiMethod.GET, url);
+    return response.data;
+  };
+
   const getUserComments = async (
     userIsNotAuthenticatedCallback: () => void
   ) => {
@@ -145,6 +177,20 @@ export const useProfileApi = () => {
       userIsNotAuthenticatedCallback,
       ApiMethod.GET,
       routes.profile.comments
+    );
+
+    return response.data;
+  };
+
+  const createUserArticle = async (
+    userIsNotAuthenticatedCallback: () => void,
+    data: CreateArticleData
+  ) => {
+    const response = await sendAuthGuardedRequest(
+      userIsNotAuthenticatedCallback,
+      ApiMethod.POST,
+      routes.profile.articles,
+      data
     );
 
     return response.data;
@@ -158,6 +204,8 @@ export const useProfileApi = () => {
     getUserSavedArticles,
     getUserComments,
     getUserArticles,
+    getUsernames,
+    createUserArticle,
     updateCurrentUserProfile,
     updateCurrentUserAvatar,
     updateUserArticleBySlug,

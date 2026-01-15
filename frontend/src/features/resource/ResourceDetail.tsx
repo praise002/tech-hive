@@ -1,11 +1,33 @@
+import { useParams } from 'react-router-dom';
 import Image from '../../components/common/Image';
 import Rectangle from '../../components/common/Rectangle';
 import SocialLinks from '../../components/common/SocialLinks';
 import Text from '../../components/common/Text';
 import CategoryBar from '../../components/sections/CategoryBar';
 import Subscribe from '../../components/sections/Subscribe';
+import { useResourceDetail } from '../../hooks/useContent';
+import Loader from '../../components/common/Loader';
 
 function ResourceDetail() {
+  const { id } = useParams<{ id: string }>();
+  const { resource, isPending, isError, error } = useResourceDetail(id || '');
+
+  if (isPending) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader />
+      </div>
+    );
+  }
+
+  if (isError || !resource) {
+    return (
+      <div className="text-center py-20 text-red-500">
+        Error loading resource: {error?.message}
+      </div>
+    );
+  }
+
   return (
     <>
       <CategoryBar />
@@ -14,19 +36,22 @@ function ResourceDetail() {
         <div className="hidden md:block px-10 mt-70">
           <SocialLinks
             visible={false}
-            title="Github Learning Lab"
-            sharemsg="Check out this resource on Github Learning Lab"
+            title={resource.name}
+            sharemsg="Check out this resource!"
             url={window.location.href}
           />
         </div>
 
         {/* Right Column: Content */}
         <div className="w-full md:w-3/4 mt-20 md:mt-10 border border-gray rounded-tl-lg rounded-tr-lg overflow-hidden">
-          <Image
-            alt="Github Learning Lab"
-            src="/assets/resources/github-learning-lab.png"
-            className="w-full h-auto shadow-md"
-          />
+          {resource.image && (
+            <Image
+              alt={resource.name}
+              src={resource.image}
+              className="w-full h-auto shadow-md"
+            />
+          )}
+
           <div className="space-y-8 px-2 text-primary">
             <Text
               variant="h3"
@@ -34,7 +59,7 @@ function ResourceDetail() {
               bold={false}
               className="font-semibold mt-4 dark:text-custom-white"
             >
-              Github Learning Lab
+              {resource.name}
             </Text>
 
             {/* Description */}
@@ -45,17 +70,18 @@ function ResourceDetail() {
                 bold={false}
                 className="font-semibold mb-2 dark:text-custom-white"
               >
-                Software Description
+                Resource Description
               </Text>
-              <p className="text-base md:text-lg leading-relaxed dark:text-custom-white">
-                GitHub Learning Lab is an educational platform offering
-                interactive, project-based courses to improve your skills in
-                software development, version control, and open-source
-                collaboration.
-              </p>
+              <div
+                className="text-base md:text-lg leading-relaxed dark:text-custom-white"
+                dangerouslySetInnerHTML={{ __html: resource.body }}
+              />
             </div>
 
-            {/* Popular Courses */}
+            {/* Dynamic content rendering skipped as resource model is simple: name, body, url, tags */}
+            {/* If there are specific fields like 'popular_courses', they need to be in the model. Assuming generic body for now */}
+
+            {/* Link */}
             <div>
               <Text
                 variant="h5"
@@ -63,44 +89,7 @@ function ResourceDetail() {
                 bold={false}
                 className="font-semibold mb-2 dark:text-custom-white"
               >
-                Popular Courses
-              </Text>
-              <ul className="dark:text-custom-white list-disc pl-6 space-y-2 text-base md:text-lg leading-relaxed">
-                <li>Introduction to Git and GitHub.</li>
-                <li>Building RESTful APIs.</li>
-                <li>Works on any platform with an internet connection.</li>
-                <li>Advanced topics in software development.</li>
-              </ul>
-            </div>
-
-            {/* Why Learn Here? */}
-            <div>
-              <Text
-                variant="h5"
-                size="lg"
-                bold={false}
-                className="font-semibold mb-2 dark:text-custom-white"
-              >
-                Why Learn Here?
-              </Text>
-              <ul className="dark:text-custom-white list-disc pl-6 space-y-2 text-base md:text-lg leading-relaxed">
-                <li>Hands-on exercises with real-world applications.</li>
-                <li>
-                  Earn certificates of completion to showcase your skills.
-                </li>
-                <li>Supportive community of learners and mentors.</li>
-              </ul>
-            </div>
-
-            {/* How to Access */}
-            <div>
-              <Text
-                variant="h5"
-                size="lg"
-                bold={false}
-                className="font-semibold mb-2 dark:text-custom-white"
-              >
-                How to Access
+                Access Resource
               </Text>
               <div className="flex gap-2 items-center text-base md:text-lg dark:text-custom-white">
                 <img
@@ -109,27 +98,27 @@ function ResourceDetail() {
                   alt=""
                 />
                 <a
-                  href="https://www.github.com"
+                  href={resource.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Visit Github Learning Lab (opens in new tab)"
+                  aria-label={`Visit ${resource.name} (opens in new tab)`}
                 >
-                  https://www.github.com
+                  {resource.url}
                 </a>
               </div>
             </div>
           </div>
-          <div className="px-2 text-secondary text-sm my-4">
+          {/* <div className="px-2 text-secondary text-sm my-4">
             Posted 1 hour ago
-          </div>
+          </div> */}
         </div>
 
         {/* Mobile social link */}
         <div className="block md:hidden text-center">
           <SocialLinks
             visible={false}
-            title="Github Learning Lab"
-            sharemsg="Check out this resource on Github Learning Lab"
+            title={resource.name}
+            sharemsg="Check out this resource!"
             url={window.location.href}
           />
         </div>

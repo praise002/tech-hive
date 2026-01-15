@@ -1,7 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useProfileApi } from './useProfileApi';
 import { useNavigate } from 'react-router-dom';
-import { UpdateUserData } from '../../../types/auth';
+import {
+  CreateArticleData,
+  UpdateUserData,
+  UsernamesResponse,
+} from '../../../types/auth';
+import { handleQueryError } from '../../../utils/utils';
 
 export function useCurrentUser() {
   const { getCurrentUser } = useProfileApi();
@@ -282,6 +287,68 @@ export function useUserComments() {
   });
 
   return { isPending, isError, articles, error };
+}
+
+export function useUsernames(params?: {
+  page?: number;
+  page_size?: number;
+  search?: string;
+}) {
+  const { getUsernames } = useProfileApi();
+
+  const {
+    data: usernamesResponse,
+    isPending,
+    isError,
+    error,
+  } = useQuery<UsernamesResponse>({
+    queryKey: ['usernames', params],
+    queryFn: () => getUsernames(params),
+  });
+
+  const usernames = usernamesResponse?.results || [];
+  const count = usernamesResponse?.count;
+  const next = usernamesResponse?.next;
+  const previous = usernamesResponse?.previous;
+
+  return {
+    usernames,
+    count,
+    next,
+    previous,
+    isPending,
+    isError,
+    error,
+  };
+}
+
+export function useCreateUserArticle() {
+  const { createUserArticle: createUserArticleApi } = useProfileApi();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: createUserArticle,
+    isPending,
+    isError,
+    error,
+    isSuccess,
+  } = useMutation({
+    mutationFn: (data: CreateArticleData) => {
+      const handleUnauthenticated = () => {
+        navigate('/login');
+      };
+      return createUserArticleApi(handleUnauthenticated, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userArticles'] });
+    },
+    onError: (error) => {
+      handleQueryError(error, 'Create Article');
+    },
+  });
+
+  return { createUserArticle, isPending, isError, error, isSuccess };
 }
 
 // TODO: MOVE THE REDIRECTS TO MUTATE CALLBACKS

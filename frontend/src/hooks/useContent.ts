@@ -13,7 +13,74 @@ import {
   ResourcesResponse,
   Tool,
   ToolsResponse,
+  Article,
+  ArticlesResponse,
 } from '../types/content';
+
+export function useArticles(params?: {
+  page?: number;
+  page_size?: number;
+  limit?: number; // For compatibility with ArticleList
+  tag?: string;
+  search?: string;
+  ordering?: string;
+}) {
+  const { getArticles } = useContentApi();
+
+  // Handle limit/page_size alias
+  const apiParams = {
+    ...params,
+    page_size: params?.page_size || params?.limit,
+  };
+
+  const {
+    isPending,
+    isError,
+    data: articlesResponse,
+    error,
+  } = useQuery<ArticlesResponse>({
+    queryKey: ['articles', apiParams],
+    queryFn: async () => {
+      const response = await getArticles(apiParams);
+      return response;
+    },
+  });
+
+  const articles = articlesResponse?.results || [];
+  const count = articlesResponse?.count;
+  const next = articlesResponse?.next;
+  const previous = articlesResponse?.previous;
+
+  return {
+    isPending,
+    isError,
+    articles,
+    count,
+    next,
+    previous,
+    error,
+  };
+}
+
+export function useArticleDetail(username: string, slug: string) {
+  const { getArticleDetail } = useContentApi();
+
+  const {
+    isPending,
+    isError,
+    data: article,
+    error,
+  } = useQuery<Article>({
+    queryKey: ['articleDetail', username, slug],
+    queryFn: async () => {
+      if (!username || !slug) throw new Error('Username and slug are required');
+      return getArticleDetail(username, slug);
+    },
+    enabled: !!username && !!slug,
+  });
+
+  return { isPending, isError, article, error };
+}
 
 export function useCategories(params?: { page?: number; page_size?: number }) {
   const { getCategories } = useContentApi();

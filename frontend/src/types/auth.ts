@@ -41,11 +41,11 @@ export interface PasswordResetCompleteData {
 }
 
 export enum ApiMethod {
-  GET = "GET",
-  PUT = "PUT",
-  POST = "POST",
-  PATCH = "PATCH",
-  DELETE = "DELETE",
+  GET = 'GET',
+  PUT = 'PUT',
+  POST = 'POST',
+  PATCH = 'PATCH',
+  DELETE = 'DELETE',
 }
 
 export interface UpdateArticleData {
@@ -55,4 +55,21 @@ export interface UpdateArticleData {
 
 export interface SaveArticleData {
   articleId: string;
+}
+
+export interface CreateArticleData {
+  title: string;
+  content: string;
+}
+
+export interface UsernamesResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: {
+    username: string;
+    first_name: string;
+    last_name: string;
+    avatar: string;
+  }[];
 }

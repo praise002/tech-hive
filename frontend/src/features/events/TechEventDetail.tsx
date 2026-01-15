@@ -1,10 +1,33 @@
+import { useParams } from 'react-router-dom';
 import Rectangle from '../../components/common/Rectangle';
 import SocialLinks from '../../components/common/SocialLinks';
 import Text from '../../components/common/Text';
 import CategoryBar from '../../components/sections/CategoryBar';
 import Subscribe from '../../components/sections/Subscribe';
+import { useEventDetail } from '../../hooks/useContent';
+import Loader from '../../components/common/Loader';
+import { formatDate } from '../../utils/utils';
 
 function TechEventDetail() {
+  const { id } = useParams<{ id: string }>();
+  const { event, isPending, isError, error } = useEventDetail(id || '');
+
+  if (isPending) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader />
+      </div>
+    );
+  }
+
+  if (isError || !event) {
+    return (
+      <div className="text-center py-20 text-red-500">
+        Error loading event: {error?.message}
+      </div>
+    );
+  }
+
   return (
     <>
       <CategoryBar />
@@ -13,8 +36,8 @@ function TechEventDetail() {
         <div className="hidden md:block px-10 mt-70">
           <SocialLinks
             visible={false}
-            title="Africa Fintech Summit 2024"
-            sharemsg="Join us at the Africa Fintech Summit 2024"
+            title={event.title}
+            sharemsg={`Join us at ${event.title}`}
             url={window.location.href}
           />
         </div>
@@ -28,9 +51,9 @@ function TechEventDetail() {
               bold={false}
               className="font-semibold mb-2 dark:text-custom-white "
             >
-              Africa Fintech Summit 2024
+              {event.title}
             </Text>
-            <div className="text-secondary text-sm">Africa Fintech Summit</div>
+            <div className="text-secondary text-sm">{event.category.name}</div>
           </div>
           <div className="space-y-8 text-primary">
             {/* Description */}
@@ -43,11 +66,10 @@ function TechEventDetail() {
               >
                 Event Description
               </Text>
-              <p className="text-base md:text-lg leading-relaxed">
-                The Africa Fintech Summit 2024 is a premier event bringing
-                together innovators, investors, and leaders shaping the fintech
-                industry across the African continent.
-              </p>
+              <div
+                className="text-base md:text-lg leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: event.desc }}
+              />
             </div>
 
             {/* Dates */}
@@ -61,7 +83,9 @@ function TechEventDetail() {
                 Dates
               </Text>
               <ul className="list-disc pl-6 space-y-2 text-base md:text-lg leading-relaxed">
-                <li>24–25 November 2024</li>
+                <li>
+                  {formatDate(event.start_date)} - {formatDate(event.end_date)}
+                </li>
               </ul>
             </div>
 
@@ -76,7 +100,7 @@ function TechEventDetail() {
                 Location
               </Text>
               <ul className="list-disc pl-6 space-y-2 text-base md:text-lg leading-relaxed">
-                <li>Cape Town, South Africa (In-person event)</li>
+                <li>{event.location}</li>
               </ul>
             </div>
 
@@ -90,16 +114,10 @@ function TechEventDetail() {
               >
                 Agenda
               </Text>
-              <ul className="list-disc pl-6 space-y-2 text-base md:text-lg leading-relaxed">
-                <li>
-                  Day 1: Keynote speeches, panel discussions, and networking
-                  sessions.
-                </li>
-                <li>
-                  Day 2: Workshops, product showcases, and startup pitch
-                  competitions.
-                </li>
-              </ul>
+              <div
+                className="text-base md:text-lg leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: event.agenda }}
+              />
             </div>
 
             {/* Tickets */}
@@ -112,32 +130,34 @@ function TechEventDetail() {
               >
                 Tickets
               </Text>
-              <div className="flex gap-2 items-center text-base md:text-lg">
-                <img
-                  src="/assets/icons/solar_link-bold.png"
-                  className="dark:invert"
-                  alt=""
-                />
-                <a
-                  href="https://www.techgiant.inc/positions"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Get tickets for Africa Fintech Summit 2024 (opens in new tab)"
-                >
-                  https://www.techgiant.inc/positions
-                </a>
-              </div>
+              {event.ticket_url && (
+                <div className="flex gap-2 items-center text-base md:text-lg">
+                  <img
+                    src="/assets/icons/solar_link-bold.png"
+                    className="dark:invert"
+                    alt=""
+                  />
+                  <a
+                    href={event.ticket_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Get tickets for ${event.title} (opens in new tab)`}
+                  >
+                    {event.ticket_url}
+                  </a>
+                </div>
+              )}
             </div>
           </div>
-          <div className="text-secondary text-sm my-4">Posted 1 hour ago</div>
+          {/* <div className="text-secondary text-sm my-4">Posted 1 hour ago</div> */}
         </div>
 
         {/* Mobile social link */}
         <div className="block md:hidden text-center">
           <SocialLinks
             visible={false}
-            title="Africa Fintech Summit 2024"
-            sharemsg="Join us at the Africa Fintech Summit 2024"
+            title={event.title}
+            sharemsg={`Join us at ${event.title}`}
             url={window.location.href}
           />
         </div>

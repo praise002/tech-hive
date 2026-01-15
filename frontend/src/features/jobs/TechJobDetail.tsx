@@ -1,10 +1,32 @@
+import { useParams } from 'react-router-dom';
 import Rectangle from '../../components/common/Rectangle';
 import SocialLinks from '../../components/common/SocialLinks';
 import Text from '../../components/common/Text';
 import CategoryBar from '../../components/sections/CategoryBar';
 import Subscribe from '../../components/sections/Subscribe';
+import { useJobDetail } from '../../hooks/useContent';
+import Loader from '../../components/common/Loader';
 
 function TechJobDetail() {
+  const { id } = useParams<{ id: string }>();
+  const { job, isPending, isError, error } = useJobDetail(id || '');
+
+  if (isPending) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader />
+      </div>
+    );
+  }
+
+  if (isError || !job) {
+    return (
+      <div className="text-center py-20 text-red-500">
+        Error loading job: {error?.message}
+      </div>
+    );
+  }
+
   return (
     <>
       <CategoryBar />
@@ -13,7 +35,7 @@ function TechJobDetail() {
         <div className="hidden md:block px-10 mt-70">
           <SocialLinks
             visible={false}
-            title="Frontend Developer at TechGiant Inc"
+            title={`${job.title} at ${job.company}`}
             sharemsg="Check out this job opportunity!"
             url={window.location.href}
           />
@@ -28,25 +50,29 @@ function TechJobDetail() {
               bold={false}
               className="font-semibold mb-2 dark:text-custom-white"
             >
-              Frontend Developer
+              {job.title}
             </Text>
-            <div className="text-secondary text-sm">TechGiant Inc</div>
+            <div className="text-secondary text-sm">{job.company}</div>
           </div>
 
           {/* Tags Section */}
           <div className="flex gap-2 flex-wrap my-4">
             <span className="inline-flex items-center px-2 py-1 bg-cream text-xs font-medium text-gray-700 rounded-sm">
-              🌍 Remote
+              🌍 {job.work_mode}
             </span>
             <span className="inline-flex items-center px-2 py-1 bg-cream text-xs font-medium text-gray-700 rounded-sm">
-              ⚛️ React
+              ⏳ {job.job_type}
             </span>
-            <span className="inline-flex items-center px-2 py-1 bg-cream text-xs font-medium text-gray-700 rounded-sm">
-              🟨 JavaScript
-            </span>
-            <span className="inline-flex items-center px-2 py-1 bg-cream text-xs font-medium text-gray-700 rounded-sm">
-              ⏳ Full-time
-            </span>
+            {job.location && (
+              <span className="inline-flex items-center px-2 py-1 bg-cream text-xs font-medium text-gray-700 rounded-sm">
+                📍 {job.location}
+              </span>
+            )}
+            {job.category && (
+              <span className="inline-flex items-center px-2 py-1 bg-cream text-xs font-medium text-gray-700 rounded-sm">
+                📂 {job.category.name}
+              </span>
+            )}
           </div>
 
           <div className="space-y-8 text-primary dark:text-custom-white">
@@ -60,15 +86,13 @@ function TechJobDetail() {
               >
                 Job Description
               </Text>
-              <p className="text-base md:text-lg leading-relaxed">
-                TechGiant Inc is looking for a skilled frontend developer to
-                join their dynamic team. You will be responsible for designing
-                and implementing user interfaces for our web applications,
-                ensuring an exceptional user experience.
-              </p>
+              <div
+                className="text-base md:text-lg leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: job.desc }}
+              />
             </div>
 
-            {/* Requirement */}
+            {/* Requirements */}
             <div>
               <Text
                 variant="h5"
@@ -78,14 +102,10 @@ function TechJobDetail() {
               >
                 Requirements
               </Text>
-              <ul className="list-disc pl-6 space-y-2 text-base md:text-lg leading-relaxed">
-                <li>Proficiency in HTML, CSS, and JavaScript.</li>
-                <li>
-                  Experience with frameworks like React, Angular, or Vue.js.
-                </li>
-                <li>Familiarity with version control tools like Git.</li>
-                <li>Strong problem-solving skills and attention to detail.</li>
-              </ul>
+              <div
+                className="text-base md:text-lg leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: job.requirements }}
+              />
             </div>
 
             {/* Responsibilities */}
@@ -98,13 +118,10 @@ function TechJobDetail() {
               >
                 Responsibilities
               </Text>
-              <p className="text-base md:text-lg leading-relaxed">
-                Develop and maintain responsive web applications. Collaborate
-                with backend developers to integrate APIs. Write clean, scalable
-                code using JavaScript frameworks. Optimize applications for
-                maximum speed and scalability. Stay up-to-date with emerging
-                technologies and trends in frontend development.
-              </p>
+              <div
+                className="text-base md:text-lg leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: job.responsibilities }}
+              />
             </div>
 
             {/* Job Link */}
@@ -124,24 +141,24 @@ function TechJobDetail() {
                   alt=""
                 />
                 <a
-                  href="https://www.techgiant.inc/positions"
+                  href={job.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="View Job website (opens in new tab)"
                 >
-                  https://www.techgiant.inc/positions
+                  {job.url}
                 </a>
               </div>
             </div>
           </div>
-          <div className="text-secondary text-sm my-4">Posted 1 hour ago</div>
+          {/* <div className="text-secondary text-sm my-4">Posted 1 hour ago</div> */}
         </div>
 
         {/* Mobile social link */}
         <div className="block md:hidden text-center">
           <SocialLinks
             visible={false}
-            title="Frontend Developer at TechGiant Inc"
+            title={`${job.title} at ${job.company}`}
             sharemsg="Check out this job opportunity!"
             url={window.location.href}
           />

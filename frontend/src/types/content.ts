@@ -109,3 +109,32 @@ export interface ContributorGuidelinesRequest {
   terms_accepted: boolean;
 }
 
+// ============================================================================
+// ARTICLES
+// ============================================================================
+
+export interface ArticleAuthor {
+  name: string;
+  avatar: string;
+  username: string;
+}
+
+export interface Article {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  cover_image_url: string;
+  read_time: number;
+  status: string;
+  created_at: string;
+  is_featured: boolean;
+  author: ArticleAuthor;
+  total_reaction_counts: number;
+  reaction_counts: Record<string, number>;
+  tags: Array<{ id: string; name: string }>;
+  comments_count: number;
+  comments: any[];
+}
+
+export type ArticlesResponse = PaginatedResponse<Article>;

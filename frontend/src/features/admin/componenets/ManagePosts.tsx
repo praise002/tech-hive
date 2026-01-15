@@ -1,11 +1,11 @@
-import { CiSearch } from "react-icons/ci";
-import { GoPlus } from "react-icons/go";
-import { IoFilterOutline } from "react-icons/io5";
-import Articles from "../../components/sections/Articles";
-import TechJobs from "../../components/sections/TechJobs";
-import TechEvents from "../../components/sections/TechEvents";
-import TechTool from "../../components/sections/TechTool";
-import ResourceSpotlight from "../../components/sections/ResourceSpotlight";
+import { CiSearch } from 'react-icons/ci';
+import { GoPlus } from 'react-icons/go';
+import { IoFilterOutline } from 'react-icons/io5';
+import Articles from '../../../components/sections/Articles';
+import TechJobs from '../../../components/sections/TechJobs';
+import TechEvents from '../../../components/sections/TechEvents';
+import TechTool from '../../../components/sections/TechTool';
+import ResourceSpotlight from '../../../components/sections/ResourceSpotlight';
 
 function ManagePosts() {
   return (

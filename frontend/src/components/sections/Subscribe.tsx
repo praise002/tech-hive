@@ -40,27 +40,31 @@ function Subscribe() {
   ): void => {
     reset?.();
 
-    subscribeNewsletter(data.email, {
-      onSuccess: (response) => {
-        toast.success(response?.message);
-      },
-      onError: (error: any) => {
-        // Handle field-specific errors from the server
-        if (error.data) {
-          const fieldMapping: Record<string, keyof FormData> = {
-            email: 'email',
-          };
+    subscribeNewsletter(
+      { email: data.email },
+      {
+        onSuccess: (response) => {
+          toast.success(response?.message);
+        },
+        onError: (error: any) => {
+          // Handle field-specific errors from the server
+          if (error.data) {
+            const fieldMapping: Record<string, keyof FormData> = {
+              email: 'email',
+            };
 
-          Object.entries(error.data).forEach(([field, message]) => {
-            const formField = fieldMapping[field] || (field as keyof FormData);
-            setError(formField, {
-              type: 'server',
-              message: Array.isArray(message) ? message[0] : String(message),
+            Object.entries(error.data).forEach(([field, message]) => {
+              const formField =
+                fieldMapping[field] || (field as keyof FormData);
+              setError(formField, {
+                type: 'server',
+                message: Array.isArray(message) ? message[0] : String(message),
+              });
             });
-          });
-        }
-      },
-    });
+          }
+        },
+      }
+    );
   };
 
   return (

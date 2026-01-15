@@ -13,6 +13,7 @@ import Contact from './pages/Contact';
 import Home from './pages/Home';
 import Login from './features/auth/pages/Login';
 import PageNotFound from './pages/PageNotFound';
+import Unsubscribe from './pages/Unsubscribe';
 
 import Register from './features/auth/pages/Register';
 import TechEventList from './features/events/TechEventList';
@@ -30,7 +31,7 @@ import ResetPassword from './features/auth/pages/ResetPassword';
 import ResetPasswordSuccess from './features/auth/pages/ResetPaswordSuccess';
 import { Toaster } from 'react-hot-toast';
 
-import AdminDashboard from './features/admin/AdminDashboard';
+import AdminDashboard from './features/admin/pages/AdminDashboard';
 
 import Liveblock from './features/articles/pages/Liveblock';
 import Docs from './features/articles/pages/Docs';
@@ -67,7 +68,10 @@ function App() {
             {/* <Route path="/" element={<Home />} /> */}
             <Route index element={<Home />} />
             <Route path="articles" element={<ArticleList />} />
-            <Route path="articles/:username/:slug" element={<ArticleDetail />} />
+            <Route
+              path="articles/:username/:slug"
+              element={<ArticleDetail />}
+            />
             <Route path="jobs" element={<TechJobsList />} />
             <Route path="jobs/:jobSlug" element={<TechJobDetail />} />
             <Route path="events" element={<TechEventList />} />
@@ -89,6 +93,7 @@ function App() {
 
             <Route path="about" element={<About />} />
             <Route path="contact" element={<Contact />} />
+            <Route path="newsletter/unsubscribe" element={<Unsubscribe />} />
 
             <Route path="login" element={<Login />} />
             <Route path="logout" element={<Logout />} />

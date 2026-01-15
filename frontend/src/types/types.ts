@@ -290,5 +290,29 @@ export interface ApiResponse<T = any> {
   errors?: Record<string, string[]>;
 }
 
+// GENERAL
+
+export interface SiteDetail {
+  image_url: string;
+  body: string;
+  fb: string;
+  ln: string;
+  x: string;
+  ig: string;
+}
+
+export interface NewsletterSubscribeRequest {
+  email: string;
+}
+
+export interface NewsletterUnsubscribeParams {
+  email: string;
+}
+
+export interface ContactRequest {
+  name: string;
+  email: string;
+  content: string;
+}
 
 // TODO: REMOVE SOME STUFFS

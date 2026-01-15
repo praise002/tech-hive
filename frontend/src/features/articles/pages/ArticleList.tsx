@@ -10,7 +10,7 @@ import { useArticles } from '../../../hooks/useContent';
 function ArticleList() {
   const [currentPage, setCurrentPage] = useState(1);
   const { isPending, articles, count, next, previous } = useArticles({
-    limit: 10,
+    page_size: 10,
     page: currentPage,
   });
   const totalPages = count ? Math.ceil(count / 10) : 0;

@@ -3,6 +3,7 @@ export const API_URL = 'http://127.0.0.1:9000/api/v1';
 // export const API_URL = 'https://tech-hive-production.up.railway.app/api/v1';
 export const AUTH_URL = '/auth';
 export const PROFILE_URL = '/profiles';
+export const ANALYTICS_URL = '/analytics';
 
 export const routes = {
   auth: {
@@ -27,10 +28,11 @@ export const routes = {
     me: `${PROFILE_URL}/me/`,
     avatar: `${PROFILE_URL}/avatar/`,
     byUsername: (username: string) => `${PROFILE_URL}/${username}/`,
-    articles: `${PROFILE_URL}/articles/`,
-    byArticle: (slug: string) => `${PROFILE_URL}/me/${slug}/`,
+    articles: `${PROFILE_URL}/me/articles/`,
+    byArticle: (slug: string) => `${PROFILE_URL}/me/articles/${slug}/`,
     saved: `${PROFILE_URL}/me/saved/`,
     comments: `${PROFILE_URL}/me/comments/`,
+    usernames: `${PROFILE_URL}/usernames/`,
   },
 
   content: {
@@ -80,7 +82,35 @@ export const routes = {
     userBatch: '/users/batch/',
   },
 
+  analytics: {
+    dashboard: `${ANALYTICS_URL}/dashboard/`,
+    track: `${ANALYTICS_URL}/track/`,
+    articlePerformance: (articleId: string) =>
+      `${ANALYTICS_URL}/articles/${articleId}/`,
+  },
+
+  notifications: {
+    list: '/notifications/',
+    badgeCount: '/notifications/badge-count/',
+    detail: (id: string) => `/notifications/${id}/`,
+    restore: (id: string) => `/notifications/${id}/restore/`,
+  },
+
   general: {
     newsletter: '/newsletter/',
+    siteDetail: '/site-detail/',
+    contact: '/contact/',
+  },
+
+  subscriptions: {
+    plans: '/subscriptions/plans/',
+    me: '/subscriptions/me/',
+    premium: '/subscriptions/premium/',
+    cancel: '/subscriptions/premium/cancel/',
+    reactivate: '/subscriptions/reactivate/',
+    paymentCallback: '/subscriptions/payment/callback/',
+    paymentRetry: '/subscriptions/payment-retry/',
+    cardUpdate: '/subscriptions/card-update/',
+    paymentHistory: '/subscriptions/payment-history/',
   },
 };

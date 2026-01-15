@@ -45,6 +45,7 @@ export const useContentApi = () => {
   const getEvents = async (params?: {
     page?: number;
     page_size?: number;
+    category?: string;
     search?: string;
     start_date?: string;
     end_date?: string;
@@ -64,6 +65,10 @@ export const useContentApi = () => {
 
       if (params.page_size) {
         searchParams.append('page_size', params.page_size.toString());
+      }
+
+      if (params.category) {
+        searchParams.append('category', params.category);
       }
 
       if (params.search) {
@@ -277,6 +282,54 @@ export const useContentApi = () => {
     return response.data;
   };
 
+  const getArticles = async (params?: {
+    page?: number;
+    page_size?: number;
+    tag?: string;
+    search?: string;
+    ordering?: string;
+  }) => {
+    let url = routes.article.articles;
+
+    if (params) {
+      const searchParams = new URLSearchParams();
+
+      if (params.page) {
+        searchParams.append('page', params.page.toString());
+      }
+
+      if (params.page_size) {
+        searchParams.append('page_size', params.page_size.toString());
+      }
+
+      if (params.tag) {
+        searchParams.append('tags__name', params.tag);
+      }
+
+      if (params.search) {
+        searchParams.append('search', params.search);
+      }
+
+      if (params.ordering) {
+        searchParams.append('ordering', params.ordering);
+      }
+
+      if (searchParams.toString()) {
+        url = `${url}?${searchParams.toString()}`;
+      }
+    }
+
+    const response = await sendRequest(ApiMethod.GET, url);
+    return response.data;
+  };
+
+  const getArticleDetail = async (username: string, slug: string) => {
+    const url = routes.article.byArticle(username, slug);
+    const response = await sendRequest(ApiMethod.GET, url);
+
+    return response.data;
+  };
+
   const acceptGuidelines = async (
     userIsNotAuthenticatedCallback: () => void,
     termsAccepted: boolean = true
@@ -299,11 +352,13 @@ export const useContentApi = () => {
     getJobs,
     getTools,
     getCategories,
+    getArticles,
     getCategoryDetail,
     getJobDetail,
     getEventDetail,
     getResourceDetail,
     getToolDetail,
+    getArticleDetail,
     acceptGuidelines,
   };
 };
