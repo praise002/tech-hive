@@ -116,7 +116,7 @@ class ArticleListView(ListAPIView):
     serializer_class = ArticleListSerializer
     # serializer_class = ArticleCommentWithLikesSerializer
     filter_backends = (DjangoFilterBackend, SearchFilter)
-    filterset_fields = ("is_featured", "category")
+    filterset_fields = ("is_featured", "category", "author__username")
     search_fields = ["title", "content"]
     pagination_class = DefaultPagination
     default_limit = 10

@@ -25,7 +25,7 @@ class SubscriptionPlan(BaseModel):
     currency = models.CharField(max_length=3, default="NGN", help_text="Currency code")
     description = models.TextField(blank=True, help_text="Plan description for display")
     price = models.DecimalField(
-        max_digits=6,
+        max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(Decimal("0.01"))],
         help_text="Price in Naira (e.g., 5000.00)",

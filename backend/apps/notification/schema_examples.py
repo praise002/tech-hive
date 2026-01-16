@@ -8,8 +8,15 @@ NOTIFICATION_EXAMPLE = {
     "actor_name": "John Doe",
     "recipient_name": "Jane Smith",
     "verb": "liked your post",
+    "description": "John Doe liked your post",
     "is_read": True,
+    "is_deleted": False,
     "created_at": "2024-01-14T17:34:53Z",
+    "target_content_type": "article",
+    "target_object_id": "123e4567-e89b-12d3-a456-426614174000",
+    "target_slug": "example-article-slug",
+    "target_username": "johndoe",
+    "actor_avatar": "https://example.com/avatar.jpg",
 }
 
 NOTIFICATION_RETRIEVE_RESPONSE_EXAMPLE = {

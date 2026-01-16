@@ -116,9 +116,13 @@ class ArticleSerializer(serializers.ModelSerializer):
     def get_read_time(self, obj):
         return obj.calculate_read_time()
 
-    @extend_schema_field(serializers.CharField)
+    @extend_schema_field(serializers.DictField)
     def get_author(self, obj):
-        return {"name": obj.author.full_name, "avatar": obj.author.avatar_url}
+        return {
+            "name": obj.author.full_name,
+            "avatar": obj.author.avatar_url,
+            "username": obj.author.username,
+        }
 
     @extend_schema_field(serializers.CharField)
     def get_category(self, obj):
@@ -147,10 +151,11 @@ class ArticleListSerializer(serializers.ModelSerializer):
     category = serializers.SerializerMethodField()
     tags = TagSerializer(many=True, read_only=True)
     total_reaction_counts = serializers.SerializerMethodField()
-    reactions = serializers.SerializerMethodField()
+    reaction_counts = serializers.SerializerMethodField()
     is_saved = serializers.SerializerMethodField()
     read_time = serializers.SerializerMethodField()
     cover_image_url = serializers.SerializerMethodField()
+    author = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Article
@@ -158,16 +163,18 @@ class ArticleListSerializer(serializers.ModelSerializer):
             "id",
             "title",
             "slug",
+            "author",
             "category",
             "content",
             "tags",
             "is_featured",
             "read_time",
             "total_reaction_counts",
-            "reactions",
+            "reaction_counts",
             "is_saved",
             "cover_image_url",
             "published_at",
+            "created_at",
         ]
 
     @extend_schema_field(serializers.BooleanField)
@@ -178,10 +185,10 @@ class ArticleListSerializer(serializers.ModelSerializer):
             return obj.saved_by_user.filter(user=user).exists()
         return False
 
-    @extend_schema_field(serializers.ListField(child=serializers.CharField()))
-    def get_reactions(self, obj):
-        """Return a unique list of emojis used in reactions for this article"""
-        return list(obj.reaction_counts.keys())
+    @extend_schema_field(serializers.DictField)
+    def get_reaction_counts(self, obj):
+        """Return a dict of emojis and their counts for this article"""
+        return obj.reaction_counts
 
     @extend_schema_field(serializers.IntegerField)
     def get_total_reaction_counts(self, obj):
@@ -199,6 +206,14 @@ class ArticleListSerializer(serializers.ModelSerializer):
     def get_category(self, obj):
         if obj.category:
             return obj.category.name
+
+    @extend_schema_field(serializers.DictField)
+    def get_author(self, obj):
+        return {
+            "name": obj.author.full_name,
+            "avatar": obj.author.avatar_url,
+            "username": obj.author.username,
+        }
 
     @extend_schema_field(serializers.CharField)
     def get_content(self, obj):
@@ -619,7 +634,8 @@ class JobListSerializer(serializers.ModelSerializer):
     def get_category(self, obj):
         if obj.category:
             return obj.category.name
-        
+
+
 class EventSerializer(serializers.ModelSerializer):
     category = serializers.CharField(source="category.name", read_only=True)
 
@@ -628,6 +644,7 @@ class EventSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "title",
+            "organizer",
             "slug",
             "desc",
             "start_date",
@@ -649,6 +666,7 @@ class EventListSerializer(serializers.ModelSerializer):
             "id",
             "slug",
             "title",
+            "organizer",
             "category",
             "location",
             "start_date",
@@ -751,6 +769,7 @@ class ToolListSerializer(serializers.ModelSerializer):
     desc = serializers.SerializerMethodField()
     image_url = serializers.SerializerMethodField()
     tags = ToolTagSerializer(many=True, read_only=True)
+    category = serializers.CharField(source="category.name", read_only=True)
 
     class Meta:
         model = models.Tool
@@ -759,10 +778,12 @@ class ToolListSerializer(serializers.ModelSerializer):
             "name",
             "slug",
             "desc",
+            "url",
             "published_at",
             "call_to_action",
             "image_url",
             "tags",
+            "category",
             "is_featured",
         ]
 

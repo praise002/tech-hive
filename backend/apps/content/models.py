@@ -445,8 +445,8 @@ class Job(BaseModel):
     slug = AutoSlugField(populate_from="title", unique=True, always_update=True)
     company = models.CharField(max_length=250)
     desc = models.TextField()
-    requirements = models.TextField()
-    responsibilities = models.TextField()
+    requirements = CKEditor5Field("Job Requirements", config_name="extends")
+    responsibilities = CKEditor5Field("Job Responsibilities", config_name="extends")
     url = models.CharField(max_length=250, validators=[URLValidator()])
     salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     location = models.CharField(max_length=100, blank=True)
@@ -474,12 +474,13 @@ class Event(BaseModel):
         Category, related_name="events", on_delete=models.SET_NULL, null=True
     )
     title = models.CharField(max_length=250)
+    organizer = models.CharField(max_length=250)
     slug = AutoSlugField(populate_from="title", unique=True, always_update=True)
     desc = models.TextField()
     start_date = models.DateTimeField(default=timezone.now)
     end_date = models.DateTimeField(default=timezone.now)
     location = models.CharField(max_length=100)
-    agenda = models.TextField()
+    agenda = CKEditor5Field("Event Agenda", config_name="extends")
     ticket_url = models.CharField(max_length=250, validators=[URLValidator()])
 
     is_published = models.BooleanField(default=True)
@@ -503,7 +504,7 @@ class Resource(BaseModel):
     image = models.ImageField(
         upload_to="resources/", null=True, blank=True, validators=[validate_file_size]
     )
-    body = models.TextField()
+    body = CKEditor5Field("Resource Body", config_name="extends")
     url = models.CharField(max_length=250, validators=[URLValidator()])
     tags = models.ManyToManyField(Tag, blank=True, related_name="resources")
 
