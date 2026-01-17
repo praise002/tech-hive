@@ -22,6 +22,7 @@ from apps.content.serializers import (
     ToolSerializer,
 )
 from apps.general.views import CustomListView
+from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -35,8 +36,8 @@ class CategoryGenericView(CustomListView):
     serializer_class = CategorySerializer
     filter_backends = (SearchFilter, OrderingFilter)
     search_fields = ["name"]
-    ordering_fields = ["name"]
-    queryset = Category.objects.all()
+    ordering_fields = ["name", "article_count"]
+    queryset = Category.objects.annotate(article_count=Count("articles")).all()
 
     @extend_schema(
         summary="List all categories",

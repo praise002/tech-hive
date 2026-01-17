@@ -33,7 +33,7 @@ class TestArticles(APITestCase):
 
         self.article = TestUtil.create_article(author=self.user4)
         self.comment = TestUtil.create_comment(article=self.article, user=self.user4)
-        self.comment_del_url = f"/api/v1/comments/{self.comment.id}/"
+        self.comment_detail_url = f"/api/v1/comments/{self.comment.id}/"
 
         # Create test data
         self.category = Category.objects.create(
@@ -738,18 +738,18 @@ class TestArticles(APITestCase):
         self.assertEqual(self.thread.reply_count, 5)
 
     def test_delete_comment_unauthenticated(self):
-        response = self.client.delete(self.comment_del_url)
+        response = self.client.delete(self.comment_detail_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_delete_comment_not_author(self):
         self.client.force_authenticate(user=self.user2)
-        response = self.client.delete(self.comment_del_url)
+        response = self.client.delete(self.comment_detail_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertTrue(Comment.objects.filter(id=self.comment.id).exists())
 
     def test_delete_comment_success(self):
         self.client.force_authenticate(user=self.user4)
-        response = self.client.delete(self.comment_del_url)
+        response = self.client.delete(self.comment_detail_url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Comment.objects.filter(id=self.comment.id).exists())
 
@@ -965,6 +965,39 @@ class TestArticles(APITestCase):
 
         self.assertEqual(response_data["like_count"], 0)
         self.assertFalse(response_data["is_liked"])
+        
+    def test_verified_user_can_edit_own_comment(self):
+        self.client.force_authenticate(user=self.user4)
+        data = {"body": "Updated body"}
+        response = self.client.patch(self.comment_detail_url, data)
+        print(response.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.comment.refresh_from_db()
+        self.assertEqual(self.comment.body, "Updated body")
+        
+    def test_user_cannot_edit_others_comment(self):
+        self.client.force_authenticate(user=self.user2)
+        data = {"body": "Hacked body"}
+        response = self.client.patch(self.comment_detail_url, data)
+        print(response.data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.comment.refresh_from_db()
+        self.assertEqual(self.comment.body, "This is a test comment.")
+        
+    def test_unauthenticated_user_cannot_edit(self):
+        data = {"body": "Hacked body"}
+        response = self.client.patch(self.comment_detail_url, data)
+        print(response.data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        
+    def test_cannot_set_empty_body(self):
+        self.client.force_authenticate(user=self.user4)
+        data = {"body": "   "}
+        response = self.client.patch(self.comment_detail_url, data)
+        print(response.data)
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+        self.comment.refresh_from_db()
+        self.assertEqual(self.comment.body, "This is a test comment.")
 
 
 # python manage.py test apps.content.tests.test_articles

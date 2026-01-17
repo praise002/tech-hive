@@ -6,7 +6,7 @@ from apps.common.exceptions import NotFoundError
 from apps.common.pagination import DefaultPagination
 from apps.common.responses import CustomResponse
 from apps.content.choices import ArticleStatusChoices
-from apps.content.models import Article, Comment, Tag
+from apps.content.models import Article, Comment, CommentThread, Tag
 from apps.content.permissions import IsCommentAuthor
 from apps.content.schema_examples import (
     ACCEPT_GUIDELINES_RESPONSE_EXAMPLE,
@@ -17,6 +17,7 @@ from apps.content.schema_examples import (
     COMMENT_DELETE_RESPONSE_EXAMPLE,
     COMMENT_LIKE_STATUS_RESPONSE_EXAMPLE,
     COMMENT_LIKE_TOGGLE_RESPONSE_EXAMPLE,
+    COMMENT_UPDATE_RESPONSE_EXAMPLE,
     RSS_RESPONSE_EXAMPLE,
     TAG_RESPONSE_EXAMPLE,
     THREAD_REPLIES_RESPONSE_EXAMPLE,
@@ -29,6 +30,7 @@ from apps.content.serializers import (
     CommentLikeSerializer,
     CommentLikeStatusSerializer,
     CommentResponseSerializer,
+    CommentUpdateSerializer,
     ContributorOnboardingSerializer,
     TagSerializer,
     ThreadReplySerializer,
@@ -42,7 +44,7 @@ from apps.content.throttles import (
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.db import transaction
-from django.db.models import Prefetch
+from django.db.models import F, Prefetch
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
 from redis import RedisError
@@ -386,8 +388,42 @@ class RSSFeedInfoView(APIView):
         )
 
 
-class CommentDeleteView(APIView):
+class CommentDetailView(APIView):
+    """
+    Update or delete a comment.
+    """
+
     permission_classes = (IsAuthenticated, IsCommentAuthor)
+    serializer_class = CommentResponseSerializer
+   
+
+    @extend_schema(
+        summary="Update a comment",
+        description="Update the body of a specific comment. Only the author can perform this action.",
+        tags=article_tags,
+        request=CommentUpdateSerializer,
+        responses=COMMENT_UPDATE_RESPONSE_EXAMPLE,
+    )
+    def patch(self, request, *args, **kwargs):
+        comment_id = self.kwargs.get("comment_id")
+        try:
+            comment = Comment.objects.select_related("user").get(id=comment_id)
+        except Comment.DoesNotExist:
+            raise NotFoundError("Comment not found.")
+
+        self.check_object_permissions(request, comment)
+
+        serializer =  CommentUpdateSerializer(comment, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        updated_comment = serializer.save()
+
+        response_serializer = self.serializer_class(updated_comment)
+
+        return CustomResponse.success(
+            message="Comment updated successfully.",
+            data=response_serializer.data,
+            status_code=status.HTTP_200_OK,
+        )
 
     @extend_schema(
         summary="Delete a comment",
@@ -406,7 +442,18 @@ class CommentDeleteView(APIView):
 
         self.check_object_permissions(request, comment)
 
+        # Check if it's a valid reply (not a root comment) before deletion
+        # accesses logic that relies on the object existing
+        is_reply = not comment.is_root_comment
+        thread_id = comment.thread_id
+
         comment.delete()
+
+        # If it was a reply, decrement the thread's reply count
+        if is_reply and thread_id:
+            CommentThread.objects.filter(id=thread_id).update(
+                reply_count=F("reply_count") - 1
+            )
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 

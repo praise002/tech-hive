@@ -607,6 +607,54 @@ COMMENT_CREATE_RESPONSE_EXAMPLE = {
 }
 
 
+COMMENT_UPDATE_RESPONSE_EXAMPLE = {
+    200: OpenApiResponse(
+        description="Comment updated successfully",
+        response=CommentResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Success Response",
+                value={
+                    "status": SUCCESS_RESPONSE_STATUS,
+                    "message": "Comment updated successfully.",
+                    "data": COMMENT_CREATE_EXAMPLE,
+                },
+            ),
+        ],
+    ),
+    401: UNAUTHORIZED_USER_RESPONSE,
+    403: OpenApiResponse(
+        description="Permission denied",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Not Author",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "You do not have permission to edit this comment.",
+                    "code": ErrorCode.FORBIDDEN,
+                },
+            ),
+        ],
+    ),
+    404: OpenApiResponse(
+        description="Comment not found",
+        response=ErrorResponseSerializer,
+        examples=[
+            OpenApiExample(
+                name="Comment Not Found",
+                value={
+                    "status": ERR_RESPONSE_STATUS,
+                    "message": "Comment not found",
+                    "code": ErrorCode.NON_EXISTENT,
+                },
+            ),
+        ],
+    ),
+    422: ErrorDataResponseSerializer,
+}
+
+
 COMMENT_LIKE_TOGGLE_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(
         description="Like status toggled successfully. The 'action' field indicates whether the comment was 'liked' or 'unliked'.",

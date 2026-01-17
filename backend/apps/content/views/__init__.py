@@ -1,11 +1,11 @@
 from .article_reaction import ArticleReactionView
-from .articles import (  # ArticleCoverImageUploadView,
+from .articles import (
     AcceptGuidelinesView,
     ArticleListView,
     ArticleRetrieveView,
     ArticleSummaryView,
     CommentCreateView,
-    CommentDeleteView,
+    CommentDetailView,
     CommentLikeStatusView,
     CommentLikeToggleView,
     RSSFeedInfoView,
@@ -51,7 +51,7 @@ __all__ = [
     "ToolListView",
     "ThreadRepliesView",
     "CommentCreateView",
-    "CommentDeleteView",
+    "CommentDetailView",
     "CommentLikeToggleView",
     "CommentLikeStatusView",
     "ArticleReactionView",

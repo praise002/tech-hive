@@ -101,7 +101,7 @@ urlpatterns = [
     ),
     path(
         "comments/<uuid:comment_id>/",
-        views.CommentDeleteView.as_view(),
+        views.CommentDetailView.as_view(),
     ),
     path(
         "comments/<uuid:comment_id>/like/",

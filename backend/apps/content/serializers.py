@@ -483,6 +483,17 @@ class CommentCreateSerializer(serializers.ModelSerializer):
         return not user.mentions_disabled and user != comment.user
 
 
+class CommentUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Comment
+        fields = ["body"]
+
+    # def validate_body(self, value):
+    #     if not value.strip():
+    #         raise serializers.ValidationError("Comment body cannot be empty.")
+    #     return value
+
+
 class CommentResponseSerializer(serializers.ModelSerializer):
     """Serializer for returning comment data after creation"""
 
@@ -576,6 +587,8 @@ class ThreadReplySerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source="user.full_name", read_only=True)
     user_avatar = serializers.URLField(source="user.avatar_url", read_only=True)
     user_username = serializers.CharField(source="user.username", read_only=True)
+    replying_to_name = serializers.SerializerMethodField()
+    replying_to_username = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Comment
@@ -586,7 +599,21 @@ class ThreadReplySerializer(serializers.ModelSerializer):
             "user_name",
             "user_username",
             "user_avatar",
+            "replying_to_name",
+            "replying_to_username",
         ]
+
+    def get_replying_to_name(self, obj):
+        mention = obj.mentions.first()
+        if mention and mention.mentioned_user:
+            return mention.mentioned_user.full_name
+        return None
+
+    def get_replying_to_username(self, obj):
+        mention = obj.mentions.first()
+        if mention and mention.mentioned_user:
+            return mention.mentioned_user.username
+        return None
 
 
 class JobSerializer(serializers.ModelSerializer):
