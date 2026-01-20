@@ -44,12 +44,12 @@ from apps.content.throttles import (
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.db import transaction
-from django.db.models import F, Prefetch
+from django.db.models import Count, F, Prefetch
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
 from redis import RedisError
 from rest_framework import status
-from rest_framework.filters import SearchFilter
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -108,18 +108,25 @@ class AcceptGuidelinesView(APIView):
 
 
 class ArticleListView(ListAPIView):
-    # List all published article
     queryset = (
         Article.objects.filter(status=ArticleStatusChoices.PUBLISHED)
         .select_related("category", "author")
         .prefetch_related("tags")
+        .annotate(annotated_reaction_count=Count("reactions"))
         .all()
     )
     serializer_class = ArticleListSerializer
-    # serializer_class = ArticleCommentWithLikesSerializer
-    filter_backends = (DjangoFilterBackend, SearchFilter)
+
+    filter_backends = (DjangoFilterBackend, SearchFilter, OrderingFilter)
     filterset_fields = ("is_featured", "category", "author__username")
     search_fields = ["title", "content"]
+    ordering_fields = [
+        "created_at",
+        "published_at",
+        "title",
+        "annotated_reaction_count",
+    ]
+    ordering = ["-created_at"]
     pagination_class = DefaultPagination
     default_limit = 10
 
@@ -395,7 +402,6 @@ class CommentDetailView(APIView):
 
     permission_classes = (IsAuthenticated, IsCommentAuthor)
     serializer_class = CommentResponseSerializer
-   
 
     @extend_schema(
         summary="Update a comment",
@@ -413,7 +419,7 @@ class CommentDetailView(APIView):
 
         self.check_object_permissions(request, comment)
 
-        serializer =  CommentUpdateSerializer(comment, data=request.data, partial=True)
+        serializer = CommentUpdateSerializer(comment, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         updated_comment = serializer.save()
 

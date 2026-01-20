@@ -488,10 +488,7 @@ class CommentUpdateSerializer(serializers.ModelSerializer):
         model = models.Comment
         fields = ["body"]
 
-    # def validate_body(self, value):
-    #     if not value.strip():
-    #         raise serializers.ValidationError("Comment body cannot be empty.")
-    #     return value
+    
 
 
 class CommentResponseSerializer(serializers.ModelSerializer):

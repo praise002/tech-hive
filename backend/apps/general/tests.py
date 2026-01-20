@@ -40,7 +40,7 @@ class TestGeneral(APITestCase):
     def test_newsletter_subscription(self):
         data = {"email": "testuser@example.com"}
         response = self.client.post(self.newsletter_url, data)
-        print(response.data)
+
         self.assertEqual(response.status_code, 201)
         self.assertTrue(
             Newsletter.objects.filter(
@@ -54,7 +54,7 @@ class TestGeneral(APITestCase):
 
         data = {"email": email}
         response = self.client.post(self.newsletter_url, data)
-        print(response.data)
+
         self.assertEqual(response.status_code, 422)
         self.assertIn(
             "This email is already subscribed to the newsletter.",
@@ -68,7 +68,7 @@ class TestGeneral(APITestCase):
 
         data = {"email": email}
         response = self.client.post(self.newsletter_url, data)
-        print(response.data)
+
         self.assertEqual(response.status_code, 201)
 
         # Verify they are now subscribed
@@ -82,7 +82,7 @@ class TestGeneral(APITestCase):
 
         # Unsubscribe using the token
         response = self.client.get(f"/api/v1/newsletter/unsubscribe/{token}/")
-        print(response.data)
+
         self.assertEqual(response.status_code, 200)
 
         newsletter.refresh_from_db()
@@ -92,7 +92,6 @@ class TestGeneral(APITestCase):
         # Invalid token
         response = self.client.get("/api/v1/newsletter/unsubscribe/invalid-token/")
         self.assertEqual(response.status_code, 404)
-        print(response.data)
 
 
 # python manage.py test apps.general.tests.TestGeneral.test_message_create
