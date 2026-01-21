@@ -302,3 +302,13 @@ API documentation will be available at:
 
 ## FIXES
 - The order of silk middleware matters in development, put it first for it to work.
+
+### Resolving Ngrok & CORS Errors
+1. **Run Localhost**: Ensure your backend server is running (e.g., `python manage.py runserver 9000`).
+2. **Run Ngrok**: Start ngrok pointing to your backend port (e.g., `ngrok http 9000`).
+3. **Bypass Ngrok Browser Warning**:
+    - **Frontend**: Add the `ngrok-skip-browser-warning` header to your API requests in `useApi.ts`.
+    - **Backend**: Add `ngrok-skip-browser-warning` to `CORS_ALLOW_HEADERS` in `settings/dev.py`.
+4. **CORS Configuration**:
+    - Ensure your frontend URL (localhost and ngrok) is in `CORS_ALLOWED_ORIGINS` in `settings/dev.py`.
+    - Ensure `CORS_ALLOW_CREDENTIALS` is set to `True`.

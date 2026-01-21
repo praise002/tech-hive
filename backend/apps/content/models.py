@@ -62,7 +62,7 @@ class Article(BaseModel):
 
     title = models.CharField(max_length=250)
     slug = AutoSlugField(populate_from="title", unique=True, always_update=True)
-    content = CKEditor5Field("Article Content", config_name="extends")
+    content = CKEditor5Field("Article Content", config_name="extends", blank=True, default='')
     cover_image = models.ImageField(
         upload_to="articles/", null=True, blank=True, validators=[validate_file_size]
     )

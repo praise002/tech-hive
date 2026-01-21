@@ -6,6 +6,8 @@ import toast from 'react-hot-toast';
 import Spinner from '../../../../components/common/Spinner';
 import { ToolTip } from '../../../../components/common/SocialLinks';
 import Text from '../../../../components/common/Text';
+import { useUpdateUserArticleBySlug } from '../../../profile/hooks/useProfile';
+import { useNavigate } from 'react-router-dom';
 
 // const suggestedTags = [
 //   'JavaScript',
@@ -29,19 +31,32 @@ import Text from '../../../../components/common/Text';
 //   'Tag 6',
 // ];
 
-function ArticleMetadata({ mode }: { mode: string }) {
-  // const [tags, setTags] = useState([
+function ArticleMetadata({
+  mode,
+  articleSlug,
+  initialTitle = '',
+  initialCoverImage = '',
+}: {
+  mode: string;
+  articleSlug?: string;
+  initialTitle?: string;
+  initialCoverImage?: string;
+}) {
+   // const [tags, setTags] = useState([
   //   'Cloud Computing',
   //   'Technology',
   //   'Innovation',
   // ]);
   // const [inputValue, setInputValue] = useState('');
-  const [isImageLoading, setIsImageLoading] = useState(false);
+  const navigate = useNavigate();
+
+  // Hook for updating article metadata (title, cover image)
+  const { updateUserArticleBySlug, isPending: isUpdating } =
+    useUpdateUserArticleBySlug(() => navigate('/login'));
 
   const [metadata, setMetadata] = useState({
-    title: 'Test Title',
-    // coverImage: '/assets/about.png',
-    coverImage: '',
+    title: initialTitle,
+    coverImage: initialCoverImage,
     coverImageAlt: '',
   });
 
@@ -83,20 +98,35 @@ function ArticleMetadata({ mode }: { mode: string }) {
   }
 
   function handleCoverImageChange(event: React.ChangeEvent<HTMLInputElement>) {
-    setIsImageLoading(true);
     const file = event.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setTimeout(() => {
-        setMetadata((prev) => ({
-          ...prev,
-          coverImage: imageUrl,
-        }));
-        setIsImageLoading(false);
-      }, 900);
+    if (!file || !articleSlug) {
+      if (!articleSlug) {
+        toast.error('Article slug is required to upload cover image');
+      }
+      return;
     }
 
-    toast.success('Cover picture updated successfully!');
+    // Create FormData for file upload
+    const formData = new FormData();
+    formData.append('cover_image', file);
+
+    // Upload to server
+    updateUserArticleBySlug(
+      { slug: articleSlug, updateData: formData },
+      {
+        onSuccess: (response) => {
+          // Update local state with permanent URL from server
+          setMetadata((prev) => ({
+            ...prev,
+            coverImage: response.data.cover_image_url,
+          }));
+          toast.success('Cover image uploaded successfully!');
+        },
+        onError: () => {
+          toast.error('Failed to upload cover image');
+        },
+      }
+    );
   }
 
   function handleCoverImageRemove() {
@@ -153,9 +183,9 @@ function ArticleMetadata({ mode }: { mode: string }) {
               <div className="absolute inset-0 group-hover:bg-opacity-30 transition-all duration-300 flex justify-center items-center">
                 <div className="space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <button
-                    disabled={isImageLoading}
+                    disabled={isUpdating}
                     className={`bg-white relative text-gray-800 px-4 py-2 rounded-md ${
-                      isImageLoading
+                      isUpdating
                         ? 'cursor-not-allowed opacity-75'
                         : 'cursor-pointer'
                     }`}
@@ -165,8 +195,9 @@ function ArticleMetadata({ mode }: { mode: string }) {
                       accept="image/*"
                       className="appearance-none opacity-0 absolute inset-0"
                       onChange={handleCoverImageChange}
+                      disabled={isUpdating}
                     />
-                    {isImageLoading ? <Spinner /> : 'Change'}
+                    {isUpdating ? <Spinner /> : 'Change'}
                   </button>
                   <Button onClick={handleCoverImageRemove}>Remove</Button>
                   <button
@@ -186,11 +217,11 @@ function ArticleMetadata({ mode }: { mode: string }) {
             >
               <Button
                 className={`${
-                  isImageLoading
+                  isUpdating
                     ? 'cursor-not-allowed opacity-75'
                     : 'cursor-pointer'
                 }`}
-                disabled={isImageLoading}
+                disabled={isUpdating}
                 variant="outline"
               >
                 {/* accept=".jpg, .jpeg, .png, .gif, .webp" */}
@@ -199,8 +230,9 @@ function ArticleMetadata({ mode }: { mode: string }) {
                   accept="image/*"
                   className="appearance-none absolute inset-0 opacity-0"
                   onChange={handleCoverImageChange}
+                  disabled={isUpdating}
                 />
-                {isImageLoading ? <Spinner /> : 'Add a cover image'}
+                {isUpdating ? <Spinner /> : 'Add a cover image'}
               </Button>
             </ToolTip>
           )}

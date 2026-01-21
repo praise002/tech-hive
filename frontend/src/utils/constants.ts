@@ -1,5 +1,5 @@
-export const API_URL = 'http://127.0.0.1:9000/api/v1';
-// export const API_URL = 'https://252f6a1b6106.ngrok-free.app/api/v1';
+// export const API_URL = 'http://127.0.0.1:9000/api/v1';
+export const API_URL = 'https://c3abff6d3a31.ngrok-free.app/api/v1';
 // export const API_URL = 'https://tech-hive-production.up.railway.app/api/v1';
 export const AUTH_URL = '/auth';
 export const PROFILE_URL = '/profiles';

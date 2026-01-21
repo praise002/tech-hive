@@ -179,7 +179,13 @@ export function useUpdateUserArticleBySlug(handleUnauthenticated: () => void) {
     isError,
     error,
   } = useMutation({
-    mutationFn: ({ slug, updateData }: { slug: string; updateData: any }) => {
+    mutationFn: ({
+      slug,
+      updateData,
+    }: {
+      slug: string;
+      updateData: FormData | { title?: string; content?: string };
+    }) => {
       return updateUserArticleBySlugApi(
         handleUnauthenticated,
         slug,

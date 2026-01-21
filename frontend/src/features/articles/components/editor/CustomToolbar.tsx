@@ -30,17 +30,7 @@ import {
 import Spinner from '../../../../components/common/Spinner';
 
 function CustomToolbar({ editor }: { editor: Editor | null }) {
-  if (!editor) return null;
-
   const [isImageLoading, setIsImageLoading] = useState(false);
-
-  function getImageUrl(
-    event: React.ChangeEvent<HTMLInputElement>
-  ): string | null {
-    const file = event.target.files?.[0];
-
-    return file ? URL.createObjectURL(file) : null;
-  }
 
   const addImage = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,6 +87,16 @@ function CustomToolbar({ editor }: { editor: Editor | null }) {
       toast.error((e as Error).message);
     }
   }, [editor]);
+
+  if (!editor) return null;
+
+  function getImageUrl(
+    event: React.ChangeEvent<HTMLInputElement>
+  ): string | null {
+    const file = event.target.files?.[0];
+
+    return file ? URL.createObjectURL(file) : null;
+  }
 
   function addYoutubeVideo() {
     const url = prompt('Enter YouTube URL');

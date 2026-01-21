@@ -119,7 +119,7 @@ export const useProfileApi = () => {
   const updateUserArticleBySlug = async (
     userIsNotAuthenticatedCallback: () => void,
     slug: string,
-    updateData: UpdateArticleData
+    updateData: UpdateArticleData | FormData
   ) => {
     const articleSlug = routes.profile.byArticle(slug);
     const response = await sendAuthGuardedRequest(

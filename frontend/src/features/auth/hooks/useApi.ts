@@ -22,6 +22,7 @@ const sendRequest = async (
     ...init,
     headers: {
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+      'ngrok-skip-browser-warning': 'true',
       ...(authToken && { Authorization: `Bearer ${authToken}` }),
       ...init?.headers,
     },

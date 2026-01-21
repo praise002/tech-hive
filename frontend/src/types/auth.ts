@@ -49,8 +49,8 @@ export enum ApiMethod {
 }
 
 export interface UpdateArticleData {
-  title: string;
-  content: string;
+  title?: string;
+  content?: string;
 }
 
 export interface SaveArticleData {
