@@ -255,6 +255,19 @@ class AvatarUpdateView(APIView):
     )
     def patch(self, request):
         profile = request.user
+
+        # Check for removal flag in FormData
+        if request.data.get("remove_avatar") == "true":
+            profile.avatar = None
+            profile.save()
+            return CustomResponse.success(
+                message="Profile avatar removed successfully.",
+                data={
+                    "avatar_url": profile.avatar_url,
+                },
+                status_code=status.HTTP_200_OK,
+            )
+
         serializer = self.serializer_class(profile, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         profile = serializer.save()
@@ -300,7 +313,6 @@ class UserArticleListCreateView(ListCreateAPIView):
                 description="Filter articles by status.",
                 enum=[  # it has to be specified for it to wrok
                     "draft",
-                    "submitted",
                     "submitted_for_review",
                     "under_review",
                     "changes_requested",

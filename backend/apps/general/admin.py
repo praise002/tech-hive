@@ -27,6 +27,7 @@ class SiteDetailAdmin(admin.ModelAdmin):
 class NewsletterAdmin(admin.ModelAdmin):
     list_display = ("email",)
     list_filter = ("is_subscribed",)
+    readonly_fields = ("unsubscribe_token", "subscribed_at")
 
 
 @admin.register(models.Contact)

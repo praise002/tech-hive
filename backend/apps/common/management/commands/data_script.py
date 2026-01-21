@@ -667,19 +667,6 @@ class CreateData:
         """Create subscription plans"""
         plans_data = [
             {
-                "name": "Free Plan",
-                "description": "Access to basic content and features.",
-                "price": 0.00,
-                "currency": "NGN",
-                "billing_cycle": "MONTHLY",
-                "features": {
-                    "ad_free": False,
-                    "premium_content": False,
-                    "download_resources": False,
-                },
-                "paystack_plan_code": "PLN_free123",
-            },
-            {
                 "name": "Premium Monthly",
                 "description": "Unlock all premium articles and resources.",
                 "price": 5000.00,

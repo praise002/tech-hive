@@ -15,7 +15,7 @@ from apps.common.serializers import (
 from apps.content.serializers import (  # CoverImageSerializer,
     ArticleApproveResponseSerializer,
     ArticleEditorSerializer,
-    ArticleReactionStatusSerializer,
+    ArticleReactionStatisticsSerializer,
     ArticleSerializer,
     ArticleSubmitResponseSerializer,
     ArticleSummaryResponseSerializer,
@@ -115,6 +115,7 @@ ARTICLE_DETAIL_EXAMPLE = {
             "thread_id": "6dd9d3f8-bdd3-43e8-83f9-a5533349f776",
             "body": "This is cool",
             "created_at": "2025-10-27T18:03:01.913900Z",
+            "updated_at": "2025-10-27T19:03:01.913900Z",
             "user_name": "Praise ID",
             "user_username": "praise-id",
             "user_avatar": AVATAR_URL,
@@ -783,7 +784,7 @@ COMMENT_LIKE_STATUS_RESPONSE_EXAMPLE = {
 
 ARTICLE_REACTION_TOGGLE_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(
-        response=ArticleReactionStatusSerializer,
+        response=ArticleReactionStatisticsSerializer,
         description="Reaction toggled successfully. The 'action' field indicates whether the reaction was 'added' or 'removed'.",
         examples=[
             OpenApiExample(
@@ -863,7 +864,7 @@ ARTICLE_REACTION_TOGGLE_RESPONSE_EXAMPLE = {
 
 ARTICLE_REACTION_STATISTICS_RESPONSE_EXAMPLE = {
     200: OpenApiResponse(
-        response=ArticleReactionStatusSerializer,
+        response=ArticleReactionStatisticsSerializer,
         description="Reaction statistics retrieved successfully. `user_reactions` will be `null` for unauthenticated users.",
         examples=[
             OpenApiExample(

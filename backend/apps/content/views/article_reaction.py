@@ -10,7 +10,7 @@ from apps.content.schema_examples import (
     ARTICLE_REACTION_TOGGLE_RESPONSE_EXAMPLE,
 )
 from apps.content.serializers import (
-    ArticleReactionStatusSerializer,
+    ArticleReactionStatisticsSerializer,
     ArticleReactionToggleSerializer,
 )
 from apps.notification.utils import create_notification
@@ -30,7 +30,7 @@ class ArticleReactionView(APIView):
     def get_serializer_class(self):
         if self.request.method == "POST":
             return ArticleReactionToggleSerializer
-        return ArticleReactionStatusSerializer
+        return ArticleReactionStatisticsSerializer
 
     def get_serializer(self, *args, **kwargs):
         """

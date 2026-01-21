@@ -65,12 +65,14 @@ class PasswordChangeSerializer(serializers.Serializer):
     def validate(self, attrs):  # object-level, runs after field-level validate
         if attrs["new_password"] != attrs["confirm_password"]:
             raise serializers.ValidationError(
-                {"error": "New password and confirm password do not match."}
+                {"confirm_password": "New password and confirm password do not match."}
             )
 
         if attrs["old_password"] == attrs["new_password"]:
             raise serializers.ValidationError(
-                {"error": "New password must be different from your current password."}
+                {
+                    "new_password": "New password must be different from your current password."
+                }
             )
 
         return attrs
@@ -79,9 +81,7 @@ class PasswordChangeSerializer(serializers.Serializer):
         user = self.context["request"].user
         if not user.check_password(value):
             raise serializers.ValidationError(
-                {
-                    "error": "The current password you entered is incorrect. Please try again."
-                }
+                "The current password you entered is incorrect. Please try again."
             )
 
         return value
@@ -119,7 +119,7 @@ class SetNewPasswordSerializer(serializers.Serializer):
     def validate(self, attrs):
         if attrs["new_password"] != attrs["confirm_password"]:
             raise serializers.ValidationError(
-                {"error": "New password and confirm password do not match."}
+                {"confirm_password": "New password and confirm password do not match."}
             )
         return attrs
 

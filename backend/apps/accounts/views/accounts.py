@@ -34,6 +34,7 @@ from apps.accounts.utils import (
 from apps.common.errors import ErrorCode
 from apps.common.responses import CustomResponse
 from apps.notification.utils import create_notification
+from django.contrib.auth.models import update_last_login
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -212,6 +213,7 @@ class LoginView(TokenObtainPairView):
                 "user_agent": request.META.get("HTTP_USER_AGENT", "unknown"),
             },
         )
+        update_last_login(None, user)
         return response
 
 
@@ -503,7 +505,7 @@ class PasswordResetRequestView(APIView):
 
         try:
             user = User.objects.get(email=email)
-            
+
             if user.is_suspended:
                 security_logger.warning(
                     f"Password Reset attempt on suspended account",
@@ -523,7 +525,7 @@ class PasswordResetRequestView(APIView):
                     status_code=status.HTTP_403_FORBIDDEN,
                     err_code=ErrorCode.FORBIDDEN,
                 )
-                
+
             invalidate_previous_otps(user)
             SendEmail.send_password_reset_email(request, user)
             auth_logger.info(
@@ -627,7 +629,7 @@ class PasswordResetDoneView(APIView):
 
         try:
             user = User.objects.get(email=email)
-            
+
             if user.is_suspended:
                 security_logger.warning(
                     f"Password Reset Done attempt on suspended account",
@@ -647,7 +649,7 @@ class PasswordResetDoneView(APIView):
                     status_code=status.HTTP_403_FORBIDDEN,
                     err_code=ErrorCode.FORBIDDEN,
                 )
-                
+
             # Update the user's password
             user.set_password(new_password)
             user.save()

@@ -318,6 +318,7 @@ class CommentSerializer(serializers.ModelSerializer):
             "article_id",
             "article_title",
             "created_at",
+            "updated_at",
             "body",
         ]
 
@@ -488,8 +489,6 @@ class CommentUpdateSerializer(serializers.ModelSerializer):
         model = models.Comment
         fields = ["body"]
 
-    
-
 
 class CommentResponseSerializer(serializers.ModelSerializer):
     """Serializer for returning comment data after creation"""
@@ -534,6 +533,7 @@ class ArticleCommentSerializer(serializers.ModelSerializer):
             "thread_id",
             "body",
             "created_at",
+            "updated_at",
             "user_name",
             "user_username",
             "user_avatar",
@@ -593,6 +593,7 @@ class ThreadReplySerializer(serializers.ModelSerializer):
             "id",
             "body",
             "created_at",
+            "updated_at",
             "user_name",
             "user_username",
             "user_avatar",
@@ -888,7 +889,7 @@ class ArticleReactionToggleSerializer(serializers.Serializer):
     total_reactions = serializers.IntegerField(read_only=True)
 
 
-class ArticleReactionStatusSerializer(serializers.Serializer):
+class ArticleReactionStatisticsSerializer(serializers.Serializer):
     """
     Serializer for getting article reaction status.
     Output only (no input fields).
