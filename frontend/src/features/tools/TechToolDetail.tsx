@@ -6,16 +6,17 @@ import Text from '../../components/common/Text';
 import CategoryBar from '../../components/sections/CategoryBar';
 import Subscribe from '../../components/sections/Subscribe';
 import { useToolDetail } from '../../hooks/useContent';
-import Loader from '../../components/common/Loader';
+import Spinner from '../../components/common/Spinner';
+import Button from '../../components/common/Button';
 
 function TechToolDetail() {
-  const { id } = useParams<{ id: string }>();
-  const { tool, isPending, isError, error } = useToolDetail(id || '');
+  const { toolId } = useParams<{ toolId: string }>();
+  const { tool, isPending, isError, error } = useToolDetail(toolId || '');
 
   if (isPending) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <Loader />
+        <Spinner />
       </div>
     );
   }
@@ -44,11 +45,11 @@ function TechToolDetail() {
 
         {/* Right Column: Content */}
         <div className="w-full md:w-3/4 mt-20 md:mt-10 border border-gray rounded-tl-lg rounded-tr-lg overflow-hidden">
-          {tool.image_url && (
+          {tool && (
             <Image
               alt={tool.name}
-              src={tool.image_url} // Assuming image_url in model is publicly accessible URL string
-              className="w-full h-auto shadow-md"
+              src="/assets/tech-tool/figma.png"
+              className="w-full h-64 md:h-80 object-cover shadow-md"
             />
           )}
 
@@ -78,10 +79,6 @@ function TechToolDetail() {
               />
             </div>
 
-            {/* Key Features/Use Cases - Tool model currently only has desc. 
-                If 'features', 'use_cases' exist in backend model they should be added.
-                For now we only have 'desc' */}
-
             {/* How to Access */}
             <div>
               <Text
@@ -105,19 +102,15 @@ function TechToolDetail() {
               </div>
             </div>
           </div>
-          <div className="px-2 text-secondary text-sm my-4">
-            {tool.call_to_action && (
-              <Button
-                variant="primary"
-                onClick={() => window.open(tool.url, '_blank')}
-              >
-                {tool.call_to_action}
-              </Button>
-            )}
+          <div className="px-2 text-secondary text-sm my-4 flex">
+            <Button
+              variant="primary"
+              onClick={() => window.open(tool.url, '_blank')}
+              className="w-full md:w-auto"
+            >
+              {tool.call_to_action || 'Explore'}
+            </Button>
           </div>
-          {/* <div className="px-2 text-secondary text-sm my-4">
-            Posted 1 hour ago
-          </div> */}
         </div>
 
         {/* Mobile social link */}
@@ -136,10 +129,5 @@ function TechToolDetail() {
     </>
   );
 }
-
-// Helper Button was missing in imports if we use it here.
-// Adding minimal Button just in case or import it.
-// Actually let's import Button
-import Button from '../../components/common/Button';
 
 export default TechToolDetail;

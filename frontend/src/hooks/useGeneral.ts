@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useGeneralApi } from './useGeneralApi';
 import {
+  ApiResponse,
   ContactRequest,
   NewsletterSubscribeRequest,
   SiteDetail,
@@ -34,7 +35,7 @@ export function useSubscribeNewsletter() {
     isError,
     error,
     isSuccess,
-  } = useMutation<any, Error, NewsletterSubscribeRequest>({
+  } = useMutation<ApiResponse, Error, NewsletterSubscribeRequest>({
     mutationFn: (data: NewsletterSubscribeRequest) =>
       subscribeNewsletterApi(data),
     onError: (error) => {

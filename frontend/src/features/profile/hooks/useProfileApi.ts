@@ -72,12 +72,31 @@ export const useProfileApi = () => {
   };
 
   const getUserArticles = async (
-    userIsNotAuthenticatedCallback: () => void
+    userIsNotAuthenticatedCallback: () => void,
+    params?: {
+      status?: string;
+      search?: string;
+      page?: number;
+      page_size?: number;
+    }
   ) => {
+    let url = routes.profile.articles;
+
+    if (params) {
+      const searchParams = new URLSearchParams();
+      if (params.status) searchParams.append('status', params.status);
+      if (params.search) searchParams.append('search', params.search);
+      if (params.page) searchParams.append('page', params.page.toString());
+      if (params.page_size)
+        searchParams.append('page_size', params.page_size.toString());
+
+      url = `${url}?${searchParams.toString()}`;
+    }
+
     const response = await sendAuthGuardedRequest(
       userIsNotAuthenticatedCallback,
       ApiMethod.GET,
-      routes.profile.articles
+      url
     );
 
     return response.data;
@@ -170,18 +189,6 @@ export const useProfileApi = () => {
     return response.data;
   };
 
-  const getUserComments = async (
-    userIsNotAuthenticatedCallback: () => void
-  ) => {
-    const response = await sendAuthGuardedRequest(
-      userIsNotAuthenticatedCallback,
-      ApiMethod.GET,
-      routes.profile.comments
-    );
-
-    return response.data;
-  };
-
   const createUserArticle = async (
     userIsNotAuthenticatedCallback: () => void,
     data: CreateArticleData
@@ -196,13 +203,61 @@ export const useProfileApi = () => {
     return response.data;
   };
 
+  const getUserComments = async (
+    userIsNotAuthenticatedCallback: () => void,
+    params?: {
+      page?: number;
+      page_size?: number;
+    }
+  ) => {
+    let url = routes.profile.comments;
+
+    if (params) {
+      const searchParams = new URLSearchParams();
+
+      if (params.page) {
+        searchParams.append('page', params.page.toString());
+      }
+
+      if (params.page_size) {
+        searchParams.append('page_size', params.page_size.toString());
+      }
+
+      if (searchParams.toString()) {
+        url = `${url}?${searchParams.toString()}`;
+      }
+    }
+
+    const response = await sendAuthGuardedRequest(
+      userIsNotAuthenticatedCallback,
+      ApiMethod.GET,
+      url
+    );
+
+    return response.data;
+  };
+
+  const deleteUserComment = async (
+    userIsNotAuthenticatedCallback: () => void,
+    commentId: string
+  ) => {
+    const url = routes.article.commentById(commentId);
+    const response = await sendAuthGuardedRequest(
+      userIsNotAuthenticatedCallback,
+      ApiMethod.DELETE,
+      url
+    );
+
+    return response.data;
+  };
+
   return {
     getCurrentUser,
     getCurrentUserProfile,
     getUserProfileByUsername,
     getUserArticleBySlug,
     getUserSavedArticles,
-    getUserComments,
+
     getUserArticles,
     getUsernames,
     createUserArticle,
@@ -210,5 +265,7 @@ export const useProfileApi = () => {
     updateCurrentUserAvatar,
     updateUserArticleBySlug,
     updateSavedArticle,
+    getUserComments,
+    deleteUserComment,
   };
 };

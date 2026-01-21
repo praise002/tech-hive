@@ -13,76 +13,14 @@ import {
   ResourcesResponse,
   Tool,
   ToolsResponse,
-  Article,
-  ArticlesResponse,
 } from '../types/content';
 
-export function useArticles(params?: {
+export function useCategories(params?: {
   page?: number;
   page_size?: number;
-  limit?: number; // For compatibility with ArticleList
-  tag?: string;
   search?: string;
   ordering?: string;
 }) {
-  const { getArticles } = useContentApi();
-
-  // Handle limit/page_size alias
-  const apiParams = {
-    ...params,
-    page_size: params?.page_size || params?.limit,
-  };
-
-  const {
-    isPending,
-    isError,
-    data: articlesResponse,
-    error,
-  } = useQuery<ArticlesResponse>({
-    queryKey: ['articles', apiParams],
-    queryFn: async () => {
-      const response = await getArticles(apiParams);
-      return response;
-    },
-  });
-
-  const articles = articlesResponse?.results || [];
-  const count = articlesResponse?.count;
-  const next = articlesResponse?.next;
-  const previous = articlesResponse?.previous;
-
-  return {
-    isPending,
-    isError,
-    articles,
-    count,
-    next,
-    previous,
-    error,
-  };
-}
-
-export function useArticleDetail(username: string, slug: string) {
-  const { getArticleDetail } = useContentApi();
-
-  const {
-    isPending,
-    isError,
-    data: article,
-    error,
-  } = useQuery<Article>({
-    queryKey: ['articleDetail', username, slug],
-    queryFn: async () => {
-      if (!username || !slug) throw new Error('Username and slug are required');
-      return getArticleDetail(username, slug);
-    },
-    enabled: !!username && !!slug,
-  });
-
-  return { isPending, isError, article, error };
-}
-
-export function useCategories(params?: { page?: number; page_size?: number }) {
   const { getCategories } = useContentApi();
 
   const {
@@ -99,7 +37,7 @@ export function useCategories(params?: { page?: number; page_size?: number }) {
   });
 
   const categories = categoriesResponse?.results || [];
-  const count = categoriesResponse?.count;
+  const count = categoriesResponse?.count ?? 0;
   const next = categoriesResponse?.next;
   const previous = categoriesResponse?.previous;
 
@@ -114,7 +52,11 @@ export function useCategories(params?: { page?: number; page_size?: number }) {
   };
 }
 
-export function useEvents(params?: { page?: number; page_size?: number }) {
+export function useEvents(params?: {
+  page?: number;
+  page_size?: number;
+  category?: string;
+}) {
   const { getEvents } = useContentApi();
 
   const {
@@ -131,7 +73,7 @@ export function useEvents(params?: { page?: number; page_size?: number }) {
   });
 
   const events = eventsResponse?.results || [];
-  const count = eventsResponse?.count;
+  const count = eventsResponse?.count ?? 0;
   const next = eventsResponse?.next;
   const previous = eventsResponse?.previous;
 
@@ -146,7 +88,11 @@ export function useEvents(params?: { page?: number; page_size?: number }) {
   };
 }
 
-export function useJobs(params?: { page?: number; page_size?: number }) {
+export function useJobs(params?: {
+  page?: number;
+  page_size?: number;
+  category?: string;
+}) {
   const { getJobs } = useContentApi();
 
   const {
@@ -163,7 +109,7 @@ export function useJobs(params?: { page?: number; page_size?: number }) {
   });
 
   const jobs = jobsResponse?.results || [];
-  const count = jobsResponse?.count;
+  const count = jobsResponse?.count ?? 0;
   const next = jobsResponse?.next;
   const previous = jobsResponse?.previous;
 
@@ -178,7 +124,11 @@ export function useJobs(params?: { page?: number; page_size?: number }) {
   };
 }
 
-export function useResources(params?: { page?: number; page_size?: number }) {
+export function useResources(params?: {
+  page?: number;
+  page_size?: number;
+  category?: string;
+}) {
   const { getResources } = useContentApi();
 
   const {
@@ -195,7 +145,7 @@ export function useResources(params?: { page?: number; page_size?: number }) {
   });
 
   const resources = resourcesResponse?.results || [];
-  const count = resourcesResponse?.count;
+  const count = resourcesResponse?.count ?? 0;
   const next = resourcesResponse?.next;
   const previous = resourcesResponse?.previous;
 
@@ -210,7 +160,11 @@ export function useResources(params?: { page?: number; page_size?: number }) {
   };
 }
 
-export function useTools(params?: { page?: number; page_size?: number }) {
+export function useTools(params?: {
+  page?: number;
+  page_size?: number;
+  category?: string;
+}) {
   const { getTools } = useContentApi();
 
   const {
@@ -227,7 +181,7 @@ export function useTools(params?: { page?: number; page_size?: number }) {
   });
 
   const tools = toolsResponse?.results || [];
-  const count = toolsResponse?.count;
+  const count = toolsResponse?.count ?? 0;
   const next = toolsResponse?.next;
   const previous = toolsResponse?.previous;
 

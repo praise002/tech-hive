@@ -24,6 +24,7 @@ export function useCurrentUser() {
       };
       return getCurrentUser(handleUnauthenticated);
     },
+    enabled: !!localStorage.getItem('authTokens'), // Only run if token exists
   });
 
   const isAuthenticated = user && user.id;
@@ -70,9 +71,8 @@ export function useUserProfile(username?: string) {
   return { isPending, isError, profile, error };
 }
 
-export function useUpdateUserProfile() {
+export function useUpdateUserProfile(handleUnauthenticated: () => void) {
   const { updateCurrentUserProfile: updateUserProfileApi } = useProfileApi();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const {
@@ -82,9 +82,6 @@ export function useUpdateUserProfile() {
     error,
   } = useMutation({
     mutationFn: (updateData: UpdateUserData) => {
-      const handleUnauthenticated = () => {
-        navigate('/login');
-      };
       return updateUserProfileApi(handleUnauthenticated, updateData);
     },
 
@@ -93,17 +90,12 @@ export function useUpdateUserProfile() {
       queryClient.invalidateQueries({ queryKey: ['user'] });
       queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
-
-    onError: (error) => {
-      handleQueryError(error, 'Profile update');
-    },
   });
   return { updateCurrentUserProfile, isPending, isError, error };
 }
 
-export function useUpdateUserAvatar() {
+export function useUpdateUserAvatar(handleUnauthenticated: () => void) {
   const { updateCurrentUserAvatar: updateUserAvatarApi } = useProfileApi();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const {
@@ -113,10 +105,6 @@ export function useUpdateUserAvatar() {
     error,
   } = useMutation({
     mutationFn: (formData: FormData) => {
-      const handleUnauthenticated = () => {
-        navigate('/login');
-      };
-
       return updateUserAvatarApi(handleUnauthenticated, formData);
     },
 
@@ -125,15 +113,16 @@ export function useUpdateUserAvatar() {
       queryClient.invalidateQueries({ queryKey: ['user'] });
       queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
-
-    onError: (error) => {
-      handleQueryError(error, 'Avatar update');
-    },
   });
   return { updateCurrentUserAvatar, isPending, isError, error };
 }
 
-export function useUserArticles() {
+export function useUserArticles(params?: {
+  status?: string;
+  search?: string;
+  page?: number;
+  page_size?: number;
+}) {
   const { getUserArticles } = useProfileApi();
   const navigate = useNavigate();
 
@@ -143,12 +132,12 @@ export function useUserArticles() {
     data: articles,
     error,
   } = useQuery({
-    queryKey: ['userArticles'],
+    queryKey: ['userArticles', params], // Include params in queryKey
     queryFn: () => {
       const handleUnauthenticated = () => {
         navigate('/login');
       };
-      return getUserArticles(handleUnauthenticated);
+      return getUserArticles(handleUnauthenticated, params);
     },
   });
 
@@ -179,10 +168,9 @@ export function useUserArticleBySlug(slug: string) {
   return { isPending, isError, userArticle, error };
 }
 
-export function useUpdateUserArticleBySlug() {
+export function useUpdateUserArticleBySlug(handleUnauthenticated: () => void) {
   const { updateUserArticleBySlug: updateUserArticleBySlugApi } =
     useProfileApi();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const {
@@ -192,10 +180,6 @@ export function useUpdateUserArticleBySlug() {
     error,
   } = useMutation({
     mutationFn: ({ slug, updateData }: { slug: string; updateData: any }) => {
-      const handleUnauthenticated = () => {
-        navigate('/login');
-      };
-
       return updateUserArticleBySlugApi(
         handleUnauthenticated,
         slug,
@@ -237,9 +221,8 @@ export function useUserSavedArticles() {
   return { isPending, isError, articles, error };
 }
 
-export function useUpdateSavedArticle() {
+export function useUpdateSavedArticle(handleUnauthenticated: () => void) {
   const { updateSavedArticle: updateSavedArticleApi } = useProfileApi();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const {
@@ -249,10 +232,6 @@ export function useUpdateSavedArticle() {
     error,
   } = useMutation({
     mutationFn: (updateData: any) => {
-      const handleUnauthenticated = () => {
-        navigate('/login');
-      };
-
       return updateSavedArticleApi(handleUnauthenticated, updateData);
     },
 
@@ -265,28 +244,6 @@ export function useUpdateSavedArticle() {
     },
   });
   return { updateSavedArticle, isPending, isError, error };
-}
-
-export function useUserComments() {
-  const { getUserComments } = useProfileApi();
-  const navigate = useNavigate();
-
-  const {
-    isPending,
-    isError,
-    data: articles,
-    error,
-  } = useQuery({
-    queryKey: ['comments'],
-    queryFn: () => {
-      const handleUnauthenticated = () => {
-        navigate('/login');
-      };
-      return getUserComments(handleUnauthenticated);
-    },
-  });
-
-  return { isPending, isError, articles, error };
 }
 
 export function useUsernames(params?: {
@@ -322,9 +279,8 @@ export function useUsernames(params?: {
   };
 }
 
-export function useCreateUserArticle() {
+export function useCreateUserArticle(handleUnauthenticated: () => void) {
   const { createUserArticle: createUserArticleApi } = useProfileApi();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const {
@@ -335,9 +291,6 @@ export function useCreateUserArticle() {
     isSuccess,
   } = useMutation({
     mutationFn: (data: CreateArticleData) => {
-      const handleUnauthenticated = () => {
-        navigate('/login');
-      };
       return createUserArticleApi(handleUnauthenticated, data);
     },
     onSuccess: () => {
@@ -351,4 +304,51 @@ export function useCreateUserArticle() {
   return { createUserArticle, isPending, isError, error, isSuccess };
 }
 
-// TODO: MOVE THE REDIRECTS TO MUTATE CALLBACKS
+export function useUserComments(params?: {
+  page?: number;
+  page_size?: number;
+}) {
+  const { getUserComments } = useProfileApi();
+  const navigate = useNavigate();
+
+  const {
+    isPending,
+    isError,
+    data: comments,
+    error,
+  } = useQuery({
+    queryKey: ['userComments', params],
+    queryFn: () => {
+      const handleUnauthenticated = () => {
+        navigate('/login');
+      };
+      return getUserComments(handleUnauthenticated, params);
+    },
+  });
+
+  return { isPending, isError, comments, error };
+}
+
+export function useDeleteUserComment(handleUnauthenticated: () => void) {
+  const { deleteUserComment: deleteUserCommentApi } = useProfileApi();
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: deleteUserComment,
+    isPending,
+    isError,
+    error,
+  } = useMutation({
+    mutationFn: (commentId: string) => {
+      return deleteUserCommentApi(handleUnauthenticated, commentId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userComments'] });
+    },
+    onError: (error) => {
+      handleQueryError(error, 'Delete Comment');
+    },
+  });
+
+  return { deleteUserComment, isPending, isError, error };
+}

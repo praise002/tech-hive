@@ -5,17 +5,17 @@ import Text from '../../components/common/Text';
 import CategoryBar from '../../components/sections/CategoryBar';
 import Subscribe from '../../components/sections/Subscribe';
 import { useEventDetail } from '../../hooks/useContent';
-import Loader from '../../components/common/Loader';
-import { formatDate } from '../../utils/utils';
+import Spinner from '../../components/common/Spinner';
+import { formatDateRange } from '../../utils/utils';
 
 function TechEventDetail() {
-  const { id } = useParams<{ id: string }>();
-  const { event, isPending, isError, error } = useEventDetail(id || '');
+  const { eventId } = useParams<{ eventId: string }>();
+  const { event, isPending, isError, error } = useEventDetail(eventId || '');
 
   if (isPending) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <Loader />
+        <Spinner />
       </div>
     );
   }
@@ -53,7 +53,7 @@ function TechEventDetail() {
             >
               {event.title}
             </Text>
-            <div className="text-secondary text-sm">{event.category.name}</div>
+            <div className="text-secondary text-sm">{event.category}</div>
           </div>
           <div className="space-y-8 text-primary">
             {/* Description */}
@@ -67,7 +67,7 @@ function TechEventDetail() {
                 Event Description
               </Text>
               <div
-                className="text-base md:text-lg leading-relaxed"
+                className="text-base md:text-lg leading-relaxed prose lg:prose-xl max-w-none dark:text-custom-white"
                 dangerouslySetInnerHTML={{ __html: event.desc }}
               />
             </div>
@@ -83,9 +83,7 @@ function TechEventDetail() {
                 Dates
               </Text>
               <ul className="list-disc pl-6 space-y-2 text-base md:text-lg leading-relaxed">
-                <li>
-                  {formatDate(event.start_date)} - {formatDate(event.end_date)}
-                </li>
+                <li>{formatDateRange(event.start_date, event.end_date)}</li>
               </ul>
             </div>
 
@@ -115,7 +113,7 @@ function TechEventDetail() {
                 Agenda
               </Text>
               <div
-                className="text-base md:text-lg leading-relaxed"
+                className="text-base md:text-lg leading-relaxed prose lg:prose-xl max-w-none dark:text-custom-white"
                 dangerouslySetInnerHTML={{ __html: event.agenda }}
               />
             </div>
@@ -149,7 +147,6 @@ function TechEventDetail() {
               )}
             </div>
           </div>
-          {/* <div className="text-secondary text-sm my-4">Posted 1 hour ago</div> */}
         </div>
 
         {/* Mobile social link */}

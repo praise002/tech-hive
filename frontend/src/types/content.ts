@@ -40,6 +40,8 @@ export interface Job {
   job_type: JobType;
   work_mode: WorkMode;
   category: string;
+  slug: string;
+  published_at?: string;
 }
 
 export type JobsResponse = PaginatedResponse<Job>;
@@ -51,6 +53,7 @@ export type JobsResponse = PaginatedResponse<Job>;
 export interface Event {
   id: string;
   title: string;
+  organizer: string;
   desc: string;
   start_date: string;
   end_date: string;
@@ -58,6 +61,8 @@ export interface Event {
   agenda: string;
   ticket_url: string;
   category: string;
+  slug: string;
+  published_at?: string;
 }
 
 export type EventsResponse = PaginatedResponse<Event>;
@@ -74,6 +79,8 @@ export interface Resource {
   url: string;
   category: string;
   is_featured: boolean;
+  slug: string;
+  published_at?: string;
 }
 
 export type ResourcesResponse = PaginatedResponse<Resource>;
@@ -97,6 +104,8 @@ export interface Tool {
   tags: ToolTag[];
   category: string;
   is_featured: boolean;
+  slug: string;
+  published_at?: string;
 }
 
 export type ToolsResponse = PaginatedResponse<Tool>;
@@ -108,33 +117,3 @@ export type ToolsResponse = PaginatedResponse<Tool>;
 export interface ContributorGuidelinesRequest {
   terms_accepted: boolean;
 }
-
-// ============================================================================
-// ARTICLES
-// ============================================================================
-
-export interface ArticleAuthor {
-  name: string;
-  avatar: string;
-  username: string;
-}
-
-export interface Article {
-  id: string;
-  title: string;
-  slug: string;
-  content: string;
-  cover_image_url: string;
-  read_time: number;
-  status: string;
-  created_at: string;
-  is_featured: boolean;
-  author: ArticleAuthor;
-  total_reaction_counts: number;
-  reaction_counts: Record<string, number>;
-  tags: Array<{ id: string; name: string }>;
-  comments_count: number;
-  comments: any[];
-}
-
-export type ArticlesResponse = PaginatedResponse<Article>;

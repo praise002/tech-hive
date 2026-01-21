@@ -2,8 +2,8 @@ import { MdLibraryBooks } from 'react-icons/md';
 import { BiMessageRounded } from 'react-icons/bi';
 
 import { useState } from 'react';
-import CommentsContent from '../componenets/CommentsContent';
-import PublishedContent from '../componenets/PublishedContent';
+import CommentsContent from '../components/CommentsContent';
+import PublishedContent from '../components/PublishedContent';
 import Text from '../../../components/common/Text';
 import { useParams } from 'react-router-dom';
 import { useUserProfile } from '../hooks/useProfile';
@@ -65,16 +65,16 @@ function ProfileDetail() {
   function getContent() {
     switch (isActiveTab) {
       case 'comments':
-        return <CommentsContent />;
+        return <CommentsContent username={username} />;
       case 'published':
-        return <PublishedContent />;
+        return <PublishedContent username={username} />;
       default:
-        return <CommentsContent />;
+        return <CommentsContent username={username} />;
     }
   }
 
   return (
-    <div className="mt-15" aria-label="User profile details">
+    <div className="mt-15 min-h-screen" aria-label="User profile details">
       <div className="bg-light w-full h-40 relative">
         {/* ✅ SVG Background */}
         <img

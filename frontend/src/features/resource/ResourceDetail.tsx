@@ -6,16 +6,18 @@ import Text from '../../components/common/Text';
 import CategoryBar from '../../components/sections/CategoryBar';
 import Subscribe from '../../components/sections/Subscribe';
 import { useResourceDetail } from '../../hooks/useContent';
-import Loader from '../../components/common/Loader';
+import Spinner from '../../components/common/Spinner';
 
 function ResourceDetail() {
-  const { id } = useParams<{ id: string }>();
-  const { resource, isPending, isError, error } = useResourceDetail(id || '');
+  const { resourceId } = useParams<{ resourceId: string }>();
+  const { resource, isPending, isError, error } = useResourceDetail(
+    resourceId || ''
+  );
 
   if (isPending) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <Loader />
+        <Spinner />
       </div>
     );
   }
@@ -44,11 +46,11 @@ function ResourceDetail() {
 
         {/* Right Column: Content */}
         <div className="w-full md:w-3/4 mt-20 md:mt-10 border border-gray rounded-tl-lg rounded-tr-lg overflow-hidden">
-          {resource.image && (
+          {resource && (
             <Image
               alt={resource.name}
-              src={resource.image}
-              className="w-full h-auto shadow-md"
+              src="/assets/resources/github-learning-lab.png"
+              className="w-full h-64 md:h-80 object-cover shadow-md"
             />
           )}
 
@@ -64,22 +66,11 @@ function ResourceDetail() {
 
             {/* Description */}
             <div>
-              <Text
-                variant="h5"
-                size="lg"
-                bold={false}
-                className="font-semibold mb-2 dark:text-custom-white"
-              >
-                Resource Description
-              </Text>
               <div
-                className="text-base md:text-lg leading-relaxed dark:text-custom-white"
+                className="text-base md:text-lg leading-relaxed dark:text-custom-white prose lg:prose-xl max-w-none"
                 dangerouslySetInnerHTML={{ __html: resource.body }}
               />
             </div>
-
-            {/* Dynamic content rendering skipped as resource model is simple: name, body, url, tags */}
-            {/* If there are specific fields like 'popular_courses', they need to be in the model. Assuming generic body for now */}
 
             {/* Link */}
             <div>
@@ -108,9 +99,6 @@ function ResourceDetail() {
               </div>
             </div>
           </div>
-          {/* <div className="px-2 text-secondary text-sm my-4">
-            Posted 1 hour ago
-          </div> */}
         </div>
 
         {/* Mobile social link */}

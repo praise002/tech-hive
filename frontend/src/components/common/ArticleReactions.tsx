@@ -9,6 +9,7 @@ function ArticleReactions({
   total_reaction_counts: totalReactionCounts,
   created_at: createdAt,
   read_time: readTime,
+  articleId,
 }: ArticleReactionsProps) {
   const reactions = reactionCounts ? Object.keys(reactionCounts) : [];
 
@@ -22,8 +23,8 @@ function ArticleReactions({
       <div className="flex justify-between items-center my-3">
         {/* Reactions */}
         <div className="flex items-center space-x-2">
-          <div className="flex space-x-1 text-lg">
-            {reactions.slice(0, 3).map((emoji, index) => (
+          <div className="flex space-x-1 text-lg xl:hidden">
+            {reactions.slice(0, 4).map((emoji, index) => (
               <span
                 key={index}
                 className={`inline-flex items-center justify-center w-6 h-6 rounded-full shadow-md ${
@@ -54,10 +55,10 @@ function ArticleReactions({
             className="whitespace-nowrap text-xs md:text-sm text-primary dark:text-custom-white font-medium"
             aria-label={`Estimated read time: ${readTime}`}
           >
-            {readTime} read
+            {readTime} min read
           </div>
 
-          <Bookmark className="w-5 h-5 dark:text-white" />
+          <Bookmark className="w-5 h-5 dark:text-white" articleId={articleId} />
         </div>
       </div>
 

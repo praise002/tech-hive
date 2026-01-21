@@ -9,13 +9,46 @@ export function formatDate(dateString: string): string {
   });
 }
 
-export function formatDateB(dateString: string) {
+export function formatDateRange(startStr: string, endStr: string): string {
+  const start = new Date(startStr);
+  const end = new Date(endStr);
+
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) return 'Date TBD';
+
+  const startDay = start.getDate();
+  const startMonth = start.toLocaleString('en-US', { month: 'long' });
+  const startYear = start.getFullYear();
+
+  const endDay = end.getDate();
+  const endMonth = end.toLocaleString('en-US', { month: 'long' });
+  const endYear = end.getFullYear();
+
+  if (startYear === endYear) {
+    if (startMonth === endMonth) {
+      if (startDay === endDay) {
+        return `${startDay} ${startMonth}, ${startYear}`;
+      }
+      return `${startDay}-${endDay} ${startMonth}, ${startYear}`;
+    }
+    return `${startDay} ${startMonth} - ${endDay} ${endMonth}, ${startYear}`;
+  }
+  return `${startDay} ${startMonth}, ${startYear} - ${endDay} ${endMonth}, ${endYear}`;
+}
+
+export function formatDateB(dateString?: string) {
+  if (!dateString) return 'some time ago';
   const date = new Date(dateString);
+  if (isNaN(date.getTime())) return 'some time ago';
   const now = new Date();
   const diffTime = Math.abs(now.getTime() - date.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // 1000ms=is
+  const diffMinutes = Math.floor(diffTime / (1000 * 60));
+  const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) return 'today';
+  if (diffMinutes < 1) return 'just now';
+  if (diffMinutes < 60) return `${diffMinutes} minutes ago`;
+  if (diffHours < 24)
+    return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`;
   if (diffDays === 1) return 'yesterday';
   if (diffDays < 7) return `${diffDays} days ago`;
   if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;

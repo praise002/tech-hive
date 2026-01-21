@@ -5,16 +5,16 @@ import Text from '../../components/common/Text';
 import CategoryBar from '../../components/sections/CategoryBar';
 import Subscribe from '../../components/sections/Subscribe';
 import { useJobDetail } from '../../hooks/useContent';
-import Loader from '../../components/common/Loader';
+import Spinner from '../../components/common/Spinner';
 
 function TechJobDetail() {
-  const { id } = useParams<{ id: string }>();
-  const { job, isPending, isError, error } = useJobDetail(id || '');
+  const { jobId } = useParams<{ jobId: string }>();
+  const { job, isPending, isError, error } = useJobDetail(jobId || '');
 
   if (isPending) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <Loader />
+        <Spinner />
       </div>
     );
   }
@@ -57,22 +57,16 @@ function TechJobDetail() {
 
           {/* Tags Section */}
           <div className="flex gap-2 flex-wrap my-4">
-            <span className="inline-flex items-center px-2 py-1 bg-cream text-xs font-medium text-gray-700 rounded-sm">
-              🌍 {job.work_mode}
+            <span className="inline-flex items-center px-2 py-1 bg-cream text-xs font-medium text-gray-700 rounded-md">
+              🌍{' '}
+              {job.work_mode.toLowerCase().charAt(0).toUpperCase() +
+                job.work_mode.toLowerCase().slice(1).replace('_', ' ')}
             </span>
-            <span className="inline-flex items-center px-2 py-1 bg-cream text-xs font-medium text-gray-700 rounded-sm">
-              ⏳ {job.job_type}
+            <span className="inline-flex items-center px-2 py-1 bg-cream text-xs font-medium text-gray-700 rounded-md">
+              🕒{' '}
+              {job.job_type.toLowerCase().charAt(0).toUpperCase() +
+                job.job_type.toLowerCase().slice(1).replace('_', '-')}
             </span>
-            {job.location && (
-              <span className="inline-flex items-center px-2 py-1 bg-cream text-xs font-medium text-gray-700 rounded-sm">
-                📍 {job.location}
-              </span>
-            )}
-            {job.category && (
-              <span className="inline-flex items-center px-2 py-1 bg-cream text-xs font-medium text-gray-700 rounded-sm">
-                📂 {job.category.name}
-              </span>
-            )}
           </div>
 
           <div className="space-y-8 text-primary dark:text-custom-white">
@@ -87,7 +81,7 @@ function TechJobDetail() {
                 Job Description
               </Text>
               <div
-                className="text-base md:text-lg leading-relaxed"
+                className="text-base md:text-lg leading-relaxed prose lg:prose-xl max-w-none dark:text-custom-white"
                 dangerouslySetInnerHTML={{ __html: job.desc }}
               />
             </div>
@@ -103,7 +97,7 @@ function TechJobDetail() {
                 Requirements
               </Text>
               <div
-                className="text-base md:text-lg leading-relaxed"
+                className="text-base md:text-lg leading-relaxed prose lg:prose-xl max-w-none dark:text-custom-white"
                 dangerouslySetInnerHTML={{ __html: job.requirements }}
               />
             </div>
@@ -119,7 +113,7 @@ function TechJobDetail() {
                 Responsibilities
               </Text>
               <div
-                className="text-base md:text-lg leading-relaxed"
+                className="text-base md:text-lg leading-relaxed prose lg:prose-xl max-w-none dark:text-custom-white"
                 dangerouslySetInnerHTML={{ __html: job.responsibilities }}
               />
             </div>
@@ -151,7 +145,6 @@ function TechJobDetail() {
               </div>
             </div>
           </div>
-          {/* <div className="text-secondary text-sm my-4">Posted 1 hour ago</div> */}
         </div>
 
         {/* Mobile social link */}

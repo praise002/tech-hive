@@ -9,6 +9,7 @@ import Button from '../../../components/common/Button';
 import { useGoogleLogin, useLogin } from '../hooks/useAuth';
 import { UseFormSetError } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { useAuthModal } from '../../../context/AuthModalContext';
 
 interface LoginFormData {
   email: string;
@@ -19,6 +20,7 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const { login, isPending } = useLogin();
   const { fetchAuthLoginUrl, isPending: isGooglePending } = useGoogleLogin();
+  const { redirectUrl, clearRedirectUrl } = useAuthModal();
   const navigate = useNavigate();
 
   function handleGoogleLogin() {
@@ -82,7 +84,7 @@ function LoginForm() {
     data: LoginFormData,
     setError: UseFormSetError<LoginFormData>
   ) {
-    console.log('Form Data:', data);
+    // console.log('Form Data:', data);
 
     const loginData: LoginFormData = {
       email: data.email,
@@ -92,7 +94,17 @@ function LoginForm() {
     login(loginData, {
       onSuccess: (response) => {
         toast.success(response?.message);
-        navigate('/'); // Only if still on this page
+
+        // Check for redirect URL from context or sessionStorage
+        const savedRedirectUrl =
+          redirectUrl || sessionStorage.getItem('authRedirectUrl');
+
+        if (savedRedirectUrl) {
+          clearRedirectUrl();
+          navigate(savedRedirectUrl);
+        } else {
+          navigate('/');
+        }
       },
       onError: (error: any) => {
         // Handle field-specific errors from the server

@@ -6,7 +6,7 @@ import Logout from '../../features/auth/components/Logout';
 import { useCurrentUser } from '../../features/profile/hooks/useProfile';
 
 function HeroSection() {
-  const { isAuthenticated } = useCurrentUser();
+  const { isAuthenticated, user } = useCurrentUser();
 
   return (
     <section className="relative mt-12 dark:bg-light bg-gradient-to-r from-coral/50 to-peach py-10 px-7 sm:py-20 sm:px-14 overflow-hidden">
@@ -34,13 +34,25 @@ function HeroSection() {
           </Button>
         )}
 
-        {/* TODO: LATER CHECK IF NOT A CONTRIBUTOR */}
         {isAuthenticated ? (
-          <Button>
-            <Link to="/" aria-label="Register a new account">
-              Contribute to Tech Hive
-            </Link>
-          </Button>
+          ['contributor', 'reviewer', 'editor', 'manager'].includes(
+            user?.role?.toLowerCase() || ''
+          ) ? (
+            <Button>
+              <Link to="/new" aria-label="Write a new article">
+                Contribute to Tech Hive
+              </Link>
+            </Button>
+          ) : (
+            <Button>
+              <Link
+                to="/contact"
+                aria-label="Contact explicit to become a contributor"
+              >
+                Become a Contributor
+              </Link>
+            </Button>
+          )
         ) : (
           <Button>
             <Link to="/register" aria-label="Register a new account">

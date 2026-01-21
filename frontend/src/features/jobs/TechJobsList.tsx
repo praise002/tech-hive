@@ -3,8 +3,9 @@ import Button from '../../components/common/Button';
 import JobPostingCard from '../../components/common/JobPostingCard';
 import Text from '../../components/common/Text';
 import { useJobs } from '../../hooks/useContent';
-import Loader from '../../components/common/Loader';
+
 import { ErrorFallbackProps } from '../../types/types';
+import { SectionSkeleton } from '../../components/common/Skeletons';
 
 function TechJobsList() {
   const [page, setPage] = useState(1);
@@ -12,11 +13,12 @@ function TechJobsList() {
     page,
     page_size: 8,
   });
+  const totalPages = count ? Math.ceil(count / 8) : 0;
 
   if (isPending) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <Loader />
+        <SectionSkeleton />
       </div>
     );
   }
@@ -65,8 +67,11 @@ function TechJobsList() {
               Previous
             </Button>
 
-            <span className="text-gray-600" aria-live="polite">
-              Page {page}
+            <span
+              className="text-gray-600 dark:text-gray-400"
+              aria-live="polite"
+            >
+              Page {page} of {totalPages}
             </span>
             <Button
               variant="primary"

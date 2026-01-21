@@ -1,12 +1,14 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Button from '../../../components/common/Button';
 import Text from '../../../components/common/Text';
 import SubscriptionStatus from '../../subscription/SubscriptionStatus';
 
 import LogoutAll from '../../auth/components/LogoutAll';
+import { useCurrentUser } from '../hooks/useProfile';
 
 function AccountContent() {
-  
+  const navigate = useNavigate();
+  const { user } = useCurrentUser();
 
   return (
     <div className="w-full max-w-none space-y-8 min-h-[70vh] lg:grid lg:grid-cols-2 lg:gap-12 lg:space-y-0">
@@ -33,7 +35,7 @@ function AccountContent() {
             </div>
             <Button variant="outline">
               <Link
-                to="/profile"
+                to={user?.username ? `/profile/${user.username}` : '#'}
                 className="text-gray-900 dark:text-custom-white"
               >
                 View My Profile
@@ -66,7 +68,7 @@ function AccountContent() {
             </div>
             <Button
               variant="outline"
-              onClick={() => alert('Redirecting to Change Password')}
+              onClick={() => navigate('/change-password')}
             >
               Update Password
             </Button>
@@ -82,11 +84,11 @@ function AccountContent() {
             </div>
             <LogoutAll />
           </div>
+
+          {/* Subscription Status */}
+          <SubscriptionStatus />
         </div>
       </div>
-
-      {/* Subscription Status - Full Width */}
-      <SubscriptionStatus />
     </div>
   );
 }

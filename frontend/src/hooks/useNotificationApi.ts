@@ -3,37 +3,71 @@ import { ApiMethod } from '../types/auth';
 import { routes } from '../utils/constants';
 
 export const useNotificationApi = () => {
-  const { sendRequest } = useApi();
+  const { sendAuthGuardedRequest } = useApi();
 
-  const getNotifications = async (params?: Record<string, string>) => {
+  const getNotifications = async (
+    userIsNotAuthenticatedCallback: () => void,
+    params?: Record<string, string>
+  ) => {
     const url = routes.notifications.list;
     const queryParams = new URLSearchParams(params).toString();
     const finalUrl = queryParams ? `${url}?${queryParams}` : url;
-    const response = await sendRequest(ApiMethod.GET, finalUrl);
+    const response = await sendAuthGuardedRequest(
+      userIsNotAuthenticatedCallback,
+      ApiMethod.GET,
+      finalUrl
+    );
     return response.data;
   };
 
-  const getNotificationBadgeCount = async () => {
+  const getNotificationBadgeCount = async (
+    userIsNotAuthenticatedCallback: () => void
+  ) => {
     const url = routes.notifications.badgeCount;
-    const response = await sendRequest(ApiMethod.GET, url);
+    const response = await sendAuthGuardedRequest(
+      userIsNotAuthenticatedCallback,
+      ApiMethod.GET,
+      url
+    );
     return response.data;
   };
 
-  const getNotification = async (id: string) => {
+  const getNotification = async (
+    userIsNotAuthenticatedCallback: () => void,
+    id: string
+  ) => {
     const url = routes.notifications.detail(id);
-    const response = await sendRequest(ApiMethod.GET, url);
+    const response = await sendAuthGuardedRequest(
+      userIsNotAuthenticatedCallback,
+      ApiMethod.GET,
+      url
+    );
     return response.data;
   };
 
-  const deleteNotification = async (id: string) => {
+  const deleteNotification = async (
+    userIsNotAuthenticatedCallback: () => void,
+    id: string
+  ) => {
     const url = routes.notifications.detail(id);
-    const response = await sendRequest(ApiMethod.DELETE, url);
+    const response = await sendAuthGuardedRequest(
+      userIsNotAuthenticatedCallback,
+      ApiMethod.DELETE,
+      url
+    );
     return response.data;
   };
 
-  const restoreNotification = async (id: string) => {
+  const restoreNotification = async (
+    userIsNotAuthenticatedCallback: () => void,
+    id: string
+  ) => {
     const url = routes.notifications.restore(id);
-    const response = await sendRequest(ApiMethod.POST, url);
+    const response = await sendAuthGuardedRequest(
+      userIsNotAuthenticatedCallback,
+      ApiMethod.POST,
+      url
+    );
     return response.data;
   };
 

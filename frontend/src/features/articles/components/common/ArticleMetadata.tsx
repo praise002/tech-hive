@@ -1,41 +1,41 @@
 import { useState } from 'react';
 import Button from '../../../../components/common/Button';
-import MarkdownTags from './MarkdownTags';
-import TagInput from './TagInput';
+// import MarkdownTags from './MarkdownTags';
+// import TagInput from './TagInput';
 import toast from 'react-hot-toast';
 import Spinner from '../../../../components/common/Spinner';
 import { ToolTip } from '../../../../components/common/SocialLinks';
 import Text from '../../../../components/common/Text';
 
-const suggestedTags = [
-  'JavaScript',
-  'Java',
-  'Django',
-  'Fastapi',
-  'React',
-  'Node.js',
-  'CSS',
-  'HTML',
-  'TypeScript',
-  'Web Development',
-  'Database',
-  'Cloud',
-  'DevOps',
-  'Tag 1',
-  'Tag 2',
-  'Tag 3',
-  'Tag 4',
-  'Tag 5',
-  'Tag 6',
-];
+// const suggestedTags = [
+//   'JavaScript',
+//   'Java',
+//   'Django',
+//   'Fastapi',
+//   'React',
+//   'Node.js',
+//   'CSS',
+//   'HTML',
+//   'TypeScript',
+//   'Web Development',
+//   'Database',
+//   'Cloud',
+//   'DevOps',
+//   'Tag 1',
+//   'Tag 2',
+//   'Tag 3',
+//   'Tag 4',
+//   'Tag 5',
+//   'Tag 6',
+// ];
 
 function ArticleMetadata({ mode }: { mode: string }) {
-  const [tags, setTags] = useState([
-    'Cloud Computing',
-    'Technology',
-    'Innovation',
-  ]);
-  const [inputValue, setInputValue] = useState('');
+  // const [tags, setTags] = useState([
+  //   'Cloud Computing',
+  //   'Technology',
+  //   'Innovation',
+  // ]);
+  // const [inputValue, setInputValue] = useState('');
   const [isImageLoading, setIsImageLoading] = useState(false);
 
   const [metadata, setMetadata] = useState({
@@ -113,29 +113,29 @@ function ArticleMetadata({ mode }: { mode: string }) {
     }));
   }
 
-  function handleAddTag(tag: string) {
-    if (!tags.includes(tag) && tags.length < 5) {
-      setTags((prevTags) => [...prevTags, tag]);
-      setInputValue('');
-    }
-  }
+  // function handleAddTag(tag: string) {
+  //   if (!tags.includes(tag) && tags.length < 5) {
+  //     setTags((prevTags) => [...prevTags, tag]);
+  //     setInputValue('');
+  //   }
+  // }
 
-  function handleRemoveTag(tagToRemove: string) {
-    setTags(tags.filter((tag) => tag !== tagToRemove));
-  }
+  // function handleRemoveTag(tagToRemove: string) {
+  //   setTags(tags.filter((tag) => tag !== tagToRemove));
+  // }
 
-  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setInputValue(e.target.value);
-  }
+  // function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+  //   setInputValue(e.target.value);
+  // }
 
-  function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter' && inputValue.trim()) {
-      e.preventDefault();
-      handleAddTag(inputValue.trim());
-    } else if (e.key === 'Backspace' && !inputValue && tags.length > 0) {
-      handleRemoveTag(tags[tags.length - 1]);
-    }
-  }
+  // function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+  //   if (e.key === 'Enter' && inputValue.trim()) {
+  //     e.preventDefault();
+  //     handleAddTag(inputValue.trim());
+  //   } else if (e.key === 'Backspace' && !inputValue && tags.length > 0) {
+  //     handleRemoveTag(tags[tags.length - 1]);
+  //   }
+  // }
 
   return (
     <div className={`${mode === 'edit' ? 'mb-8' : 'mb-2'} mt-2`}>
@@ -285,7 +285,7 @@ function ArticleMetadata({ mode }: { mode: string }) {
       )}
 
       {/* Tags Section */}
-      <>
+      {/* <>
         {mode === 'edit' ? (
           <div className="flex items-center gap-2 flex-wrap my-2 text-xs md:text-sm">
             <MarkdownTags tags={tags} mode="edit" onRemove={handleRemoveTag} />
@@ -303,7 +303,7 @@ function ArticleMetadata({ mode }: { mode: string }) {
             <MarkdownTags tags={tags} mode="preview" onRemove={() => {}} />
           </div>
         )}
-      </>
+      </> */}
     </div>
   );
 }

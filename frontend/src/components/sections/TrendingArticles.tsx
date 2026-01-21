@@ -1,12 +1,25 @@
 import { Link } from 'react-router-dom';
-import { trendingArticles } from '../../data/articles';
 import ArticleCard from '../common/ArticleCard';
 import Text from '../common/Text';
 
-function TrendingArticles() {
+import { SectionSkeleton } from '../common/Skeletons';
+import { useArticles } from '../../features/articles/hooks/useArticle';
+
+interface TrendingArticlesProps {
+  category?: string;
+}
+
+function TrendingArticles({ category }: TrendingArticlesProps) {
+  const { articles, isPending } = useArticles({
+    limit: 4,
+    ordering: '-annotated_reaction_count',
+    category,
+  });
+
+  if (isPending) return <SectionSkeleton marginTop={20} />;
+
   return (
-    <section className="mt-20 lg:mt-4  mx-auto px-4 lg:px-8 mb-4">
-      {/* max-w-7xl */}
+    <section className="mt-20 lg:mt-4 max-w-7xl mx-auto px-4 lg:px-8 mb-4">
       <div className="flex justify-between items-center">
         <div className="my-4">
           <Text
@@ -32,7 +45,7 @@ function TrendingArticles() {
       </div>
       <div>
         <ul className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4 h-full">
-          {trendingArticles.map((article) => (
+          {articles.map((article) => (
             <li key={article.id}>
               <ArticleCard article={article} />
             </li>

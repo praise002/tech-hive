@@ -15,12 +15,13 @@ const sendRequest = async (
   authToken?: string | null,
   init?: RequestInit
 ) => {
+  const isFormData = body instanceof FormData;
   const response = await fetch(API_URL + path, {
     method,
-    ...(body && { body: JSON.stringify(body) }),
+    ...(body && { body: isFormData ? body : JSON.stringify(body) }),
     ...init,
     headers: {
-      'Content-Type': 'application/json',
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...(authToken && { Authorization: `Bearer ${authToken}` }),
       ...init?.headers,
     },

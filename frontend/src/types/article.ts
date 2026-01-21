@@ -36,6 +36,7 @@ export type TagsResponse = Tag[];
 export interface ArticleAuthor {
   name: string;
   avatar: string;
+  username: string;
 }
 
 export interface ReactionCounts {
@@ -56,6 +57,8 @@ export interface Article {
   read_time: number;
   status: ArticleStatus;
   created_at: string;
+  updated_at: string;
+  published_at: string;
   is_featured: boolean;
   author: ArticleAuthor;
   total_reaction_counts: number;
@@ -87,7 +90,15 @@ export interface CommentCreateRequest {
   thread_id?: string; // Optional - if provided, creates a reply
 }
 
-export interface CommentCreateResponse {
+// Generic API Response wrapper
+export interface ApiResponse<T = any> {
+  status: 'success' | 'error';
+  message: string;
+  data: T;
+}
+
+// Comment data structure
+export interface CommentData {
   id: string;
   thread_id: string;
   body: string;
@@ -98,28 +109,56 @@ export interface CommentCreateResponse {
   is_root: boolean;
 }
 
-export interface ThreadReply {
+export interface ArticleComment {
   id: string;
+  thread_id: string;
   body: string;
   created_at: string;
+  updated_at?: string;
   user_name: string;
   user_username: string;
   user_avatar: string;
+  total_replies: number;
+  replies?: ArticleReply[]; // Optional: only loaded when user clicks "View replies"
 }
 
+export interface DiscussionThreadProps {
+  comments: ArticleComment[];
+  commentsCount: number;
+  articleId: string;
+}
+
+
+export interface CommentCreateResponse extends ApiResponse<CommentData> {}
+
+export interface ArticleReply {
+  id: string;
+  body: string;
+  created_at: string;
+  updated_at?: string;
+  user_name: string;
+  user_username: string;
+  user_avatar: string;
+  replying_to_name: string;
+  replying_to_username: string;
+}
 export interface CommentLikeStatus {
   comment_id: string;
   like_count: number;
   is_liked: boolean | null; // null for unauthenticated users
 }
 
-export interface CommentLikeToggleResponse {
+// Comment like data
+export interface CommentLikeData {
   comment_id: string;
   is_liked: boolean;
   like_count: number;
 }
 
-export interface ArticleSummaryResponse {
+export interface CommentLikeToggleResponse extends ApiResponse<CommentLikeData> {}
+
+// Article summary data
+export interface ArticleSummaryData {
   article_id: string;
   article_title: string;
   article_slug: string;
@@ -127,19 +166,24 @@ export interface ArticleSummaryResponse {
   cached: boolean;
 }
 
+export interface ArticleSummaryResponse extends ApiResponse<ArticleSummaryData> {}
+
 export type ReactionType = '❤️' | '😍' | '👍' | '🔥';
 
 export interface ArticleReactionToggleRequest {
   reaction_type: ReactionType;
 }
 
-export interface ArticleReactionToggleResponse {
+// Article reaction toggle data
+export interface ArticleReactionToggleData {
   article_id: string;
   action: 'added' | 'removed';
   is_reacted: boolean;
   reaction_counts: ReactionCounts;
   total_reactions: number;
 }
+
+export interface ArticleReactionToggleResponse extends ApiResponse<ArticleReactionToggleData> {}
 
 export interface ArticleReactionStatisticsResponse {
   article_id: string;

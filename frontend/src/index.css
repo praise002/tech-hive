@@ -64,6 +64,36 @@
   color: #fcfcfc !important;
 }
 
+/* Global prose overrides for dark mode */
+.dark .prose strong {
+  color: #fcfcfc !important;
+}
+
+.dark .prose h1,
+.dark .prose h2,
+.dark .prose h3,
+.dark .prose h4,
+.dark .prose h5,
+.dark .prose h6 {
+  color: #fcfcfc !important;
+}
+
+.dark .prose li,
+.dark .prose li::marker {
+  color: #fcfcfc !important;
+}
+
+.dark .prose blockquote {
+  color: #fcfcfc !important;
+  border-left-color: #fcfcfc !important;
+}
+
+/* Light mode high contrast for list items */
+html:not(.dark) .prose li,
+html:not(.dark) .prose li::marker {
+  color: #000 !important;
+}
+
 /* In your global.css or similar file */
 .ProseMirror table {
   border-collapse: collapse;

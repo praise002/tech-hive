@@ -17,27 +17,6 @@ export interface TextProps {
   color?: string;
 }
 
-export interface Article {
-  id: string;
-  title: string;
-  slug: string;
-  content: string;
-  cover_image_url: string;
-  read_time: number;
-  status: string;
-  created_at: string;
-  is_featured: boolean;
-  author: string;
-  total_reaction_counts: number;
-  reaction_counts: {
-    [key: string]: number;
-  };
-  tags: Array<{
-    id: string;
-    name: string;
-  }>;
-}
-
 export interface MarkdownTagsProps {
   tags: string[];
   mode: 'edit' | 'preview';
@@ -78,15 +57,17 @@ export interface ImageProps {
 
 export interface ArticleReactionsProps {
   reaction_counts: {
-    [key: string]: number;
+    [key: string]: number | undefined;
   };
   total_reaction_counts: number;
-  created_at: string;
+  created_at?: string;
   read_time: number;
+  articleId: string;
 }
 
 export interface BookmarkProps {
   className: string;
+  articleId: string;
 }
 
 export interface TagsProps {
@@ -103,12 +84,11 @@ export interface ArticleTitleProps {
 type ButtonVariant = 'primary' | 'outline' | 'gradient';
 type ButtonType = 'button' | 'submit' | 'reset';
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   className?: string;
   variant?: ButtonVariant;
-  onClick?: () => void;
+  size?: 'sm' | 'md' | 'lg';
   type?: ButtonType;
 }
 
@@ -127,24 +107,12 @@ export interface Comment {
   replies: Reply[];
 }
 
-interface Event {
-  title: string;
-  organizer: string;
-  date: string;
-  location: string;
-  type: string;
-  lastPosted: string;
-}
+import { Article } from './article';
+import type { Event, Job, Resource, Tool } from './content';
+export type { Event, Job, Resource, Tool };
 
 export interface EventCardProps {
   event: Event;
-}
-
-interface Job {
-  title: string;
-  company: string;
-  lastPosted: string;
-  tags: string[];
 }
 
 export interface JobPostingCardProps {
@@ -155,15 +123,6 @@ export interface JobTagsProps {
   tags: string[];
 }
 
-interface Resource {
-  resourceName: string;
-  resourceImage: string;
-  resourceType: string;
-  resourceDescription: string;
-  resourceCategories: string[];
-  timePosted: string;
-}
-
 export interface ResourceCardProps {
   resource: Resource;
 }
@@ -171,15 +130,6 @@ export interface ResourceCardProps {
 export interface SearchInputProps {
   inputWidth?: string;
   iconSize: string;
-}
-
-interface Tool {
-  toolName: string;
-  toolImage: string;
-  toolDescription: string;
-  toolCategories: string[];
-  callToAction: string;
-  link: string;
 }
 
 export interface ToolCardProps {
@@ -198,6 +148,10 @@ export interface SocialLinksProps {
   sharemsg: string;
   content?: string;
   url: string;
+  onSummarize?: (forceRegenerate?: boolean) => void;
+  summaryContent?: string | null;
+  isSummarizing?: boolean;
+  summaryError?: string | null;
 }
 
 export interface ToolTipProps {
@@ -211,6 +165,7 @@ export interface ArticlesProps {
   showAdminActions?: boolean;
   visibleHeader?: boolean;
   context?: string;
+  category?: string;
 }
 
 export interface MarkdownTagsProps {
@@ -237,40 +192,6 @@ export interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
-export interface ArticleReply {
-  id: string;
-  body: string;
-  created_at: string;
-  user_name: string;
-  user_username: string;
-  user_avatar: string;
-  replying_to_name: string;
-  replying_to_username: string;
-}
-
-export interface ArticleComment {
-  id: string;
-  thread_id: string;
-  body: string;
-  created_at: string;
-  user_name: string;
-  user_username: string;
-  user_avatar: string;
-  total_replies: number;
-  replies?: ArticleReply[]; // Optional: only loaded when user clicks "View replies"
-}
-
-export interface ArticleDetail extends Article {
-  comments: ArticleComment[];
-  comments_count: number;
-}
-
-export interface DiscussionThreadProps {
-  comments: ArticleComment[];
-  commentsCount: number;
-  articleId: string;
-}
-
 export interface PaginatedResponse<T> {
   count: number;
   next: string | null;
@@ -282,7 +203,7 @@ export interface PaginatedResponse<T> {
 // API RESPONSE WRAPPER (from your CustomResponse backend)
 // ============================================================================
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   status: 'success' | 'error';
   message: string;
   data?: T;
@@ -315,4 +236,29 @@ export interface ContactRequest {
   content: string;
 }
 
-// TODO: REMOVE SOME STUFFS
+export interface Notification {
+  id: string;
+  recipient_name: string;
+  verb: string;
+  is_read: boolean;
+  is_deleted: boolean;
+  created_at: string;
+  actor_name: string;
+  actor_avatar: string | null;
+  description: string;
+  target_content_type: string | null;
+  target_object_id: string | null;
+  target_slug: string | null;
+  target_username: string | null;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  created_at: string;
+  first_name: string;
+  last_name: string;
+  username: string;
+  avatar_url: string;
+  role: string;
+}
