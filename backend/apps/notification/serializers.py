@@ -57,13 +57,23 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.CharField)
     def get_target_slug(self, obj):
-        if obj.target and hasattr(obj.target, "slug"):
-            return obj.target.slug
+        if obj.target:
+            # If target is a Comment, get the article's slug
+            if hasattr(obj.target, "article"):
+                return obj.target.article.slug
+            # Otherwise, check if target itself has a slug
+            elif hasattr(obj.target, "slug"):
+                return obj.target.slug
         return None
 
     @extend_schema_field(serializers.CharField)
     def get_target_username(self, obj):
         # Specific logic for objects that link to a user profile via 'author'
-        if obj.target and hasattr(obj.target, "author"):
-            return obj.target.author.username
+        if obj.target:
+            # If target is a Comment, get the article author's username
+            if hasattr(obj.target, "article"):
+                return obj.target.article.author.username
+            # Otherwise, check if target itself has an author
+            elif hasattr(obj.target, "author"):
+                return obj.target.author.username
         return None
