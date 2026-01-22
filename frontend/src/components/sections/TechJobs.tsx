@@ -1,17 +1,23 @@
-// import Button from '../common/Button';
 import { Link } from 'react-router-dom';
-
 import JobPostingCard from '../common/JobPostingCard';
 import Text from '../common/Text';
-import { displayedTechJobs } from '../../data/jobs';
+import { useJobs } from '../../hooks/useContent';
+import { SectionSkeleton } from '../common/Skeletons';
 
-function TechJobs() {
+interface TechJobsProps {
+  category?: string;
+}
+
+function TechJobs({ category }: TechJobsProps) {
+  const { jobs, isPending } = useJobs({ page_size: 4, category });
+
+  if (isPending) return <SectionSkeleton marginTop={20} />;
+
   return (
     <section
-      className="mt-20 lg:mt-4  mx-auto px-4 lg:px-8 mb-4"
+      className="mt-20 lg:mt-4 max-w-7xl mx-auto px-4 lg:px-8 mb-4"
       aria-label="Tech job listings"
     >
-      {/* max-w-7xl */}
       <div className="flex justify-between items-center">
         <div className="my-4">
           <Text
@@ -37,14 +43,12 @@ function TechJobs() {
       </div>
 
       <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 h-full">
-        {/* <div className="flex flex-col gap-y-2"> */}
-        {displayedTechJobs.map((job) => (
+        {jobs.map((job) => (
           <li key={job.id}>
             <JobPostingCard job={job} />
           </li>
         ))}
       </ul>
-      {/* <Button>Explore More Jobs &rarr;</Button> */}
     </section>
   );
 }

@@ -8,8 +8,8 @@ export const useContentApi = () => {
   const getCategories = async (params?: {
     page?: number;
     page_size?: number;
-    ordering?: number;
-    search?: number;
+    ordering?: string;
+    search?: string;
   }) => {
     let url = routes.content.categories;
 
@@ -25,11 +25,11 @@ export const useContentApi = () => {
       }
 
       if (params.search) {
-        searchParams.append('search', params.search.toString());
+        searchParams.append('search', params.search);
       }
 
       if (params.ordering) {
-        searchParams.append('search', params.ordering.toString());
+        searchParams.append('ordering', params.ordering);
       }
 
       // Only add '?' if we have params
@@ -216,7 +216,7 @@ export const useContentApi = () => {
     search?: string;
     category?: string;
   }) => {
-    let url = routes.content.resources;
+    let url = routes.content.tools;
 
     if (params) {
       const searchParams = new URLSearchParams();
@@ -282,54 +282,6 @@ export const useContentApi = () => {
     return response.data;
   };
 
-  const getArticles = async (params?: {
-    page?: number;
-    page_size?: number;
-    tag?: string;
-    search?: string;
-    ordering?: string;
-  }) => {
-    let url = routes.article.articles;
-
-    if (params) {
-      const searchParams = new URLSearchParams();
-
-      if (params.page) {
-        searchParams.append('page', params.page.toString());
-      }
-
-      if (params.page_size) {
-        searchParams.append('page_size', params.page_size.toString());
-      }
-
-      if (params.tag) {
-        searchParams.append('tags__name', params.tag);
-      }
-
-      if (params.search) {
-        searchParams.append('search', params.search);
-      }
-
-      if (params.ordering) {
-        searchParams.append('ordering', params.ordering);
-      }
-
-      if (searchParams.toString()) {
-        url = `${url}?${searchParams.toString()}`;
-      }
-    }
-
-    const response = await sendRequest(ApiMethod.GET, url);
-    return response.data;
-  };
-
-  const getArticleDetail = async (username: string, slug: string) => {
-    const url = routes.article.byArticle(username, slug);
-    const response = await sendRequest(ApiMethod.GET, url);
-
-    return response.data;
-  };
-
   const acceptGuidelines = async (
     userIsNotAuthenticatedCallback: () => void,
     termsAccepted: boolean = true
@@ -352,13 +304,11 @@ export const useContentApi = () => {
     getJobs,
     getTools,
     getCategories,
-    getArticles,
     getCategoryDetail,
     getJobDetail,
     getEventDetail,
     getResourceDetail,
     getToolDetail,
-    getArticleDetail,
     acceptGuidelines,
   };
 };

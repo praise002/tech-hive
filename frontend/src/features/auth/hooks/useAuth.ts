@@ -1,4 +1,8 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  QueryClient,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 
 import { LoginUserData } from '../../../types/auth';
 import { useAuthApi } from './useAuthApi';
@@ -75,6 +79,7 @@ export function useRegisterResendOtp() {
 
 export function useLogin() {
   const { login: loginApi } = useAuthApi();
+  const queryClient = useQueryClient();
 
   const {
     mutate: login,
@@ -85,6 +90,9 @@ export function useLogin() {
     mutationFn: (credentials: LoginUserData) => loginApi(credentials),
     onSuccess: async (response) => {
       setToken(response.data);
+      // Invalidate queries so they refetch with new auth state
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
     onError: (error) => {
       handleQueryError(error, 'Login');
@@ -114,13 +122,15 @@ export function useLogout() {
   return { logout, isPending };
 }
 
-export function useLogoutAll() {
+export function useLogoutAll(handleUnauthenticated: () => void) {
   const { logoutAll: logoutAllApi } = useAuthApi();
 
   const queryClient = useQueryClient();
 
   const { mutate: logoutAll, isPending } = useMutation({
-    mutationFn: logoutAllApi,
+    mutationFn: () => {
+      return logoutAllApi(handleUnauthenticated);
+    },
     onSuccess: () => {
       clearTokens();
       // Clears all user's cached data
@@ -134,11 +144,13 @@ export function useLogoutAll() {
   return { logoutAll, isPending };
 }
 
-export function useChangePassword() {
+export function useChangePassword(handleUnauthenticated: () => void) {
   const { changePassword: changePasswordApi } = useAuthApi();
 
   const { mutate: changePassword, isPending } = useMutation({
-    mutationFn: changePasswordApi,
+    mutationFn: (passwordData: any) => {
+      return changePasswordApi(handleUnauthenticated, passwordData);
+    },
     onSuccess: (response) => {
       setToken(response.data);
     },

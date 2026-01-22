@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Bookmark from '../../../components/common/Bookmark';
 import DiscussionThread from '../../../components/common/DiscussionThread';
@@ -10,8 +11,13 @@ import Tags from '../../../components/common/Tags';
 import Text from '../../../components/common/Text';
 import CategoryBar from '../../../components/sections/CategoryBar';
 import Subscribe from '../../../components/sections/Subscribe';
-import { useArticleDetail } from '../../../hooks/useContent';
+
+import {
+  useArticleDetail,
+  useGenerateArticleSummary,
+} from '../hooks/useArticle';
 import { formatDateB, getPreviewText } from '../../../utils/utils';
+import { ArticleSummaryData } from '../../../types/article';
 
 function ArticleDetail() {
   const { username, slug } = useParams<{ username: string; slug: string }>();
@@ -19,6 +25,26 @@ function ArticleDetail() {
     username!,
     slug!
   );
+
+  const [summaryData, setSummaryData] = useState<ArticleSummaryData | null>(
+    null
+  );
+  const {
+    generateArticleSummary,
+    isPending: isSummarizing,
+    error: summaryError,
+  } = useGenerateArticleSummary();
+
+  const handleSummarize = (forceRegenerate: boolean = false) => {
+    generateArticleSummary(
+      { articleId: article?.id || '', forceRegenerate },
+      {
+        onSuccess: (data) => {
+          setSummaryData(data as unknown as ArticleSummaryData);
+        },
+      }
+    );
+  };
 
   if (isPending) {
     return (
@@ -44,16 +70,9 @@ function ArticleDetail() {
   const {
     id: articleId,
     title,
-    slug: articleSlug,
     content,
-    cover_image_url: coverImageUrl,
-    read_time: readTime,
-    status,
     created_at: createdAt,
-    is_featured: isFeatured,
     author,
-    total_reaction_counts: totalReactionCounts,
-    reaction_counts: reactionCounts,
     tags,
     comments,
     comments_count: commentsCount,
@@ -62,7 +81,7 @@ function ArticleDetail() {
   return (
     <>
       <CategoryBar />
-      <div className="flex flex-col md:flex-row gap-8 px-4 md:px-10 py-8">
+      <div className="flex flex-col md:flex-row gap-8 px-4 md:px-10 py-8 min-h-screen">
         {/* Left Column: Social Links */}
         <div className="hidden md:block px-10 mt-70">
           <SocialLinks
@@ -71,6 +90,10 @@ function ArticleDetail() {
             url={`${window.location.origin}/${username}/${slug}`}
             content={content}
             sharemsg={title}
+            onSummarize={handleSummarize}
+            summaryContent={summaryData?.summary}
+            isSummarizing={isSummarizing}
+            summaryError={summaryError?.message}
           />
         </div>
 
@@ -78,8 +101,8 @@ function ArticleDetail() {
         <div className="w-full md:w-3/4 mt-20 md:mt-10 border border-gray rounded-tl-lg rounded-tr-lg overflow-hidden">
           <Image
             alt="Article Image"
-            src={coverImageUrl}
-            className="w-full h-auto shadow-md"
+            src="/assets/articles/the-future-ui-ux.jpg"
+            className="w-full h-64 md:h-96 object-cover shadow-md"
           />
           <div className="px-4 py-6 border border-secondary text-primary">
             <div className="my-4 text-xs text-secondary">
@@ -115,17 +138,25 @@ function ArticleDetail() {
               </div>
             </div>
 
-            <p className="text-base md:text-lg leading-relaxed dark:text-custom-white">
-              {content}
-            </p>
+            <div
+              className="text-base md:text-lg leading-relaxed dark:text-custom-white prose lg:prose-xl max-w-none start-article"
+              dangerouslySetInnerHTML={{ __html: content }}
+            />
             <Tags tags={tags} />
             <div className="flex justify-between my-4">
-              <Reaction />
+              <Reaction articleId={articleId} />
               <div>
-                <Bookmark className="w-6 h-6 dark:invert" />
+                <Bookmark
+                  className="w-6 h-6 dark:invert"
+                  articleId={articleId}
+                />
               </div>
             </div>
-            <DiscussionThread />
+            <DiscussionThread
+              comments={comments}
+              commentsCount={commentsCount}
+              articleId={articleId}
+            />
           </div>
         </div>
 
@@ -137,6 +168,10 @@ function ArticleDetail() {
             url={`${window.location.origin}/${username}/${slug}`}
             content={getPreviewText(content, 200)}
             sharemsg={title}
+            onSummarize={handleSummarize}
+            summaryContent={summaryData?.summary}
+            isSummarizing={isSummarizing}
+            summaryError={summaryError?.message}
           />
         </div>
       </div>

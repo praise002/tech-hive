@@ -11,7 +11,10 @@ export const useArticleApi = () => {
     page?: number;
     page_size?: number;
     is_featured?: number;
-    search?: number;
+    search?: string;
+    category?: string;
+    author__username?: string;
+    ordering?: string;
   }) => {
     let url = routes.article.articles;
 
@@ -35,7 +38,19 @@ export const useArticleApi = () => {
       }
 
       if (params.search) {
-        searchParams.append('search', params.search.toString());
+        searchParams.append('search', params.search);
+      }
+
+      if (params.ordering) {
+        searchParams.append('ordering', params.ordering);
+      }
+
+      if (params.category) {
+        searchParams.append('category', params.category);
+      }
+
+      if (params.author__username) {
+        searchParams.append('author__username', params.author__username);
       }
 
       // Only add '?' if we have params
@@ -113,8 +128,23 @@ export const useArticleApi = () => {
       ApiMethod.DELETE,
       url
     );
-    console.log(response.data);
+    
     return true;
+  };
+
+  const updateComment = async (
+    userIsNotAuthenticatedCallback: () => void,
+    commentId: string,
+    body: string
+  ) => {
+    const url = routes.article.commentById(commentId);
+    const response = await sendAuthGuardedRequest(
+      userIsNotAuthenticatedCallback,
+      ApiMethod.PATCH,
+      url,
+      { body }
+    );
+    return response.data;
   };
 
   const toggleCommentLike = async (
@@ -132,7 +162,16 @@ export const useArticleApi = () => {
 
   const getCommentLikeStatus = async (commentId: string) => {
     const url = routes.article.commentLikes(commentId);
-    const response = await sendRequest(ApiMethod.GET, url);
+    // Get auth token if available, but don't require it
+    const authTokens = localStorage.getItem('authTokens');
+    const authToken = authTokens ? JSON.parse(authTokens).access : null;
+
+    const response = await sendRequest(
+      ApiMethod.GET,
+      url,
+      undefined,
+      authToken
+    );
     return response.data;
   };
 
@@ -168,9 +207,16 @@ export const useArticleApi = () => {
     return response.data;
   };
 
-  const getArticleReactionStatistics = async (articleId: string) => {
+  const getArticleReactionStatistics = async (
+    userIsNotAuthenticatedCallback: () => void,
+    articleId: string
+  ) => {
     const url = routes.article.articleReactions(articleId);
-    const response = await sendRequest(ApiMethod.GET, url);
+    const response = await sendAuthGuardedRequest(
+      userIsNotAuthenticatedCallback,
+      ApiMethod.GET,
+      url
+    );
     return response.data;
   };
 
@@ -379,6 +425,7 @@ export const useArticleApi = () => {
     createComment,
     getThreadReplies,
     deleteComment,
+    updateComment,
     toggleCommentLike,
     getCommentLikeStatus,
     generateArticleSummary,

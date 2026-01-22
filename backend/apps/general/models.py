@@ -49,4 +49,4 @@ class Contact(BaseModel):
     content = models.TextField()
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return self.name

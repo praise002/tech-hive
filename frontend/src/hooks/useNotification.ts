@@ -13,7 +13,7 @@ export function useNotifications(params?: Record<string, string>) {
   } = useQuery({
     queryKey: ['notifications', params],
     queryFn: async () => {
-      const response = await getNotifications(params);
+      const response = await getNotifications(() => {}, params);
       return response;
     },
   });
@@ -36,15 +36,18 @@ export function useNotificationBadgeCount() {
     error,
   } = useQuery({
     queryKey: ['notificationBadge'],
-    queryFn: () => getNotificationBadgeCount(),
-    // Refetch often for live updates or use staleTime appropriately
+    queryFn: () => getNotificationBadgeCount(() => {}),
+    enabled: !!localStorage.getItem('authTokens'), // Only run if token exists
+    // Refetch often for live updates
     staleTime: 1000 * 60, // 1 minute
+    refetchInterval: 1000 * 60 * 2, // Refetch every 2 minutes for live updates
+    refetchOnWindowFocus: true, // Refetch when user returns to the tab
   });
 
   return { badgeCount, isPending, isError, error };
 }
 
-export function useNotification(id: string) {
+export function useMarkNotificationAsRead(id: string) {
   const { getNotification } = useNotificationApi();
   const queryClient = useQueryClient();
 
@@ -56,7 +59,7 @@ export function useNotification(id: string) {
   } = useQuery({
     queryKey: ['notification', id],
     queryFn: async () => {
-      const data = await getNotification(id);
+      const data = await getNotification(() => {}, id);
       // Invalidate list/badge as reading a notification updates read status
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['notificationBadge'] });
@@ -79,7 +82,7 @@ export function useDeleteNotification() {
     error,
     isSuccess,
   } = useMutation({
-    mutationFn: (id: string) => deleteNotificationApi(id),
+    mutationFn: (id: string) => deleteNotificationApi(() => {}, id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['notificationBadge'] });
@@ -103,7 +106,7 @@ export function useRestoreNotification() {
     error,
     isSuccess,
   } = useMutation({
-    mutationFn: (id: string) => restoreNotificationApi(id),
+    mutationFn: (id: string) => restoreNotificationApi(() => {}, id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['notificationBadge'] });

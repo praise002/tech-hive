@@ -15,13 +15,13 @@ import {
 import { FaRegBookmark } from 'react-icons/fa6';
 import { RiDraftFill } from 'react-icons/ri';
 
-import SavedContent from '../componenets/SavedContent';
-import DraftsContent from '../componenets/DraftsContent';
-import SubmittedContent from '../componenets/SubmittedContent';
-import AccountContent from '../componenets/AccountContent';
-import PublishedContent from '../componenets/PublishedContent';
+import SavedContent from '../components/SavedContent';
+import DraftsContent from '../components/DraftsContent';
+import SubmittedContent from '../components/SubmittedContent';
+import AccountContent from '../components/AccountContent';
+import PublishedContent from '../components/PublishedContent';
 import { BiMessageRounded } from 'react-icons/bi';
-import CommentsContent from '../componenets/CommentsContent';
+import CommentsContent from '../components/CommentsContent';
 import {
   useCurrentUser,
   useUpdateUserAvatar,
@@ -29,6 +29,7 @@ import {
 } from '../hooks/useProfile';
 import Spinner from '../../../components/common/Spinner';
 import { formatDate, handleQueryError } from '../../../utils/utils';
+import { useNavigate } from 'react-router-dom';
 
 const defaultProfilePicture = '/assets/icons/Avatars.png';
 
@@ -79,13 +80,18 @@ function AccountDetail() {
   const [showCropModal, setShowCropModal] = useState(false);
 
   const [tempImage, setTempImage] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  const handleUnauthenticated = () => {
+    navigate('/login');
+  };
 
   const { isPending: isUserLoading, user, error } = useCurrentUser();
   const { updateCurrentUserProfile, isPending: isUpdating } =
-    useUpdateUserProfile();
+    useUpdateUserProfile(handleUnauthenticated);
 
   const { updateCurrentUserAvatar, isPending: isAvatarUpdating } =
-    useUpdateUserAvatar();
+    useUpdateUserAvatar(handleUnauthenticated);
 
   const {
     first_name: firstName,
@@ -182,7 +188,7 @@ function AccountDetail() {
           onSuccess: (responseData) => {
             setProfile((prev) => ({
               ...prev,
-              profilePicture: responseData.data.avatar_url,
+              profilePicture: responseData.avatar_url,
             }));
             setShowCropModal(false);
             cleanupTempImage();
@@ -435,15 +441,32 @@ function AccountDetail() {
                     <button
                       type="button"
                       onClick={() => {
-                        setIsEditingPc(false);
-                        setProfile((prev) => ({
-                          ...prev,
-                          profilePicture: defaultProfilePicture,
-                        }));
+                        const formData = new FormData();
+                        formData.append('remove_avatar', 'true');
+
+                        updateCurrentUserAvatar(formData, {
+                          onSuccess: (responseData) => {
+                            setProfile((prev) => ({
+                              ...prev,
+                              profilePicture:
+                                responseData.avatar_url ||
+                                defaultProfilePicture,
+                            }));
+                            setIsEditingPc(false);
+                            toast.success(
+                              'Profile picture removed successfully!'
+                            );
+                          },
+                          onError: () => {
+                            toast.error('Failed to remove profile picture.');
+                            setIsEditingPc(false);
+                          },
+                        });
                       }}
+                      disabled={isAvatarUpdating}
                       className="p-1 cursor-pointer focus-visible:outline-0 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-red-300 transition duration-300 hover:bg-red-800 hover:text-white"
                     >
-                      Remove a photo
+                      {isAvatarUpdating ? 'Removing...' : 'Remove a photo'}
                     </button>
                   </div>
                 </div>

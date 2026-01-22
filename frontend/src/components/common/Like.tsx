@@ -1,16 +1,84 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useCurrentUser } from '../../features/profile/hooks/useProfile';
+import { useAuthModal } from '../../context/AuthModalContext';
+import {
+  useToggleCommentLike,
+  useCommentLikeStatus,
+} from '../../features/articles/hooks/useArticle';
+import { useNavigate } from 'react-router-dom';
 
-function Like() {
-  const [isLiked, setIsLiked] = useState(false);
+interface LikeProps {
+  commentId: string;
+  initialLikeCount?: number;
+  initialIsLiked?: boolean;
+}
+
+function Like({
+  commentId,
+  initialLikeCount = 0,
+  initialIsLiked = false,
+}: LikeProps) {
+  const [isLiked, setIsLiked] = useState(initialIsLiked);
+  const [likeCount, setLikeCount] = useState(initialLikeCount);
+  const { isAuthenticated } = useCurrentUser();
+  const { openAuthModal } = useAuthModal();
+  const navigate = useNavigate();
+
+  const handleUnauthenticated = () => {
+    navigate('/login');
+  };
+
+  const { toggleCommentLike, isPending: isToggling } = useToggleCommentLike(
+    handleUnauthenticated
+  );
+
+  const { likeStatus } = useCommentLikeStatus(commentId);
+
+  useEffect(() => {
+    if (likeStatus) {
+      setIsLiked(!!likeStatus.is_liked);
+      setLikeCount(likeStatus.like_count);
+    }
+  }, [likeStatus]);
+
+  const handleLikeClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      openAuthModal(window.location.pathname);
+      return;
+    }
+
+    // Optimistic update
+    const newIsLiked = !isLiked;
+    setIsLiked(newIsLiked);
+    setLikeCount((prev) => (newIsLiked ? prev + 1 : Math.max(0, prev - 1)));
+
+    toggleCommentLike(commentId, {
+      onError: () => {
+        // Revert on error
+        setIsLiked(!newIsLiked);
+        setLikeCount((prev) =>
+          !newIsLiked ? prev + 1 : Math.max(0, prev - 1)
+        );
+      },
+    });
+  };
 
   return (
     <button
-      className="inline-flex gap-2 items-center min-w-[48px] min-h-[48px]"
-      onClick={() => setIsLiked((like) => !like)}
+      className="inline-flex gap-1.5 items-center hover:text-primary transition-colors text-secondary"
+      onClick={handleLikeClick}
+      disabled={isToggling}
       aria-pressed={isLiked}
       aria-label={isLiked ? 'Unlike' : 'Like'}
     >
-      <span>
+      <span
+        className={
+          isLiked
+            ? 'text-red-500 scale-110 transition-transform'
+            : 'transition-transform'
+        }
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           // fill="none"
@@ -18,7 +86,7 @@ function Like() {
           viewBox="0 0 24 24"
           strokeWidth={1.5}
           stroke="currentColor"
-          className="size-5"
+          className="size-4"
           aria-hidden="true"
         >
           <path
@@ -28,7 +96,12 @@ function Like() {
           />
         </svg>
       </span>
-      <span>{isLiked ? 'Liked' : 'Like'}</span>
+      <span className="text-xs font-medium min-w-[20px] text-left">
+        {isLiked ? 'Unlike' : 'Like'}
+      </span>
+      <span className="text-xs font-medium min-w-[20px] text-left">
+        {likeCount > 0 ? likeCount : ''}
+      </span>
     </button>
   );
 }

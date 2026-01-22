@@ -1,66 +1,74 @@
 import { useState } from 'react';
 import { MdOutlineAddReaction, MdAddReaction } from 'react-icons/md';
+import { useCurrentUser } from '../../features/profile/hooks/useProfile';
+import { useAuthModal } from '../../context/AuthModalContext';
+import {
+  useToggleArticleReaction,
+  useArticleReactionStatistics,
+} from '../../features/articles/hooks/useArticle';
+import { ReactionType } from '../../types/article';
 
-const initialReactions = [
-  { id: 'Love', emoji: '❤️', numReactions: 5 },
-  { id: 'Laugh', emoji: '😄', numReactions: 9 },
-  { id: 'Think', emoji: '🤔', numReactions: 13 },
-  { id: 'Angry', emoji: '😡', numReactions: 1 },
-  { id: 'Fire', emoji: '🔥', numReactions: 10 },
-  { id: 'Heart Eyes', emoji: '😍', numReactions: 4 },
+interface ReactionProps {
+  articleId: string;
+}
+
+const SUPPORTED_REACTIONS: { id: ReactionType; emoji: string }[] = [
+  { id: '❤️', emoji: '❤️' },
+  { id: '👍', emoji: '👍' },
+  { id: '🔥', emoji: '🔥' },
+  { id: '😍', emoji: '😍' },
 ];
 
-function Reaction() {
-  const [reactions, setReactions] = useState(initialReactions); // Keeps track of all the reactions and their counts
-  const [selectedReactions, setSelectedReactions] = useState<string[]>([]); // Remembers which reactions YOU have selected
+function Reaction({ articleId }: ReactionProps) {
   const [showReactions, setShowReactions] = useState(false); // Shows or hides the list of emojis
   const [hoveredId, setHoveredId] = useState<string | null>(null); // Remembers which emoji you're hovering over with your mouse
+  const { isAuthenticated } = useCurrentUser();
+  const { openAuthModal } = useAuthModal();
 
-  function toggleReaction(reactionId: string) {
-    setSelectedReactions((prevSelected) => {
-      // Check if reaction is already selected
-      const isSelected = prevSelected.includes(reactionId);
+  const { data: stats } = useArticleReactionStatistics(articleId);
+  const { toggleArticleReaction, isPending: isToggling } =
+    useToggleArticleReaction();
 
-      return isSelected
-        ? // Remove the reaction if already selected
-          prevSelected.filter((id) => id !== reactionId)
-        : // Add the reaction if not selected
-          [...prevSelected, reactionId];
-    });
+  // Derived state from API data
+  const userReactions = stats?.user_reactions || [];
+  const reactionCounts = stats?.reaction_counts || {};
+  const totalReactions = stats?.total_reactions || 0;
 
-    setReactions((prevReactions) =>
-      prevReactions.map((reaction) =>
-        reaction.id === reactionId
-          ? {
-              ...reaction,
-              numReactions: selectedReactions.includes(reactionId)
-                ? reaction.numReactions - 1
-                : reaction.numReactions + 1,
-            }
-          : reaction
-      )
+  // Check if user has reacted
+  const hasUserReacted =
+    Array.isArray(userReactions) && userReactions.length > 0;
+  function handleToggleReaction(reactionType: ReactionType) {
+    if (!isAuthenticated) {
+      openAuthModal(window.location.pathname);
+      return;
+    }
+
+    toggleArticleReaction(
+      { articleId, reactionType },
+      {
+        onSuccess: () => {
+          setShowReactions(false);
+        },
+      }
     );
-
-    setShowReactions(false); // Hide reaction picker after selection
   }
 
-  const totalReactions = reactions.reduce(
-    (sum, reaction) => sum + reaction.numReactions,
-    0
-  );
+  // Close dropdown when clicking existing reaction button if it's open, or toggle it
+  const toggleDropdown = () => setShowReactions((prev) => !prev);
 
   return (
     <div className="relative">
       <div className="inline-flex flex-col gap-1">
         <button
-          className="hover:opacity-80 transition cursor-pointer min-w-[48px] min-h-[48px]"
-          onClick={() => setShowReactions((show) => !show)}
+          className="hover:opacity-80 transition cursor-pointer min-w-[48px] min-h-[48px] flex items-center justify-center"
+          onClick={toggleDropdown}
           aria-haspopup="true"
           aria-expanded={showReactions}
+          disabled={isToggling}
         >
-          {selectedReactions.length > 0 ? (
+          {hasUserReacted ? (
             <MdAddReaction
-              className="w-6 h-6 dark:text-custom-white"
+              className="w-6 h-6  dark:text-custom-white"
               aria-hidden="true"
             />
           ) : (
@@ -71,7 +79,7 @@ function Reaction() {
           )}
         </button>
         <span
-          className="dark:text-custom-white"
+          className="dark:text-custom-white text-center text-sm"
           aria-label={`Total reactions: ${totalReactions}`}
         >
           {totalReactions}
@@ -84,42 +92,48 @@ function Reaction() {
           role="menu"
           aria-label="Pick a reaction"
         >
-          {reactions.map((reaction) => (
-            <div
-              key={reaction.id}
-              className="relative dark:text-custom-white rounded-md px-1 flex flex-col gap-x-8 items-center"
-              onMouseEnter={() => setHoveredId(reaction.id)}
-              onMouseLeave={() => setHoveredId(null)} // reset
-              onClick={() => toggleReaction(reaction.id)}
-            >
-              <button
-                className="cursor-pointer hover:scale-125 transition-transform"
-                aria-label={`React with ${reaction.id} emoji`}
-                aria-pressed={selectedReactions.includes(reaction.id)}
-                role="menuitem"
-              >
-                <span className="w-6 h-6" aria-hidden="true">
-                  {reaction.emoji}
-                </span>
-                <span
-                  className="text-xs"
-                  aria-label={`${reaction.numReactions} ${reaction.id} reactions`}
-                >
-                  {' '}
-                  {reaction.numReactions}
-                </span>
-              </button>
+          {SUPPORTED_REACTIONS.map((reaction) => {
+            const count = reactionCounts[reaction.id] || 0;
+            const isSelected = userReactions.includes(reaction.id);
 
-              {hoveredId === reaction.id && (
-                <div
-                  className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black text-custom-white text-xs rounded whitespace-nowrap"
-                  role="tooltip"
+            return (
+              <div
+                key={reaction.id}
+                className="relative dark:text-custom-white rounded-md px-1 flex flex-col gap-x-8 items-center"
+                onMouseEnter={() => setHoveredId(reaction.id)}
+                onMouseLeave={() => setHoveredId(null)}
+                onClick={() => handleToggleReaction(reaction.id)}
+              >
+                <button
+                  className="cursor-pointer hover:scale-125 transition-transform"
+                  aria-label={`React with ${reaction.id} emoji`}
+                  aria-pressed={isSelected}
+                  role="menuitem"
+                  disabled={isToggling}
                 >
-                  {reaction.id}
-                </div>
-              )}
-            </div>
-          ))}
+                  <span className="w-6 h-6" aria-hidden="true">
+                    {reaction.emoji}
+                  </span>
+                  <span
+                    className="text-xs"
+                    aria-label={`${count} ${reaction.id} reactions`}
+                  >
+                    {' '}
+                    {count}
+                  </span>
+                </button>
+
+                {hoveredId === reaction.id && (
+                  <div
+                    className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black text-custom-white text-xs rounded whitespace-nowrap"
+                    role="tooltip"
+                  >
+                    {reaction.id}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

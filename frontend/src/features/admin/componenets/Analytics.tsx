@@ -15,34 +15,58 @@ import {
 } from 'recharts';
 import { GoArrowDownRight, GoArrowUpRight } from 'react-icons/go';
 import Text from '../../../components/common/Text';
+import { useDashboardMetrics } from '../hooks/useAnalytics';
+import { useState } from 'react';
+import Spinner from '../../../components/common/Spinner';
 
 function Analytics() {
-  const deviceTypesData = [
-    { name: 'Mobile', value: 400, color: '#a32816' },
-    { name: 'Tablet', value: 300, color: '#F58F29' },
-    {
-      name: 'Desktop',
-      value: 200,
-      color: '#2EA316',
-    },
-  ];
+  const [period, setPeriod] = useState<'weekly' | 'monthly'>('weekly');
+  const { data, isLoading, error } = useDashboardMetrics(period);
 
-  const activeUsersData = [
-    { name: 'Mon', registered: 1350, visitors: 900, total: 2250 },
-    { name: 'Tue', registered: 1450, visitors: 750, total: 2200 },
-    { name: 'Wed', registered: 1200, visitors: 950, total: 2150 },
-    { name: 'Thu', registered: 1600, visitors: 600, total: 2200 },
-    { name: 'Fri', registered: 1750, visitors: 500, total: 2250 },
-    { name: 'Sat', registered: 1000, visitors: 450, total: 1450 },
-    { name: 'Sun', registered: 950, visitors: 650, total: 1600 },
-  ];
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-[500px]">
+        <Spinner />
+      </div>
+    );
+  }
 
-  const topPerformingPostsData = [
-    { category: 'Articles', views: 2200, shares: 1400 },
-    { category: 'Jobs', views: 1500, shares: 900 },
-    { category: 'Events', views: 1800, shares: 1100 },
-    { category: 'Featured', views: 2500, shares: 1600 },
-  ];
+  if (error || !data) {
+    return (
+      <div className="flex justify-center items-center h-[500px] text-red-500">
+        Failed to load analytics data
+      </div>
+    );
+  }
+
+  const deviceTypesData = data.device_types.map((d) => ({
+    name: d.name,
+    value: d.value,
+    color:
+      d.name === 'Mobile'
+        ? '#a32816'
+        : d.name === 'Tablet'
+        ? '#F58F29'
+        : '#2EA316',
+  }));
+
+  const activeUsersData = data.active_users.map((d) => ({
+    name: d.day,
+    registered: d.registered_users,
+    visitors: d.visitors,
+    total: d.total_active_users,
+  }));
+
+  // Aggregate top posts by category from the API response
+  const topPerformingPostsData = Object.entries(data.top_performing_posts).map(
+    ([category, posts]) => ({
+      category: category.charAt(0).toUpperCase() + category.slice(1),
+      views: posts.reduce((sum, p) => sum + p.views, 0),
+      shares: 0, // Shares not currently in TopPost interface, would need API update or mock
+    })
+  );
+
+  const { metrics } = data;
 
   return (
     <div className="flex flex-col gap-4 px-2 lg:px-0">
@@ -51,32 +75,59 @@ function Analytics() {
           <div className="my-6 lg:my-0 flex flex-col lg:flex-row gap-4 justify-between text-primary dark:text-custom-white">
             <div className="flex flex-col items-center gap-y-5 px-8 py-3 rounded-md border border-primary dark:border-gray-200">
               <span className="text-sm">Time on page</span>
-              <span className="font-semibold text-2xl">3.2 min</span>
+              <span className="font-semibold text-2xl">
+                {(metrics.avg_session_duration.value / 60).toFixed(1)} min
+              </span>
               <p className="inline-flex items-center gap-2 text-xs">
                 <span>
-                  <GoArrowUpRight className="text-lime-green" />
+                  {metrics.avg_session_duration.trend === 'up' ? (
+                    <GoArrowUpRight className="text-lime-green" />
+                  ) : (
+                    <GoArrowDownRight className="text-red" />
+                  )}
                 </span>
-                <span>+1.01% this week</span>
+                <span>
+                  {metrics.avg_session_duration.change > 0 ? '+' : ''}
+                  {metrics.avg_session_duration.change}% this {period}
+                </span>
               </p>
             </div>
             <div className="flex flex-col items-center gap-y-5 px-8 py-3 rounded-md border border-primary dark:border-gray-200">
               <span className="text-sm">Bounce rate</span>
-              <span className="font-semibold text-2xl">42%</span>
+              <span className="font-semibold text-2xl">
+                {metrics.bounce_rate.value}%
+              </span>
               <p className="inline-flex items-center gap-2 text-xs">
                 <span>
-                  <GoArrowUpRight className="text-lime-green" />
+                  {metrics.bounce_rate.trend === 'down' ? (
+                    <GoArrowDownRight className="text-lime-green" />
+                  ) : (
+                    <GoArrowUpRight className="text-red" />
+                  )}
                 </span>
-                <span>+0.12% this week</span>
+                <span>
+                  {metrics.bounce_rate.change > 0 ? '+' : ''}
+                  {metrics.bounce_rate.change}% this {period}
+                </span>
               </p>
             </div>
             <div className="flex flex-col items-center gap-y-5 px-8 py-3 rounded-md border border-primary dark:border-gray-200">
               <span className="text-sm">Load speed</span>
-              <span className="font-semibold text-2xl">1.0 min</span>
+              <span className="font-semibold text-2xl">
+                {metrics.page_load_time.value} ms
+              </span>
               <p className="inline-flex items-center gap-2 text-xs">
                 <span>
-                  <GoArrowDownRight className="text-red" />
+                  {metrics.page_load_time.trend === 'down' ? (
+                    <GoArrowDownRight className="text-lime-green" />
+                  ) : (
+                    <GoArrowUpRight className="text-red" />
+                  )}
                 </span>
-                <span>-1.01% this week</span>
+                <span>
+                  {metrics.page_load_time.change > 0 ? '+' : ''}
+                  {metrics.page_load_time.change}% this {period}
+                </span>
               </p>
             </div>
           </div>
@@ -105,8 +156,14 @@ function Analytics() {
             </Text>
 
             <form>
-              <select className="dark:text-custom-white dark:bg-dark text-sm py-1 px-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700">
-                <option value="">Weekly</option>
+              <select
+                className="dark:text-custom-white dark:bg-dark text-sm py-1 px-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700"
+                value={period}
+                onChange={(e) =>
+                  setPeriod(e.target.value as 'weekly' | 'monthly')
+                }
+              >
+                <option value="weekly">Weekly</option>
                 <option value="monthly">Monthly</option>
               </select>
             </form>
@@ -157,8 +214,14 @@ function Analytics() {
               Active users overview
             </Text>
             <form>
-              <select className="dark:text-custom-white text-sm dark:bg-dark py-1 px-2  border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700">
-                <option value="">Weekly</option>
+              <select
+                className="dark:text-custom-white text-sm dark:bg-dark py-1 px-2  border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700"
+                value={period}
+                onChange={(e) =>
+                  setPeriod(e.target.value as 'weekly' | 'monthly')
+                }
+              >
+                <option value="weekly">Weekly</option>
                 <option value="monthly">Monthly</option>
               </select>
             </form>
@@ -236,8 +299,14 @@ function Analytics() {
               Top Performing Post
             </Text>
             <form>
-              <select className="dark:text-custom-white text-sm dark:bg-dark py-1 px-2  border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700">
-                <option value="">Weekly</option>
+              <select
+                className="dark:text-custom-white text-sm dark:bg-dark py-1 px-2  border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus:ring-gray-700"
+                value={period}
+                onChange={(e) =>
+                  setPeriod(e.target.value as 'weekly' | 'monthly')
+                }
+              >
+                <option value="weekly">Weekly</option>
                 <option value="monthly">Monthly</option>
               </select>
             </form>

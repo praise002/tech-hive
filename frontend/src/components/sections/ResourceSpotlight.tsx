@@ -1,17 +1,23 @@
-// import Button from '../common/Button';
 import { Link } from 'react-router-dom';
-
 import ResourceCard from '../common/ResourceCard';
 import Text from '../common/Text';
-import { displayedResources } from '../../data/resources';
+import { useResources } from '../../hooks/useContent';
+import { SectionSkeleton } from '../common/Skeletons';
 
-function ResourceSpotlight() {
+interface ResourceSpotlightProps {
+  category?: string;
+}
+
+function ResourceSpotlight({ category }: ResourceSpotlightProps) {
+  const { resources, isPending } = useResources({ page_size: 4, category });
+
+  if (isPending) return <SectionSkeleton marginTop={20} />;
+
   return (
     <section
-      className="mt-20 lg:mt-4  mx-auto px-4 lg:px-8 mb-4"
+      className="mt-20 lg:mt-4 max-w-7xl mx-auto px-4 lg:px-8 mb-4"
       aria-label="Tech resources"
     >
-      {/* max-w-7xl */}
       <div className="flex justify-between items-center">
         <div className="my-4">
           <Text
@@ -36,14 +42,12 @@ function ResourceSpotlight() {
         </div>
       </div>
       <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 h-full">
-        {displayedResources.map((resource) => (
+        {resources.map((resource) => (
           <li key={resource.id}>
             <ResourceCard resource={resource} />
           </li>
         ))}
       </ul>
-
-      {/* <Button>Explore More Resources &rarr;</Button> */}
     </section>
   );
 }

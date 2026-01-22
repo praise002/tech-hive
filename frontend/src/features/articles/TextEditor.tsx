@@ -49,6 +49,8 @@ function TextEditor() {
       StarterKit.configure({
         // The Liveblocks extension comes with its own history handling
         history: false,
+        codeBlock: false, // Using CodeBlockLowlight instead
+        dropcursor: false, // Adding Dropcursor explicitly
       }),
 
       Placeholder.configure({

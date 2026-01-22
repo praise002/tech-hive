@@ -13,7 +13,8 @@ import { getToken, safeLocalStorage } from '../../../utils/utils';
 const storage = safeLocalStorage();
 
 export const useAuthApi = () => {
-  const { sendRequest, sendProtectedRequest } = useApi();
+  const { sendRequest, sendProtectedRequest, sendAuthGuardedRequest } =
+    useApi();
 
   const register = async (userData: RegisterUserData) => {
     const response = await sendRequest(
@@ -68,14 +69,22 @@ export const useAuthApi = () => {
     return response;
   };
 
-  const logoutAll = async () => {
-    const response = await sendRequest(ApiMethod.POST, routes.auth.logoutAll);
+  const logoutAll = async (userIsNotAuthenticatedCallback: () => void) => {
+    const response = await sendAuthGuardedRequest(
+      userIsNotAuthenticatedCallback,
+      ApiMethod.POST,
+      routes.auth.logoutAll
+    );
 
     return response;
   };
 
-  const changePassword = async (passwordData: ChangePasswordData) => {
-    const response = await sendRequest(
+  const changePassword = async (
+    userIsNotAuthenticatedCallback: () => void,
+    passwordData: ChangePasswordData
+  ) => {
+    const response = await sendAuthGuardedRequest(
+      userIsNotAuthenticatedCallback,
       ApiMethod.POST,
       routes.auth.changePassword,
       passwordData
@@ -87,7 +96,7 @@ export const useAuthApi = () => {
   const requestPasswordReset = async (email: string) => {
     const response = await sendRequest(
       ApiMethod.POST,
-      routes.auth.changePassword,
+      routes.auth.requestPasswordReset,
       { email }
     );
 

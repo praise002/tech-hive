@@ -4,33 +4,31 @@ import Text from '../common/Text';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 
-import { Article, ArticlesProps } from '../../types/types';
+import { ArticlesProps } from '../../types/types';
 
-import Spinner from '../common/Spinner';
-import { useArticles } from '../../hooks/useContent';
+import { SectionSkeleton } from '../common/Skeletons';
+import { useArticles } from '../../features/articles/hooks/useArticle';
 
 function Articles({
   marginTop = 20,
   showAdminActions,
   context,
   visibleHeader = true,
+  category,
 }: ArticlesProps) {
   const [openArticleId, setOpenArticleId] = useState<string | null>(null);
-  const { isPending, articles } = useArticles({ limit: 4 });
+  const { isPending, articles } = useArticles({ limit: 4, category });
 
   function handleMenuClick(articleId: string) {
     setOpenArticleId((prevId) => (prevId === articleId ? null : articleId));
   }
 
-  if (isPending)
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Spinner />
-      </div>
-    );
+  if (isPending) return <SectionSkeleton marginTop={marginTop} />;
 
   return (
-    <section className={`lg:mt-4  mx-auto px-4 lg:px-8 mb-4 mt-${marginTop}`}>
+    <section
+      className={`lg:mt-4 max-w-7xl mx-auto px-4 lg:px-8 mb-4 mt-${marginTop}`}
+    >
       {/* max-w-7xl */}
       {visibleHeader && (
         <div className="flex justify-between items-center">
@@ -49,7 +47,7 @@ function Articles({
           <div>
             <Link
               to="/articles"
-              className="cursor-pointer text-red-800 dark:text-secondary dark:hover:text-whitedark:text-secondary dark:hover:text-white hover:text-red transition-colors"
+              className="cursor-pointer text-secondary hover:text-red transition-colors"
               aria-label="See all articles"
             >
               See all
@@ -60,7 +58,7 @@ function Articles({
       <div>
         <ul className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4 h-full">
           {/* <div className="flex flex-col gap-y-2"> */}
-          {articles?.map((article: Article) => (
+          {articles?.map((article) => (
             <li key={article.id}>
               <ArticleCard
                 showAdminActions={showAdminActions}

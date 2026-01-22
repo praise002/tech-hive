@@ -1,8 +1,10 @@
 import { UseFormSetError } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import Form from '../../../components/common/Form';
 import Text from '../../../components/common/Text';
 import { useChangePassword } from '../hooks/useAuth';
 import toast from 'react-hot-toast';
+import { handleMutationError } from '../../../utils/errorHandler';
 
 interface ChangePasswordFormData {
   currentPassword: string;
@@ -17,7 +19,14 @@ interface ChangePasswordApiData {
 }
 
 function ChangePassword() {
-  const { changePassword, isPending } = useChangePassword();
+  const navigate = useNavigate();
+  function handleUnauthenticated() {
+    navigate('/login');
+  }
+
+  const { changePassword, isPending } = useChangePassword(
+    handleUnauthenticated
+  );
 
   const inputs: Array<{
     name: keyof ChangePasswordFormData;
@@ -64,9 +73,6 @@ function ChangePassword() {
     data: ChangePasswordFormData,
     setError: UseFormSetError<ChangePasswordFormData>
   ) => {
-    console.log('Form Data:', data);
-    alert('Password Changed successfully!');
-
     const changePasswordData: ChangePasswordApiData = {
       old_password: data.currentPassword,
       new_password: data.newPassword,
@@ -76,29 +82,18 @@ function ChangePassword() {
     changePassword(changePasswordData, {
       onSuccess: (response) => {
         toast.success(response?.message);
+        navigate('/account');
       },
       onError: (error: any) => {
-        // Handle field-specific errors from the server
-        if (error.data) {
-          const fieldMapping: Record<string, keyof ChangePasswordFormData> = {
-            old_password: 'currentPassword',
-            new_password: 'newPassword',
-            confirm_password: 'password',
-          };
+        const fieldMapping: Record<string, string> = {
+          old_password: 'currentPassword',
+          new_password: 'newPassword',
+          confirm_password: 'password',
+        };
 
-          Object.entries(error.data).forEach(([field, message]) => {
-            const formField =
-              fieldMapping[field] || (field as keyof ChangePasswordFormData);
-            setError(formField, {
-              type: 'server',
-              message: Array.isArray(message) ? message[0] : String(message),
-            });
-          });
-        } else {
-          // Handle general errors (no specific field)
-          toast.error(
-            error.message || 'Something went wrong. Please try again.'
-          );
+        const errorMessage = handleMutationError(error, setError, fieldMapping);
+        if (!error.data) {
+          toast.error(errorMessage);
         }
       },
     });
@@ -109,7 +104,12 @@ function ChangePassword() {
       <Text variant="h2" size="2xl" className="mb-4 dark:text-custom-white">
         Change Password
       </Text>
-      <Form inputs={inputs} onSubmit={handleFormSubmit} isLoading={isPending} className="w-full">
+      <Form
+        inputs={inputs}
+        onSubmit={handleFormSubmit}
+        isLoading={isPending}
+        className="w-full"
+      >
         Update Password
       </Form>
     </div>

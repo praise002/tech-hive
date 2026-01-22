@@ -4,9 +4,9 @@ import Footer from './Footer';
 
 function AppLayout() {
   return (
-    <div className="font-inter dark:bg-dark">
+    <div className="font-inter dark:bg-dark min-h-screen flex flex-col">
       <Navbar />
-      <main>
+      <main className="flex-grow">
         <Outlet /> {/* This is where child routes will be rendered */}
       </main>
       <Footer />

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { handleQueryError } from '../../../utils/utils';
 import {
   ArticleDetail,
+  ArticleReply,
   ArticleEditorResponse,
   ArticleReactionStatisticsResponse,
   ArticleReactionToggleResponse,
@@ -24,16 +25,26 @@ import {
   ReviewStartResponse,
   RssFeedInfo,
   TagsResponse,
-  ThreadReply,
   UserMention,
 } from '../../../types/article';
+import { ApiResponse } from '../../../types/types';
 
 export function useArticles(params?: {
-  limit?: number;
   page?: number;
   page_size?: number;
+  limit?: number;
+  tag?: string;
+  category?: string;
+  search?: string;
+  author__username?: string;
+  ordering?: string;
 }) {
   const { getArticles } = useArticleApi();
+
+  const apiParams = {
+    ...params,
+    page_size: params?.page_size || params?.limit,
+  };
 
   const {
     isPending,
@@ -41,15 +52,15 @@ export function useArticles(params?: {
     data: articlesResponse,
     error,
   } = useQuery<ArticlesResponse>({
-    queryKey: ['articles', params],
+    queryKey: ['articles', apiParams],
     queryFn: async () => {
-      const response = await getArticles(params);
+      const response = await getArticles(apiParams);
       return response;
     },
   });
 
   const articles = articlesResponse?.results || [];
-  const count = articlesResponse?.count;
+  const count = articlesResponse?.count ?? 0;
   const next = articlesResponse?.next;
   const previous = articlesResponse?.previous;
 
@@ -107,10 +118,9 @@ export function useTags(params?: { limit?: number; search?: string }) {
   };
 }
 
-export function useCreateComment() {
+export function useCreateComment(handleUnauthenticated: () => void) {
   const { createComment: createCommentApi } = useArticleApi();
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   const {
     mutate: createComment,
@@ -119,10 +129,6 @@ export function useCreateComment() {
     error,
   } = useMutation<CommentCreateResponse, Error, CommentCreateRequest>({
     mutationFn: (data: CommentCreateRequest) => {
-      const handleUnauthenticated = () => {
-        navigate('/login');
-      };
-
       return createCommentApi(handleUnauthenticated, data);
     },
 
@@ -140,7 +146,7 @@ export function useCreateComment() {
     },
 
     onError: (error) => {
-      handleQueryError(error, 'Comment update');
+      handleQueryError(error, 'Comment create');
     },
   });
 
@@ -157,7 +163,7 @@ export function useThreadReplies(commentId: string, enabled: boolean = true) {
     isError,
     data: replies,
     error,
-  } = useQuery<ThreadReply[]>({
+  } = useQuery<ArticleReply[]>({
     queryKey: ['threadReplies', commentId],
     queryFn: () => getThreadReplies(commentId),
     enabled: enabled && !!commentId, // Only fetch if enabled and commentId exists
@@ -166,10 +172,9 @@ export function useThreadReplies(commentId: string, enabled: boolean = true) {
   return { isPending, isError, replies: replies || [], error };
 }
 
-export function useDeleteComment() {
+export function useDeleteComment(handleUnauthenticated: () => void) {
   const { deleteComment: deleteCommentApi } = useArticleApi();
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   const {
     mutate: deleteComment,
@@ -178,10 +183,6 @@ export function useDeleteComment() {
     error,
   } = useMutation<boolean, Error, string>({
     mutationFn: (commentId: string) => {
-      const handleUnauthenticated = () => {
-        navigate('/login');
-      };
-
       return deleteCommentApi(handleUnauthenticated, commentId);
     },
     onSuccess: () => {
@@ -197,10 +198,9 @@ export function useDeleteComment() {
   return { deleteComment, isPending, isError, error };
 }
 
-export function useToggleCommentLike() {
+export function useToggleCommentLike(handleUnauthenticated: () => void) {
   const { toggleCommentLike: toggleCommentLikeApi } = useArticleApi();
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   const {
     mutate: toggleCommentLike,
@@ -209,10 +209,6 @@ export function useToggleCommentLike() {
     error,
   } = useMutation<CommentLikeToggleResponse, Error, string>({
     mutationFn: (commentId: string) => {
-      const handleUnauthenticated = () => {
-        navigate('/login');
-      };
-
       return toggleCommentLikeApi(handleUnauthenticated, commentId);
     },
     onSuccess: (data, commentId) => {
@@ -229,10 +225,7 @@ export function useToggleCommentLike() {
   return { toggleCommentLike, isPending, isError, error };
 }
 
-export function useCommentLikeStatus(
-  commentId: string,
-  enabled: boolean = true
-) {
+export function useCommentLikeStatus(commentId: string) {
   const { getCommentLikeStatus } = useArticleApi();
 
   const {
@@ -243,7 +236,7 @@ export function useCommentLikeStatus(
   } = useQuery<CommentLikeStatus>({
     queryKey: ['commentLikeStatus', commentId],
     queryFn: () => getCommentLikeStatus(commentId),
-    enabled: enabled && !!commentId,
+    enabled: !!commentId,
   });
 
   return { isPending, isError, likeStatus, error };
@@ -261,7 +254,7 @@ export function useGenerateArticleSummary() {
     error,
   } = useMutation<
     ArticleSummaryResponse,
-    Error,
+    ApiResponse, // Changed from Error to ApiResponse
     { articleId: string; forceRegenerate?: boolean }
   >({
     mutationFn: ({ articleId, forceRegenerate }) => {
@@ -313,12 +306,12 @@ export function useToggleArticleReaction() {
         reactionType
       );
     },
-    onSuccess: (data, variables) => {
-      // Update reaction status cache
-      queryClient.setQueryData(
-        ['articleReactionStatus', variables.articleId],
-        data
-      );
+    onSuccess: (_, variables) => {
+      // Invalidate the statistics query to refetch fresh data
+      // Don't use setQueryData because POST response has different structure than GET
+      queryClient.invalidateQueries({
+        queryKey: ['articleReactionStatistics', variables.articleId],
+      });
       // Refresh article detail
       queryClient.invalidateQueries({ queryKey: ['articleDetail'] });
     },
@@ -332,10 +325,16 @@ export function useToggleArticleReaction() {
 
 export function useArticleReactionStatistics(articleId: string) {
   const { getArticleReactionStatistics } = useArticleApi();
+  const navigate = useNavigate();
 
   return useQuery<ArticleReactionStatisticsResponse>({
-    queryKey: ['articleReactionStatus', articleId],
-    queryFn: () => getArticleReactionStatistics(articleId),
+    queryKey: ['articleReactionStatistics', articleId],
+    queryFn: () => {
+      const handleUnauthenticated = () => {
+        navigate('/login');
+      };
+      return getArticleReactionStatistics(handleUnauthenticated, articleId);
+    },
     enabled: !!articleId,
   });
 }
@@ -714,5 +713,35 @@ export function useRssFeedInfo() {
   return { isPending, isError, rssInfo, error };
 }
 
+export function useUpdateComment(handleUnauthenticated: () => void) {
+  const { updateComment: updateCommentApi } = useArticleApi();
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: updateComment,
+    mutateAsync: updateCommentAsync,
+    isPending,
+    isError,
+    error,
+  } = useMutation({
+    mutationFn: ({ commentId, body }: { commentId: string; body: string }) => {
+      return updateCommentApi(handleUnauthenticated, commentId, body);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['articleDetail'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['threadReplies'],
+      });
+    },
+
+    onError: (error) => {
+      handleQueryError(error, 'Update comment');
+    },
+  });
+
+  return { updateComment, updateCommentAsync, isPending, isError, error };
+}
+
 // enabled: Controls when the query runs (useful for conditional fetching)
-// TODO: MOVE THE REDIRECTS TO MUTATE CALLBACKS

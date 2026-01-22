@@ -10,8 +10,12 @@ interface Comment {
   created_at: string;
 }
 
-function CommentsContent() {
-  const { isPending, isError, articles } = useUserComments();
+interface CommentsContentProps {
+  username?: string;
+}
+
+function CommentsContent({ username }: CommentsContentProps) {
+  const { isPending, isError, comments } = useUserComments();
 
   if (isPending) return <Spinner />;
 
@@ -23,8 +27,16 @@ function CommentsContent() {
     );
   }
 
-  if (!articles?.data?.results?.length)
-    return <p className="font-bold text-sm">No recent comments available.</p>;
+  if (!comments?.data?.results?.length)
+    return (
+      <div className="text-center py-20 text-secondary">
+        <p>
+          {username
+            ? 'No recent comments found.'
+            : 'No recent comments available.'}
+        </p>
+      </div>
+    );
 
   return (
     <>
@@ -36,7 +48,7 @@ function CommentsContent() {
       >
         Recent Comments
       </Text>
-      {articles.data.results.map((comment: Comment) => (
+      {comments.data.results.map((comment: Comment) => (
         <div key={comment.id}>
           <div>
             {/* <Text
@@ -47,7 +59,9 @@ function CommentsContent() {
             >
               {comment.article_title}
             </Text> */}
-            <p className="text-secondary text-sm mb-1">{comment.article_title}</p>
+            <p className="text-secondary text-sm mb-1">
+              {comment.article_title}
+            </p>
           </div>
           <div className="flex items-center gap-2 text-xs md:text-sm">
             <p className="font-bold">{comment.body}</p>

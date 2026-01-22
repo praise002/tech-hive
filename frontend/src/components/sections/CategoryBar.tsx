@@ -1,29 +1,39 @@
 import { Link, NavLink } from 'react-router-dom';
-
-const popularCategories = [
-  {
-    id: 1,
-    name: 'AI & Machine Learning',
-    link: 'categories/ai-machine-learning',
-  },
-  { id: 2, name: 'Blockchain', link: 'categories/blockchain' },
-  { id: 3, name: 'Cloud computing', link: 'categories/cloud-computing' },
-  { id: 4, name: 'Cybersecurity', link: 'categories/cybersecurity' },
-  { id: 5, name: 'Data Science', link: 'categories/data-science' },
-  { id: 6, name: 'Web Development', link: 'categories/web-development' },
-];
+import { useCategories } from '../../hooks/useContent';
 
 function CategoryBar() {
+  const { categories, isPending } = useCategories({ page_size: 10 });
+
+  if (isPending) {
+    return (
+      <nav
+        className="lg:flex hidden bg-peach items-center justify-between overflow-x-auto mt-15 px-8 py-4 h-[72px]"
+        aria-label="Loading categories"
+      >
+        <div className="animate-pulse flex space-x-4">
+          <div className="h-4 w-24 bg-gray-200 rounded"></div>
+          <div className="h-4 w-24 bg-gray-200 rounded"></div>
+          <div className="h-4 w-24 bg-gray-200 rounded"></div>
+        </div>
+      </nav>
+    );
+  }
+
   return (
     <nav
       className="lg:flex hidden bg-peach items-center justify-between overflow-x-auto mt-15 px-8 py-4"
       aria-label="Popular tech categories"
     >
-      <ul className="flex items-center space-x-2 overflow-x-auto ">
-        {popularCategories.map((category) => (
-          <li key={category.id}>
+      <ul className="flex items-center space-x-6 overflow-x-auto no-scrollbar">
+        {categories.map((category) => (
+          <li key={category.id} className="whitespace-nowrap">
             <NavLink
-              to={category.link}
+              to={`/categories/${category.slug}`}
+              className={({ isActive }) =>
+                `text-sm font-medium transition-colors hover:text-primary ${
+                  isActive ? 'text-primary font-bold' : 'text-gray-700'
+                }`
+              }
               aria-label={`Browse articles in ${category.name}`}
             >
               {category.name}
@@ -31,8 +41,10 @@ function CategoryBar() {
           </li>
         ))}
       </ul>
-      <div className="text-secondary hover:text-red transition-colors">
-        <Link to="/categories">See All Categories</Link>
+      <div className="text-secondary hover:text-red transition-colors whitespace-nowrap ml-4">
+        <Link to="/categories" className="text-sm font-semibold">
+          See All Categories
+        </Link>
       </div>
     </nav>
   );

@@ -1,9 +1,11 @@
 import { CiSearch } from 'react-icons/ci';
 import { SearchInputProps } from '../../types/types';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function SearchInput({ inputWidth, iconSize }: SearchInputProps) {
   const [searchValue, setSearchValue] = useState('');
+  const navigate = useNavigate();
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     setSearchValue(e.target.value);
@@ -11,7 +13,10 @@ function SearchInput({ inputWidth, iconSize }: SearchInputProps) {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    console.log('Search query:', searchValue);
+    if (searchValue.trim()) {
+      navigate(`/articles?search=${encodeURIComponent(searchValue.trim())}`);
+      // setSearchValue(''); // Clear search after navigation
+    }
   }
 
   return (
@@ -24,7 +29,7 @@ function SearchInput({ inputWidth, iconSize }: SearchInputProps) {
 
       {/* Input Field */}
       <input
-        className={`${inputWidth} appearance-none dark:text-custom-white border border-gray-500 dark:border-custom-white rounded-md pl-10 pr-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-600 dark:focus-visible:ring-white dark:focus-visible:text-white focus-visible:border-gray-600 dark:focus-visible:border-white`}
+        className={`${inputWidth} appearance-none dark:text-custom-white dark:bg-dark-bg border border-gray-500 dark:border-custom-white rounded-md pl-10 pr-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-600 dark:focus-visible:ring-white dark:focus-visible:text-white focus-visible:border-gray-600 dark:focus-visible:border-white`}
         type="search"
         placeholder="Search articles..."
         aria-label="Search articles"

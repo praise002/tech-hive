@@ -6,6 +6,7 @@ import Button from './Button';
 import Text from './Text';
 import { Link } from 'react-router-dom';
 import { EventCardProps } from '../../types/types';
+import { formatDateRange } from '../../utils/utils';
 
 function EventCard({ event }: EventCardProps) {
   return (
@@ -21,14 +22,15 @@ function EventCard({ event }: EventCardProps) {
           {event.title}
         </Text>
 
-        <div className="text-secondary text-sm">{event.organizer}</div>
+        <div className="text-secondary text-sm mb-4">{event.organizer}</div>
+
         <div className="text-sm text-primary dark:text-custom-white space-y-2">
           {/* Date */}
           <div className="flex gap-2 items-center">
             <div aria-hidden="true">
               <MdOutlineDateRange className="w-5 h-5 md:w-7 md:h-7" />
             </div>
-            <p>{event.date}</p>
+            <p>{formatDateRange(event.start_date, event.end_date)}</p>
           </div>
 
           {/* Location */}
@@ -38,14 +40,6 @@ function EventCard({ event }: EventCardProps) {
             </div>
             <p>{event.location}</p>
           </div>
-
-          {/* Virtual or Physical */}
-          <div className="flex gap-2 items-center">
-            <div aria-hidden="true">
-              <RiMapPinRangeLine className="w-5 h-5 md:w-7 md:h-7" />
-            </div>
-            <p>{event.type}</p>
-          </div>
         </div>
       </div>
 
@@ -53,8 +47,8 @@ function EventCard({ event }: EventCardProps) {
         {/* View Details Button */}
         <Button variant="outline" className="font-medium">
           <Link
-            to="/events/a"
-            aria-label={`View details for ${event.title} by ${event.organizer}`}
+            to={`/events/${event.id}`}
+            aria-label={`View details for ${event.title}`}
           >
             View Details
           </Link>
@@ -63,7 +57,8 @@ function EventCard({ event }: EventCardProps) {
         {/* Posted Time */}
 
         <div className="text-secondary text-xs">
-          Posted {event.lastPosted} ago
+          Posted recently
+          {/* Posted {event.lastPosted} ago */}
         </div>
       </div>
     </article>

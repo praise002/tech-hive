@@ -1,16 +1,23 @@
 import { Link } from 'react-router-dom';
-
 import EventCard from '../common/EventCard';
 import Text from '../common/Text';
-import { displayedEvents } from '../../data/events';
+import { useEvents } from '../../hooks/useContent';
+import { SectionSkeleton } from '../common/Skeletons';
 
-function TechEvents() {
+interface TechEventsProps {
+  category?: string;
+}
+
+function TechEvents({ category }: TechEventsProps) {
+  const { events, isPending } = useEvents({ page_size: 4, category });
+
+  if (isPending) return <SectionSkeleton marginTop={20} />;
+
   return (
     <section
-      className="mt-20 lg:mt-4  mx-auto px-4 lg:px-8 mb-4"
+      className="mt-20 lg:mt-4 max-w-7xl mx-auto px-4 lg:px-8 mb-4"
       aria-label="Tech events"
     >
-      {/* max-w-7xl */}
       <div className="flex justify-between items-center">
         <div className="my-4">
           <Text
@@ -36,14 +43,12 @@ function TechEvents() {
       </div>
 
       <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 h-full">
-        {/* <div className="flex flex-col gap-y-2"> */}
-        {displayedEvents.map((event) => (
+        {events.map((event) => (
           <li key={event.id}>
             <EventCard event={event} />
           </li>
         ))}
       </ul>
-      {/* <Button>Explore More Jobs &rarr;</Button> */}
     </section>
   );
 }

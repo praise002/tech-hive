@@ -4,6 +4,9 @@ import { NavLink } from 'react-router-dom';
 import SearchInput from '../common/SearchInput';
 import { ThemeContext } from '../../context/ThemeContext';
 import { IoMdNotificationsOutline } from 'react-icons/io';
+import { useCurrentUser } from '../../features/profile/hooks/useProfile';
+import { useNotificationBadgeCount } from '../../hooks/useNotification';
+import { Link } from 'react-router-dom';
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,6 +15,8 @@ function Navbar() {
 
   // Use the ThemeContext
   const { theme, toggleTheme } = useContext(ThemeContext);
+  const { user, isAuthenticated } = useCurrentUser();
+  const { badgeCount } = useNotificationBadgeCount();
 
   const navLinks = [
     { to: '/', name: 'Home' },
@@ -71,31 +76,42 @@ function Navbar() {
         </div>
 
         <div className="lg:flex items-center gap-6 hidden">
-          <button
-            className="relative"
-            aria-label="Notifications, you have 2 unread notifications"
-            type="button"
-          >
-            <div
-              aria-hidden="true"
-              className="absolute right-0 rounded-full bg-red w-5 h-5 flex items-center justify-center"
-            >
-              <span className="text-white text-xs">2</span>
-              {/* FIXME: IT BREAKS AT 3 DIGIT NUMBER */}
-            </div>
-            <IoMdNotificationsOutline
-              className="w-10 h-10 text-gray-900 dark:text-white"
-              aria-hidden="true"
-            />
-          </button>
+          {isAuthenticated && (
+            <>
+              <Link
+                to="/notifications"
+                className="relative"
+                aria-label={`Notifications, you have ${
+                  badgeCount?.unread_count || 0
+                } unread notifications`}
+              >
+                {badgeCount?.unread_count > 0 && (
+                  <div
+                    aria-hidden="true"
+                    className="absolute right-0 rounded-full bg-red w-5 h-5 flex items-center justify-center top-0"
+                  >
+                    <span className="text-white text-xs">
+                      {badgeCount.unread_count > 99
+                        ? '99+'
+                        : badgeCount.unread_count}
+                    </span>
+                  </div>
+                )}
+                <IoMdNotificationsOutline
+                  className="w-10 h-10 text-gray-900 dark:text-white"
+                  aria-hidden="true"
+                />
+              </Link>
 
-          <div>
-            <img
-              className="w-10 h-10 rounded-full object-cover"
-              src="/assets/icons/Avatars.png"
-              alt="Profile Picture"
-            />
-          </div>
+              <Link to="/account">
+                <img
+                  className="w-10 h-10 rounded-full object-cover border-2 border-transparent hover:border-red-600 transition-colors"
+                  src={user?.avatar_url || '/assets/icons/Avatars.png'}
+                  alt={`${user?.first_name || 'User'}'s Profile`}
+                />
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -176,34 +192,45 @@ function Navbar() {
           </li>
         ))}
 
-        {/* Profile Picture */}
-        <li className="flex items-center space-x-2">
-          <button
-            type="button"
-            className="relative"
-            aria-label="Notifications, you have 2 unread notifications"
-          >
-            <div
-              aria-hidden="true"
-              className="absolute right-0 rounded-full bg-red w-4 h-4 flex items-center justify-center"
+        {/* Authenticated Links (Mobile) */}
+        {isAuthenticated && (
+          <li className="flex items-center space-x-4 mt-2">
+            <Link
+              to="/notifications"
+              className="relative"
+              aria-label={`Notifications, you have ${
+                badgeCount?.unread_count || 0
+              } unread notifications`}
             >
-              <span className="text-white text-xs">2</span>
-              {/* FIXME: IT BREAKS AT 3 DIGIT NUMBER */}
-            </div>
-            <IoMdNotificationsOutline
-              aria-hidden="true"
-              className="w-8 h-8 text-gray-900 dark:text-white"
-            />
-          </button>
-          <img
-            className="w-8 h-8 rounded-full object-cover"
-            src="/assets/icons/Avatars.png"
-            alt="Profile Picture"
-          />
-          <span className="font-medium text-gray-800 dark:text-custom-white">
-            Elizabeth Stone
-          </span>
-        </li>
+              {badgeCount?.unread_count > 0 && (
+                <div
+                  aria-hidden="true"
+                  className="absolute right-0 rounded-full bg-red w-4 h-4 flex items-center justify-center top-0"
+                >
+                  <span className="text-white text-xs">
+                    {badgeCount.unread_count > 99
+                      ? '99+'
+                      : badgeCount.unread_count}
+                  </span>
+                </div>
+              )}
+              <IoMdNotificationsOutline
+                aria-hidden="true"
+                className="w-8 h-8 text-gray-900 dark:text-white"
+              />
+            </Link>
+            <Link to="/account" className="flex items-center space-x-2">
+              <img
+                className="w-8 h-8 rounded-full object-cover"
+                src={user?.avatar_url || '/assets/icons/Avatars.png'}
+                alt="Profile"
+              />
+              <span className="font-medium text-gray-800 dark:text-custom-white">
+                {user?.first_name || 'My Account'}
+              </span>
+            </Link>
+          </li>
+        )}
       </ul>
     </nav>
   );

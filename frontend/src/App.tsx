@@ -44,10 +44,14 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 import ProfileDetail from './features/profile/pages/ProfileDetail';
 import AccountDisabled from './features/auth/pages/AccountDisabled';
 import Logout from './features/auth/components/Logout';
+import NotificationList from './features/notifications/pages/NotificationList';
+import { AuthModalProvider } from './context/AuthModalProvider';
+import AuthModal from './features/auth/components/AuthModal';
 import {
   GoogleLoginCallback,
   GoogleRegisterCallback,
 } from './features/auth/pages/GoogleCallback';
+import PaymentStatus from './features/subscription/pages/PaymentStatus';
 import ArticleDetail from './features/articles/pages/ArticleDetail';
 
 const queryClient = new QueryClient({
@@ -62,82 +66,82 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
-      <BrowserRouter>
-        <Routes>
-          <Route element={<AppLayout />}>
-            {/* <Route path="/" element={<Home />} /> */}
-            <Route index element={<Home />} />
-            <Route path="articles" element={<ArticleList />} />
-            <Route
-              path="articles/:username/:slug"
-              element={<ArticleDetail />}
-            />
-            <Route path="jobs" element={<TechJobsList />} />
-            <Route path="jobs/:jobSlug" element={<TechJobDetail />} />
-            <Route path="events" element={<TechEventList />} />
-            <Route path="events/:eventSlug" element={<TechEventDetail />} />
-            <Route path="tools" element={<TechToolList />} />
-            <Route path="tools/:toolSlug" element={<TechToolDetail />} />
-            <Route path="resources" element={<ResourceList />} />
-            <Route
-              path="resources/:resourceSlug"
-              element={<ResourceDetail />}
-            />
-
-            <Route path="categories">
-              <Route index element={<CategoryList />} />
-              <Route path=":categorySlug" element={<CategoryDetail />} />
-              {/* <Route path=":categorySlug/articles" element={<ArticleList />} />
+      <AuthModalProvider>
+        <BrowserRouter>
+          <AuthModal />
+          <Routes>
+            <Route element={<AppLayout />}>
+              {/* <Route path="/" element={<Home />} /> */}
+              <Route index element={<Home />} />
+              <Route path="articles" element={<ArticleList />} />
+              <Route
+                path="articles/:username/:slug"
+                element={<ArticleDetail />}
+              />
+              <Route path="jobs" element={<TechJobsList />} />
+              <Route path="jobs/:jobId" element={<TechJobDetail />} />
+              <Route path="events" element={<TechEventList />} />
+              <Route path="events/:eventId" element={<TechEventDetail />} />
+              <Route path="tools" element={<TechToolList />} />
+              <Route path="tools/:toolId" element={<TechToolDetail />} />
+              <Route path="resources" element={<ResourceList />} />
+              <Route
+                path="resources/:resourceId"
+                element={<ResourceDetail />}
+              />
+              <Route path="categories">
+                <Route index element={<CategoryList />} />
+                <Route path=":categorySlug" element={<CategoryDetail />} />
+                {/* <Route path=":categorySlug/articles" element={<ArticleList />} />
               <Route path=":categorySlug/articles/:articleSlug" element={<ArticleDetail />} /> */}
+              </Route>
+              <Route path="about" element={<About />} />
+              <Route path="contact" element={<Contact />} />
+              <Route path="newsletter/unsubscribe" element={<Unsubscribe />} />
+              <Route path="login" element={<Login />} />
+              <Route path="logout" element={<Logout />} />
+              <Route path="register" element={<Register />} />
+              <Route path="profile/:username" element={<ProfileDetail />} />
+              <Route path="verify-email" element={<VerifyEmail />} />
+              <Route
+                path="auth/google/register/callback"
+                element={<GoogleRegisterCallback />}
+              />
+              <Route
+                path="auth/google/login/callback"
+                element={<GoogleLoginCallback />}
+              />
+              <Route path="reset-password" element={<ResetPassword />} />
+              <Route
+                path="reset-password-success"
+                element={<ResetPasswordSuccess />}
+              />
+              <Route path="docs" element={<Docs />} />
+              <Route path="account-disabled" element={<AccountDisabled />} />
             </Route>
 
-            <Route path="about" element={<About />} />
-            <Route path="contact" element={<Contact />} />
-            <Route path="newsletter/unsubscribe" element={<Unsubscribe />} />
-
-            <Route path="login" element={<Login />} />
-            <Route path="logout" element={<Logout />} />
-            <Route path="register" element={<Register />} />
-            <Route path="profile/:username" element={<ProfileDetail />} />
-            <Route path="verify-email" element={<VerifyEmail />} />
             <Route
-              path="auth/google/register/callback"
-              element={<GoogleRegisterCallback />}
-            />
-            <Route
-              path="auth/google/login/callback"
-              element={<GoogleLoginCallback />}
-            />
+              element={
+                <ProtectedRoute>
+                  <AppLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="new" element={<Liveblock />} />
+              <Route path="account" element={<AccountDetail />} />
+              <Route path="notifications" element={<NotificationList />} />
+              <Route path="change-password" element={<ChangePassword />} />
+              <Route path="payment/status" element={<PaymentStatus />} />
+              <Route path="admin" element={<AdminDashboard />} />
+            </Route>
 
-            <Route path="reset-password" element={<ResetPassword />} />
-            <Route
-              path="reset-password-success"
-              element={<ResetPasswordSuccess />}
-            />
-
-            <Route path="docs" element={<Docs />} />
-            <Route path="account-disabled" element={<AccountDisabled />} />
-          </Route>
-
-          <Route
-            element={
-              <ProtectedRoute>
-                <AppLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="new" element={<Liveblock />} />
-            <Route path="account" element={<AccountDetail />} />
-            <Route path="change-password" element={<ChangePassword />} />
-            <Route path="admin" element={<AdminDashboard />} />
-          </Route>
-
-          <Route path="coming-soon" element={<ComingSoon />} />
-          <Route path="campuskart" element={<CampusKart />} />
-          {/* Catch-all route for 404 errors */}
-          <Route path="*" element={<PageNotFound />} />
-        </Routes>
-      </BrowserRouter>
+            <Route path="coming-soon" element={<ComingSoon />} />
+            <Route path="campuskart" element={<CampusKart />} />
+            {/* Catch-all route for 404 errors */}
+            <Route path="*" element={<PageNotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthModalProvider>
       <Toaster
         position="top-right"
         toastOptions={{
@@ -154,8 +158,3 @@ function App() {
 }
 
 export default App;
-
-// filtering - categories/slug/trending-articles, categories/slug/featured-tech-tool,
-// categories/slug/job-in-tech
-// categories/slug/articles, categories/resource-spotlight
-// =?filter=trending, =?filter=resource-spotlight

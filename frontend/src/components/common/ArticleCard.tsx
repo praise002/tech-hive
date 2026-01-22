@@ -23,8 +23,8 @@ function ArticleCard({
       <article className="relative overflow-hidden rounded-lg shadow-lg h-full flex flex-col">
         <Image
           alt={article.title}
-          src={article.cover_image_url}
-          className="flex-shrink-0"
+          src="/assets/articles/the-future-ui-ux.jpg"
+          className="flex-shrink-0 h-48 md:h-56 w-full object-cover"
         />
         {showAdminActions && (
           <>
@@ -90,13 +90,16 @@ function ArticleCard({
           </div>
           <div className="space-y-2">
             <Button className="w-auto" variant="outline">
-              <Link to="/articles/a">View details</Link>
+              <Link to={`/articles/${article.author.username}/${article.slug}`}>
+                View details
+              </Link>
             </Button>
             <ArticleReactions
               reaction_counts={article.reaction_counts}
               total_reaction_counts={article.total_reaction_counts}
-              created_at={article.created_at}
+              created_at={article.created_at || article.published_at}
               read_time={article.read_time}
+              articleId={article.id}
             />
           </div>
         </div>
