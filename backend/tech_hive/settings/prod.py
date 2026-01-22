@@ -8,6 +8,11 @@ ADMINS = [
     ("Praise Idowu", "ifeoluwapraise02@gmail.com"),
 ]
 
+from corsheaders.defaults import default_headers
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "ngrok-skip-browser-warning",
+]
 
 ALLOWED_HOSTS = [".railway.app"]
 
