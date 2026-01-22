@@ -123,12 +123,12 @@ export const useArticleApi = () => {
     commentId: string
   ) => {
     const url = routes.article.commentById(commentId);
-    const response = await sendAuthGuardedRequest(
+    await sendAuthGuardedRequest(
       userIsNotAuthenticatedCallback,
       ApiMethod.DELETE,
       url
     );
-    
+
     return true;
   };
 

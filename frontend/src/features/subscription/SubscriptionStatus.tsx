@@ -12,7 +12,7 @@ import { SubscriptionPlan } from '../../types/subscription';
 
 function SubscriptionStatus() {
   const [isRenewModalOpen, setIsRenewModalOpen] = useState(false);
-  const { subscription, isPending, isError } = useMySubscription();
+  const { subscription, isPending } = useMySubscription();
   const { plans, isPending: isPlansPending } = usePlans();
   const { subscribe, isPending: isSubscribing } = useSubscribe();
 

@@ -1,6 +1,5 @@
 import { MdOutlineDateRange } from 'react-icons/md';
 import { HiOutlineLocationMarker } from 'react-icons/hi';
-import { RiMapPinRangeLine } from 'react-icons/ri';
 
 import Button from './Button';
 import Text from './Text';
