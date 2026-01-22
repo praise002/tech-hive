@@ -279,11 +279,9 @@ export async function initiateGoogleLogin() {
 export async function fetchTokens(state: string, fullUrl: string) {
   if (!state) throw new Error('Missing state');
 
-  console.log('Full url for backend: ', fullUrl);
   const apiUrl = new URL(`${AUTH_URL}/google/callback/signup`);
   apiUrl.searchParams.append('state', state);
   apiUrl.searchParams.append('auth_uri', fullUrl);
-  console.log('API url for backend: ', apiUrl);
 
   const response = await fetch(apiUrl);
 

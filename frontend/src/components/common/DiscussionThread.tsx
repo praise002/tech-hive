@@ -5,7 +5,7 @@ import Text from './Text';
 import Button from './Button';
 import Spinner from './Spinner';
 
-import { formatDateB } from '../../utils/utils';
+import { formatDateB, handleQueryError } from '../../utils/utils';
 import {
   useCreateComment,
   useUpdateComment,
@@ -93,13 +93,9 @@ function DiscussionThread({
   useEffect(() => {
     if (location.hash && comments.length > 0) {
       const commentId = location.hash.replace('#comment-', '');
-      console.log('🔍 Looking for comment:', commentId);
-      console.log('📋 Root comments loaded:', comments.length);
-
       const scrollToElement = () => {
         const element = document.getElementById(`comment-${commentId}`);
         if (element) {
-          console.log('✅ Found element, scrolling...');
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });
           element.classList.add('bg-blue-50', 'dark:bg-blue-900/20');
           setTimeout(() => {
@@ -107,7 +103,6 @@ function DiscussionThread({
           }, 2000);
           return true;
         }
-        console.log('❌ Element not found in DOM');
         return false;
       };
 
@@ -116,25 +111,18 @@ function DiscussionThread({
 
       // If not found, it's likely a reply - load all threads with replies
       const loadRepliesAndScroll = async () => {
-        console.log('🔄 Not a root comment, checking replies...');
-
         for (const comment of comments) {
           if (comment.total_replies > 0) {
             // Check if replies are already loaded
             if (!comment.replies || comment.replies.length === 0) {
               try {
-                console.log(
-                  `⬇️ Loading ${comment.total_replies} replies for comment ${comment.id}...`
-                );
                 const replies = await getThreadReplies(comment.id);
-                console.log(`📥 Loaded ${replies.length} replies`);
 
                 // Check if our target is in these replies
                 const foundReply = replies.find(
                   (r: { id: string }) => r.id === commentId
                 );
                 if (foundReply) {
-                  console.log('🎯 Found target reply! Updating state...');
                   setComments((prev) =>
                     prev.map((c) =>
                       c.id === comment.id ? { ...c, replies } : c
@@ -143,13 +131,12 @@ function DiscussionThread({
                   // Wait for DOM update then scroll
                   setTimeout(() => {
                     if (scrollToElement()) {
-                      console.log('✨ Successfully scrolled to reply!');
                     }
                   }, 600);
                   return;
                 }
               } catch (error) {
-                console.error('❌ Failed to load replies:', error);
+                handleQueryError(error, '❌ Failed to load replies:');
               }
             } else {
               // Replies already loaded, check if target is there
@@ -157,14 +144,12 @@ function DiscussionThread({
                 (r) => r.id === commentId
               );
               if (foundReply) {
-                console.log('🎯 Found in already-loaded replies');
                 setTimeout(scrollToElement, 300);
                 return;
               }
             }
           }
         }
-        console.log('❌ Comment not found anywhere');
       };
 
       // Delay to let page render first

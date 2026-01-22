@@ -74,7 +74,7 @@ function VerifyEmail() {
     data: FormData,
     setError: UseFormSetError<FormData>
   ) {
-    console.log('Form Data:', data);
+    
 
     // Additional safety check
     if (!email) {

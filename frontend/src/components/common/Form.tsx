@@ -65,7 +65,7 @@ function Form<T extends FieldValues>({
             placeholder={input.placeholder || ''}
             type={input.type || 'text'}
             aria-label={input.ariaLabel}
-            className={`appearance-none block w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-800 focus-visible:border-gray-800 ${
+            className={`appearance-none block w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-800 focus-visible:border-gray-800 dark:bg-dark-bg dark:text-custom-white dark:border-gray-700 ${
               input.icon ? 'pr-12' : ''
             }`}
           />

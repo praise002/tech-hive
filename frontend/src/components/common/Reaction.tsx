@@ -30,9 +30,7 @@ function Reaction({ articleId }: ReactionProps) {
     useToggleArticleReaction();
 
   // Derived state from API data
-  console.log(stats);
   const userReactions = stats?.user_reactions || [];
-  console.log(userReactions);
   const reactionCounts = stats?.reaction_counts || {};
   const totalReactions = stats?.total_reactions || 0;
 

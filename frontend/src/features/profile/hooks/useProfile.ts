@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useProfileApi } from './useProfileApi';
 import { useNavigate } from 'react-router-dom';
+import { useArticles } from '../../articles/hooks/useArticle'; // Import useArticles
 import {
   CreateArticleData,
   UpdateUserData,
@@ -357,4 +358,56 @@ export function useDeleteUserComment(handleUnauthenticated: () => void) {
   });
 
   return { deleteUserComment, isPending, isError, error };
+}
+
+export function usePublishedArticles(username?: string) {
+  // 1. Fetching for own profile (if no username is provided)
+  const isOwnProfile = !username;
+  const {
+    articles: userArticlesResponse,
+    isPending: isUserPending,
+    isError: isUserError,
+    error: userError,
+  } = useUserArticles(
+    isOwnProfile
+      ? {
+          status: 'published',
+          page_size: 10,
+        }
+      : undefined
+  );
+
+  // 2. Fetching for another user (if username IS provided)
+  const {
+    articles: publicArticles,
+    count: publicCount,
+    isPending: isPublicPending,
+    isError: isPublicError,
+    error: publicError,
+  } = useArticles(
+    !isOwnProfile
+      ? {
+          author__username: username,
+          page_size: 10,
+        }
+      : undefined
+  );
+
+  // 3. Normalize return data
+  const articles = isOwnProfile
+    ? userArticlesResponse?.results || []
+    : publicArticles;
+
+  const count = isOwnProfile ? userArticlesResponse?.count : publicCount;
+  const isPending = isOwnProfile ? isUserPending : isPublicPending;
+  const isError = isOwnProfile ? isUserError : isPublicError;
+  const error = isOwnProfile ? userError : publicError;
+
+  return {
+    articles,
+    count,
+    isPending,
+    isError,
+    error,
+  };
 }

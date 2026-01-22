@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import Button from '../../../components/common/Button';
 import Text from '../../../components/common/Text';
-import SubscriptionStatus from '../../subscription/SubscriptionStatus';
+// import SubscriptionStatus from '../../subscription/SubscriptionStatus';
 
 import LogoutAll from '../../auth/components/LogoutAll';
 import { useCurrentUser } from '../hooks/useProfile';
@@ -86,7 +86,7 @@ function AccountContent() {
           </div>
 
           {/* Subscription Status */}
-          <SubscriptionStatus />
+          {/* <SubscriptionStatus /> */}
         </div>
       </div>
     </div>

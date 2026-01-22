@@ -128,7 +128,7 @@ export const useArticleApi = () => {
       ApiMethod.DELETE,
       url
     );
-    console.log(response.data);
+    
     return true;
   };
 

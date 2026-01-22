@@ -13,7 +13,8 @@ import { getToken, safeLocalStorage } from '../../../utils/utils';
 const storage = safeLocalStorage();
 
 export const useAuthApi = () => {
-  const { sendRequest, sendProtectedRequest, sendAuthGuardedRequest } = useApi();
+  const { sendRequest, sendProtectedRequest, sendAuthGuardedRequest } =
+    useApi();
 
   const register = async (userData: RegisterUserData) => {
     const response = await sendRequest(
@@ -95,7 +96,7 @@ export const useAuthApi = () => {
   const requestPasswordReset = async (email: string) => {
     const response = await sendRequest(
       ApiMethod.POST,
-      routes.auth.changePassword,
+      routes.auth.requestPasswordReset,
       { email }
     );
 

@@ -182,6 +182,14 @@ function LoginForm() {
         >
           Login
         </Form>
+        <div className="flex justify-end mt-2">
+          <Link
+            to="/reset-password"
+            className="text-sm text-primary hover:text-red-700 hover:underline"
+          >
+            Forgot Password?
+          </Link>
+        </div>
 
         <div className="my-4 flex items-center gap-2">
           <div className="flex-1">
